@@ -1,0 +1,359 @@
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { ProjectService } from '../../../core/services/project.service';
+import { Project, PaginatedProjectList, PaginationParams } from '../../../core/models/interfaces';
+
+@Component({
+  selector: 'app-projects-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  template: `
+    <div class="min-h-screen bg-gray-50">
+      <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-900">Projects</h1>
+            <a 
+              routerLink="/projects/create"
+              class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 font-medium"
+            >
+              Create Project
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+          <!-- Search and Filter Bar -->
+          <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="flex gap-4 items-end">
+              <div class="flex-1">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
+                  Search Projects
+                </label>
+                <input
+                  id="search"
+                  type="text"
+                  formControlName="search"
+                  placeholder="Search by name or description..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  id="status"
+                  formControlName="status"
+                  class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  (change)="onSearch()"
+                >
+                  <option value="">All Status</option>
+                  <option value="planning">Planning</option>
+                  <option value="active">Active</option>
+                  <option value="on_hold">On Hold</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">
+                  Priority
+                </label>
+                <select
+                  id="priority"
+                  formControlName="priority"
+                  class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  (change)="onSearch()"
+                >
+                  <option value="">All Priorities</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              <div>
+                <label for="ordering" class="block text-sm font-medium text-gray-700 mb-1">
+                  Sort By
+                </label>
+                <select
+                  id="ordering"
+                  formControlName="ordering"
+                  class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  (change)="onSearch()"
+                >
+                  <option value="name">Name A-Z</option>
+                  <option value="-name">Name Z-A</option>
+                  <option value="created_at">Oldest First</option>
+                  <option value="-created_at">Newest First</option>
+                  <option value="start_date">Start Date</option>
+                  <option value="due_date">Due Date</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                class="bg-primary text-white px-6 py-2 rounded-md hover:bg-primary/90 font-medium"
+              >
+                Search
+              </button>
+            </form>
+          </div>
+
+          <!-- Loading State -->
+          @if (loading()) {
+            <div class="flex justify-center items-center py-12">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          }
+
+          <!-- Error State -->
+          @if (error()) {
+            <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+              <div class="flex">
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">Error loading projects</h3>
+                  <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Projects Grid -->
+          @if (projects().length > 0) {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              @for (project of projects(); track project.id) {
+                <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                  <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                      <div class="flex items-center">
+                        @if (project.cover_image_url) {
+                          <img [src]="project.cover_image_url" [alt]="project.name + ' cover'" class="w-10 h-10 rounded mr-3 object-cover">
+                        } @else {
+                          <div class="w-10 h-10 bg-primary rounded flex items-center justify-center text-white font-medium mr-3">
+                            {{ project.name.charAt(0).toUpperCase() }}
+                          </div>
+                        }
+                        <div class="min-w-0 flex-1">
+                          <h3 class="text-lg font-medium text-gray-900 truncate">{{ project.name }}</h3>
+                          <p class="text-sm text-gray-500 truncate">{{ project.slug }}</p>
+                        </div>
+                      </div>
+                      <span [class]="getStatusBadgeClass(project.status)" class="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap">
+                        {{ project.status | titlecase }}
+                      </span>
+                    </div>
+
+                    @if (project.description) {
+                      <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ project.description }}</p>
+                    }
+
+                    <div class="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span [class]="getPriorityBadgeClass(project.priority)" class="px-2 py-1 rounded-full font-medium">
+                        {{ project.priority | titlecase }}
+                      </span>
+                      <span>{{ project.workspace.name }}</span>
+                    </div>
+
+                    @if (project.start_date || project.due_date) {
+                      <div class="text-xs text-gray-500 mb-4 space-y-1">
+                        @if (project.start_date) {
+                          <div>Start: {{ project.start_date | date:'mediumDate' }}</div>
+                        }
+                        @if (project.due_date) {
+                          <div>Due: {{ project.due_date | date:'mediumDate' }}</div>
+                        }
+                      </div>
+                    }
+
+                    <!-- Progress Bar -->
+                    @if (project.progress !== null && project.progress !== undefined) {
+                      <div class="mb-4">
+                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                          <span>Progress</span>
+                          <span>{{ project.progress }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            class="bg-primary h-2 rounded-full transition-all duration-300" 
+                            [style.width.%]="project.progress"
+                          ></div>
+                        </div>
+                      </div>
+                    }
+
+                    <div class="flex space-x-2">
+                      <a
+                        [routerLink]="['/projects', project.id]"
+                        class="flex-1 text-center bg-primary text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-primary/90"
+                      >
+                        View Details
+                      </a>
+                      <a
+                        [routerLink]="['/projects', project.id, 'config']"
+                        class="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-200"
+                      >
+                        Configure
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Pagination -->
+            @if (paginationData() && (paginationData()!.count > projects().length)) {
+              <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 rounded-lg shadow">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <p class="text-sm text-gray-700">
+                      Showing {{ ((currentPage() - 1) * 10) + 1 }} to {{ Math.min(currentPage() * 10, paginationData()!.count) }} of {{ paginationData()!.count }} results
+                    </p>
+                  </div>
+                  <div class="flex space-x-2">
+                    <button
+                      (click)="loadPage(currentPage() - 1)"
+                      [disabled]="!paginationData()?.previous"
+                      class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      (click)="loadPage(currentPage() + 1)"
+                      [disabled]="!paginationData()?.next"
+                      class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          } @else if (!loading()) {
+            <div class="text-center py-12">
+              <div class="mx-auto h-12 w-12 text-gray-400">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No projects found</h3>
+              <p class="mt-1 text-sm text-gray-500">Get started by creating your first project.</p>
+              <div class="mt-6">
+                <a
+                  routerLink="/projects/create"
+                  class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90"
+                >
+                  Create Project
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      </main>
+    </div>
+  `
+})
+export class ProjectsListComponent implements OnInit {
+  private projectService = inject(ProjectService);
+  private fb = inject(FormBuilder);
+
+  projects = signal<Project[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  paginationData = signal<PaginatedProjectList | null>(null);
+  currentPage = signal(1);
+
+  searchForm: FormGroup = this.fb.group({
+    search: [''],
+    status: [''],
+    priority: [''],
+    ordering: ['-created_at']
+  });
+
+  Math = Math;
+
+  ngOnInit(): void {
+    this.loadProjects();
+  }
+
+  async loadProjects(params?: PaginationParams): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    try {
+      const response = await this.projectService.getProjects(params).toPromise();
+      if (response) {
+        this.projects.set(response.results);
+        this.paginationData.set(response);
+      }
+    } catch (error: any) {
+      this.error.set(error.error?.message || 'Failed to load projects');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  onSearch(): void {
+    const searchParams: PaginationParams = {
+      page: 1,
+      search: this.searchForm.value.search || undefined,
+      status: this.searchForm.value.status || undefined,
+      priority: this.searchForm.value.priority || undefined,
+      ordering: this.searchForm.value.ordering || undefined
+    };
+    
+    this.currentPage.set(1);
+    this.loadProjects(searchParams);
+  }
+
+  loadPage(page: number): void {
+    if (page < 1) return;
+    
+    const searchParams: PaginationParams = {
+      page,
+      search: this.searchForm.value.search || undefined,
+      status: this.searchForm.value.status || undefined,
+      priority: this.searchForm.value.priority || undefined,
+      ordering: this.searchForm.value.ordering || undefined
+    };
+    
+    this.currentPage.set(page);
+    this.loadProjects(searchParams);
+  }
+
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'planning':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'on_hold':
+        return 'bg-orange-100 text-orange-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  getPriorityBadgeClass(priority: string): string {
+    switch (priority) {
+      case 'low':
+        return 'bg-gray-100 text-gray-800';
+      case 'medium':
+        return 'bg-blue-100 text-blue-800';
+      case 'high':
+        return 'bg-orange-100 text-orange-800';
+      case 'critical':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+}
