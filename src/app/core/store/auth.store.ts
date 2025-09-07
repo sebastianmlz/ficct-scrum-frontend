@@ -32,8 +32,8 @@ export class AuthStore {
     isAuthenticated: false,
     loading: false,
     error: null,
-    accessToken: localStorage.getItem('access_token'),
-    refreshToken: localStorage.getItem('refresh_token')
+    accessToken: null,
+    refreshToken: null
   });
 
   // Computed signals
@@ -56,16 +56,13 @@ export class AuthStore {
     try {
       const response: LoginResponse = await firstValueFrom(this.authService.login(credentials));
       
-      // Store tokens in localStorage
-      localStorage.setItem('access_token', response.access);
-      localStorage.setItem('refresh_token', response.refresh);
+      // Store tokens using updateTokens method
+      this.updateTokens(response.access, response.refresh);
       
       this.updateState({
         user: response.user,
         isAuthenticated: true,
         loading: false,
-        accessToken: response.access,
-        refreshToken: response.refresh,
         error: null
       });
     } catch (error: any) {
@@ -127,13 +124,13 @@ export class AuthStore {
   }
 
   async getCurrentUser(): Promise<void> {
-    const token = this.state().accessToken;
+    const token = await this.getValidToken();
     if (!token) {
-      this.updateState({ isAuthenticated: false, user: null });
+      this.updateState({ isAuthenticated: false, user: null, loading: false });
       return;
     }
 
-    this.updateState({ loading: true });
+    this.updateState({ loading: true, error: null });
     
     try {
       const user: User = await firstValueFrom(this.authService.getCurrentUser());
@@ -145,12 +142,19 @@ export class AuthStore {
         error: null
       });
     } catch (error: any) {
-      // Token might be expired or invalid
-      this.logout();
-      this.updateState({
-        loading: false,
-        error: error.error?.message || 'Failed to get current user'
-      });
+      console.error('AuthStore getCurrentUser failed:', error);
+      
+      // Handle different error scenarios
+      if (error.status === 401 || error.status === 403) {
+        // Token is invalid, logout user
+        await this.logout();
+      } else {
+        // Network or other errors - don't logout, just show error
+        this.updateState({
+          loading: false,
+          error: 'Unable to verify user session. Please check your connection.'
+        });
+      }
     }
   }
 
@@ -254,7 +258,7 @@ export class AuthStore {
   }
 
   // Initialize auth state from localStorage on app start
-  initializeAuth(): void {
+  async initializeAuth(): Promise<void> {
     const token = localStorage.getItem('access_token');
     const refreshToken = localStorage.getItem('refresh_token');
     
@@ -266,7 +270,58 @@ export class AuthStore {
       });
       
       // Verify token by getting current user
-      this.getCurrentUser();
+      await this.getCurrentUser();
+    }
+  }
+
+  // Update tokens in both localStorage and store
+  public updateTokens(accessToken: string, refreshToken?: string): void {
+    localStorage.setItem('access_token', accessToken);
+    if (refreshToken) {
+      localStorage.setItem('refresh_token', refreshToken);
+    }
+    
+    this.updateState({
+      accessToken,
+      refreshToken: refreshToken || this.state().refreshToken,
+      isAuthenticated: true
+    });
+  }
+
+  // Check if token is expired (basic JWT decode)
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp < now;
+    } catch {
+      return true;
+    }
+  }
+
+  // Get token or refresh if needed
+  async getValidToken(): Promise<string | null> {
+    const token = this.state().accessToken;
+    const refreshToken = this.state().refreshToken;
+    
+    if (!token || !refreshToken) {
+      return null;
+    }
+    
+    // If token is not expired, return it
+    if (!this.isTokenExpired(token)) {
+      return token;
+    }
+    
+    // Token is expired, try to refresh
+    try {
+      const response = await firstValueFrom(this.authService.refreshToken(refreshToken));
+      this.updateTokens(response.access, response.refresh);
+      return response.access;
+    } catch (error) {
+      // Refresh failed, logout
+      await this.logout();
+      return null;
     }
   }
 }

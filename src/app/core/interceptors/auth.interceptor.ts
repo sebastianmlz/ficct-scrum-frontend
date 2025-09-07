@@ -41,7 +41,8 @@ export class AuthInterceptor implements HttpInterceptor {
       '/api/v1/auth/login/',
       '/api/v1/auth/register/',
       '/api/v1/auth/password-reset-request/',
-      '/api/v1/auth/password-reset-confirm/'
+      '/api/v1/auth/password-reset-confirm/',
+      '/api/v1/auth/token/refresh/'
     ];
     
     return skipUrls.some(skipUrl => url.includes(skipUrl));
@@ -66,10 +67,7 @@ export class AuthInterceptor implements HttpInterceptor {
             this.isRefreshing = false;
             
             // Update tokens in store and localStorage
-            localStorage.setItem('access_token', response.access);
-            if (response.refresh) {
-              localStorage.setItem('refresh_token', response.refresh);
-            }
+            this.authStore.updateTokens(response.access, response.refresh);
             
             this.refreshTokenSubject.next(response.access);
             

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry, tap } from 'rxjs/operators';
 import {
   User,
   UserLoginRequest,
@@ -36,7 +37,18 @@ export class AuthService {
   }
 
   getCurrentUser(): Observable<User> {
-    return this.http.get<User>(`${this.baseUrl}/me/`);
+    return this.http.get<User>(`${this.baseUrl}/me/`).pipe(
+      retry(2),
+      catchError((error: HttpErrorResponse) => {
+        console.error('getCurrentUser failed:', error);
+        // Don't auto-logout here - let AuthStore handle it
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem('access_token');
   }
 
   requestPasswordReset(request: PasswordResetRequestRequest): Observable<PasswordResetRequestResponse> {

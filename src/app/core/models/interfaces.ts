@@ -389,6 +389,9 @@ export interface PaginatedSystemLogList extends PaginatedResponse<SystemLog> {}
 export interface PaginatedErrorLogList extends PaginatedResponse<ErrorLog> {}
 
 // Query Parameters
+// Alias for legacy ApiQueryParams used in some services
+export type ApiQueryParams = PaginationParams;
+
 export interface PaginationParams {
   page?: number;
   search?: string;
