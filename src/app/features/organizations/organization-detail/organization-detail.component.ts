@@ -1,0 +1,279 @@
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { OrganizationService } from '../../../core/services/organization.service';
+import { Organization } from '../../../core/models/interfaces';
+
+@Component({
+  selector: 'app-organization-detail',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
+    <div class="min-h-screen bg-gray-50">
+      @if (loading()) {
+        <div class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      } @else if (error()) {
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Error loading organization</h3>
+                <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else if (organization()) {
+        <!-- Header -->
+        <header class="bg-white shadow">
+          <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <a routerLink="/organizations" class="text-gray-400 hover:text-gray-600">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                </a>
+                <div class="flex items-center">
+                  @if (organization()!.logo_url) {
+                    <img [src]="organization()!.logo_url" [alt]="organization()!.name + ' logo'" class="w-12 h-12 rounded-full mr-4">
+                  } @else {
+                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-medium text-lg mr-4">
+                      {{ organization()!.name.charAt(0).toUpperCase() }}
+                    </div>
+                  }
+                  <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ organization()!.name }}</h1>
+                    <p class="text-sm text-gray-500">{{ organization()!.slug }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex space-x-3">
+                <a
+                  [routerLink]="['/organizations', organization()!.id, 'edit']"
+                  class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Edit
+                </a>
+                <a
+                  [routerLink]="['/organizations', organization()!.id, 'members']"
+                  class="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90"
+                >
+                  Manage Members
+                </a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div class="px-4 py-6 sm:px-0">
+            <!-- Status Banner -->
+            @if (!organization()!.is_active) {
+              <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                      This organization is currently inactive.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Organization Info -->
+              <div class="lg:col-span-2 space-y-6">
+                <!-- Description Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                  <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">About</h3>
+                    @if (organization()!.description) {
+                      <p class="text-gray-700 whitespace-pre-wrap">{{ organization()!.description }}</p>
+                    } @else {
+                      <p class="text-gray-500 italic">No description available.</p>
+                    }
+                  </div>
+                </div>
+
+                <!-- Statistics Card -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                  <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Statistics</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">{{ organization()!.member_count }}</div>
+                        <div class="text-sm text-gray-500">Members</div>
+                      </div>
+                      <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">{{ organization()!.workspace_count }}</div>
+                        <div class="text-sm text-gray-500">Workspaces</div>
+                      </div>
+                      <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">{{ organization()!.project_count }}</div>
+                        <div class="text-sm text-gray-500">Projects</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Recent Activity Placeholder -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                  <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Activity</h3>
+                    <div class="text-center py-8">
+                      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      <h3 class="mt-2 text-sm font-medium text-gray-900">No recent activity</h3>
+                      <p class="mt-1 text-sm text-gray-500">Activity will appear here when members start working on projects.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sidebar -->
+              <div class="space-y-6">
+                <!-- Organization Details -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                  <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Details</h3>
+                    <dl class="space-y-3">
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1">
+                          <span [class]="getStatusBadgeClass(organization()!.is_active)" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                            {{ organization()!.is_active ? 'Active' : 'Inactive' }}
+                          </span>
+                        </dd>
+                      </div>
+                      
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500">Type</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ organization()!.organization_type | titlecase }}</dd>
+                      </div>
+                      
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500">Subscription</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ organization()!.subscription_plan | titlecase }}</dd>
+                      </div>
+                      
+                      @if (organization()!.website_url) {
+                        <div>
+                          <dt class="text-sm font-medium text-gray-500">Website</dt>
+                          <dd class="mt-1">
+                            <a [href]="organization()!.website_url" target="_blank" class="text-sm text-primary hover:text-primary/80">
+                              {{ organization()!.website_url }}
+                            </a>
+                          </dd>
+                        </div>
+                      }
+                      
+                      <div>
+                        <dt class="text-sm font-medium text-gray-500">Created</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ organization()!.created_at | date:'medium' }}</dd>
+                      </div>
+                      
+                      @if (organization()!.updated_at !== organization()!.created_at) {
+                        <div>
+                          <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                          <dd class="mt-1 text-sm text-gray-900">{{ organization()!.updated_at | date:'medium' }}</dd>
+                        </div>
+                      }
+                    </dl>
+                  </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                  <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                      <a
+                        routerLink="/workspaces/create"
+                        [queryParams]="{ organization: organization()!.id }"
+                        class="w-full flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Create Workspace
+                      </a>
+                      
+                      <a
+                        [routerLink]="['/organizations', organization()!.id, 'members']"
+                        class="w-full flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                        Invite Members
+                      </a>
+                      
+                      <a
+                        [routerLink]="['/organizations', organization()!.id, 'edit']"
+                        class="w-full flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit Organization
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      }
+    </div>
+  `
+})
+export class OrganizationDetailComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private organizationService = inject(OrganizationService);
+
+  organization = signal<Organization | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.route.params.subscribe(params => {
+      const id = params['id'];
+      if (id) {
+        this.loadOrganization(id);
+      }
+    });
+  }
+
+  async loadOrganization(id: string): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
+
+    try {
+      const org = await this.organizationService.getOrganization(id).toPromise();
+      if (org) {
+        this.organization.set(org);
+      }
+    } catch (error: any) {
+      this.error.set(error.error?.message || 'Failed to load organization');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  getStatusBadgeClass(isActive: boolean): string {
+    return isActive 
+      ? 'bg-green-100 text-green-800'
+      : 'bg-red-100 text-red-800';
+  }
+}
