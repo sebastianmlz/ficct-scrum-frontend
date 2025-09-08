@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+
 import {
   User,
   UserLoginRequest,
@@ -21,18 +23,52 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AuthService {
-  private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api/v1/auth`;
+  constructor(private http: HttpClient, private router: Router) { }
 
-  login(credentials: UserLoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/login/`, credentials);
+
+    login(credentials: { email: string, password: string }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/login/`, {
+      email: credentials.email,
+      password: credentials.password
+    });
   }
+
+  logout(): void {
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+    localStorage.removeItem('user_role');
+    this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('access');
+  }
+
+  isAdmin(): boolean {
+    return localStorage.getItem('user_role') === 'admin';
+  }
+
+
+
+  getToken(): string | null {
+    return localStorage.getItem('access');
+  }
+
+  getUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+
 
   register(userData: UserRegistrationRequest): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/register/`, userData);
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    return this.http.post<User>(`${this.baseUrl}/register/`, userData, { headers });
   }
 
-  logout(request: LogoutRequestRequest): Observable<LogoutResponse> {
+  logoutt(request: LogoutRequestRequest): Observable<LogoutResponse> {
     return this.http.post<LogoutResponse>(`${this.baseUrl}/logout/`, request);
   }
 

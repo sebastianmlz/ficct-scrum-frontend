@@ -50,27 +50,51 @@ export class AuthStore {
   private updateState(updates: Partial<AuthState>): void {
     this.state.update(current => ({ ...current, ...updates }));
   }
+
+  // Public method to sync login state from external login
+  public syncLoginState(user: User, accessToken: string, refreshToken: string): void {
+    this.updateState({
+      user,
+      isAuthenticated: true,
+      loading: false,
+      error: null,
+      accessToken,
+      refreshToken
+    });
+  }
   async login(credentials: UserLoginRequest): Promise<void> {
     this.updateState({ loading: true, error: null });
     
     try {
       const response: LoginResponse = await firstValueFrom(this.authService.login(credentials));
       
-      // Store tokens using updateTokens method
-      this.updateTokens(response.access, response.refresh);
+      // Store tokens immediately in localStorage and state
+      localStorage.setItem('access', response.access);
+      localStorage.setItem('refresh', response.refresh);
       
       this.updateState({
         user: response.user,
         isAuthenticated: true,
         loading: false,
-        error: null
+        error: null,
+        accessToken: response.access,
+        refreshToken: response.refresh
       });
+      
+      console.log('Login successful, tokens stored:', {
+        access: response.access.substring(0, 20) + '...',
+        refresh: response.refresh.substring(0, 20) + '...'
+      });
+      
     } catch (error: any) {
+      console.error('Login failed:', error);
       this.updateState({
         loading: false,
         error: error.error?.message || 'Login failed',
         isAuthenticated: false,
-        user: null
+        user: null,
+        accessToken: null,
+        refreshToken: null
       });
       throw error;
     }
@@ -102,15 +126,15 @@ export class AuthStore {
     try {
       const refreshToken = this.state().refreshToken;
       if (refreshToken) {
-        await firstValueFrom(this.authService.logout({ refresh: refreshToken }));
+        await firstValueFrom(this.authService.logoutt({ refresh: refreshToken }));
       }
     } catch (error) {
       // Continue with logout even if API call fails
       console.error('Logout API call failed:', error);
     } finally {
       // Clear tokens from localStorage
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('access');
+      localStorage.removeItem('refresh');
       
       this.updateState({
         user: null,
@@ -259,26 +283,67 @@ export class AuthStore {
 
   // Initialize auth state from localStorage on app start
   async initializeAuth(): Promise<void> {
-    const token = localStorage.getItem('access_token');
-    const refreshToken = localStorage.getItem('refresh_token');
+    console.log("access token: ",localStorage.getItem('access'));
+    const token = localStorage.getItem('access');
+    const refreshToken = localStorage.getItem('refresh');
+    const userJson = localStorage.getItem('user');
     
     if (token && refreshToken) {
+      let user = null;
+      
+      // Try to parse user from localStorage
+      if (userJson) {
+        try {
+          user = JSON.parse(userJson);
+        } catch (error) {
+          console.error('Failed to parse user from localStorage:', error);
+        }
+      }
+      
+      // Update the state with tokens and user from localStorage
       this.updateState({
         accessToken: token,
         refreshToken: refreshToken,
-        isAuthenticated: true
+        user: user,
+        isAuthenticated: true,
+        loading: false,
+        error: null
       });
       
-      // Verify token by getting current user
-      await this.getCurrentUser();
+      console.log('Auth initialized from localStorage:', { 
+        hasToken: !!token, 
+        hasUser: !!user,
+        userName: user?.first_name 
+      });
+      
+      // Optionally verify token by getting fresh user data from server
+      // (commented out to prevent immediate API call on every page load)
+      /*
+      try {
+        await this.getCurrentUser();
+      } catch (error) {
+        console.error('Token verification failed during initialization:', error);
+        // Don't logout immediately, let the user continue with cached data
+      }
+      */
+    } else {
+      // No tokens found, ensure user is logged out
+      this.updateState({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+        error: null,
+        accessToken: null,
+        refreshToken: null
+      });
     }
   }
 
   // Update tokens in both localStorage and store
   public updateTokens(accessToken: string, refreshToken?: string): void {
-    localStorage.setItem('access_token', accessToken);
+    localStorage.setItem('access', accessToken);
     if (refreshToken) {
-      localStorage.setItem('refresh_token', refreshToken);
+      localStorage.setItem('refresh', refreshToken);
     }
     
     this.updateState({

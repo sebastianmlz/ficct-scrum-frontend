@@ -1,0 +1,70 @@
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
+    <h2 class="text-2xl font-bold text-center text-gray-800">Iniciar Sesión</h2>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+        <input
+          type="email"
+          id="email"
+          [(ngModel)]="email"
+          name="email"
+          required
+          class="w-full px-3 py-2 mt-1 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+        />
+        <p *ngIf="emailError" class="text-sm text-red-500">Por favor, ingrese un correo válido.</p>
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+        <div class="relative">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            class="w-full px-3 py-2 mt-1 border rounded focus:outline-none focus:ring focus:ring-blue-300"
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+          >
+            {{ showPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <p *ngIf="passwordError" class="text-sm text-red-500">La contraseña es obligatoria.</p>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <label class="flex items-center">
+          <input
+            type="checkbox"
+            [(ngModel)]="rememberMe"
+            name="rememberMe"
+            class="text-blue-600 border-gray-300 rounded focus:ring focus:ring-blue-300"
+          />
+          <span class="ml-2 text-sm text-gray-700">Recuérdame</span>
+        </label>
+        <a href="/forgot-password" class="text-sm text-blue-600 hover:underline">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
+      >
+        {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
+      </button>
+
+      <p *ngIf="error" class="text-sm text-center text-red-500">{{ error }}</p>
+    </form>
+
+    <p class="text-sm text-center text-gray-700">
+      ¿No tienes una cuenta?
+      <a routerLink="/auth/register" class="text-blue-600 hover:underline">Regístrate</a>
+    </p>
+  </div>
+</div>

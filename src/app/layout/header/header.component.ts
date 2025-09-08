@@ -1,7 +1,7 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthStore } from '../../core/store/auth.store';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -209,16 +209,16 @@ import { AuthStore } from '../../core/store/auth.store';
   `
 })
 export class HeaderComponent {
-  private authStore = inject(AuthStore);
-  
-  user = computed(() => this.authStore.user());
+  private authService = inject(AuthService);
+
+  user = computed(() => this.authService.getUser());
   mobileMenuOpen = false;
 
   getInitials(fullName: string): string {
     return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   }
 
-  async logout(): Promise<void> {
-    await this.authStore.logout();
+  logout(): void {
+    this.authService.logout();
   }
 }

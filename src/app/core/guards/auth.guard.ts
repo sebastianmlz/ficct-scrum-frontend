@@ -1,39 +1,43 @@
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CanActivateFn } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { AuthStore } from '../store/auth.store';
 
-export const authGuard: CanActivateFn = async (route, state) => {
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
-  // Try to get a valid token (this will refresh if needed)
-  const validToken = await authStore.getValidToken();
+  // Check both AuthService (for token in localStorage) and AuthStore (for app state)
+  const hasToken = authService.isLoggedIn();
+  const isAuthenticated = authStore.isAuthenticated();
   
-  if (validToken && authStore.isLoggedIn()) {
-    return true;
-  }
+  console.log('AuthGuard check:', { hasToken, isAuthenticated });
 
-  // Redirect to login page with return url
-  router.navigate(['/auth/login'], { 
-    queryParams: { returnUrl: state.url } 
-  });
-  return false;
+  if (hasToken) {
+    // If user has token but AuthStore is not initialized, initialize it
+    if (!isAuthenticated) {
+      console.log('AuthGuard: Token exists but AuthStore not initialized, initializing...');
+      authStore.initializeAuth();
+    }
+    return true;
+  } else {
+    console.log('AuthGuard: User not authenticated, redirecting to login');
+    router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
+    return false;
+  }
 };
 
-export const guestGuard: CanActivateFn = async (route, state) => {
-  const authStore = inject(AuthStore);
+export const guestGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
   const router = inject(Router);
 
-  // Check if user has valid token
-  const validToken = await authStore.getValidToken();
-  
-  if (!validToken || !authStore.isLoggedIn()) {
+  if (!authService.isLoggedIn()) {
     return true;
+  } else {
+    console.log('GuestGuard: User already authenticated, redirecting to dashboard');
+    router.navigate(['/dashboard']);
+    return false;
   }
-
-  // Get return URL from query params or default to dashboard
-  const returnUrl = route.queryParams?.['returnUrl'] || '/dashboard';
-  router.navigate([returnUrl]);
-  return false;
 };
