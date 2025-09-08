@@ -4,7 +4,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Servir archivos estáticos
-const staticPath = path.join(__dirname, 'dist/ficct-scrum-frontend');
+const staticPath = path.join(__dirname, 'dist/ficct-scrum-frontend/browser');
 app.use(express.static(staticPath));
 
 // Ruta de fallback para SPA
