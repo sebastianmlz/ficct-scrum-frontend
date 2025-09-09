@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/store/auth.store';
 import { UserRegistrationRequest } from '../../../core/models/interfaces';
 
+
 @Component({
   selector: 'app-register',
   standalone: true,

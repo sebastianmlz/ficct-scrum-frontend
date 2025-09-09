@@ -58,6 +58,7 @@ export class LoginComponent {
         localStorage.setItem('access', response.access);
         localStorage.setItem('refresh', response.refresh);
         localStorage.setItem('user', JSON.stringify(response.user));
+        console.log(response.user)
         // Set user role if available
         if (response.user.is_staff) {
           localStorage.setItem('user_role', 'admin');

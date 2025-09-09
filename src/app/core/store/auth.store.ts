@@ -277,6 +277,34 @@ export class AuthStore {
     }
   }
 
+  async updateProfile(profileData: any): Promise<User | null> {
+    if (!this.state().isAuthenticated) return null;
+    
+    this.updateState({ loading: true, error: null });
+    
+    try {
+      const updatedUser: User = await firstValueFrom(this.authService.updateProfile(profileData));
+      
+      // Update user in localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      this.updateState({
+        user: updatedUser,
+        loading: false,
+        error: null
+      });
+      
+      return updatedUser;
+    } catch (error: any) {
+      console.error('AuthStore updateProfile failed:', error);
+      this.updateState({
+        loading: false,
+        error: error.error?.message || 'Failed to update profile'
+      });
+      throw error;
+    }
+  }
+
   clearError(): void {
     this.updateState({ error: null });
   }

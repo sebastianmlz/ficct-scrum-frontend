@@ -27,7 +27,7 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) { }
 
 
-    login(credentials: { email: string, password: string }): Observable<any> {
+  login(credentials: { email: string, password: string }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/login/`, {
       email: credentials.email,
       password: credentials.password
@@ -99,10 +99,21 @@ export class AuthService {
     return this.http.get<UserProfile>(`${this.baseUrl}/profiles/me/`);
   }
 
+  updateProfile(profileData: any): Observable<User> {
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    return this.http.patch<User>(`${this.baseUrl}/users/me/`, profileData, { headers }).pipe(
+      retry(1),
+      catchError((error: HttpErrorResponse) => {
+        console.error('updateProfile failed:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   uploadAvatar(avatarFile: File): Observable<UserProfile> {
     const formData = new FormData();
     formData.append('avatar', avatarFile);
-    
+
     return this.http.post<UserProfile>(`${this.baseUrl}/profiles/upload-avatar/`, formData);
   }
 
