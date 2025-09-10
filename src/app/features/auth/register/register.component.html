@@ -1,187 +1,232 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
-    <div>
-      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-        Create your FICCT-SCRUM account
-      </h2>
-      <p class="mt-2 text-center text-sm text-gray-600">
+<div class="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center py-14 px-4">
+  <div class="w-full max-w-lg">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="mx-auto mb-4 w-12 h-12 rounded-2xl bg-primary/10 grid place-content-center">
+        <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 3l9 4.5v9L12 21 3 16.5v-9L12 3z" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900">
+        Create your <span class="text-primary">FICCT-SCRUM</span> account
+      </h1>
+      <p class="mt-2 text-sm text-slate-600">
         Or
-        <a routerLink="/auth/login" class="font-medium text-primary hover:text-primary/80">
+        <a routerLink="/auth/login" class="font-medium text-primary hover:underline">
           sign in to your existing account
         </a>
       </p>
     </div>
 
-    <div hlmCard class="bg-white shadow-md">
-      <div hlmCardHeader>
-        <h3 hlmCardTitle class="text-lg font-medium">Register for a new account</h3>
+    <!-- Card -->
+    <div hlmCard class="bg-white/80 backdrop-blur border border-slate-200/80 shadow-xl rounded-2xl">
+      <div hlmCardHeader class="px-6 pt-6 pb-0">
+        <h3 hlmCardTitle class="text-base font-semibold text-slate-900">
+          Register for a new account
+        </h3>
+        <p class="text-sm text-slate-500">It takes less than a minute.</p>
       </div>
-      
-      <div hlmCardContent>
+
+      <div hlmCardContent class="p-6">
+        <!-- Server/Error alert -->
         @if (authStore.error()) {
-          <div hlmAlert class="mb-4 bg-red-50 border-red-200 text-red-800">
-            {{ authStore.error() }}
-          </div>
+        <div hlmAlert class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {{ authStore.error() }}
+        </div>
         }
 
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <label hlmLabel for="firstName" class="block text-sm font-medium text-gray-700">
-                First Name
-              </label>
-              <input
-                hlmInput
-                id="firstName"
-                type="text"
-                formControlName="first_name"
-                placeholder="First name"
-                class="mt-1 w-full"
-                [class.border-red-300]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched"
-              />
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
+          <!-- Names -->
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div class="relative">
+              <label hlmLabel for="firstName" class="block text-sm font-medium text-slate-700">First Name</label>
+              <div class="mt-1 relative">
+                <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
+                  <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-8 9a8 8 0 0116 0H4z" />
+                  </svg>
+                </span>
+                <input hlmInput id="firstName" type="text" formControlName="first_name" placeholder="First name"
+                  class="pl-9 w-full"
+                  [attr.aria-invalid]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched"
+                  [class.border-red-300]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched" />
+              </div>
               @if (registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched) {
-                <p class="mt-1 text-sm text-red-600">First name is required</p>
+              <p class="mt-1 text-xs text-red-600">First name is required</p>
               }
             </div>
 
-            <div>
-              <label hlmLabel for="lastName" class="block text-sm font-medium text-gray-700">
-                Last Name
-              </label>
-              <input
-                hlmInput
-                id="lastName"
-                type="text"
-                formControlName="last_name"
-                placeholder="Last name"
-                class="mt-1 w-full"
-                [class.border-red-300]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched"
-              />
+            <div class="relative">
+              <label hlmLabel for="lastName" class="block text-sm font-medium text-slate-700">Last Name</label>
+              <div class="mt-1 relative">
+                <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
+                  <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-8 9a8 8 0 0116 0H4z" />
+                  </svg>
+                </span>
+                <input hlmInput id="lastName" type="text" formControlName="last_name" placeholder="Last name"
+                  class="pl-9 w-full"
+                  [class.border-red-300]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched" />
+              </div>
               @if (registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched) {
-                <p class="mt-1 text-sm text-red-600">Last name is required</p>
+              <p class="mt-1 text-xs text-red-600">Last name is required</p>
               }
             </div>
           </div>
 
-          <div>
-            <label hlmLabel for="username" class="block text-sm font-medium text-gray-700">
-              Username
-            </label>
-            <input
-              hlmInput
-              id="username"
-              type="text"
-              formControlName="username"
-              placeholder="Choose a username"
-              class="mt-1 w-full"
-              [class.border-red-300]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
-            />
-            @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
-              <p class="mt-1 text-sm text-red-600">
-                @if (registerForm.get('username')?.errors?.['required']) {
-                  Username is required
-                }
-                @if (registerForm.get('username')?.errors?.['minlength']) {
-                  Username must be at least 3 characters long
-                }
-              </p>
-            }
-          </div>
-
-          <div>
-            <label hlmLabel for="email" class="block text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-            <input
-              hlmInput
-              id="email"
-              type="email"
-              formControlName="email"
-              placeholder="Enter your email"
-              class="mt-1 w-full"
-              [class.border-red-300]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
-            />
-            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
-              <p class="mt-1 text-sm text-red-600">
-                @if (registerForm.get('email')?.errors?.['required']) {
-                  Email is required
-                }
-                @if (registerForm.get('email')?.errors?.['email']) {
-                  Please enter a valid email address
-                }
-              </p>
-            }
-          </div>
-
-          <div>
-            <label hlmLabel for="password" class="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              hlmInput
-              id="password"
-              type="password"
-              formControlName="password"
-              placeholder="Create a password"
-              class="mt-1 w-full"
-              [class.border-red-300]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
-            />
-            @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
-              <p class="mt-1 text-sm text-red-600">
-                @if (registerForm.get('password')?.errors?.['required']) {
-                  Password is required
-                }
-                @if (registerForm.get('password')?.errors?.['minlength']) {
-                  Password must be at least 8 characters long
-                }
-              </p>
-            }
-          </div>
-
-          <div>
-            <label hlmLabel for="passwordConfirm" class="block text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <input
-              hlmInput
-              id="passwordConfirm"
-              type="password"
-              formControlName="password_confirm"
-              placeholder="Confirm your password"
-              class="mt-1 w-full"
-              [class.border-red-300]="registerForm.get('password_confirm')?.invalid && registerForm.get('password_confirm')?.touched"
-            />
-            @if (registerForm.get('password_confirm')?.invalid && registerForm.get('password_confirm')?.touched) {
-              <p class="mt-1 text-sm text-red-600">
-                @if (registerForm.get('password_confirm')?.errors?.['required']) {
-                  Password confirmation is required
-                }
-                @if (registerForm.errors?.['passwordMismatch']) {
-                  Passwords do not match
-                }
-              </p>
-            }
-          </div>
-
-          <div>
-            <button
-              hlmBtn
-              type="submit"
-              [disabled]="registerForm.invalid || authStore.isLoading()"
-              class="w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              @if (authStore.isLoading()) {
-                <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <!-- Username -->
+          <div class="relative">
+            <label hlmLabel for="username" class="block text-sm font-medium text-slate-700">Username</label>
+            <div class="mt-1 relative">
+              <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4 5h16v2H4zM4 11h16v2H4zM4 17h10v2H4z" />
                 </svg>
-                Creating account...
+              </span>
+              <input hlmInput id="username" type="text" formControlName="username" placeholder="Choose a username"
+                class="pl-9 w-full"
+                [class.border-red-300]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" />
+            </div>
+            @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+            <p class="mt-1 text-xs text-red-600">
+              @if (registerForm.get('username')?.errors?.['required']) { Username is required }
+              @if (registerForm.get('username')?.errors?.['minlength']) { Username must be at least 3 characters }
+            </p>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="relative">
+            <label hlmLabel for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+            <div class="mt-1 relative">
+              <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M2 6l10 7 10-7v10H2z" />
+                  <path d="M22 6H2l10 7z" />
+                </svg>
+              </span>
+              <input hlmInput id="email" type="email" formControlName="email" placeholder="you@ficct.edu.bo"
+                class="pl-9 w-full"
+                [class.border-red-300]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" />
+            </div>
+            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+            <p class="mt-1 text-xs text-red-600">
+              @if (registerForm.get('email')?.errors?.['required']) { Email is required }
+              @if (registerForm.get('email')?.errors?.['email']) { Enter a valid email address }
+            </p>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="relative">
+            <label hlmLabel for="password" class="block text-sm font-medium text-slate-700">Password</label>
+            <div class="mt-1 relative">
+              <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17a2 2 0 100-4 2 2 0 000 4z" />
+                  <path
+                    d="M6 9V7a6 6 0 1112 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V10a1 1 0 011-1h1zm2 0h8V7a4 4 0 10-8 0v2z" />
+                </svg>
+              </span>
+              <input hlmInput id="password" [type]="showPass ? 'text' : 'password'" formControlName="password"
+                placeholder="Create a password" class="pl-9 pr-10 w-full" (input)="updateStrength()"
+                [class.border-red-300]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" />
+              <button type="button" class="absolute inset-y-0 right-3 text-slate-400 hover:text-slate-600"
+                (click)="showPass = !showPass" aria-label="Toggle password visibility">
+                <svg *ngIf="!showPass" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 3a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+                <svg *ngIf="showPass" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M3 3l18 18-1.5 1.5L17 19.5A13.4 13.4 0 0112 20C5 20 1 12 1 12a23.2 23.2 0 015.2-5.9L1.5 4.5 3 3z" />
+                </svg>
+              </button>
+            </div>
+            <!-- Strength meter -->
+            <div class="mt-2">
+              <div class="h-1.5 w-full rounded bg-slate-200 overflow-hidden">
+                <div class="h-full transition-all" [ngClass]="strengthClass" [style.width.%]="passwordStrength"></div>
+              </div>
+              <p class="mt-1 text-[11px] text-slate-500">Use 8+ chars with letters, numbers & symbols.</p>
+            </div>
+            @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+            <p class="mt-1 text-xs text-red-600">
+              @if (registerForm.get('password')?.errors?.['required']) { Password is required }
+              @if (registerForm.get('password')?.errors?.['minlength']) { Must be at least 8 characters }
+            </p>
+            }
+          </div>
+
+          <!-- Confirm -->
+          <div class="relative">
+            <label hlmLabel for="passwordConfirm" class="block text-sm font-medium text-slate-700">Confirm
+              Password</label>
+            <div class="mt-1 relative">
+              <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
+                <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 17a2 2 0 100-4 2 2 0 000 4z" />
+                  <path
+                    d="M6 9V7a6 6 0 1112 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V10a1 1 0 011-1h1zm2 0h8V7a4 4 0 10-8 0v2z" />
+                </svg>
+              </span>
+              <input hlmInput id="passwordConfirm" [type]="showConfirm ? 'text' : 'password'"
+                formControlName="password_confirm" placeholder="Confirm your password" class="pl-9 pr-10 w-full"
+                [class.border-red-300]="registerForm.get('password_confirm')?.invalid && registerForm.get('password_confirm')?.touched" />
+              <button type="button" class="absolute inset-y-0 right-3 text-slate-400 hover:text-slate-600"
+                (click)="showConfirm = !showConfirm" aria-label="Toggle password visibility">
+                <svg *ngIf="!showConfirm" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12zm11 3a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+                <svg *ngIf="showConfirm" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M3 3l18 18-1.5 1.5L17 19.5A13.4 13.4 0 0112 20C5 20 1 12 1 12a23.2 23.2 0 015.2-5.9L1.5 4.5 3 3z" />
+                </svg>
+              </button>
+            </div>
+            @if (registerForm.get('password_confirm')?.invalid && registerForm.get('password_confirm')?.touched) {
+            <p class="mt-1 text-xs text-red-600">
+              @if (registerForm.get('password_confirm')?.errors?.['required']) { Password confirmation is required }
+              @if (registerForm.errors?.['passwordMismatch']) { Passwords do not match }
+            </p>
+            }
+          </div>
+
+          <!-- Terms -->
+          <div class="flex items-start gap-3 pt-1">
+            <input type="checkbox" id="tos"
+              class="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" [checked]="true">
+            <label for="tos" class="text-xs text-slate-600">
+              I agree to the <a class="text-primary hover:underline" href="#">Terms</a> and <a
+                class="text-primary hover:underline" href="#">Privacy Policy</a>.
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <div class="pt-2">
+            <button hlmBtn type="submit" [disabled]="registerForm.invalid || authStore.isLoading()"
+              class="w-full h-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+              @if (authStore.isLoading()) {
+              <svg class="animate-spin -ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0A12 12 0 000 12h4z" />
+              </svg>
+              Creating account…
               } @else {
-                Create account
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l4 8h8l-6 5 2 8-8-5-8 5 2-8-6-5h8z" />
+              </svg>
+              Create account
               }
             </button>
           </div>
         </form>
+      </div>
+
+      <div class="px-6 pb-6 pt-2">
+        <div class="text-[11px] text-slate-500 text-center">
+          By creating an account you accept our policies.
+        </div>
       </div>
     </div>
   </div>

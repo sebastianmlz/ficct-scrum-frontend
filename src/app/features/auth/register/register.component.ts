@@ -22,6 +22,28 @@ export class RegisterComponent {
   private router = inject(Router);
   public authStore = inject(AuthStore);
 
+  showPass = false;
+  showConfirm = false;
+  passwordStrength = 0; // 0..100
+  strengthClass: string = 'bg-slate-300';
+
+
+  updateStrength(): void {
+    const v = this.registerForm.get('password')?.value ?? '';
+    // fuerza simple: longitud + diversidad
+    let score = 0;
+    if (v.length >= 8) score += 30;
+    if (/[A-Z]/.test(v)) score += 15;
+    if (/[a-z]/.test(v)) score += 15;
+    if (/\d/.test(v)) score += 20;
+    if (/[^A-Za-z0-9]/.test(v)) score += 20;
+    this.passwordStrength = Math.min(score, 100);
+
+    if (this.passwordStrength < 40) this.strengthClass = 'bg-red-400';
+    else if (this.passwordStrength < 70) this.strengthClass = 'bg-yellow-400';
+    else this.strengthClass = 'bg-green-500';
+  }
+
   registerForm: FormGroup = this.fb.group({
     first_name: ['', [Validators.required]],
     last_name: ['', [Validators.required]],
@@ -34,7 +56,7 @@ export class RegisterComponent {
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('password_confirm');
-    
+
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       return { passwordMismatch: true };
     }
@@ -58,7 +80,7 @@ export class RegisterComponent {
 
     try {
       await this.authStore.register(userData);
-      this.router.navigate(['/auth/login'], { 
+      this.router.navigate(['/auth/login'], {
         queryParams: { message: 'Registration successful! Please log in.' }
       });
     } catch (error) {
