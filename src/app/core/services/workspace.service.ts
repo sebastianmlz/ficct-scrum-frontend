@@ -1,139 +1,117 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
 import { Observable } from 'rxjs';
-import {
-  Workspace,
-  WorkspaceRequest,
-  WorkspaceMember,
-  WorkspaceMemberRequest,
-  PaginatedWorkspaceList,
-  PaginatedWorkspaceMemberList,
-  PaginationParams
-} from '../models/interfaces';
+
 import { environment } from '../../../environments/environment';
+
+export interface WorkspaceCreateRequest {
+  name: string;
+  slug?: string;
+  description?: string;
+  workspace_type: string;
+  visibility: string;
+  cover_image?: string | File;
+  workspace_settings?: any;
+  is_active?: boolean;
+  organization: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  organization_type: string;
+}
+
+export interface CreatedBy {
+  id: number;
+  email: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+}
+
+export interface Workspace {
+  id: string;
+  organization: Organization;
+  name: string;
+  slug: string;
+  description?: string;
+  workspace_type: string;
+  visibility: string;
+  cover_image?: string;
+  cover_image_url?: string;
+  workspace_settings?: any;
+  is_active: boolean;
+  created_by: CreatedBy;
+  member_count: number;
+  project_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkspaceListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Workspace[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkspaceService {
-  private http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiUrl}/api/v1/workspaces`;
+  private apiUrl = `${environment.apiUrl}/api/v1/workspaces`;
 
-  getWorkspaces(params?: PaginationParams): Observable<PaginatedWorkspaceList> {
-    let httpParams = new HttpParams();
+  constructor(private http: HttpClient) {}
+
+  createWorkspace(workspace: WorkspaceCreateRequest | FormData): Observable<Workspace> {
+    const token = localStorage.getItem('access');
+    let headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    if (params?.page) {
-      httpParams = httpParams.set('page', params.page.toString());
+    // Si es FormData (con archivo), no establecer Content-Type
+    // Si es JSON (sin archivo), Angular establecerá application/json automáticamente
+    if (workspace instanceof FormData) {
+      headers = headers.delete('Content-Type');
     }
-    if (params?.search) {
-      httpParams = httpParams.set('search', params.search);
-    }
-    if (params?.ordering) {
-      httpParams = httpParams.set('ordering', params.ordering);
-    }
-    if (params?.workspace_type) {
-      httpParams = httpParams.set('workspace_type', params.workspace_type);
-    }
+    
+    return this.http.post<Workspace>(`${this.apiUrl}/`, workspace, { headers });
+  }
 
-    return this.http.get<PaginatedWorkspaceList>(`${this.baseUrl}/`, { params: httpParams });
+  getWorkspaces(organizationId?: string, page?: number, search?: string): Observable<WorkspaceListResponse> {
+    let params = '';
+    const queryParams = [];
+    
+    if (organizationId) queryParams.push(`organization=${organizationId}`);
+    if (page) queryParams.push(`page=${page}`);
+    if (search) queryParams.push(`search=${search}`);
+    
+    if (queryParams.length > 0) {
+      params = '?' + queryParams.join('&');
+    }
+    
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<WorkspaceListResponse>(`${this.apiUrl}/${params}`, { headers });
   }
 
   getWorkspace(id: string): Observable<Workspace> {
-    return this.http.get<Workspace>(`${this.baseUrl}/${id}/`);
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<Workspace>(`${this.apiUrl}/${id}/`, { headers });
   }
 
-  createWorkspace(workspaceData: WorkspaceRequest): Observable<Workspace> {
-    const formData = new FormData();
-    
-    formData.append('name', workspaceData.name);
-    formData.append('slug', workspaceData.slug);
-    
-    if (workspaceData.description) {
-      formData.append('description', workspaceData.description);
-    }
-    if (workspaceData.workspace_type) {
-      formData.append('workspace_type', workspaceData.workspace_type);
-    }
-    if (workspaceData.visibility) {
-      formData.append('visibility', workspaceData.visibility);
-    }
-    if (workspaceData.cover_image) {
-      formData.append('cover_image', workspaceData.cover_image);
-    }
-    if (workspaceData.workspace_settings) {
-      formData.append('workspace_settings', JSON.stringify(workspaceData.workspace_settings));
-    }
-    if (workspaceData.is_active !== undefined) {
-      formData.append('is_active', workspaceData.is_active.toString());
-    }
-
-    return this.http.post<Workspace>(`${this.baseUrl}/`, formData);
-  }
-
-  updateWorkspace(id: string, workspaceData: Partial<WorkspaceRequest>): Observable<Workspace> {
-    const formData = new FormData();
-    
-    if (workspaceData.name) {
-      formData.append('name', workspaceData.name);
-    }
-    if (workspaceData.slug) {
-      formData.append('slug', workspaceData.slug);
-    }
-    if (workspaceData.description) {
-      formData.append('description', workspaceData.description);
-    }
-    if (workspaceData.workspace_type) {
-      formData.append('workspace_type', workspaceData.workspace_type);
-    }
-    if (workspaceData.visibility) {
-      formData.append('visibility', workspaceData.visibility);
-    }
-    if (workspaceData.cover_image) {
-      formData.append('cover_image', workspaceData.cover_image);
-    }
-    if (workspaceData.workspace_settings) {
-      formData.append('workspace_settings', JSON.stringify(workspaceData.workspace_settings));
-    }
-    if (workspaceData.is_active !== undefined) {
-      formData.append('is_active', workspaceData.is_active.toString());
-    }
-
-    return this.http.patch<Workspace>(`${this.baseUrl}/${id}/`, formData);
+  updateWorkspace(id: string, workspace: Partial<WorkspaceCreateRequest>): Observable<Workspace> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<Workspace>(`${this.apiUrl}/${id}/`, workspace, { headers });
   }
 
   deleteWorkspace(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}/`);
-  }
-
-  // Workspace Members
-  getWorkspaceMembers(workspaceId: string, params?: PaginationParams): Observable<PaginatedWorkspaceMemberList> {
-    let httpParams = new HttpParams();
-    
-    if (params?.page) {
-      httpParams = httpParams.set('page', params.page.toString());
-    }
-    if (params?.search) {
-      httpParams = httpParams.set('search', params.search);
-    }
-    if (params?.ordering) {
-      httpParams = httpParams.set('ordering', params.ordering);
-    }
-    if (params?.role) {
-      httpParams = httpParams.set('role', params.role);
-    }
-
-    return this.http.get<PaginatedWorkspaceMemberList>(`${this.baseUrl}/${workspaceId}/members/`, { params: httpParams });
-  }
-
-  addWorkspaceMember(workspaceId: string, memberData: WorkspaceMemberRequest): Observable<WorkspaceMember> {
-    return this.http.post<WorkspaceMember>(`${this.baseUrl}/${workspaceId}/members/`, memberData);
-  }
-
-  updateWorkspaceMember(workspaceId: string, memberId: string, memberData: Partial<WorkspaceMemberRequest>): Observable<WorkspaceMember> {
-    return this.http.patch<WorkspaceMember>(`${this.baseUrl}/${workspaceId}/members/${memberId}/`, memberData);
-  }
-
-  removeWorkspaceMember(workspaceId: string, memberId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${workspaceId}/members/${memberId}/`);
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}/`, { headers });
   }
 }

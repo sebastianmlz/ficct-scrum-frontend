@@ -20,12 +20,21 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = this.authService.getToken();
     if (token) {
       console.log('AuthInterceptor: Adding token to request:', req.url);
-      req = req.clone({
-        setHeaders: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Solo agregar Content-Type si el cuerpo NO es FormData
+      if (req.body instanceof FormData) {
+        req = req.clone({
+          setHeaders: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      } else {
+        req = req.clone({
+          setHeaders: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
     } else {
       console.log('AuthInterceptor: No token available for request:', req.url);
     }

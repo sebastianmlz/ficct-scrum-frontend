@@ -41,6 +41,13 @@
           </div>
           <div class="flex space-x-3">
             <a
+              [routerLink]="['/workspaces']"
+              [queryParams]="{ organization: organization()!.id }"
+              class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700"
+            >
+              Ver Workspaces
+            </a>
+            <a
               [routerLink]="['/organizations', organization()!.id, 'edit']"
               class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
@@ -102,11 +109,17 @@
                     <div class="text-sm text-gray-500">Members</div>
                   </div>
                   <div class="text-center">
-                    <div class="text-3xl font-bold text-primary">{{ organization()!.workspace_count }}</div>
-                    <div class="text-sm text-gray-500">Workspaces</div>
+                    <a 
+                      [routerLink]="['/workspaces']"
+                      [queryParams]="{ organization: organization()!.id }"
+                      class="block hover:bg-gray-50 rounded-lg p-2 transition-colors"
+                    >
+                      <div class="text-3xl font-bold text-primary">{{ organization()!.workspace_count }}</div>
+                      <div class="text-sm text-gray-500">Workspaces</div>
+                    </a>
                   </div>
                   <div class="text-center">
-                    <div class="text-3xl font-bold text-primary">{{ organization()!.project_count }}</div>
+                    <div class="text-3xl font-bold text-primary">0</div>
                     <div class="text-sm text-gray-500">Projects</div>
                   </div>
                 </div>

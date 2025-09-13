@@ -65,12 +65,37 @@ export class OrganizationCreateComponent {
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
+      console.log('📁 Archivo seleccionado:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      });
+
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        this.error = 'Please select a valid image file (PNG, JPG, GIF)';
+        return;
+      }
+
+      // Validar tamaño (10MB máximo)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        this.error = 'File size must be less than 10MB';
+        return;
+      }
+
       this.selectedFile = file;
+      this.error = null; // Limpiar errores previos
       
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         this.previewUrl = e.target?.result as string;
+      };
+      reader.onerror = (e) => {
+        console.error('❌ Error reading file:', e);
+        this.error = 'Error reading the selected file';
       };
       reader.readAsDataURL(file);
     }
@@ -102,14 +127,110 @@ export class OrganizationCreateComponent {
         logo: this.selectedFile || undefined
       };
 
+      console.log('🚀 Datos del formulario:', formData);
+      console.log('📄 Archivo seleccionado:', this.selectedFile);
+      console.log('🔍 Valores del form:', this.organizationForm.value);
+
       const organization = await this.organizationService.createOrganization(formData).toPromise();
+      console.log('✅ Organización creada:', organization);
+      
       if (organization) {
         this.router.navigate(['/organizations', organization.id]);
       }
     } catch (error: any) {
-      this.error = error.error?.message || 'Failed to create organization';
+      console.error('❌ Error completo:', error);
+      console.error('❌ Error detalles:', {
+        status: error.status,
+        statusText: error.statusText,
+        message: error.message,
+        error: error.error
+      });
+      
+      this.error = error.error?.message || error.message || 'Failed to create organization';
     } finally {
       this.loading = false;
     }
+  }
+
+  async testSimplePost(): Promise<void> {
+    console.log('🧪 Iniciando prueba POST simple...');
+    
+    this.loading = true;
+    this.error = null;
+
+    try {
+      const testData: OrganizationRequest = {
+        name: 'Test Organization ' + new Date().toLocaleTimeString(),
+        slug: 'test-org-' + Date.now(),
+        description: 'Organización de prueba creada desde el frontend',
+        organization_type: OrganizationTypeEnum.STARTUP,
+        subscription_plan: SubscriptionPlanEnum.FREE,
+        is_active: true
+        // NO incluir logo para evitar problemas de FormData
+      };
+
+      console.log('🧪 Datos de prueba (JSON puro):', testData);
+
+      const organization = await this.organizationService.createOrganization(testData).toPromise();
+      console.log('✅ Organización de prueba creada:', organization);
+      
+      if (organization) {
+        alert('✅ ¡Prueba exitosa! Organización creada: ' + organization.name);
+        this.router.navigate(['/organizations', organization.id]);
+      }
+    } catch (error: any) {
+      console.error('❌ Error en prueba:', error);
+      this.error = 'Test POST failed: ' + (error.error?.message || error.message);
+      alert('❌ Error en prueba: ' + this.error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async testWithFile(): Promise<void> {
+    if (!this.selectedFile) {
+      alert('Por favor selecciona una imagen primero');
+      return;
+    }
+
+    console.log('🧪 Iniciando prueba POST con archivo...');
+    
+    this.loading = true;
+    this.error = null;
+
+    try {
+      const testData: OrganizationRequest = {
+        name: 'Test With Image ' + new Date().toLocaleTimeString(),
+        slug: 'test-img-' + Date.now(),
+        description: 'Organización de prueba CON imagen',
+        organization_type: OrganizationTypeEnum.STARTUP,
+        subscription_plan: SubscriptionPlanEnum.FREE,
+        is_active: true,
+        logo: this.selectedFile
+      };
+
+      console.log('🧪 Datos de prueba (con archivo):', testData);
+
+      const organization = await this.organizationService.createOrganization(testData).toPromise();
+      console.log('✅ Organización con imagen creada:', organization);
+      
+      if (organization) {
+        alert('✅ ¡Prueba con imagen exitosa! Organización creada: ' + organization.name);
+        this.router.navigate(['/organizations', organization.id]);
+      }
+    } catch (error: any) {
+      console.error('❌ Error en prueba con archivo:', error);
+      this.error = 'Test with file failed: ' + (error.error?.message || error.message);
+      alert('❌ Error en prueba con archivo: ' + this.error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  scrollToBottom(): void {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
   }
 }

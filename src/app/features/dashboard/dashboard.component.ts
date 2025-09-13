@@ -107,25 +107,26 @@ export class DashboardComponent implements OnInit {
     
     try {
       // Load organizations, workspaces, and projects
-      const [orgsResponse, workspacesResponse, projectsResponse] = await Promise.all([
+      const [orgsResponse, /* workspacesResponse, */ projectsResponse] = await Promise.all([
         this.organizationService.getOrganizations({ page: 1 }).toPromise(),
-        this.workspaceService.getWorkspaces({ page: 1 }).toPromise(),
+        // TODO: Need to implement organization-specific workspace loading
+        // this.workspaceService.getWorkspaces({ page: 1 }).toPromise(),
         this.projectService.getProjects({ page: 1 }).toPromise()
       ]);
 
       // Update raw data
       this.organizations.set(orgsResponse?.results || []);
-      this.workspaces.set(workspacesResponse?.results || []);
+      this.workspaces.set(/* workspacesResponse?.results || */ []);
       this.projects.set(projectsResponse?.results || []);
 
       // Calculate statistics
       const totalProjects = projectsResponse?.count || 0;
       const activeProjects = projectsResponse?.results?.filter(p => p.status === 'active').length || 0;
-      const totalWorkspaces = workspacesResponse?.count || 0;
+      const totalWorkspaces = 0; // TODO: Calculate when workspace loading is implemented
       const totalOrganizations = orgsResponse?.count || 0;
 
       // Calculate team members (sum of all workspace member counts)
-      const totalMembers = workspacesResponse?.results?.reduce((sum, ws) => sum + ws.member_count, 0) || 0;
+      const totalMembers = 0; // TODO: Calculate when workspace loading is implemented
 
       this.quickStats.set([
         {

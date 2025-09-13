@@ -145,11 +145,18 @@ export interface OrganizationBasic {
 
 export interface Organization extends OrganizationBasic {
   description: string;
+  logo: string;
+  logo_url: string;
   website_url: string;
   owner: UserBasic;
+  organization_settings: {
+    additionalProp1?: string;
+    additionalProp2?: string;
+    additionalProp3?: string;
+    [key: string]: any;
+  };
   subscription_plan: SubscriptionPlanEnum;
   member_count: number;
-  project_count: number;
   workspace_count: number;
   created_at: string;
   updated_at: string;
@@ -163,7 +170,12 @@ export interface OrganizationRequest {
   website_url?: string;
   organization_type?: OrganizationTypeEnum;
   subscription_plan?: SubscriptionPlanEnum;
-  organization_settings?: object;
+  organization_settings?: {
+    additionalProp1?: string;
+    additionalProp2?: string;
+    additionalProp3?: string;
+    [key: string]: any;
+  };
   is_active?: boolean;
 }
 
