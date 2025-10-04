@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import {
   Organization,
   OrganizationRequest,
@@ -33,14 +34,44 @@ export class OrganizationService {
       httpParams = httpParams.set('ordering', params.ordering);
     }
 
-    return this.http.get<PaginatedOrganizationList>(`${this.baseUrl}/organizations/`, { params: httpParams });
+    return this.http.get<PaginatedOrganizationList>(`${this.baseUrl}/organizations/`, { params: httpParams }).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
   }
 
   getOrganization(id: string): Observable<Organization> {
-    return this.http.get<Organization>(`${this.baseUrl}/organizations/${id}/`);
+    return this.http.get<Organization>(`${this.baseUrl}/organizations/${id}/`).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
   }
 
   createOrganization(organizationData: OrganizationRequest): Observable<Organization> {
+    console.log('🔧 OrganizationService - Datos recibidos:', organizationData);
+    
+    // Si NO hay logo, enviar como JSON normal
+    if (!organizationData.logo) {
+      const jsonData = {
+        name: organizationData.name,
+        slug: organizationData.slug,
+        description: organizationData.description || '',
+        organization_type: organizationData.organization_type || '',
+        subscription_plan: organizationData.subscription_plan || '',
+        website_url: organizationData.website_url || '',
+        is_active: organizationData.is_active ?? true
+      };
+
+      console.log('📤 Enviando como JSON (sin logo):', jsonData);
+
+      return this.http.post<Organization>(`${this.baseUrl}/organizations/`, jsonData, {
+        headers: { 'Content-Type': 'application/json' }
+      }).pipe(
+        catchError(this.handleError)
+      );
+    }
+
+    // Si HAY logo, enviar como FormData
     const formData = new FormData();
     
     formData.append('name', organizationData.name);
@@ -48,9 +79,6 @@ export class OrganizationService {
     
     if (organizationData.description) {
       formData.append('description', organizationData.description);
-    }
-    if (organizationData.logo) {
-      formData.append('logo', organizationData.logo);
     }
     if (organizationData.website_url) {
       formData.append('website_url', organizationData.website_url);
@@ -61,14 +89,40 @@ export class OrganizationService {
     if (organizationData.subscription_plan) {
       formData.append('subscription_plan', organizationData.subscription_plan);
     }
-    if (organizationData.organization_settings) {
-      formData.append('organization_settings', JSON.stringify(organizationData.organization_settings));
-    }
     if (organizationData.is_active !== undefined) {
       formData.append('is_active', organizationData.is_active.toString());
     }
+    
+    // Agregar logo al final y con validación
+    if (organizationData.logo && organizationData.logo instanceof File) {
+      console.log('📸 Agregando logo - Nombre:', organizationData.logo.name, 'Tamaño:', organizationData.logo.size, 'Tipo:', organizationData.logo.type);
+      
+      // Validar que el archivo sea una imagen
+      if (organizationData.logo.type.startsWith('image/')) {
+        formData.append('logo', organizationData.logo, organizationData.logo.name);
+      } else {
+        console.error('❌ El archivo no es una imagen válida:', organizationData.logo.type);
+        return throwError(() => new Error('El archivo debe ser una imagen válida'));
+      }
+    }
 
-    return this.http.post<Organization>(`${this.baseUrl}/organizations/`, formData);
+    // Log FormData contents (excluyendo el archivo para evitar problemas)
+    console.log('📋 FormData contents:');
+    for (let pair of formData.entries()) {
+      if (pair[1] instanceof File) {
+        console.log(`${pair[0]}:`, `[File: ${pair[1].name}, ${pair[1].size} bytes, ${pair[1].type}]`);
+      } else {
+        console.log(`${pair[0]}:`, pair[1]);
+      }
+    }
+
+    const url = `${this.baseUrl}/organizations/`;
+    console.log('🌐 POST URL (con FormData):', url);
+
+    // Enviar FormData SIN headers explícitos (dejar que el navegador los configure)
+    return this.http.post<Organization>(url, formData).pipe(
+      catchError(this.handleError)
+    );
   }
 
   updateOrganization(id: string, organizationData: Partial<OrganizationRequest>): Observable<Organization> {
@@ -102,11 +156,15 @@ export class OrganizationService {
       formData.append('is_active', organizationData.is_active.toString());
     }
 
-    return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, formData);
+    return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, formData).pipe(
+      catchError(this.handleError)
+    );
   }
 
   deleteOrganization(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/organizations/${id}/`);
+    return this.http.delete<void>(`${this.baseUrl}/organizations/${id}/`).pipe(
+      catchError(this.handleError)
+    );
   }
 
   // Organization Members
@@ -126,18 +184,76 @@ export class OrganizationService {
       httpParams = httpParams.set('role', params.role);
     }
 
-    return this.http.get<PaginatedOrganizationMemberList>(`${this.baseUrl}/organizations/${organizationId}/members/`, { params: httpParams });
+    return this.http.get<PaginatedOrganizationMemberList>(`${this.baseUrl}/organizations/${organizationId}/members/`, { params: httpParams }).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
   }
 
   addOrganizationMember(organizationId: string, memberData: OrganizationMemberRequest): Observable<OrganizationMember> {
-    return this.http.post<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/`, memberData);
+    return this.http.post<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/`, memberData).pipe(
+      catchError(this.handleError)
+    );
   }
 
   updateOrganizationMemberRole(organizationId: string, memberId: string, roleData: PatchedOrganizationMemberRequest): Observable<OrganizationMember> {
-    return this.http.patch<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`, roleData);
+    return this.http.patch<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`, roleData).pipe(
+      catchError(this.handleError)
+    );
   }
 
   removeOrganizationMember(organizationId: string, memberId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`);
+    return this.http.delete<void>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    console.error('🚨 OrganizationService error:', error);
+    console.error('🚨 Error details:', {
+      status: error.status,
+      statusText: error.statusText,
+      url: error.url,
+      message: error.message,
+      error: error.error
+    });
+    
+    let errorMessage = 'An unexpected error occurred';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      switch (error.status) {
+        case 400:
+          const validationErrors = error.error?.errors || error.error;
+          if (typeof validationErrors === 'object') {
+            const errorMessages = Object.entries(validationErrors)
+              .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+              .join('; ');
+            errorMessage = `Validation errors: ${errorMessages}`;
+          } else {
+            errorMessage = 'Invalid request. Please check your input.';
+          }
+          break;
+        case 401:
+          errorMessage = 'You are not authorized to access this resource.';
+          break;
+        case 403:
+          errorMessage = 'Access forbidden. You do not have permission.';
+          break;
+        case 404:
+          errorMessage = 'Organization not found.';
+          break;
+        case 500:
+          errorMessage = 'Server error. Please try again later.';
+          break;
+        default:
+          errorMessage = `Error ${error.status}: ${error.error?.message || error.message}`;
+      }
+    }
+    
+    return throwError(() => new Error(errorMessage));
   }
 }

@@ -19,18 +19,18 @@
     </div>
 
     <!-- Card -->
-    <div hlmCard class="bg-white/80 backdrop-blur border border-slate-200/80 shadow-xl rounded-2xl">
-      <div hlmCardHeader class="px-6 pt-6 pb-0">
-        <h3 hlmCardTitle class="text-base font-semibold text-slate-900">
+    <div class="bg-white/80 backdrop-blur border border-slate-200/80 shadow-xl rounded-2xl">
+      <div class="px-6 pt-6 pb-0">
+        <h3 class="text-base font-semibold text-slate-900">
           Register for a new account
         </h3>
         <p class="text-sm text-slate-500">It takes less than a minute.</p>
       </div>
 
-      <div hlmCardContent class="p-6">
+      <div class="p-6">
         <!-- Server/Error alert -->
         @if (authStore.error()) {
-        <div hlmAlert class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {{ authStore.error() }}
         </div>
         }
@@ -39,15 +39,15 @@
           <!-- Names -->
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div class="relative">
-              <label hlmLabel for="firstName" class="block text-sm font-medium text-slate-700">First Name</label>
+              <label for="firstName" class="block text-sm font-medium text-slate-700">First Name</label>
               <div class="mt-1 relative">
                 <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
                   <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-8 9a8 8 0 0116 0H4z" />
                   </svg>
                 </span>
-                <input hlmInput id="firstName" type="text" formControlName="first_name" placeholder="First name"
-                  class="pl-9 w-full"
+                <input id="firstName" type="text" formControlName="first_name" placeholder="First name"
+                  class="pl-9 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   [attr.aria-invalid]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched"
                   [class.border-red-300]="registerForm.get('first_name')?.invalid && registerForm.get('first_name')?.touched" />
               </div>
@@ -57,15 +57,16 @@
             </div>
 
             <div class="relative">
-              <label hlmLabel for="lastName" class="block text-sm font-medium text-slate-700">Last Name</label>
+              <label for="lastName" class="block text-sm font-medium text-slate-700">Last Name</label>
               <div class="mt-1 relative">
                 <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
                   <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-8 9a8 8 0 0116 0H4z" />
                   </svg>
                 </span>
-                <input hlmInput id="lastName" type="text" formControlName="last_name" placeholder="Last name"
-                  class="pl-9 w-full"
+                                <input id="lastName" type="text" formControlName="last_name" placeholder="Last name"
+                  class="pl-9 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  [attr.aria-invalid]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched"
                   [class.border-red-300]="registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched" />
               </div>
               @if (registerForm.get('last_name')?.invalid && registerForm.get('last_name')?.touched) {
@@ -76,15 +77,16 @@
 
           <!-- Username -->
           <div class="relative">
-            <label hlmLabel for="username" class="block text-sm font-medium text-slate-700">Username</label>
+            <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
             <div class="mt-1 relative">
               <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M4 5h16v2H4zM4 11h16v2H4zM4 17h10v2H4z" />
                 </svg>
               </span>
-              <input hlmInput id="username" type="text" formControlName="username" placeholder="Choose a username"
-                class="pl-9 w-full"
+                            <input id="username" type="text" formControlName="username" placeholder="Choose a username"
+                class="pl-9 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                [attr.aria-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
                 [class.border-red-300]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" />
             </div>
             @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
@@ -97,7 +99,7 @@
 
           <!-- Email -->
           <div class="relative">
-            <label hlmLabel for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+            <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
             <div class="mt-1 relative">
               <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
@@ -105,8 +107,8 @@
                   <path d="M22 6H2l10 7z" />
                 </svg>
               </span>
-              <input hlmInput id="email" type="email" formControlName="email" placeholder="you@ficct.edu.bo"
-                class="pl-9 w-full"
+              <input id="email" type="email" formControlName="email" placeholder="you@ficct.edu.bo"
+                class="pl-9 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 [class.border-red-300]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" />
             </div>
             @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
@@ -119,7 +121,7 @@
 
           <!-- Password -->
           <div class="relative">
-            <label hlmLabel for="password" class="block text-sm font-medium text-slate-700">Password</label>
+            <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
             <div class="mt-1 relative">
               <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
@@ -128,8 +130,8 @@
                     d="M6 9V7a6 6 0 1112 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V10a1 1 0 011-1h1zm2 0h8V7a4 4 0 10-8 0v2z" />
                 </svg>
               </span>
-              <input hlmInput id="password" [type]="showPass ? 'text' : 'password'" formControlName="password"
-                placeholder="Create a password" class="pl-9 pr-10 w-full" (input)="updateStrength()"
+              <input id="password" [type]="showPass ? 'text' : 'password'" formControlName="password"
+                placeholder="Create a password" class="pl-9 pr-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 [class.border-red-300]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" />
               <button type="button" class="absolute inset-y-0 right-3 text-slate-400 hover:text-slate-600"
                 (click)="showPass = !showPass" aria-label="Toggle password visibility">
@@ -159,8 +161,7 @@
 
           <!-- Confirm -->
           <div class="relative">
-            <label hlmLabel for="passwordConfirm" class="block text-sm font-medium text-slate-700">Confirm
-              Password</label>
+            <label for="passwordConfirm" class="block text-sm font-medium text-slate-700">Confirm Password</label>
             <div class="mt-1 relative">
               <span class="pointer-events-none absolute inset-y-0 left-3 grid place-content-center">
                 <svg class="h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
@@ -169,8 +170,8 @@
                     d="M6 9V7a6 6 0 1112 0v2h1a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V10a1 1 0 011-1h1zm2 0h8V7a4 4 0 10-8 0v2z" />
                 </svg>
               </span>
-              <input hlmInput id="passwordConfirm" [type]="showConfirm ? 'text' : 'password'"
-                formControlName="password_confirm" placeholder="Confirm your password" class="pl-9 pr-10 w-full"
+              <input id="passwordConfirm" [type]="showConfirm ? 'text' : 'password'"
+                formControlName="password_confirm" placeholder="Confirm your password" class="pl-9 pr-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 [class.border-red-300]="registerForm.get('password_confirm')?.invalid && registerForm.get('password_confirm')?.touched" />
               <button type="button" class="absolute inset-y-0 right-3 text-slate-400 hover:text-slate-600"
                 (click)="showConfirm = !showConfirm" aria-label="Toggle password visibility">
@@ -203,7 +204,7 @@
 
           <!-- Submit -->
           <div class="pt-2">
-            <button hlmBtn type="submit" [disabled]="registerForm.invalid || authStore.isLoading()"
+            <button type="submit" [disabled]="registerForm.invalid || authStore.isLoading()"
               class="w-full h-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
               @if (authStore.isLoading()) {
               <svg class="animate-spin -ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"

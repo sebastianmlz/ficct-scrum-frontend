@@ -1,0 +1,51 @@
+<div class="max-w-2xl mx-auto p-6">
+	<h2 class="text-2xl font-bold mb-6 text-primary">Crear Workspace</h2>
+	<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6 bg-white rounded-lg shadow p-6">
+		<div>
+			<label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nombre <span class="text-red-500">*</span></label>
+			<input pInputText id="name" formControlName="name" class="w-full border-gray-300 rounded focus:ring focus:ring-primary" />
+			<div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-xs text-red-500 mt-1">Nombre requerido</div>
+		</div>
+		<div>
+			<label for="slug" class="block text-sm font-medium text-gray-700 mb-1">Slug <span class="text-red-500">*</span></label>
+			<input pInputText id="slug" formControlName="slug" class="w-full border-gray-300 rounded focus:ring focus:ring-primary" placeholder="Solo minúsculas, números y guiones (ej: plataforma-web)" />
+			<div *ngIf="form.get('slug')?.invalid && form.get('slug')?.touched" class="text-xs text-red-500 mt-1">Slug requerido. Solo minúsculas, números y guiones.</div>
+		</div>
+		<div>
+			<label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+			<textarea pTextarea id="description" formControlName="description" rows="2" class="w-full border-gray-300 rounded focus:ring focus:ring-primary"></textarea>
+		</div>
+				<div>
+					<label for="workspace_type" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Workspace</label>
+					<select id="workspace_type" formControlName="workspace_type" class="w-full border-gray-300 rounded focus:ring focus:ring-primary">
+						<option value="">Selecciona tipo...</option>
+						<option value="development">Desarrollo</option>
+						<option value="design">Diseño</option>
+						<option value="marketing">Marketing</option>
+						<option value="sales">Ventas</option>
+						<option value="support">Soporte</option>
+						<option value="hr">Recursos Humanos</option>
+						<option value="finance">Finanzas</option>
+						<option value="general">General</option>
+					</select>
+				</div>
+		<div>
+			<label for="visibility" class="block text-sm font-medium text-gray-700 mb-1">Visibilidad</label>
+			<select id="visibility" formControlName="visibility" class="w-full border-gray-300 rounded focus:ring focus:ring-primary">
+				<option value="public">Público</option>
+				<option value="private">Privado</option>
+			</select>
+		</div>
+			<div>
+				<label for="cover_image" class="block text-sm font-medium text-gray-700 mb-1">Imagen de portada</label>
+				<input type="file" id="cover_image" (change)="onFileChange($event)" class="w-full border-gray-300 rounded focus:ring focus:ring-primary" />
+			</div>
+		<div>
+			<label for="is_active" class="block text-sm font-medium text-gray-700 mb-1">Activo</label>
+			<input type="checkbox" id="is_active" formControlName="is_active" class="ml-2" />
+		</div>
+		<button pButton type="submit" label="Crear" class="w-full bg-primary text-white py-2 rounded" [disabled]="form.invalid || loading"></button>
+		<div *ngIf="error" class="text-red-500 mt-2 text-sm">{{ error }}</div>
+		<div *ngIf="success" class="text-green-600 mt-2 text-sm">{{ success }}</div>
+	</form>
+</div>

@@ -82,10 +82,14 @@ export class ProjectCreateComponent implements OnInit {
 
   async loadWorkspaces(): Promise<void> {
     try {
-      const response = await this.workspaceService.getWorkspaces().toPromise();
-      if (response) {
-        this.workspaces.set(response.results);
-      }
+      // TODO: Need to implement organization-specific workspace loading
+      // For now, set empty array to prevent errors
+      this.workspaces.set([]);
+      
+      // const response = await this.workspaceService.getWorkspaces(organizationId).toPromise();
+      // if (response) {
+      //   this.workspaces.set(response.results);
+      // }
     } catch (error: any) {
       this.error.set('Failed to load workspaces');
     }
