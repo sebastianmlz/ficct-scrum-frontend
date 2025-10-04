@@ -101,7 +101,7 @@ export class AuthService {
 
   updateProfile(profileData: any): Observable<User> {
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    return this.http.put<User>(`${this.baseUrl}/users/me`, profileData, { headers }).pipe(
+    return this.http.patch<User>(`${this.baseUrl}/users/me/`, profileData, { headers }).pipe(
       retry(1),
       catchError((error: HttpErrorResponse) => {
         console.error('updateProfile failed:', error);

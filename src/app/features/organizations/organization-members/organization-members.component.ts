@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { Organization, OrganizationMember, OrganizationMemberRequest, PaginatedOrganizationMemberList, PaginationParams } from '../../../core/models/interfaces';
 import { OrganizationMemberRoleEnum } from '../../../core/models/enums';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-organization-members',
@@ -76,11 +77,11 @@ export class OrganizationMembersComponent implements OnInit {
     this.error.set(null);
 
     try {
-      const response = await this.organizationService.getOrganizationMembers(this.organizationId, params).toPromise();
-      if (response) {
-        this.members.set(response.results);
-        this.paginationData.set(response);
-      }
+      const response = await firstValueFrom(
+        this.organizationService.getOrganizationMembers(this.organizationId, params)
+      );
+      this.members.set(Array.isArray(response) ? response : response.results);
+      this.paginationData.set(response);
     } catch (error: any) {
       this.error.set(error.error?.message || 'Failed to load members');
     } finally {
@@ -94,20 +95,20 @@ export class OrganizationMembersComponent implements OnInit {
       search: this.searchForm.value.search || undefined,
       role: this.searchForm.value.role || undefined
     };
-    
+
     this.currentPage.set(1);
     this.loadMembers(searchParams);
   }
 
   loadPage(page: number): void {
     if (page < 1) return;
-    
+
     const searchParams: PaginationParams = {
       page,
       search: this.searchForm.value.search || undefined,
       role: this.searchForm.value.role || undefined
     };
-    
+
     this.currentPage.set(page);
     this.loadMembers(searchParams);
   }
@@ -132,7 +133,7 @@ export class OrganizationMembersComponent implements OnInit {
       this.inviteSuccess.set('Invitation sent successfully!');
       this.inviteForm.reset({ role: OrganizationMemberRoleEnum.MEMBER });
       this.loadMembers(); // Reload to show new member
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => this.inviteSuccess.set(null), 3000);
     } catch (error: any) {
@@ -187,7 +188,7 @@ export class OrganizationMembersComponent implements OnInit {
   }
 
   getStatusBadgeClass(isActive: boolean): string {
-    return isActive 
+    return isActive
       ? 'bg-green-100 text-green-800'
       : 'bg-red-100 text-red-800';
   }
