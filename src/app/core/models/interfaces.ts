@@ -278,6 +278,7 @@ export interface ProjectBasic {
 
 export interface Project extends ProjectBasic {
   workspace: Workspace;
+  workspace_details: WorkspaceBasic;
   description?: string;
   lead?: UserBasic;
   start_date?: string;

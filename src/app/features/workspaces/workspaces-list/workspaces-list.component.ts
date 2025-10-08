@@ -13,12 +13,12 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-workspaces-list',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterModule, 
-    ButtonModule, 
-    InputTextModule, 
-    CardModule, 
-    TagModule, 
+    CommonModule,
+    RouterModule,
+    ButtonModule,
+    InputTextModule,
+    CardModule,
+    TagModule,
     PaginatorModule,
     FormsModule
   ],
@@ -31,12 +31,12 @@ export class WorkspacesListComponent implements OnInit {
   error = signal('');
   organizationId = signal('');
   organizationName = signal('');
-  
+
   // Paginación
   totalRecords = signal(0);
   currentPage = signal(1);
   rowsPerPage = 10;
-  
+
   // Búsqueda
   searchTerm = '';
 
@@ -44,7 +44,7 @@ export class WorkspacesListComponent implements OnInit {
     private workspaceService: WorkspaceService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -58,20 +58,32 @@ export class WorkspacesListComponent implements OnInit {
   loadWorkspaces() {
     this.loading.set(true);
     this.error.set('');
-    
+
     this.workspaceService.getWorkspaces(
-      this.organizationId(), 
-      this.currentPage(), 
+      this.organizationId(),
+      this.currentPage(),
       this.searchTerm || undefined
     ).subscribe({
       next: (response: WorkspaceListResponse) => {
-        this.workspaces.set(response.results);
+        // Normaliza cada workspace
+        const normalizedWorkspaces = (response.results || []).map((ws: any) => ({
+          ...ws,
+          organization: {
+            id: ws.organization?.id || '',
+            name: ws.organization?.name || '',
+            slug: ws.organization?.slug || '',
+            logo_url: ws.organization?.logo_url || '',
+            organization_type: ws.organization?.organization_type || '',
+            subscription_plan: ws.organization?.subscription_plan || '',
+            is_active: ws.organization?.is_active ?? true
+          }
+        }));
+        this.workspaces.set(normalizedWorkspaces);
         this.totalRecords.set(response.count);
         this.loading.set(false);
-        
-        // Obtener nombre de organización del primer workspace
-        if (response.results.length > 0) {
-          this.organizationName.set(response.results[0].organization.name);
+
+        if (normalizedWorkspaces.length > 0) {
+          this.organizationName.set(normalizedWorkspaces[0].organization.name);
         }
       },
       error: (err) => {
@@ -92,8 +104,8 @@ export class WorkspacesListComponent implements OnInit {
   }
 
   createWorkspace() {
-    this.router.navigate(['/workspaces/create'], { 
-      queryParams: { organization: this.organizationId() } 
+    this.router.navigate(['/workspaces/create'], {
+      queryParams: { organization: this.organizationId() }
     });
   }
 

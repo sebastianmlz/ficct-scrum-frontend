@@ -41,7 +41,11 @@ export class ProjectsListComponent implements OnInit {
     try {
       const response = await this.projectService.getProjects(params).toPromise();
       if (response) {
-        this.projects.set(response.results);
+        const normalizeProjects = response.results.map(project => ({
+          ...project,
+          workspace: project.workspace || { name: 'Sin workspace' }
+        }))
+        this.projects.set(normalizeProjects);
         this.paginationData.set(response);
       }
     } catch (error: any) {

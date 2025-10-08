@@ -131,7 +131,7 @@
                                 class="px-2 py-1 rounded-full font-medium">
                                 {{ project.priority | titlecase }}
                             </span>
-                            <span>{{ project.workspace.name }}</span>
+                            <span>{{ project.workspace_details.name}}</span>
                         </div>
 
                         @if (project.start_date || project.due_date) {
@@ -161,7 +161,7 @@
 
                         <div class="flex space-x-2">
                             <a [routerLink]="['/projects', project.id]"
-                                class="flex-1 text-center bg-primary text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-primary/90">
+                                class="flex-1 text-center bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-primary/90">
                                 View Details
                             </a>
                             <a [routerLink]="['/projects', project.id, 'config']"

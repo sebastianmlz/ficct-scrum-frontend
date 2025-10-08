@@ -93,62 +93,45 @@
           </div>
         </div>
       } @else {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           @for (workspace of workspaces(); track workspace.id) {
-            <p-card class="cursor-pointer hover:shadow-lg transition-shadow" (click)="viewWorkspace(workspace)">
-              <ng-template pTemplate="header">
-                @if (workspace.cover_image_url) {
-                  <img [src]="workspace.cover_image_url" [alt]="workspace.name" class="w-full h-48 object-cover">
-                } @else {
-                  <div class="w-full h-48 bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                    <span class="text-4xl font-bold text-white">{{ workspace.name.charAt(0).toUpperCase() }}</span>
+            <div class="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer" (click)="viewWorkspace(workspace)">
+              <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center">
+                    @if (workspace.cover_image_url) {
+                      <img [src]="workspace.cover_image_url" [alt]="workspace.name" class="w-10 h-10 rounded-full mr-3">
+                    } @else {
+                      <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-medium mr-3">
+                        {{ workspace.name.charAt(0).toUpperCase() }}
+                      </div>
+                    }
+                    <div>
+                      <h3 class="text-lg font-medium text-gray-900">{{ workspace.name }}</h3>
+                      <p class="text-sm text-gray-500">{{ getTypeLabel(workspace.workspace_type) }}</p>
+                    </div>
                   </div>
-                }
-              </ng-template>
-              
-              <ng-template pTemplate="title">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-lg font-semibold text-gray-900 truncate">{{ workspace.name }}</h3>
                   <p-tag 
                     [value]="workspace.visibility" 
                     [severity]="getVisibilityClass(workspace.visibility)"
                     [ngClass]="'text-xs'"
                   ></p-tag>
                 </div>
-              </ng-template>
-              
-              <ng-template pTemplate="subtitle">
-                <p class="text-sm text-gray-600">{{ getTypeLabel(workspace.workspace_type) }}</p>
-              </ng-template>
-              
-              <ng-template pTemplate="content">
+
                 @if (workspace.description) {
-                  <p class="text-gray-700 text-sm line-clamp-3">{{ workspace.description }}</p>
-                } @else {
-                  <p class="text-gray-500 text-sm italic">No description available</p>
+                  <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ workspace.description }}</p>
                 }
-                
-                <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
-                  <div class="flex items-center space-x-4">
-                    <span class="flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                      </svg>
-                      {{ workspace.member_count }}
-                    </span>
-                    <span class="flex items-center">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                      {{ workspace.project_count }}
-                    </span>
-                  </div>
-                  <div class="text-xs">
-                    {{ workspace.created_at | date:'short' }}
-                  </div>
+
+                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span>{{ workspace.member_count }} members</span>
+                  <span>{{ workspace.project_count }} projects</span>
                 </div>
-              </ng-template>
-            </p-card>
+
+                <div class="flex items-center justify-between text-xs text-gray-400 mb-4">
+                  <span>{{ workspace.created_at | date:'short' }}</span>
+                </div>
+              </div>
+            </div>
           }
         </div>
 

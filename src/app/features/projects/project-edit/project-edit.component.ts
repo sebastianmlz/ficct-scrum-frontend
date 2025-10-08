@@ -64,39 +64,60 @@ export class ProjectEditComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.projectId = params['id'];
       if (this.projectId) {
-        this.loadWorkspaces();
+        this.loadWorkSpaces();
         this.loadProject();
       }
     });
   }
 
-  async loadWorkspaces(): Promise<void> {
-    try {
-      // TODO: Need to implement organization-specific workspace loading
-      // For now, set empty array to prevent errors
-      this.workspaces.set([]);
-      
-      // const response = await this.workspaceService.getWorkspaces(organizationId).toPromise();
-      // if (response) {
-      //   this.workspaces.set(response.results);
-      // }
-    } catch (error: any) {
-      console.error('Failed to load workspaces:', error);
-    }
+  loadWorkSpaces(): void {
+    this.workspaceService.getWorkspaces().subscribe({
+      next: (response) => {
+        // Normaliza cada workspace para que su organization tenga los campos esperados
+        const normalizedWorkspaces = (response.results || []).map((ws: any) => ({
+          ...ws,
+          organization: {
+            id: ws.organization?.id || '',
+            name: ws.organization?.name || '',
+            slug: ws.organization?.slug || '',
+            logo_url: ws.organization?.logo_url || '',
+            organization_type: ws.organization?.organization_type || '',
+            subscription_plan: ws.organization?.subscription_plan || '',
+            is_active: ws.organization?.is_active ?? true
+          }
+        }));
+        this.workspaces.set(normalizedWorkspaces);
+      },
+      error: () => {
+        this.workspaces.set([]);
+      }
+    });
   }
 
   async loadProject(): Promise<void> {
     this.loading.set(true);
-    this.loadError.set(null);
-
     try {
       const project = await this.projectService.getProject(this.projectId).toPromise();
       if (project) {
-        this.populateForm(project);
-        this.currentCoverUrl.set(project.cover_image_url || null);
+        let workspaceId = typeof project.workspace === 'string' ? project.workspace : project.workspace?.id;
+        let workspaceObj = this.workspaces().find(ws => ws.id === workspaceId);
+        this.projectForm.patchValue({
+          name: project.name,
+          slug: project.slug,
+          workspace: workspaceObj ? workspaceObj.id : '',
+          description: project.description,
+          status: project.status,
+          priority: project.priority,
+          start_date: project.start_date ? project.start_date.split('T')[0] : '',
+          due_date: project.due_date ? project.due_date.split('T')[0] : '',
+          budget: project.budget,
+          estimated_hours: project.estimated_hours,
+          is_active: project.is_active
+        });
       }
-    } catch (error: any) {
-      this.loadError.set(error.error?.message || 'Failed to load project');
+    } catch (error) {
+      this.loadError.set('Failed to load project');
+      console.error('Error loading project:', error);
     } finally {
       this.loading.set(false);
     }
@@ -128,7 +149,7 @@ export class ProjectEditComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       this.selectedFile = file;
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -175,7 +196,7 @@ export class ProjectEditComponent implements OnInit {
         this.currentCoverUrl.set(project.cover_image_url || null);
         this.selectedFile = null;
         this.previewUrl = null;
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => this.successMessage.set(null), 3000);
       }
