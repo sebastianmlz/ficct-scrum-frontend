@@ -277,23 +277,17 @@ export class AuthStore {
     }
   }
 
-  async updateProfile(profileData: any): Promise<User | null> {
+  async updateProfile(userId: number, profileData: any): Promise<User | null> {
     if (!this.state().isAuthenticated) return null;
-    
     this.updateState({ loading: true, error: null });
-    
     try {
-      const updatedUser: User = await firstValueFrom(this.authService.updateProfile(profileData));
-      
-      // Update user in localStorage
+      const updatedUser: User = await firstValueFrom(this.authService.updateProfile(userId, profileData));
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      
       this.updateState({
         user: updatedUser,
         loading: false,
         error: null
       });
-      
       return updatedUser;
     } catch (error: any) {
       console.error('AuthStore updateProfile failed:', error);

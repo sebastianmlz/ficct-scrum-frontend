@@ -10,7 +10,11 @@ import {
   PatchedOrganizationMemberRequest,
   PaginatedOrganizationList,
   PaginatedOrganizationMemberList,
-  PaginationParams
+  PaginationParams,
+  OrganizationInvitation,
+  OrganizationInvitationRequest,
+  OrganizationInvitationResponse,
+  PaginatedOrganizationInvitationList
 } from '../models/interfaces';
 import { environment } from '../../../environments/environment';
 
@@ -190,8 +194,10 @@ export class OrganizationService {
     );
   }
 
-  addOrganizationMember(organizationId: string, memberData: OrganizationMemberRequest): Observable<OrganizationMember> {
-    return this.http.post<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/`, memberData).pipe(
+  addOrganizationMember(_organizationId: string, memberData: any): Observable<OrganizationMember> {
+    // El backend espera POST a /api/v1/orgs/members/ con email, role, status, is_active
+    const url = `${this.baseUrl}/members/`;
+    return this.http.post<OrganizationMember>(url, memberData).pipe(
       catchError(this.handleError)
     );
   }
@@ -204,6 +210,91 @@ export class OrganizationService {
 
   removeOrganizationMember(organizationId: string, memberId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Actualiza el rol de un miembro usando el endpoint PATCH /api/v1/orgs/members/{id}/update-role/
+   */
+  updateOrganizationMemberRoleById(memberId: string, roleData: { role: string }): Observable<OrganizationMember> {
+    const url = `${this.baseUrl}/members/${memberId}/update-role/`;
+    return this.http.patch<OrganizationMember>(url, roleData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // --- Organization Invitations ---
+  sendInvitation(organizationId: string, invitationData: OrganizationInvitationRequest): Observable<OrganizationInvitationResponse> {
+    // POST /api/v1/orgs/invitations/
+    const url = `${this.baseUrl}/invitations/`;
+    const body = {
+      organization: organizationId,
+      email: invitationData.email,
+      role: invitationData.role
+    };
+    console.log('📤 Enviando invitación:', body);
+    return this.http.post<OrganizationInvitationResponse>(url, body).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getInvitations(organizationId: string, params?: PaginationParams): Observable<PaginatedOrganizationInvitationList> {
+    // GET /api/v1/orgs/invitations/?organization={id}
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set('organization', organizationId);
+    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.ordering) httpParams = httpParams.set('ordering', params.ordering);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    const url = `${this.baseUrl}/invitations/`;
+    console.log('🔍 getInvitations URL:', url);
+    console.log('🔍 getInvitations params:', httpParams.toString());
+    return this.http.get<PaginatedOrganizationInvitationList>(url, { params: httpParams }).pipe(
+      retry(1),
+      catchError(this.handleError)
+    );
+  }
+
+  cancelInvitation(organizationId: string, invitationId: string): Observable<void> {
+    // DELETE /api/v1/orgs/invitations/{invitation_id}/
+    const url = `${this.baseUrl}/invitations/${invitationId}/`;
+    console.log('🗑️ Cancelando invitación:', url);
+    return this.http.delete<void>(url).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  resendInvitation(organizationId: string, invitationId: string): Observable<OrganizationInvitationResponse> {
+    // POST /api/v1/orgs/invitations/{invitation_id}/resend/
+    const url = `${this.baseUrl}/invitations/${invitationId}/resend/`;
+    console.log('📧 Reenviando invitación:', url);
+    return this.http.post<OrganizationInvitationResponse>(url, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // --- Invitaciones por token (aceptar/rechazar) ---
+  getInvitationByToken(token: string): Observable<OrganizationInvitation> {
+    // GET /api/v1/orgs/invitations/:token/
+    const url = `${this.baseUrl}/invitations/${token}/`;
+    return this.http.get<OrganizationInvitation>(url).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  acceptInvitation(token: string): Observable<any> {
+    // POST /api/v1/orgs/invitations/:token/accept/
+    const url = `${this.baseUrl}/invitations/${token}/accept/`;
+    return this.http.post(url, {}).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  rejectInvitation(token: string): Observable<any> {
+    // POST /api/v1/orgs/invitations/:token/reject/
+    const url = `${this.baseUrl}/invitations/${token}/reject/`;
+    return this.http.post(url, {}).pipe(
       catchError(this.handleError)
     );
   }

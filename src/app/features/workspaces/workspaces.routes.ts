@@ -9,16 +9,12 @@ export const workspacesRoutes: Routes = [
     path: 'create',
     loadComponent: () => import('./workspaces-create/workspaces-create.component').then(m => m.WorkspacesCreateComponent)
   },
-  // {
-  //   path: ':id',
-  //   loadComponent: () => import('./workspace-detail/workspace-detail.component').then(m => m.WorkspaceDetailComponent)
-  // },
-  // {
-  //   path: ':id/edit',
-  //   loadComponent: () => import('./workspace-edit/workspace-edit.component').then(m => m.WorkspaceEditComponent)
-  // },
-  // {
-  //   path: ':id/members',
-  //   loadComponent: () => import('./workspace-members/workspace-members.component').then(m => m.WorkspaceMembersComponent)
-  // }
+  {
+    path: ':id',
+    loadComponent: () => import('./workspaces-detail/workspaces-detail.component').then(m => m.WorkspacesDetailComponent)
+  },
+  {
+    path: ':id/members',
+    loadComponent: () => import('./workspaces-members/workspaces-members.component').then(m => m.WorkspacesMembersComponent)
+  }
 ];

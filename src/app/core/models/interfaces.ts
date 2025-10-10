@@ -401,6 +401,35 @@ export interface PaginatedWorkspaceMemberList extends PaginatedResponse<Workspac
 export interface PaginatedSystemLogList extends PaginatedResponse<SystemLog> {}
 export interface PaginatedErrorLogList extends PaginatedResponse<ErrorLog> {}
 
+// --- Organization Invitation System ---
+export interface OrganizationInvitation {
+  id: string;
+  organization: OrganizationBasic;
+  email: string;
+  role: OrganizationMemberRoleEnum;
+  status: 'pending' | 'accepted' | 'expired' | 'cancelled';
+  token: string;
+  invited_by: UserBasic;
+  invited_at: string;
+  accepted_at?: string;
+  expires_at: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizationInvitationRequest {
+  email: string;
+  role: OrganizationMemberRoleEnum;
+}
+
+export interface OrganizationInvitationResponse {
+  message: string;
+  invitation: OrganizationInvitation;
+}
+
+export interface PaginatedOrganizationInvitationList extends PaginatedResponse<OrganizationInvitation> {}
+
 // Query Parameters
 // Alias for legacy ApiQueryParams used in some services
 export type ApiQueryParams = PaginationParams;

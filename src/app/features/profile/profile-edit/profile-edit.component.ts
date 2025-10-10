@@ -72,20 +72,17 @@ export class ProfileEditComponent implements OnInit {
 
     try {
       const formData = this.profileForm.value;
-      
-      // Call the AuthStore updateProfile method
-      const updatedUser = await this.authStore.updateProfile(formData);
-      
+      const user = this.authStore.user();
+      if (!user || !user.id) throw new Error('No user ID found');
+      // Call the AuthStore updateProfile method with user id
+      const updatedUser = await this.authStore.updateProfile(user.id, formData);
       if (updatedUser) {
         this.success.set('Profile updated successfully!');
-        
-        // Clear success message after 2 seconds and navigate
         setTimeout(() => {
           this.success.set(null);
           this.router.navigate(['/profile']);
         }, 2000);
       }
-      
     } catch (error: any) {
       console.error('Profile update error:', error);
       this.error.set(error.error?.message || error.message || 'Failed to update profile');

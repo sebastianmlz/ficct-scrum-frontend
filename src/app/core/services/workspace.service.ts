@@ -59,6 +59,55 @@ export interface WorkspaceListResponse {
   results: Workspace[];
 }
 
+export interface UserProfile {
+  avatar_url?: string;
+  bio?: string;
+  phone_number?: string;
+  timezone: string;
+  language: string;
+  github_username?: string;
+  linkedin_url?: string;
+  website_url?: string;
+  is_online: boolean;
+  last_activity: string;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  is_active: boolean;
+  is_verified: boolean;
+  is_staff: boolean;
+  is_superuser: boolean;
+  date_joined: string;
+  last_login: string;
+  created_at: string;
+  updated_at: string;
+  profile: UserProfile;
+}
+
+export interface WorkspaceMember {
+  id: string;
+  workspace: string;
+  user: User;
+  role: string;
+  permissions?: any;
+  is_active: boolean;
+  joined_at: string;
+  updated_at: string;
+}
+
+export interface WorkspaceMembersResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: WorkspaceMember[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -113,5 +162,38 @@ export class WorkspaceService {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.delete<void>(`${this.apiUrl}/${id}/`, { headers });
+  }
+
+  getWorkspaceMembers(workspaceId: string, page?: number, search?: string, ordering?: string): Observable<WorkspaceMembersResponse> {
+    let params = '';
+    const queryParams = [`workspace=${workspaceId}`];
+    
+    if (page) queryParams.push(`page=${page}`);
+    if (search) queryParams.push(`search=${search}`);
+    if (ordering) queryParams.push(`ordering=${ordering}`);
+    
+    params = '?' + queryParams.join('&');
+    
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<WorkspaceMembersResponse>(`${this.apiUrl}/members/${params}`, { headers });
+  }
+
+  getWorkspaceMember(memberId: string): Observable<WorkspaceMember> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<WorkspaceMember>(`${this.apiUrl}/members/${memberId}/`, { headers });
+  }
+
+  updateWorkspaceMember(memberId: string, data: Partial<WorkspaceMember>): Observable<WorkspaceMember> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.put<WorkspaceMember>(`${this.apiUrl}/members/${memberId}/`, data, { headers });
+  }
+
+  deleteWorkspaceMember(memberId: string): Observable<void> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete<void>(`${this.apiUrl}/members/${memberId}/`, { headers });
   }
 }

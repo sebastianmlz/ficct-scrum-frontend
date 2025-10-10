@@ -1,3 +1,4 @@
+
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
 
@@ -26,8 +27,14 @@ export const routes: Routes = [
         path: 'forgot-password',
         loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
       },
+      // reset-password sin token (formulario manual)
       {
         path: 'reset-password',
+        loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
+      },
+      // reset-password con token en la URL (desde email)
+      {
+        path: 'reset-password/:token',
         loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
       },
       {
@@ -78,6 +85,13 @@ export const routes: Routes = [
     path: 'profile',
     canActivate: [authGuard],
     loadChildren: () => import('./features/profile/profile.routes').then(m => m.profileRoutes)
+  },
+
+  // Redirección global para enlaces externos de reset-password
+  {
+    path: 'reset-password/:token',
+    redirectTo: '/auth/reset-password/:token',
+    pathMatch: 'full'
   },
 
   // Wildcard route - must be last
