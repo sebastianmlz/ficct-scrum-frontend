@@ -1,4 +1,3 @@
-<app-header/>
 <div class="min-h-screen bg-gray-50">
     <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-4 sm:px-0">
@@ -31,8 +30,11 @@
                             <div>
                                 <label for="first_name" class="block text-sm font-medium text-gray-700">First
                                     Name</label>
-                                <input type="text" id="first_name" formControlName="first_name"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                    <input type="text" id="first_name" formControlName="first_name"
+                                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400" />
+                                    @if (profileForm.get('first_name')?.errors && profileForm.get('first_name')?.touched) {
+                                    <p class="mt-1 text-sm text-red-600">First name is required</p>
+                                    }
                                 @if (profileForm.get('first_name')?.errors && profileForm.get('first_name')?.touched) {
                                 <p class="mt-1 text-sm text-red-600">First name is required</p>
                                 }
@@ -40,8 +42,11 @@
 
                             <div>
                                 <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
-                                <input type="text" id="last_name" formControlName="last_name"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                    <input type="text" id="last_name" formControlName="last_name"
+                                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400" />
+                                    @if (profileForm.get('last_name')?.errors && profileForm.get('last_name')?.touched) {
+                                    <p class="mt-1 text-sm text-red-600">Last name is required</p>
+                                    }
                                 @if (profileForm.get('last_name')?.errors && profileForm.get('last_name')?.touched) {
                                 <p class="mt-1 text-sm text-red-600">Last name is required</p>
                                 }
@@ -50,8 +55,17 @@
 
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" id="email" formControlName="email"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                                <input type="email" id="email" formControlName="email"
+                                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400" />
+                                @if (profileForm.get('email')?.errors && profileForm.get('email')?.touched) {
+                                <p class="mt-1 text-sm text-red-600">
+                                    @if (profileForm.get('email')?.errors?.['required']) {
+                                    Email is required
+                                    } @else if (profileForm.get('email')?.errors?.['email']) {
+                                    Please enter a valid email address
+                                    }
+                                </p>
+                                }
                             @if (profileForm.get('email')?.errors && profileForm.get('email')?.touched) {
                             <p class="mt-1 text-sm text-red-600">
                                 @if (profileForm.get('email')?.errors?.['required']) {
@@ -66,8 +80,8 @@
                         <div>
                             <label for="bio" class="block text-sm font-medium text-gray-700">Bio</label>
                             <textarea id="bio" formControlName="bio" rows="4"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="Tell us about yourself..."></textarea>
+                              class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400"
+                              placeholder="Tell us about yourself..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -81,16 +95,16 @@
                         <div>
                             <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone
                                 Number</label>
-                            <input type="tel" id="phone_number" formControlName="phone_number"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="+1 (555) 123-4567" />
+                                <input type="tel" id="phone_number" formControlName="phone_number"
+                                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400"
+                                    placeholder="+1 (555) 123-4567" />
                         </div>
 
                         <div>
                             <label for="website_url" class="block text-sm font-medium text-gray-700">Website</label>
-                            <input type="url" id="website_url" formControlName="website_url"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="https://your-website.com" />
+                                <input type="url" id="website_url" formControlName="website_url"
+                                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400"
+                                    placeholder="https://your-website.com" />
                             @if (profileForm.get('website_url')?.errors && profileForm.get('website_url')?.touched) {
                             <p class="mt-1 text-sm text-red-600">Please enter a valid URL</p>
                             }
@@ -112,18 +126,18 @@
                                     class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                                     github.com/
                                 </span>
-                                <input type="text" id="github_username" formControlName="github_username"
-                                    class="flex-1 rounded-none rounded-r-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="username" />
+                                    <input type="text" id="github_username" formControlName="github_username"
+                                        class="flex-1 rounded-none rounded-r-lg border-0 bg-transparent focus:ring-0 focus:border-blue-600 placeholder-gray-400"
+                                        placeholder="username" />
                             </div>
                         </div>
 
                         <div>
                             <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn
                                 URL</label>
-                            <input type="url" id="linkedin_url" formControlName="linkedin_url"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="https://linkedin.com/in/username" />
+                                <input type="url" id="linkedin_url" formControlName="linkedin_url"
+                                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition placeholder-gray-400"
+                                    placeholder="https://linkedin.com/in/username" />
                             @if (profileForm.get('linkedin_url')?.errors && profileForm.get('linkedin_url')?.touched) {
                             <p class="mt-1 text-sm text-red-600">Please enter a valid LinkedIn URL</p>
                             }
@@ -132,16 +146,19 @@
                 </div>
 
                 <!-- Preferences -->
-                <div class="bg-white shadow rounded-lg">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-medium text-gray-900">Preferences</h3>
+                <div class="bg-white shadow rounded-xl border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <svg class="h-5 w-5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" /></svg>
+                            Preferences
+                        </h3>
                     </div>
-                    <div class="px-6 py-4 space-y-6">
+                    <div class="px-6 py-6 space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="timezone" class="block text-sm font-medium text-gray-700">Timezone</label>
-                                <select id="timezone" formControlName="timezone"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <select id="timezone" formControlName="timezone"
+                                            class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition">
                                     <option value="">Select timezone...</option>
                                     <option value="UTC">UTC</option>
                                     <option value="America/New_York">Eastern Time</option>
@@ -153,11 +170,10 @@
                                     <option value="Asia/Tokyo">JST</option>
                                 </select>
                             </div>
-
                             <div>
                                 <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
-                                <select id="language" formControlName="language"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <select id="language" formControlName="language"
+                                            class="mt-1 block w-full rounded-lg border border-gray-300 bg-gray-50 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition">
                                     <option value="">Select language...</option>
                                     <option value="en">English</option>
                                     <option value="es">Spanish</option>

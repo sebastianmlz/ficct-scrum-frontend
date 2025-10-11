@@ -24,6 +24,7 @@ export class ResetPasswordComponent {
 
   token: string | null = null;
   resetSuccess = false;
+  invalidToken = false;
 
   resetPasswordForm: FormGroup = this.fb.group({
     new_password: ['', [Validators.required, Validators.minLength(8)]],
@@ -31,9 +32,21 @@ export class ResetPasswordComponent {
   }, { validators: this.passwordMatchValidator });
 
   constructor() {
+    // Permitir token por query param o por param de ruta
     this.route.queryParams.subscribe(params => {
-      this.token = params['token'] || null;
+      if (params['token']) {
+        this.token = params['token'];
+      }
     });
+    this.route.params.subscribe(params => {
+      if (params['token']) {
+        this.token = params['token'];
+      }
+    });
+    // Log para depuración
+    setTimeout(() => {
+      console.log('[ResetPassword] Token recibido:', this.token);
+    }, 0);
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -52,18 +65,26 @@ export class ResetPasswordComponent {
       return;
     }
 
+    // Evitar duplicidad de token en el payload
+    const { new_password, new_password_confirm } = this.resetPasswordForm.value;
     const request: PasswordResetConfirmRequest = {
-      token: this.token,
-      new_password: this.resetPasswordForm.value.new_password,
-      new_password_confirm: this.resetPasswordForm.value.new_password_confirm
+      token: this.token!,
+      new_password,
+      new_password_confirm
     };
+
+    console.log('[ResetPassword] Payload enviado:', request);
 
     try {
       await this.authStore.confirmPasswordReset(request);
       this.resetSuccess = true;
-    } catch (error) {
-      // Error is handled by the store
-      console.error('Password reset failed:', error);
+    } catch (error: any) {
+      // Log completo del error
+      console.error('[ResetPassword] Password reset failed:', error);
+      // Detectar error de token inválido
+      if (error?.error?.token && Array.isArray(error.error.token) && error.error.token.includes('Invalid token')) {
+        this.invalidToken = true;
+      }
     }
   }
 }

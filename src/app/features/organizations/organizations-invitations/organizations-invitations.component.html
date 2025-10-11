@@ -1,0 +1,38 @@
+<div class="max-w-lg mx-auto mt-12 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
+	<h2 class="text-2xl font-bold text-primary mb-4">Invitación a organización</h2>
+	<p-progressSpinner *ngIf="loading" styleClass="mx-auto block" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+	<div *ngIf="error" class="text-red-500 mb-4">{{ error }}</div>
+
+	<ng-container *ngIf="!loading && invitation">
+		<div class="mb-4">
+			<div class="text-gray-700 mb-2">Te han invitado a unirte a la organización:</div>
+			<div class="font-bold text-lg text-primary">{{ invitation.organization.name }}</div>
+			<div class="text-gray-600 text-sm">Rol: <span class="capitalize">{{ invitation.role }}</span></div>
+			<div class="text-gray-600 text-sm">Invitado por: {{ invitation.invited_by?.full_name || '-' }}</div>
+			<div class="text-gray-600 text-sm">Enviada: {{ invitation.invited_at | date:'short' }}</div>
+			<div class="text-gray-600 text-sm">Expira: {{ invitation.expires_at | date:'short' }}</div>
+			<div class="mt-2">
+				<span [ngClass]="{
+					'bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold': invitation.status === 'pending',
+					'bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold': invitation.status === 'accepted',
+					'bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold': invitation.status === 'expired' || invitation.status === 'cancelled'
+				}">{{ invitation.status }}</span>
+			</div>
+		</div>
+
+		<div *ngIf="!accepted && !rejected && invitation.status === 'pending'" class="flex gap-4 mt-6">
+			<button (click)="acceptInvitation()" [disabled]="actionLoading" class="bg-primary text-white px-4 py-2 rounded-lg shadow hover:bg-primary/90 transition disabled:opacity-60">
+				{{ actionLoading ? 'Aceptando...' : 'Aceptar invitación' }}
+			</button>
+			<button (click)="rejectInvitation()" [disabled]="actionLoading" class="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition disabled:opacity-60">
+				{{ actionLoading ? 'Rechazando...' : 'Rechazar' }}
+			</button>
+		</div>
+
+		<div *ngIf="actionMessage" class="text-green-600 mt-4">{{ actionMessage }}</div>
+		<div *ngIf="actionError" class="text-red-500 mt-4">{{ actionError }}</div>
+		<div *ngIf="invitation.status !== 'pending' && !accepted && !rejected" class="text-gray-500 mt-4">
+			Esta invitación ya no está disponible.
+		</div>
+	</ng-container>
+</div>

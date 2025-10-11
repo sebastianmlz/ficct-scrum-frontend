@@ -1,0 +1,184 @@
+<div class="min-h-screen bg-gray-50">
+	<!-- Loading State -->
+	@if (loading()) {
+		<div class="flex justify-center items-center py-12">
+			<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+		</div>
+	}
+	<!-- Error State -->
+	@else if (error()) {
+		<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+			<div class="bg-red-50 border border-red-200 rounded-lg p-4">
+				<div class="flex">
+					<div class="ml-3">
+						<h3 class="text-sm font-medium text-red-800">Error</h3>
+						<p class="mt-1 text-sm text-red-700">{{ error() }}</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+	<!-- Workspace Detail -->
+	   @else if (workspace()) {
+		   <!-- Header with Cover Image -->
+		   <div class="relative">
+			   @if (workspace()!.cover_image_url) {
+				   <div class="h-64 bg-gradient-to-r from-blue-500 to-indigo-600 overflow-hidden">
+					   <img [src]="workspace()!.cover_image_url" [alt]="workspace()!.name" class="w-full h-full object-cover opacity-75">
+				   </div>
+			   } @else {
+				   <div class="h-64 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+			   }
+			   <div class="absolute top-4 left-4">
+				   <button (click)="goBack()"
+								   class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-white/30 shadow transition flex items-center gap-2">
+					   <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+						   <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+					   </svg>
+					   Volver a Workspaces
+				   </button>
+			   </div>
+		   </div>
+
+		   <!-- Main Content -->
+		   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
+			   <!-- Workspace Info Card -->
+			   <div class="bg-white shadow-xl rounded-xl border border-gray-200 mb-6">
+				   <div class="px-6 py-8">
+					   <div class="flex items-start justify-between">
+						   <div class="flex items-start gap-4">
+							   <div class="flex-shrink-0">
+								   @if (workspace()!.cover_image_url) {
+									   <img [src]="workspace()!.cover_image_url" [alt]="workspace()!.name" class="w-20 h-20 rounded-xl object-cover border border-gray-200">
+								   } @else {
+									   <div class="w-20 h-20 bg-blue-500 rounded-xl flex items-center justify-center text-white text-3xl font-bold">
+										   {{ workspace()!.name.charAt(0).toUpperCase() }}
+									   </div>
+								   }
+							   </div>
+							   <div>
+								   <h2 class="text-2xl font-bold text-gray-900">{{ workspace()!.name }}</h2>
+								   <div class="flex items-center gap-2 mt-1">
+									   <span class="text-sm text-gray-500">Slug:</span>
+									   <span class="text-sm font-mono text-gray-700 bg-gray-100 rounded px-2 py-0.5">{{ workspace()!.slug }}</span>
+								   </div>
+								   <div class="flex items-center gap-2 mt-1">
+									   <span class="text-sm text-gray-500">Tipo:</span>
+									   <span class="text-sm font-medium text-blue-700">{{ getTypeLabel(workspace()!.workspace_type) }}</span>
+									   <span class="ml-2 text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">{{ getVisibilityLabel(workspace()!.visibility) }}</span>
+									   @if (!workspace()!.is_active) {
+										   <span class="ml-2 text-xs px-2 py-0.5 rounded bg-red-100 text-red-600">Inactivo</span>
+									   }
+								   </div>
+							   </div>
+						   </div>
+						   <div class="flex gap-2">
+							   <button (click)="editWorkspace()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow transition">Editar</button>
+							   <button (click)="viewProjects()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow transition">Proyectos</button>
+							   <button (click)="viewMembers()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow transition">Miembros</button>
+						   </div>
+					   </div>
+				   </div>
+			   </div>
+
+			   <!-- Grid Layout -->
+			   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+				   <!-- Left Column: Main Info -->
+				   <div class="lg:col-span-2 space-y-6">
+					   <!-- Description -->
+					   <div class="bg-white shadow rounded-xl border border-gray-100">
+						   <div class="px-6 py-4 border-b border-gray-50">
+							   <h3 class="text-lg font-semibold text-gray-900">Descripción</h3>
+						   </div>
+						   <div class="px-6 py-4">
+							   <p class="text-gray-700 text-base">{{ workspace()!.description || 'Sin descripción.' }}</p>
+						   </div>
+					   </div>
+
+					   <!-- Organization Details -->
+					   <div class="bg-white shadow rounded-xl border border-gray-100">
+						   <div class="px-6 py-4 border-b border-gray-50">
+							   <h3 class="text-lg font-semibold text-gray-900">Organización</h3>
+						   </div>
+						   <div class="px-6 py-4">
+							   <div class="flex flex-col gap-1">
+								   <div><span class="font-medium text-gray-700">Nombre:</span> {{ workspace()!.organization.name }}</div>
+								   <div><span class="font-medium text-gray-700">Slug:</span> <span class="font-mono text-gray-600">{{ workspace()!.organization.slug }}</span></div>
+								   <div><span class="font-medium text-gray-700">Tipo:</span> {{ workspace()!.organization.organization_type }}</div>
+							   </div>
+						   </div>
+					   </div>
+
+					   <!-- Workspace Settings -->
+					   @if (workspace()!.workspace_settings && objectKeys(workspace()!.workspace_settings).length > 0) {
+						   <div class="bg-white shadow rounded-xl border border-gray-100">
+							   <div class="px-6 py-4 border-b border-gray-50">
+								   <h3 class="text-lg font-semibold text-gray-900">Configuración</h3>
+							   </div>
+							   <div class="px-6 py-4">
+								   <ul class="divide-y divide-gray-100">
+									   @for (key of objectKeys(workspace()!.workspace_settings); track key) {
+										   <li class="py-2 flex justify-between items-center">
+											   <span class="text-gray-700">{{ key }}</span>
+											   <span class="font-mono text-gray-600">{{ workspace()!.workspace_settings[key] }}</span>
+										   </li>
+									   }
+								   </ul>
+							   </div>
+						   </div>
+					   }
+				   </div>
+
+				   <!-- Right Column: Stats & Metadata -->
+				   <div class="space-y-6">
+					   <!-- Quick Stats -->
+					   <div class="bg-white shadow rounded-xl border border-gray-100">
+						   <div class="px-6 py-4 border-b border-gray-50">
+							   <h3 class="text-lg font-semibold text-gray-900">Estadísticas</h3>
+						   </div>
+						   <div class="px-6 py-4 space-y-4">
+							   <div class="flex items-center justify-between">
+								   <span class="text-gray-700">Miembros</span>
+								   <span class="font-bold text-blue-700">{{ workspace()!.member_count }}</span>
+							   </div>
+							   <div class="flex items-center justify-between">
+								   <span class="text-gray-700">Proyectos</span>
+								   <span class="font-bold text-blue-700">{{ workspace()!.project_count }}</span>
+							   </div>
+							   <div class="flex items-center justify-between">
+								   <span class="text-gray-700">Activo</span>
+								   <span class="font-bold" [ngClass]="workspace()!.is_active ? 'text-green-600' : 'text-red-600'">{{ workspace()!.is_active ? 'Sí' : 'No' }}</span>
+							   </div>
+						   </div>
+					   </div>
+
+					   <!-- Created By -->
+					   <div class="bg-white shadow rounded-xl border border-gray-100">
+						   <div class="px-6 py-4 border-b border-gray-50">
+							   <h3 class="text-lg font-semibold text-gray-900">Creado por</h3>
+						   </div>
+						   <div class="px-6 py-4">
+							   <div class="flex flex-col gap-1">
+								   <div><span class="font-medium text-gray-700">Nombre:</span> {{ workspace()!.created_by.full_name }}</div>
+								   <div><span class="font-medium text-gray-700">Usuario:</span> {{ workspace()!.created_by.username }}</div>
+								   <div><span class="font-medium text-gray-700">Email:</span> {{ workspace()!.created_by.email }}</div>
+							   </div>
+						   </div>
+					   </div>
+
+					   <!-- Timestamps -->
+					   <div class="bg-white shadow rounded-xl border border-gray-100">
+						   <div class="px-6 py-4 border-b border-gray-50">
+							   <h3 class="text-lg font-semibold text-gray-900">Tiempos</h3>
+						   </div>
+						   <div class="px-6 py-4">
+							   <div class="flex flex-col gap-1">
+								   <div><span class="font-medium text-gray-700">Creado:</span> {{ workspace()!.created_at | date:'medium' }}</div>
+								   <div><span class="font-medium text-gray-700">Actualizado:</span> {{ workspace()!.updated_at | date:'medium' }}</div>
+							   </div>
+						   </div>
+					   </div>
+				   </div>
+			   </div>
+		   </div>
+	   }
