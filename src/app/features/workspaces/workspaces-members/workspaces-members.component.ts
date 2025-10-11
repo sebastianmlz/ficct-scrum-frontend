@@ -5,16 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { WorkspaceService, WorkspaceMember, WorkspaceMembersResponse, Workspace } from '../../../core/services/workspace.service';
 import { OrganizationService } from '../../../core/services/organization.service';
 import { OrganizationMember } from '../../../core/models/interfaces';
-import { PaginatorModule } from 'primeng/paginator';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
-import { DialogModule  } from 'primeng/dialog';
-import { Select } from 'primeng/select';
-import { ConfirmDialog } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
-import { TooltipModule } from 'primeng/tooltip';
-import { Button } from 'primeng/button';
 
 @Component({
   selector: 'app-workspaces-members',
@@ -22,18 +12,8 @@ import { Button } from 'primeng/button';
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule,
-    PaginatorModule,
-    InputTextModule,
-    ButtonModule,
-    TagModule,
-    DialogModule,
-    Select,
-    ConfirmDialog,
-    TooltipModule,
-    Button
+    FormsModule
   ],
-  providers: [ConfirmationService],
   templateUrl: './workspaces-members.component.html',
   styleUrl: './workspaces-members.component.css'
 })
@@ -48,10 +28,15 @@ export class WorkspacesMembersComponent implements OnInit {
   addMemberError = signal('');
   addMemberSuccess = signal('');
   
+  // Estado para el modal de confirmación de eliminación
+  showDeleteConfirm = signal(false);
+  memberToDelete = signal<WorkspaceMember | null>(null);
+  
   // Buscar usuarios para agregar al workspace (filtrar miembros de la organización)
   searchUsers() {
     // Filtrar miembros que NO están en el workspace
     const currentMemberIds = this.members().map(m => m.user.id);
+    
     let availableMembers = this.organizationMembers().filter(
       orgMember => !currentMemberIds.includes(orgMember.user.id)
     );
@@ -120,24 +105,17 @@ export class WorkspacesMembersComponent implements OnInit {
   totalRecords = signal(0);
   currentPage = signal(1);
   rowsPerPage = 10;
+  Math = Math; // Exponer Math para usarlo en el template
 
   // Búsqueda y filtros
   searchTerm = '';
   selectedRole = '';
 
-  // Opciones de roles
-  roleOptions = [
-    { label: 'Administrador', value: 'admin' },
-    { label: 'Miembro', value: 'member' },
-    { label: 'Invitado', value: 'guest' }
-  ];
-
   constructor(
     private workspaceService: WorkspaceService,
     private organizationService: OrganizationService,
     private route: ActivatedRoute,
-    private router: Router,
-    private confirmationService: ConfirmationService
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -153,7 +131,6 @@ export class WorkspacesMembersComponent implements OnInit {
   loadWorkspaceInfo() {
     this.workspaceService.getWorkspace(this.workspaceId()).subscribe({
       next: (workspace: any) => {
-        console.log('📦 Workspace cargado:', workspace);
         this.workspaceName.set(workspace.name);
         // Buscar organizationId en organization o en organization_details
         let organizationId = '';
@@ -163,10 +140,7 @@ export class WorkspacesMembersComponent implements OnInit {
           organizationId = workspace.organization_details.id;
         }
         if (organizationId) {
-          console.log('🏢 Organization ID encontrado:', organizationId);
           this.loadOrganizationMembers(organizationId);
-        } else {
-          console.error('❌ No se encontró organization.id ni organization_details.id en el workspace:', workspace);
         }
       },
       error: (err) => {
@@ -176,19 +150,15 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   loadOrganizationMembers(organizationId: string) {
-    console.log('🔍 Cargando miembros de la organización:', organizationId);
     this.loadingOrgMembers.set(true);
     this.organizationService.getOrganizationMembers(organizationId).subscribe({
       next: (response: any) => {
-        console.log('✅ Respuesta de miembros de organización:', response);
         const membersArray = Array.isArray(response) ? response : Array.isArray(response.results) ? response.results : [];
-        console.log('👥 Miembros encontrados:', membersArray.length);
         this.organizationMembers.set(membersArray);
-        this.filteredOrgMembers.set(membersArray);
         this.loadingOrgMembers.set(false);
       },
       error: (err) => {
-        console.error('❌ Error loading organization members:', err);
+        console.error('Error loading organization members:', err);
         this.loadingOrgMembers.set(false);
       }
     });
@@ -224,6 +194,20 @@ export class WorkspacesMembersComponent implements OnInit {
     this.loadMembers();
   }
 
+  previousPage() {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+      this.loadMembers();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage() < Math.ceil(this.totalRecords() / this.rowsPerPage)) {
+      this.currentPage.set(this.currentPage() + 1);
+      this.loadMembers();
+    }
+  }
+
   onSearch() {
     this.currentPage.set(1);
     this.loadMembers();
@@ -254,8 +238,6 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   addMember() {
-    console.log('➕ Abriendo modal para agregar miembro');
-    console.log('👥 Miembros de organización disponibles:', this.organizationMembers().length);
     this.addMemberModalVisible = true;
     this.searchUserTerm = '';
     this.addMemberError.set('');
@@ -288,27 +270,35 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   removeMember(member: WorkspaceMember) {
-    this.confirmationService.confirm({
-      message: `¿Estás seguro de eliminar a ${member.user.full_name} del workspace?`,
-      header: 'Confirmar Eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sí, eliminar',
-      rejectLabel: 'Cancelar',
-      acceptButtonStyleClass: 'p-button-danger',
-      accept: () => {
-        this.workspaceService.deleteWorkspaceMember(this.workspaceId(), member.id).subscribe({
-          next: () => {
-            console.log('✅ Miembro eliminado');
-            // Remover el miembro de la lista local
-            const updatedMembers = this.members().filter(m => m.id !== member.id);
-            this.members.set(updatedMembers);
-            this.totalRecords.set(this.totalRecords() - 1);
-          },
-          error: (err) => {
-            console.error('Error removing member:', err);
-            this.error.set('Error al eliminar el miembro');
-          }
-        });
+    this.memberToDelete.set(member);
+    this.showDeleteConfirm.set(true);
+  }
+
+  cancelDelete() {
+    this.showDeleteConfirm.set(false);
+    this.memberToDelete.set(null);
+  }
+
+  confirmDelete() {
+    const member = this.memberToDelete();
+    if (!member) return;
+
+    // member.id es el UUID de la relación workspace-member
+    this.workspaceService.deleteWorkspaceMember(member.id).subscribe({
+      next: () => {
+        console.log('✅ Miembro eliminado');
+        // Remover el miembro de la lista local
+        const updatedMembers = this.members().filter(m => m.id !== member.id);
+        this.members.set(updatedMembers);
+        this.totalRecords.set(this.totalRecords() - 1);
+        this.showDeleteConfirm.set(false);
+        this.memberToDelete.set(null);
+      },
+      error: (err) => {
+        console.error('Error removing member:', err);
+        this.error.set('Error al eliminar el miembro');
+        this.showDeleteConfirm.set(false);
+        this.memberToDelete.set(null);
       }
     });
   }

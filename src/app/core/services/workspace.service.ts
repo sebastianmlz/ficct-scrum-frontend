@@ -193,10 +193,10 @@ export class WorkspaceService {
     return this.http.patch<WorkspaceMember>(`${this.apiUrl}/members/${memberId}/update-role/`, data, { headers });
   }
 
-  deleteWorkspaceMember(workspaceId: string, memberId: string): Observable<void> {
+  deleteWorkspaceMember(memberRelationId: string): Observable<void> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete<void>(`${this.apiUrl}/${workspaceId}/members/${memberId}/`, { headers });
+    return this.http.delete<void>(`${this.apiUrl}/members/${memberRelationId}/`, { headers });
   }
 
   // Method to add a member to a workspace
