@@ -1,4 +1,7 @@
 <div class="min-h-screen bg-gray-50">
+  <!-- Confirmation Dialog -->
+  <p-confirmDialog></p-confirmDialog>
+  
   <!-- Header -->
   <header class="bg-white shadow">
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -18,7 +21,7 @@
         </div>
         <div class="flex space-x-3">
           <button pButton type="button" label="Agregar Miembro" icon="pi pi-user-plus" class="p-button-primary"
-            (click)="addMemberModalVisible = true"></button>
+            (click)="addMember()"></button>
         </div>
       </div>
     </div>
@@ -80,43 +83,81 @@
           <input pInputText type="text" [(ngModel)]="searchUserTerm"
             placeholder="Buscar por nombre, email o username..."
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-            (keyup.enter)="searchUsers()" />
-          <button pButton type="button" label="Buscar" icon="pi pi-search"
-            class="p-button-outlined p-button-primary w-full mt-1" (click)="searchUsers()"></button>
+            (keyup)="searchUsers()" />
         </div>
 
-        <!-- Resultados -->
-        <div *ngIf="searchResults.length > 0" class="pt-2">
-          <ul class="grid gap-4">
-            <li *ngFor="let user of searchResults" class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 shadow-sm hover:bg-gray-100 transition">
-              <div class="flex items-center gap-3">
-                <img *ngIf="user.avatar_url" [src]="user.avatar_url"
-                  class="w-10 h-10 rounded-full border border-gray-200" />
-                <div>
-                  <span class="block font-medium text-gray-900">{{ user.full_name }}</span>
-                  <span class="text-xs text-gray-500">{{ user.email }}</span>
-                </div>
-              </div>
+        <!-- Loading state -->
+        @if (loadingOrgMembers()) {
+          <div class="flex justify-center items-center py-8">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          </div>
+        }
 
-              <div class="flex items-center gap-2">
-                <select [(ngModel)]="user.selectedRole"
-                  class="rounded-lg border-gray-300 px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-indigo-400 shadow">
-                  <option value="member">Miembro</option>
-                  <option value="admin">Administrador</option>
-                  <option value="guest">Invitado</option>
-                  <option value="viewer">Visualizador</option>
-                </select>
-                <button pButton type="button" icon="pi pi-plus" label="Agregar" class="p-button-success p-button-sm"
-                  (click)="addUserToWorkspace(user)"></button>
-              </div>
-            </li>
-          </ul>
-        </div>
+        <!-- Success/Error messages -->
+        @if (addMemberSuccess()) {
+          <div class="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">
+            {{ addMemberSuccess() }}
+          </div>
+        }
+        @if (addMemberError()) {
+          <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+            {{ addMemberError() }}
+          </div>
+        }
+
+        <!-- Miembros de la organización -->
+        @if (!loadingOrgMembers() && filteredOrgMembers().length > 0) {
+          <div class="pt-2 max-h-96 overflow-y-auto">
+            <ul class="grid gap-3">
+              @for (orgMember of filteredOrgMembers(); track orgMember.id) {
+                <li class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 shadow-sm hover:bg-gray-100 transition">
+                  <div class="flex items-center gap-3 flex-1">
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      {{ orgMember.user.full_name.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <span class="block font-medium text-gray-900 truncate">{{ orgMember.user.full_name }}</span>
+                      <span class="text-xs text-gray-500 truncate block">{{ orgMember.user.email }}</span>
+                      <span class="text-xs text-blue-600">{{ getRoleLabel(orgMember.role) }} en la organización</span>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2 ml-3">
+                    @if (isAlreadyMember(orgMember.user.id)) {
+                      <p-tag value="Ya es miembro" severity="info" [rounded]="true"></p-tag>
+                    } @else {
+                      <select #roleSelect
+                        class="rounded-lg border-gray-300 px-2 py-1.5 text-sm bg-white focus:ring-2 focus:ring-indigo-400 shadow-sm min-w-[130px]">
+                        <option value="member">Miembro</option>
+                        <option value="admin">Administrador</option>
+                        <option value="guest">Invitado</option>
+                      </select>
+                      <button pButton type="button" label="Agregar" icon="pi pi-plus" 
+                        class="p-button-success p-button-sm"
+                        [disabled]="addingMember()"
+                        (click)="addUserToWorkspace(orgMember, roleSelect.value)">
+                      </button>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        }
 
         <!-- Sin resultados -->
-        <div *ngIf="searchResults.length === 0 && searchUserTerm" class="text-center text-gray-500 py-4">
-          No se encontraron usuarios.
-        </div>
+        @if (!loadingOrgMembers() && filteredOrgMembers().length === 0) {
+          <div class="text-center text-gray-500 py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            @if (searchUserTerm) {
+              <p>No se encontraron miembros que coincidan con la búsqueda.</p>
+            } @else {
+              <p>No hay miembros en la organización disponibles para agregar.</p>
+            }
+          </div>
+        }
       </div>
     </p-dialog>
     @if (members().length === 0) {
@@ -192,18 +233,38 @@
 
             <!-- Role & Actions -->
             <div class="flex items-center gap-3 ml-4">
-              <p-tag [value]="getRoleLabel(member.role)" [severity]="getRoleSeverity(member.role)"></p-tag>
-
-              @if (!member.is_active) {
-              <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-600">Inactivo</span>
+              <!-- Role Tag o Select - Solo editable si no es owner -->
+              @if (member.role !== 'owner') {
+                <p-select 
+                  [options]="roleOptions" 
+                  [(ngModel)]="member.role"
+                  (onChange)="onRoleChange(member, member.role)"
+                  optionLabel="label" 
+                  optionValue="value"
+                  placeholder="Seleccionar rol"
+                  styleClass="w-40">
+                </p-select>
+              } @else {
+                <p-tag [value]="getRoleLabel(member.role)" [severity]="getRoleSeverity(member.role)"
+                  [rounded]="true"></p-tag>
               }
 
-              <div class="flex gap-2">
-                <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm"
-                  (click)="editMember(member)" title="Editar miembro"></button>
-                <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger"
-                  (click)="removeMember(member)" title="Eliminar miembro"></button>
-              </div>
+              @if (!member.is_active) {
+                <p-tag value="Inactivo" severity="danger" [rounded]="true"></p-tag>
+              }
+
+              <!-- Delete Button - No permitir eliminar al owner -->
+              @if (member.role !== 'owner') {
+                <p-button 
+                  icon="pi pi-trash" 
+                  [text]="true"
+                  [rounded]="true"
+                  severity="danger"
+                  (onClick)="removeMember(member)"
+                  pTooltip="Eliminar miembro"
+                  tooltipPosition="top">
+                </p-button>
+              }
             </div>
           </div>
         </li>

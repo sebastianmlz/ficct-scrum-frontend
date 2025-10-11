@@ -185,15 +185,26 @@ export class WorkspaceService {
     return this.http.get<WorkspaceMember>(`${this.apiUrl}/members/${memberId}/`, { headers });
   }
 
-  updateWorkspaceMember(memberId: string, data: Partial<WorkspaceMember>): Observable<WorkspaceMember> {
+  updateWorkspaceMember(memberId: string, data: { role: string }): Observable<WorkspaceMember> {
     const token = localStorage.getItem('access');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.put<WorkspaceMember>(`${this.apiUrl}/members/${memberId}/`, data, { headers });
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.patch<WorkspaceMember>(`${this.apiUrl}/members/${memberId}/update-role/`, data, { headers });
   }
 
-  deleteWorkspaceMember(memberId: string): Observable<void> {
+  deleteWorkspaceMember(workspaceId: string, memberId: string): Observable<void> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete<void>(`${this.apiUrl}/members/${memberId}/`, { headers });
+    return this.http.delete<void>(`${this.apiUrl}/${workspaceId}/members/${memberId}/`, { headers });
+  }
+
+  // Method to add a member to a workspace
+  addWorkspaceMember(data: { workspace: string, user_id: number, role: string, permissions?: any, is_active?: boolean }): Observable<WorkspaceMember> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders()
+      .set('Authorization', `Bearer ${token}`)
+      .set('Content-Type', 'application/json');
+    return this.http.post<WorkspaceMember>(`${this.apiUrl}/members/`, data, { headers });
   }
 }

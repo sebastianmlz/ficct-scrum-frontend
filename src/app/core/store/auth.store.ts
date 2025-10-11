@@ -46,6 +46,8 @@ export class AuthStore {
   user = computed(() => this.state().user);
   loading = computed(() => this.state().loading);
   error = computed(() => this.state().error);
+  isSuperUser = computed(() => this.state().user?.is_superuser === true);
+  isStaff = computed(() => this.state().user?.is_staff === true);
 
   private updateState(updates: Partial<AuthState>): void {
     this.state.update(current => ({ ...current, ...updates }));

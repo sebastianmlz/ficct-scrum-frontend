@@ -50,7 +50,10 @@ export class AuthService {
     return localStorage.getItem('user_role') === 'admin';
   }
 
-
+  isSuperUser(): boolean {
+    const user = this.getUser();
+    return user?.is_superuser === true;
+  }
 
   getToken(): string | null {
     return localStorage.getItem('access');

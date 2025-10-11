@@ -34,6 +34,8 @@ export interface User {
   is_active: boolean;
   avatar_url?: string;
   is_staff?: boolean;
+  is_superuser?: boolean;
+  is_verified?: boolean;
   profile?: UserProfileNested;
 }
 
@@ -352,18 +354,20 @@ export interface ProjectConfigRequest {
 // Logging-related Interfaces
 export interface SystemLog {
   id: string;
-  user?: UserBasic;
-  action_type: ActionTypeEnum;
-  object_type: string;
-  object_id?: string;
+  level: LevelEnum;
+  action: string;
+  action_type: string;
+  message: string;
+  user?: User;
   ip_address: string;
   user_agent: string;
-  level: LevelEnum;
-  message?: string;
-  details?: string;
-  status?: string;
-  additional_data?: object;
-  timestamp: string;
+  request_method: string;
+  request_path: string;
+  request_data: object;
+  response_status: number | null;
+  execution_time: number | null;
+  metadata: object;
+  stack_trace: string;
   created_at: string;
 }
 

@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SystemLog, PaginatedSystemLogList, SystemLogQueryParams } from '../../../core/models/interfaces';
 import { ActionTypeEnum, LevelEnum } from '../../../core/models/enums';
+import { LoggingService } from '../../../core/services/logging.service';
 
 @Component({
   selector: 'app-system-logs',
@@ -118,7 +119,7 @@ import { ActionTypeEnum, LevelEnum } from '../../../core/models/enums';
                       @for (log of logsList()!.results; track log.id) {
                         <tr class="hover:bg-gray-50">
                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {{ log.timestamp | date:'medium' }}
+                            {{ log.created_at | date:'medium' }}
                           </td>
                           <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ log.user?.full_name || 'System' }}
@@ -137,7 +138,7 @@ import { ActionTypeEnum, LevelEnum } from '../../../core/models/enums';
                             {{ log.ip_address }}
                           </td>
                           <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                            {{ log.details }}
+                            {{ log.message }}
                           </td>
                         </tr>
                       }
@@ -211,6 +212,7 @@ import { ActionTypeEnum, LevelEnum } from '../../../core/models/enums';
 })
 export class SystemLogsComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private loggingService = inject(LoggingService);
 
   logsList = signal<PaginatedSystemLogList | null>(null);
   loading = signal(true);
@@ -230,39 +232,30 @@ export class SystemLogsComponent implements OnInit {
     this.loadLogs();
   }
 
-  async loadLogs(): Promise<void> {
+  loadLogs(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    try {
-      // Simulate API call - replace with actual service
-      const mockData: PaginatedSystemLogList = {
-        count: 45,
-        next: this.currentPage() < 3 ? 'next-url' : null,
-        previous: this.currentPage() > 1 ? 'prev-url' : null,
-        results: [
-          {
-            id: '1',
-            timestamp: new Date().toISOString(),
-            user: { id: 1, username: 'admin', email: 'admin@test.com', first_name: 'Admin', last_name: 'User', full_name: 'Admin User' },
-            action_type: ActionTypeEnum.LOGIN,
-            object_type: 'User',
-            object_id: '1',
-            ip_address: '192.168.1.100',
-            user_agent: 'Mozilla/5.0...',
-            level: LevelEnum.INFO,
-            details: 'User successfully logged in',
-            created_at: new Date().toISOString()
-          }
-        ]
-      };
-      
-      this.logsList.set(mockData);
-    } catch (error: any) {
-      this.error.set(error.error?.message || 'Failed to load system logs');
-    } finally {
-      this.loading.set(false);
-    }
+    const formValues = this.searchForm.value;
+    const params: SystemLogQueryParams = {
+      page: this.currentPage(),
+      ...(formValues.search && { search: formValues.search }),
+      ...(formValues.action_type && { action_type: formValues.action_type }),
+      ...(formValues.level && { level: formValues.level }),
+      ...(formValues.ip_address && { ip_address: formValues.ip_address })
+    };
+
+    this.loggingService.getSystemLogs(params).subscribe({
+      next: (data) => {
+        this.logsList.set(data);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading system logs:', error);
+        this.error.set(error.error?.message || 'Failed to load system logs');
+        this.loading.set(false);
+      }
+    });
   }
 
   searchLogs(): void {
@@ -284,32 +277,45 @@ export class SystemLogsComponent implements OnInit {
     }
   }
 
-  getActionBadgeClass(actionType: ActionTypeEnum): string {
-    switch (actionType) {
-      case ActionTypeEnum.CREATE:
+  getActionBadgeClass(actionType: string): string {
+    switch (actionType.toLowerCase()) {
+      case 'create':
+      case 'created':
         return 'bg-green-100 text-green-800';
-      case ActionTypeEnum.UPDATE:
+      case 'update':
+      case 'updated':
         return 'bg-blue-100 text-blue-800';
-      case ActionTypeEnum.DELETE:
+      case 'delete':
+      case 'deleted':
         return 'bg-red-100 text-red-800';
-      case ActionTypeEnum.LOGIN:
+      case 'login':
+      case 'user_login':
         return 'bg-purple-100 text-purple-800';
-      case ActionTypeEnum.LOGOUT:
+      case 'logout':
+      case 'user_logout':
         return 'bg-gray-100 text-gray-800';
+      case 'system_event':
+        return 'bg-purple-100 text-purple-800';
+      case 'user_action':
+        return 'bg-blue-100 text-blue-800';
+      case 'api_request':
+        return 'bg-green-100 text-green-800';
+      case 'error':
+        return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   }
 
-  getLevelBadgeClass(level: LevelEnum): string {
-    switch (level) {
-      case LevelEnum.INFO:
+  getLevelBadgeClass(level: string): string {
+    switch (level.toUpperCase()) {
+      case 'INFO':
         return 'bg-blue-100 text-blue-800';
-      case LevelEnum.WARNING:
+      case 'WARNING':
         return 'bg-yellow-100 text-yellow-800';
-      case LevelEnum.ERROR:
+      case 'ERROR':
         return 'bg-red-100 text-red-800';
-      case LevelEnum.CRITICAL:
+      case 'CRITICAL':
         return 'bg-red-200 text-red-900';
       default:
         return 'bg-gray-100 text-gray-800';

@@ -7,20 +7,14 @@ export const adminRoutes: Routes = [
   },
   {
     path: 'logs',
-    children: [
-      {
-        path: 'system',
-        loadComponent: () => import('./system-logs/system-logs.component').then(m => m.SystemLogsComponent)
-      },
-      {
-        path: 'errors',
-        loadComponent: () => import('./error-logs/error-logs.component').then(m => m.ErrorLogsComponent)
-      },
-      {
-        path: '',
-        redirectTo: 'system',
-        pathMatch: 'full'
-      }
-    ]
+    loadComponent: () => import('./logs/logs.component').then(m => m.LogsComponent)
+  },
+  {
+    path: 'logs/system',
+    loadComponent: () => import('./logs/logs.component').then(m => m.LogsComponent)
+  },
+  {
+    path: 'logs/errors',
+    loadComponent: () => import('./error-logs/error-logs.component').then(m => m.ErrorLogsComponent)
   }
 ];

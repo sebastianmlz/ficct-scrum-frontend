@@ -69,7 +69,12 @@ export class LoginComponent {
         // Sync AuthStore state with the login response
         this.authStore.syncLoginState(response.user, response.access, response.refresh);
         
-        this.router.navigate(['/dashboard']);
+        // Redirect based on user role
+        if (response.user.is_superuser) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (err) => {
         console.log("email:", this.email);

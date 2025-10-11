@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ErrorLog, PaginatedErrorLogList, ErrorLogQueryParams } from '../../../core/models/interfaces';
 import { SeverityEnum, ErrorLogStatusEnum } from '../../../core/models/enums';
+import { LoggingService } from '../../../core/services/logging.service';
 
 @Component({
   selector: 'app-error-logs',
@@ -227,6 +228,7 @@ import { SeverityEnum, ErrorLogStatusEnum } from '../../../core/models/enums';
 })
 export class ErrorLogsComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private loggingService = inject(LoggingService);
 
   logsList = signal<PaginatedErrorLogList | null>(null);
   loading = signal(true);
@@ -245,40 +247,29 @@ export class ErrorLogsComponent implements OnInit {
     this.loadLogs();
   }
 
-  async loadLogs(): Promise<void> {
+  loadLogs(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    try {
-      // Simulate API call - replace with actual service
-      const mockData: PaginatedErrorLogList = {
-        count: 23,
-        next: this.currentPage() < 2 ? 'next-url' : null,
-        previous: this.currentPage() > 1 ? 'prev-url' : null,
-        results: [
-          {
-            id: '1',
-            timestamp: new Date().toISOString(),
-            error_type: 'ValidationError',
-            message: 'Invalid email format provided',
-            stack_trace: 'Traceback (most recent call last)...',
-            url: '/api/v1/auth/register/',
-            method: 'POST',
-            request_data: { email: 'invalid-email', username: 'testuser' },
-            severity: SeverityEnum.MEDIUM,
-            status: ErrorLogStatusEnum.NEW,
-            resolved_at: undefined,
-            resolved_by: undefined
-          }
-        ]
-      };
-      
-      this.logsList.set(mockData);
-    } catch (error: any) {
-      this.error.set(error.error?.message || 'Failed to load error logs');
-    } finally {
-      this.loading.set(false);
-    }
+    const formValues = this.searchForm.value;
+    const params: ErrorLogQueryParams = {
+      page: this.currentPage(),
+      ...(formValues.search && { search: formValues.search }),
+      ...(formValues.severity && { severity: formValues.severity }),
+      ...(formValues.status && { status: formValues.status })
+    };
+
+    this.loggingService.getErrorLogs(params).subscribe({
+      next: (data) => {
+        this.logsList.set(data);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading error logs:', error);
+        this.error.set(error.error?.message || 'Failed to load error logs');
+        this.loading.set(false);
+      }
+    });
   }
 
   searchLogs(): void {
@@ -305,14 +296,16 @@ export class ErrorLogsComponent implements OnInit {
     console.log('View error details:', log);
   }
 
-  async markResolved(logId: string): Promise<void> {
-    try {
-      // Implement API call to mark error as resolved
-      console.log('Mark resolved:', logId);
-      this.loadLogs(); // Refresh data
-    } catch (error: any) {
-      this.error.set(error.error?.message || 'Failed to update error status');
-    }
+  markResolved(logId: string): void {
+    this.loggingService.updateErrorLogStatus(logId, ErrorLogStatusEnum.RESOLVED).subscribe({
+      next: () => {
+        this.loadLogs(); // Refresh data
+      },
+      error: (error) => {
+        console.error('Error updating error status:', error);
+        this.error.set(error.error?.message || 'Failed to update error status');
+      }
+    });
   }
 
   getSeverityBadgeClass(severity: SeverityEnum): string {

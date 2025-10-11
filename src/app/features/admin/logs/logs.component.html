@@ -1,0 +1,475 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-4 sm:px-0">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">System Logs</h1>
+            <p class="mt-2 text-gray-600">Monitor system activity and user actions</p>
+          </div>
+          <a [routerLink]="['/admin']"
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="bg-white shadow rounded-lg mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">Filters</h3>
+        </div>
+        <div class="px-6 py-4">
+          <form [formGroup]="searchForm" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <input type="text" formControlName="search" placeholder="Search logs..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Action Type</label>
+                <select formControlName="action_type"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">All Actions</option>
+                  <option value="system_event">System Event</option>
+                  <option value="user_action">User Action</option>
+                  <option value="api_request">API Request</option>
+                  <option value="error">Error</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
+                <select formControlName="level"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">All Levels</option>
+                  <option value="INFO">Info</option>
+                  <option value="WARNING">Warning</option>
+                  <option value="ERROR">Error</option>
+                  <option value="CRITICAL">Critical</option>
+                </select>
+              </div>
+
+              <div class="flex items-end">
+                <button type="button" (click)="searchLogs()"
+                  class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (loading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+      } @else if (error()) {
+      <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Error loading logs</h3>
+            <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
+          </div>
+        </div>
+      </div>
+      } @else {
+      <!-- System Logs Table -->
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-medium text-gray-900">
+              System Logs
+              <span class="ml-2 text-sm font-normal text-gray-500">({{ logsList()?.count || 0 }} total)</span>
+            </h3>
+            <button type="button" (click)="loadLogs()"
+              class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        @if (logsList()?.results && logsList()!.results.length > 0) {
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Timestamp
+                </th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  User
+                </th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Type
+                </th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Level
+                </th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  IP Address
+                </th>
+                <th scope="col"
+                  class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              @for (log of logsList()!.results; track log.id) {
+              <tr class="hover:bg-gray-50 transition-colors duration-150">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <div class="flex flex-col">
+                    <span class="font-medium">{{ formatTimestamp(log.created_at).split(',')[0] }}</span>
+                    <span class="text-xs text-gray-500">{{ formatTimestamp(log.created_at).split(',')[1] }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-8 w-8">
+                      <div
+                        class="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                        {{ log.user?.first_name?.charAt(0) || 'S' }}{{ log.user?.last_name?.charAt(0) || 'Y' }}
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-900">
+                        {{ log.user?.full_name || 'System' }}
+                      </p>
+                      <p class="text-xs text-gray-500">{{ log.user?.email || 'system@ficct.com' }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  <div class="max-w-xs">
+                    <p class="font-medium truncate">{{ log.action }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ log.message }}</p>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="getActionTypeBadgeClass(log.action_type)"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    {{ log.action_type }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="getLevelBadgeClass(log.level)"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                    {{ log.level }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                  {{ log.ip_address }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button type="button" (click)="viewDetails(log)"
+                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Details
+                  </button>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (logsList()!.count > 20) {
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button [disabled]="!logsList()?.previous" (click)="previousPage()"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              Previous
+            </button>
+            <button [disabled]="!logsList()?.next" (click)="nextPage()"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing <span class="font-medium">{{ ((currentPage() - 1) * 20) + 1 }}</span>
+                to <span class="font-medium">{{ Math.min(currentPage() * 20, logsList()!.count) }}</span>
+                of <span class="font-medium">{{ logsList()!.count }}</span> results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button [disabled]="!logsList()?.previous" (click)="previousPage()"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <span
+                  class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                  Page {{ currentPage() }}
+                </span>
+                <button [disabled]="!logsList()?.next" (click)="nextPage()"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+        }
+        } @else {
+        <div class="px-6 py-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No logs found</h3>
+          <p class="mt-1 text-sm text-gray-500">No system logs match your current filters.</p>
+        </div>
+        }
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal de detalles -->
+@if (showModal() && selectedLog()) {
+<div class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Background overlay -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+      (click)="closeModal()"></div>
+
+    <!-- Center modal -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div
+      class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-white px-4 pt-4 pb-3 sm:p-5 sm:pb-3">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+          <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+            Log Details
+          </h3>
+          <button type="button" (click)="closeModal()"
+            class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <span class="sr-only">Close</span>
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="mt-4 space-y-4">
+          <!-- Basic Info -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Log ID</label>
+              <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedLog()!.id }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Timestamp</label>
+              <p class="mt-1 text-sm text-gray-900">{{ formatTimestamp(selectedLog()!.created_at) }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Level</label>
+              <span [class]="getLevelBadgeClass(selectedLog()!.level)"
+                class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                {{ selectedLog()!.level }}
+              </span>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Action Type</label>
+              <span [class]="getActionTypeBadgeClass(selectedLog()!.action_type)"
+                class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                {{ selectedLog()!.action_type }}
+              </span>
+            </div>
+          </div>
+
+          <!-- User Info -->
+          @if (selectedLog()!.user) {
+          <div class="bg-gray-50 rounded-lg p-3">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">User Information</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Name</label>
+                <p class="mt-1 text-sm text-gray-900">{{ selectedLog()!.user!.full_name }}</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Email</label>
+                <p class="mt-1 text-sm text-gray-900">{{ selectedLog()!.user!.email }}</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Username</label>
+                <p class="mt-1 text-sm text-gray-900">{{ selectedLog()!.user!.username }}</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Role</label>
+                <div class="mt-1 flex gap-2">
+                  @if (selectedLog()!.user!.is_superuser) {
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                    Superuser
+                  </span>
+                  }
+                  @if (selectedLog()!.user!.is_staff) {
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Staff
+                  </span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Request Info -->
+          <div class="bg-blue-50 rounded-lg p-3">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Request Information</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Action</label>
+                <p class="mt-1 text-sm text-gray-900">{{ selectedLog()!.action }}</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Message</label>
+                <p class="mt-1 text-sm text-gray-900">{{ selectedLog()!.message }}</p>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-500">IP Address</label>
+                <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedLog()!.ip_address }}</p>
+              </div>
+              @if (selectedLog()!.request_method) {
+              <div>
+                <label class="block text-xs font-medium text-gray-500">HTTP Method</label>
+                <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                  {{ selectedLog()!.request_method }}
+                </span>
+              </div>
+              }
+              @if (selectedLog()!.request_path) {
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-500">Request Path</label>
+                <p class="mt-1 text-sm text-gray-900 font-mono">{{ selectedLog()!.request_path }}</p>
+              </div>
+              }
+              @if (selectedLog()!.response_status) {
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Response Status</label>
+                <span class="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                  [ngClass]="selectedLog()!.response_status! < 400 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                  {{ selectedLog()!.response_status }}
+                </span>
+              </div>
+              }
+              @if (selectedLog()!.execution_time) {
+              <div>
+                <label class="block text-xs font-medium text-gray-500">Execution Time</label>
+                <p class="mt-1 text-sm text-gray-900">{{ selectedLog()!.execution_time }}ms</p>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- User Agent -->
+          @if (hasUserAgent(selectedLog()!)) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">User Agent</label>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-xs text-gray-600 font-mono break-all">
+                {{ getUserAgent(selectedLog()!) }}
+              </p>
+            </div>
+          </div>
+          }
+
+          <!-- Request Data -->
+          @if (hasRequestData(selectedLog()!)) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Request Data</label>
+            <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+              <pre class="text-xs text-green-400 font-mono">{{ formatJSON(selectedLog()!.request_data) }}</pre>
+            </div>
+          </div>
+          }
+
+          <!-- Metadata -->
+          @if (hasMetadata(selectedLog()!)) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Metadata</label>
+            <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+              <pre class="text-xs text-blue-400 font-mono">{{ formatJSON(selectedLog()!.metadata) }}</pre>
+            </div>
+          </div>
+          }
+
+          <!-- Stack Trace -->
+          @if (selectedLog()!.stack_trace) {
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Stack Trace</label>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 overflow-x-auto">
+              <pre class="text-xs text-red-900 font-mono whitespace-pre-wrap">{{ selectedLog()!.stack_trace }}</pre>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button type="button" (click)="closeModal()"
+          class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
