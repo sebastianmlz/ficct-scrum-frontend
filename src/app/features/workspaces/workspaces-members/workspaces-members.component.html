@@ -12,190 +12,213 @@
           <div>
             <h1 class="text-3xl font-bold text-gray-900">Miembros del Workspace</h1>
             @if (workspaceName()) {
-              <p class="text-sm text-gray-500">{{ workspaceName() }}</p>
+            <p class="text-sm text-gray-500">{{ workspaceName() }}</p>
             }
           </div>
         </div>
         <div class="flex space-x-3">
-          <button
-            pButton
-            type="button"
-            label="Agregar Miembro"
-            icon="pi pi-user-plus"
-            class="p-button-primary"
-            (click)="addMember()"
-          ></button>
+          <button pButton type="button" label="Agregar Miembro" icon="pi pi-user-plus" class="p-button-primary"
+            (click)="addMemberModalVisible = true"></button>
         </div>
       </div>
     </div>
   </header>
+
+
 
   <!-- Search and Filters -->
   <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <div class="flex flex-col sm:flex-row gap-4">
         <div class="flex-1">
-          <input
-            pInputText
-            type="text"
-            placeholder="Buscar miembros por nombre, email o username..."
-            [(ngModel)]="searchTerm"
-            (keyup.enter)="onSearch()"
-            class="w-full"
-          />
+          <input pInputText type="text" placeholder="Buscar miembros por nombre, email o username..."
+            [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" class="w-full" />
         </div>
-        <button
-          pButton
-          type="button"
-          label="Buscar"
-          icon="pi pi-search"
-          class="p-button-outlined"
-          (click)="onSearch()"
-        ></button>
+        <button pButton type="button" label="Buscar" icon="pi pi-search" class="p-button-outlined"
+          (click)="onSearch()"></button>
       </div>
     </div>
 
+
+
     <!-- Loading State -->
     @if (loading()) {
-      <div class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
     }
     <!-- Error State -->
     @else if (error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div class="flex">
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Error</h3>
-            <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
-          </div>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
         </div>
       </div>
+    </div>
     }
     <!-- Members List -->
-    @else {
-      @if (members().length === 0) {
-        <div class="text-center py-12 bg-white rounded-lg shadow">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No hay miembros</h3>
-          <p class="mt-1 text-sm text-gray-500">Comienza agregando miembros a este workspace.</p>
-          <div class="mt-6">
-            <button
-              pButton
-              type="button"
-              label="Agregar Miembro"
-              icon="pi pi-user-plus"
-              class="p-button-primary"
-              (click)="addMember()"
-            ></button>
-          </div>
+    <p-dialog header="Agregar Miembro al Workspace" [(visible)]="addMemberModalVisible" [modal]="true"
+      [draggable]="false" [resizable]="false"
+      [style]="{ width: '520px', 'border-radius': '1rem', 'box-shadow': '0 8px 32px rgba(0,0,0,0.18)' }"
+      [contentStyle]="{ 'background': '#fff', 'padding': '2rem 2.5rem', 'border-radius': '1rem' }" [baseZIndex]="10000">
+      <!-- Encabezado mejorado -->
+      <ng-template pTemplate="header">
+        <div class="flex items-center justify-between w-full bg-white border-b border-gray-200 shadow-sm px-4 py-3 rounded-t-lg">
+          <span class="font-semibold text-xl text-gray-900 mx-auto">Agregar Miembro al Workspace</span>
+          <button type="button" pButton icon="pi pi-times"
+            class="p-button-rounded p-button-text text-gray-500 hover:text-gray-700 ml-auto"
+            (click)="addMemberModalVisible = false"></button>
         </div>
-      } @else {
-        <!-- Members Grid -->
-        <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
-          <ul class="divide-y divide-gray-200">
-            @for (member of members(); track member.id) {
-              <li class="px-6 py-4 hover:bg-gray-50 transition">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center flex-1 min-w-0">
-                    <!-- Avatar -->
-                    <div class="flex-shrink-0">
-                      @if (member.user.profile?.avatar_url) {
-                        <img [src]="member.user.profile.avatar_url" [alt]="member.user.full_name" class="h-12 w-12 rounded-full border-2 border-gray-200">
-                      } @else {
-                        <div class="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-lg">
-                          {{ member.user.full_name.charAt(0).toUpperCase() }}
-                        </div>
-                      }
-                    </div>
-                    
-                    <!-- User Info -->
-                    <div class="ml-4 flex-1 min-w-0">
-                      <div class="flex items-center gap-2">
-                        <p class="text-base font-semibold text-gray-900 truncate">
-                          {{ member.user.full_name }}
-                        </p>
-                        @if (member.user.profile?.is_online) {
-                          <span class="flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                          </span>
-                        }
-                        @if (member.user.is_verified) {
-                          <svg class="h-4 w-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                          </svg>
-                        }
-                      </div>
-                      <div class="flex items-center gap-3 mt-1">
-                        <p class="text-sm text-gray-600">{{ '@' + member.user.username }}</p>
-                        <p class="text-sm text-gray-500">{{ member.user.email }}</p>
-                      </div>
-                      @if (member.user.profile?.bio) {
-                        <p class="text-sm text-gray-500 mt-1 line-clamp-1">{{ member.user.profile.bio }}</p>
-                      }
-                      <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                        <span>Unido: {{ member.joined_at | date:'short' }}</span>
-                        @if (member.user.profile?.last_activity) {
-                          <span>•</span>
-                          <span>Última actividad: {{ member.user.profile.last_activity | date:'short' }}</span>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Role & Actions -->
-                  <div class="flex items-center gap-3 ml-4">
-                    <p-tag 
-                      [value]="getRoleLabel(member.role)" 
-                      [severity]="getRoleSeverity(member.role)"
-                    ></p-tag>
-                    
-                    @if (!member.is_active) {
-                      <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-600">Inactivo</span>
-                    }
-                    
-                    <div class="flex gap-2">
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-pencil"
-                        class="p-button-text p-button-sm"
-                        (click)="editMember(member)"
-                        title="Editar miembro"
-                      ></button>
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-trash"
-                        class="p-button-text p-button-sm p-button-danger"
-                        (click)="removeMember(member)"
-                        title="Eliminar miembro"
-                      ></button>
-                    </div>
-                  </div>
+      </ng-template>
+
+      <!-- Cuerpo del modal -->
+      <div class="space-y-6 mt-2">
+        <!-- Campo de búsqueda -->
+        <div class="flex flex-col gap-2">
+          <input pInputText type="text" [(ngModel)]="searchUserTerm"
+            placeholder="Buscar por nombre, email o username..."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
+            (keyup.enter)="searchUsers()" />
+          <button pButton type="button" label="Buscar" icon="pi pi-search"
+            class="p-button-outlined p-button-primary w-full mt-1" (click)="searchUsers()"></button>
+        </div>
+
+        <!-- Resultados -->
+        <div *ngIf="searchResults.length > 0" class="pt-2">
+          <ul class="grid gap-4">
+            <li *ngFor="let user of searchResults" class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 shadow-sm hover:bg-gray-100 transition">
+              <div class="flex items-center gap-3">
+                <img *ngIf="user.avatar_url" [src]="user.avatar_url"
+                  class="w-10 h-10 rounded-full border border-gray-200" />
+                <div>
+                  <span class="block font-medium text-gray-900">{{ user.full_name }}</span>
+                  <span class="text-xs text-gray-500">{{ user.email }}</span>
                 </div>
-              </li>
-            }
+              </div>
+
+              <div class="flex items-center gap-2">
+                <select [(ngModel)]="user.selectedRole"
+                  class="rounded-lg border-gray-300 px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-indigo-400 shadow">
+                  <option value="member">Miembro</option>
+                  <option value="admin">Administrador</option>
+                  <option value="guest">Invitado</option>
+                  <option value="viewer">Visualizador</option>
+                </select>
+                <button pButton type="button" icon="pi pi-plus" label="Agregar" class="p-button-success p-button-sm"
+                  (click)="addUserToWorkspace(user)"></button>
+              </div>
+            </li>
           </ul>
         </div>
 
-        <!-- Paginación -->
-        @if (totalRecords() > rowsPerPage) {
-          <div class="mt-8 flex justify-center">
-            <p-paginator
-              [rows]="rowsPerPage"
-              [totalRecords]="totalRecords()"
-              [first]="(currentPage() - 1) * rowsPerPage"
-              (onPageChange)="onPageChange($event)"
-              [showCurrentPageReport]="true"
-              currentPageReportTemplate="Mostrando {{ '{' }}first{{ '}' }} a {{ '{' }}last{{ '}' }} de {{ '{' }}totalRecords{{ '}' }} miembros"
-            ></p-paginator>
+        <!-- Sin resultados -->
+        <div *ngIf="searchResults.length === 0 && searchUserTerm" class="text-center text-gray-500 py-4">
+          No se encontraron usuarios.
+        </div>
+      </div>
+    </p-dialog>
+    @if (members().length === 0) {
+    <div class="text-center py-12 bg-white rounded-lg shadow">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No hay miembros</h3>
+      <p class="mt-1 text-sm text-gray-500">Comienza agregando miembros a este workspace.</p>
+      <div class="mt-6">
+        <button pButton type="button" label="Agregar Miembro" icon="pi pi-user-plus" class="p-button-primary"
+          (click)="addMember()"></button>
+      </div>
+    </div>
+    } @else {
+    <!-- Members Grid -->
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+      <ul class="divide-y divide-gray-200">
+        @for (member of members(); track member.id) {
+        <li class="px-6 py-4 hover:bg-gray-50 transition">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center flex-1 min-w-0">
+              <!-- Avatar -->
+              <div class="flex-shrink-0">
+                @if (member.user.profile.avatar_url) {
+                <img [src]="member.user.profile.avatar_url" [alt]="member.user.full_name"
+                  class="h-12 w-12 rounded-full border-2 border-gray-200">
+                } @else {
+                <div
+                  class="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-lg">
+                  {{ member.user.full_name.charAt(0).toUpperCase() }}
+                </div>
+                }
+              </div>
+
+              <!-- User Info -->
+              <div class="ml-4 flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <p class="text-base font-semibold text-gray-900 truncate">
+                    {{ member.user.full_name }}
+                  </p>
+                  @if (member.user.profile.is_online) {
+                  <span class="flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  }
+                  @if (member.user.is_verified) {
+                  <svg class="h-4 w-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  }
+                </div>
+                <div class="flex items-center gap-3 mt-1">
+                  <p class="text-sm text-gray-600">{{ '@' + member.user.username }}</p>
+                  <p class="text-sm text-gray-500">{{ member.user.email }}</p>
+                </div>
+                @if (member.user.profile.bio) {
+                <p class="text-sm text-gray-500 mt-1 line-clamp-1">{{ member.user.profile.bio }}</p>
+                }
+                <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                  <span>Unido: {{ member.joined_at | date:'short' }}</span>
+                  @if (member.user.profile.last_activity) {
+                  <span>•</span>
+                  <span>Última actividad: {{ member.user.profile.last_activity | date:'short' }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Role & Actions -->
+            <div class="flex items-center gap-3 ml-4">
+              <p-tag [value]="getRoleLabel(member.role)" [severity]="getRoleSeverity(member.role)"></p-tag>
+
+              @if (!member.is_active) {
+              <span class="text-xs px-2 py-1 rounded bg-red-100 text-red-600">Inactivo</span>
+              }
+
+              <div class="flex gap-2">
+                <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm"
+                  (click)="editMember(member)" title="Editar miembro"></button>
+                <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger"
+                  (click)="removeMember(member)" title="Eliminar miembro"></button>
+              </div>
+            </div>
           </div>
+        </li>
         }
-      }
+      </ul>
+    </div>
+
+    <!-- Paginación -->
+    @if (totalRecords() > rowsPerPage) {
+    <div class="mt-8 flex justify-center">
+      <p-paginator [rows]="rowsPerPage" [totalRecords]="totalRecords()" [first]="(currentPage() - 1) * rowsPerPage"
+        (onPageChange)="onPageChange($event)" [showCurrentPageReport]="true"
+        currentPageReportTemplate="Mostrando {{ '{' }}first{{ '}' }} a {{ '{' }}last{{ '}' }} de {{ '{' }}totalRecords{{ '}' }} miembros"></p-paginator>
+    </div>
+    }
     }
   </div>
 </div>

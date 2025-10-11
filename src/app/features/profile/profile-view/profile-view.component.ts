@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/store/auth.store';
 import { User, UserProfile } from '../../../core/models/interfaces';
-import { HeaderComponent } from '../../../layout/header/header.component';
 @Component({
   selector: 'app-profile-view',
   standalone: true,
-  imports: [CommonModule, RouterLink, HeaderComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './profile-view.component.html',
   styleUrls: ['./profile-view.component.css'],
 })

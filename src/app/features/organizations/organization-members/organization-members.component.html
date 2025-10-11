@@ -125,7 +125,7 @@
 							</span>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-							{{ member.invited_by?.full_name || '-' }}
+							{{ member.invited_by.full_name || '-' }}
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
 							{{ member.invited_at | date:'short' }}
@@ -172,7 +172,7 @@
 							</span>
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-							{{ inv.invited_by?.full_name || '-' }}
+							{{ inv.invited_by.full_name || '-' }}
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
 							{{ inv.invited_at | date:'short' }}

@@ -5,12 +5,11 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../../../core/store/auth.store';
 import { User } from '../../../core/models/interfaces';
 import { TimezoneEnum, LanguageEnum } from '../../../core/models/enums';
-import { HeaderComponent } from "../../../layout/header/header.component";
 
 @Component({
   selector: 'app-profile-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, HeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './profile-edit.component.html',
   styleUrls: ['./profile-edit.component.css']
 })

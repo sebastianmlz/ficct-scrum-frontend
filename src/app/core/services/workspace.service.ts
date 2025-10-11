@@ -165,18 +165,18 @@ export class WorkspaceService {
   }
 
   getWorkspaceMembers(workspaceId: string, page?: number, search?: string, ordering?: string): Observable<WorkspaceMembersResponse> {
-    let params = '';
+    /*let params = '';
     const queryParams = [`workspace=${workspaceId}`];
     
     if (page) queryParams.push(`page=${page}`);
     if (search) queryParams.push(`search=${search}`);
     if (ordering) queryParams.push(`ordering=${ordering}`);
     
-    params = '?' + queryParams.join('&');
+    params = '?' + queryParams.join('&');*/
     
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<WorkspaceMembersResponse>(`${this.apiUrl}/members/${params}`, { headers });
+    return this.http.get<WorkspaceMembersResponse>(`${this.apiUrl}/${workspaceId}/members/`, { headers });
   }
 
   getWorkspaceMember(memberId: string): Observable<WorkspaceMember> {
