@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 import { 
   Project, 
   PaginatedProjectList, 
-  ApiQueryParams 
+  ApiQueryParams, 
+  ProjectConfigRequest
 } from '../models/interfaces';
 import { environment } from '../../../environments/environment';
 
@@ -88,5 +89,27 @@ export class ProjectsService {
     }
     
     return throwError(() => new Error(errorMessage));
+  }
+
+  createProjectConfig(config: ProjectConfigRequest): Observable<ProjectConfigRequest> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<ProjectConfigRequest>(`${this.baseUrl}/configs/`, config, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getProjectConfig(): Observable<ProjectConfigRequest> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<ProjectConfigRequest>(`${this.baseUrl}/projects/configs/`, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  editProjectConfig(id: string, config: Partial<ProjectConfigRequest>): Observable<ProjectConfigRequest> {
+    return this.http.patch<ProjectConfigRequest>(`${this.baseUrl}/projects/configs/${id}/`, config).pipe(
+      catchError(this.handleError)
+    );
   }
 }

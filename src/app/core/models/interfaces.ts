@@ -160,6 +160,7 @@ export interface Organization extends OrganizationBasic {
   subscription_plan: SubscriptionPlanEnum;
   member_count: number;
   workspace_count: number;
+  project_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -337,6 +338,7 @@ export interface ProjectConfig {
 }
 
 export interface ProjectConfigRequest {
+  project: ProjectBasic | string;
   sprint_duration?: SprintDurationEnum;
   auto_close_sprints?: boolean;
   estimation_type?: EstimationTypeEnum;

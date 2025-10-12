@@ -51,19 +51,19 @@
                             </div>
 
                             <div>
-                                <label for="slug" class="block text-sm font-medium text-gray-700">
-                                    URL Slug *
+                                <label for="key" class="block text-sm font-medium text-gray-700">
+                                    URL Key *
                                 </label>
-                                <input id="slug" type="text" formControlName="slug" placeholder="project-url-slug"
+                                <input id="key" type="text" formControlName="key" placeholder="project-url-key"
                                     class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    [class.border-red-300]="projectForm.get('slug')?.invalid && projectForm.get('slug')?.touched" />
-                                @if (projectForm.get('slug')?.invalid && projectForm.get('slug')?.touched) {
+                                    [class.border-red-300]="projectForm.get('key')?.invalid && projectForm.get('key')?.touched" />
+                                @if (projectForm.get('key')?.invalid && projectForm.get('key')?.touched) {
                                 <p class="mt-1 text-sm text-red-600">
-                                    @if (projectForm.get('slug')?.errors?.['required']) {
-                                    URL slug is required
+                                    @if (projectForm.get('key')?.errors?.['required']) {
+                                    URL key is required
                                     }
-                                    @if (projectForm.get('slug')?.errors?.['pattern']) {
-                                    URL slug can only contain lowercase letters, numbers, and hyphens
+                                    @if (projectForm.get('key')?.errors?.['pattern']) {
+                                    URL key can only contain lowercase letters, numbers, and hyphens
                                     }
                                 </p>
                                 }
@@ -120,6 +120,18 @@
                                         }
                                     </select>
                                 </div>
+
+                                <div>
+                                    <label for="methodology" class="block text-sm font-medium text-gray-700">
+                                        Methodology
+                                    </label>
+                                    <select id="methodology" formControlName="methodology"
+                                        class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                        @for (methodology of projectMethodology; track methodology.value) {
+                                        <option [value]="methodology.value">{{ methodology.label }}</option>
+                                        }
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -135,10 +147,10 @@
                                 </div>
 
                                 <div>
-                                    <label for="dueDate" class="block text-sm font-medium text-gray-700">
-                                        Due Date
+                                    <label for="endDate" class="block text-sm font-medium text-gray-700">
+                                        End Date
                                     </label>
-                                    <input id="dueDate" type="date" formControlName="due_date"
+                                    <input id="endDate" type="date" formControlName="end_date"
                                         class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   Project,
@@ -20,7 +20,7 @@ export class ProjectService {
 
   getProjects(params?: PaginationParams): Observable<PaginatedProjectList> {
     let httpParams = new HttpParams();
-    
+
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
     }
@@ -39,61 +39,70 @@ export class ProjectService {
   }
 
   createProject(projectData: ProjectRequest): Observable<Project> {
-    const formData = new FormData();
-    
-    formData.append('name', projectData.name);
-    formData.append('slug', projectData.slug);
-    formData.append('workspace', projectData.workspace);
-    
-    if (projectData.key) {
-      formData.append('key', projectData.key);
-    }
-    if (projectData.description) {
-      formData.append('description', projectData.description);
-    }
-    if (projectData.methodology) {
-      formData.append('methodology', projectData.methodology);
-    }
-    if (projectData.status) {
-      formData.append('status', projectData.status);
-    }
-    if (projectData.priority) {
-      formData.append('priority', projectData.priority);
-    }
-    if (projectData.start_date) {
-      formData.append('start_date', projectData.start_date);
-    }
-    if (projectData.due_date) {
-      formData.append('due_date', projectData.due_date);
-    }
-    if (projectData.end_date) {
-      formData.append('end_date', projectData.end_date);
-    }
-    if (projectData.estimated_hours !== undefined) {
-      formData.append('estimated_hours', projectData.estimated_hours.toString());
-    }
-    if (projectData.budget !== undefined) {
-      formData.append('budget', projectData.budget.toString());
-    }
-    if (projectData.cover_image) {
-      formData.append('cover_image', projectData.cover_image);
-    }
-    if (projectData.attachments) {
-      formData.append('attachments', projectData.attachments);
-    }
-    if (projectData.project_settings) {
-      formData.append('project_settings', JSON.stringify(projectData.project_settings));
-    }
-    if (projectData.is_active !== undefined) {
-      formData.append('is_active', projectData.is_active.toString());
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    if (projectData.cover_image || projectData.attachments) {
+      headers.delete('Content-Type');
+      const formData = new FormData();
+
+      formData.append('name', projectData.name);
+      formData.append('slug', projectData.slug);
+      formData.append('workspace', projectData.workspace);
+
+      if (projectData.key) {
+        formData.append('key', projectData.key);
+      }
+      if (projectData.description) {
+        formData.append('description', projectData.description);
+      }
+      if (projectData.methodology) {
+        formData.append('methodology', projectData.methodology);
+      }
+      if (projectData.status) {
+        formData.append('status', projectData.status);
+      }
+      if (projectData.priority) {
+        formData.append('priority', projectData.priority);
+      }
+      if (projectData.start_date) {
+        formData.append('start_date', projectData.start_date);
+      }
+      if (projectData.due_date) {
+        formData.append('due_date', projectData.due_date);
+      }
+      if (projectData.end_date) {
+        formData.append('end_date', projectData.end_date);
+      }
+      if (projectData.estimated_hours !== undefined) {
+        formData.append('estimated_hours', projectData.estimated_hours.toString());
+      }
+      if (projectData.budget !== undefined) {
+        formData.append('budget', projectData.budget.toString());
+      }
+      if (projectData.cover_image) {
+        formData.append('cover_image', projectData.cover_image);
+      }
+      if (projectData.attachments) {
+        formData.append('attachments', projectData.attachments);
+      }
+      if (projectData.project_settings) {
+        formData.append('project_settings', JSON.stringify(projectData.project_settings));
+      }
+      if (projectData.is_active !== undefined) {
+        formData.append('is_active', projectData.is_active.toString());
+      }
+      return this.http.post<Project>(`${this.baseUrl}/projects/`, formData);
     }
 
-    return this.http.post<Project>(`${this.baseUrl}/projects/`, formData);
+    return this.http.post<Project>(`${this.baseUrl}/projects/`, projectData, { headers });
   }
 
   updateProject(id: string, projectData: Partial<ProjectRequest>): Observable<Project> {
-    const formData = new FormData();
-    
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    /*const formData = new FormData();
+
     if (projectData.name) {
       formData.append('name', projectData.name);
     }
@@ -144,9 +153,9 @@ export class ProjectService {
     }
     if (projectData.is_active !== undefined) {
       formData.append('is_active', projectData.is_active.toString());
-    }
+    }*/
 
-    return this.http.patch<Project>(`${this.baseUrl}/projects/${id}/`, formData);
+    return this.http.patch<Project>(`${this.baseUrl}/projects/${id}/`, projectData, { headers });
   }
 
   deleteProject(id: string): Observable<void> {

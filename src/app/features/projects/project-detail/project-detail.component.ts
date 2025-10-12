@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
-import { Project } from '../../../core/models/interfaces';
+import { Project, ProjectConfig } from '../../../core/models/interfaces';
 import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
 
 @Component({
@@ -19,6 +19,7 @@ export class ProjectDetailComponent implements OnInit {
   project = signal<Project | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
+  projectConfig = signal<ProjectConfig | null>(null);
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -37,6 +38,7 @@ export class ProjectDetailComponent implements OnInit {
       const project = await this.projectService.getProject(id).toPromise();
       if (project) {
         this.project.set(project);
+        await this.loadConfigProject(id);
       }
     } catch (error: any) {
       this.error.set(error.error?.message || 'Failed to load project');
@@ -44,6 +46,28 @@ export class ProjectDetailComponent implements OnInit {
       this.loading.set(false);
     }
   }
+
+  async loadConfigProject(id: string): Promise<void> {
+    /*En caso que tengan configuraciones iniciales*/
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      const config = await this.projectService.getProjectConfig(id).toPromise();
+      if (config) {
+        this.projectConfig.set(config);
+      }
+    } catch (error: any) {
+      if (error.status === 404) {
+        this.projectConfig.set(null);
+      } else {
+        this.error.set(error.error?.message || 'Failed to load project configuration');
+      }
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+
 
   getStatusBadgeClass(status: string): string {
     switch (status) {
