@@ -4,11 +4,13 @@ import { Sprint, PaginationParams, Project } from '../../../../core/models/inter
 import { PaginatedSprintList } from '../../../../core/models/api-interfaces';
 import { CommonModule } from '@angular/common';
 import { SprintDetailComponent } from '../sprint-detail/sprint-detail.component';
+import { SprintEditComponent } from '../sprint-edit/sprint-edit.component';
 @Component({
   selector: 'app-sprint-list',
   imports: [
     CommonModule,
-    SprintDetailComponent
+    SprintDetailComponent,
+    SprintEditComponent
   ],
   templateUrl: './sprint-list.component.html',
   styleUrl: './sprint-list.component.css'
@@ -23,8 +25,8 @@ export class SprintListComponent {
   sprints = signal<Sprint[]>([]);
   paginationData = signal<PaginatedSprintList | null>(null);
   project = signal<Project | null>(null);
-  openModalDetail = signal(false); 
-
+  openModalDetail = signal(false);
+  openModalEdit = signal(false);
 
   ngOnInit(): void {
     if (this.projectId) {
@@ -53,9 +55,25 @@ export class SprintListComponent {
     }
   }
 
+  async deleteSprint(sprintId: string): Promise<void> {
+    this.loading.set(true);
+    try {
+      await this.sprintService.deleteSprint(sprintId).toPromise();
+      await this.loadSprints();
+    } catch (error) {
+      this.error.set('Error al eliminar el sprint');
+      console.error(error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   showDetailSprintModal(): void {
     this.openModalDetail.set(true);
   }
 
+  showEditSprintModal(): void {
+    this.openModalEdit.set(true);
+  }
 
 }

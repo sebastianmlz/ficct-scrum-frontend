@@ -39,4 +39,29 @@ export class SprintsService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<Sprint>(`${this.baseUrl}/${sprintId}/`, { headers });
   }
+
+  editSprint(sprintId: string, sprintData: SprintRequest): Observable<Sprint> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.patch<Sprint>(`${this.baseUrl}/${sprintId}/`, sprintData, { headers })
+  }
+
+  deleteSprint(sprintId: string): Observable<Sprint> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete<Sprint>(`${this.baseUrl}/${sprintId}/`, { headers })
+  }
+
+  getSprintBurdown(sprintId: string): Observable<any> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>(`${this.baseUrl}/${sprintId}/burndown/`, { headers });
+  }
+
+  starSprint(sprintId: string): Observable<Sprint> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/start/`, { headers });
+  }
+
 }

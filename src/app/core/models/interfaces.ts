@@ -482,10 +482,27 @@ export interface Sprint {
   duration_days: number;
 }
 
+export interface SprintBurdown {
+  sprint: Sprint;
+  total_points: number;
+  ideal_line:
+  {
+    day: number,
+    date: Date,
+    remaining_points: number
+  }[],
+  actual_line: {
+    day: number,
+    date: Date,
+    remaining_points: number  
+  }[]
+
+}
+
 export interface SprintRequest {
   project: string,
   name: string,
-  goal: string  | null,
+  goal: string | null,
   start_date: string,
   end_date: string,
 }

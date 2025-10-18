@@ -1,0 +1,35 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" (click)="handleClose()">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative" (click)="$event.stopPropagation()">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Editar Sprint</h2>
+    <form [formGroup]="form" (ngSubmit)="editSprintData()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+        <input type="text" formControlName="name" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Meta</label>
+        <input type="text" formControlName="goal" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+      </div>
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Fecha inicio</label>
+          <input type="date" formControlName="start_date" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Fecha fin</label>
+          <input type="date" formControlName="end_date" class="w-full border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+        </div>
+      </div>
+      <div *ngIf="error" class="text-red-500 text-sm">{{ error }}</div>
+      <div class="flex justify-end gap-2 mt-6">
+        <button type="button" (click)="handleClose()" class="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
+        <button type="submit" [disabled]="form.invalid || loading" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">Guardar</button>
+      </div>
+    </form>
+    <button (click)="handleClose()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" title="Cerrar">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</div>
