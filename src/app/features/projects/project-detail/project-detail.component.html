@@ -84,11 +84,29 @@
                             <span class="text-sm text-gray-900">{{ project()?.due_date | date:'mediumDate' }}</span>
                         </div>
                         }
-                        <div class="flex items-center justify-between py-2">
+                        <div class="flex items-center justify-between py-2 border-b border-gray-200">
                             <span class="text-sm font-medium text-gray-500">Last Updated</span>
                             <span class="text-sm text-gray-900">{{ project()?.updated_at | date:'mediumDate' }}</span>
                         </div>
                     </div>
+                </div>
+                <!-- Sprints: carta separada debajo del timeline -->
+                <div class="bg-white shadow rounded-lg p-6 mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-gray-900">Sprints</h2>
+                        <button 
+                            class="bg-blue-500 text-white px-4 py-2 rounded"
+                            (click)="showSprintModal()"
+                        >Add Sprint</button>
+                    </div>
+                    <app-sprint-list
+                        [projectId]="project()?.id || ''"
+                    ></app-sprint-list>
+                    <app-sprint-create
+                        *ngIf="openModal()"
+                        [projectId]="project()?.id || ''"
+                        (close)="openModal.set(false)"
+                    ></app-sprint-create>
                 </div>
             </div>
             <!-- Project Configuration + Stats + Actions -->

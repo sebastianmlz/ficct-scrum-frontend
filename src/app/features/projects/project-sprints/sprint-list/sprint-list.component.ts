@@ -1,0 +1,51 @@
+import { Component, inject, Input, signal } from '@angular/core';
+import { SprintsService } from '../../../../core/services/sprints.service';
+import { Sprint, PaginationParams, Project } from '../../../../core/models/interfaces';
+import { PaginatedSprintList } from '../../../../core/models/api-interfaces';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-sprint-list',
+  imports: [CommonModule],
+  templateUrl: './sprint-list.component.html',
+  styleUrl: './sprint-list.component.css'
+})
+export class SprintListComponent {
+  @Input() projectId!: string;
+  private sprintService = inject(SprintsService);
+
+  loading = signal(false);
+  error = signal<string | null>(null);
+  sprints = signal<Sprint[]>([]);
+  paginationData = signal<PaginatedSprintList | null>(null);
+  project = signal<Project | null>(null);
+
+
+  ngOnInit(): void {
+    if (this.projectId) {
+      this.loadSprints();
+    } else {
+      this.sprints.set([]);
+    }
+  }
+
+  async loadSprints(params?: PaginationParams): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
+    try {
+      const result = await this.sprintService.getSprints(this.projectId, params).toPromise();
+      if (result) {
+        // Filtrar por projectId por seguridad
+        const filtered = result.results.filter(sprint => sprint.project.id === this.projectId);
+        this.sprints.set(filtered);
+        this.paginationData.set(result);
+      }
+    } catch (error) {
+      this.error.set('Error loading sprints');
+      console.error(error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+}

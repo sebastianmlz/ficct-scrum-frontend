@@ -1,5 +1,7 @@
 // OpenAPI Specification Interfaces
 
+import { Sprint } from "./interfaces";
+
 export type OrganizationTypeEnum = 'startup' | 'enterprise' | 'agency' | 'nonprofit' | 'education' | 'government' | 'other';
 export type SubscriptionPlanEnum = 'free' | 'basic' | 'professional' | 'enterprise';
 export type WorkspaceTypeEnum = 'development' | 'design' | 'marketing' | 'sales' | 'support' | 'hr' | 'finance' | 'general';
@@ -99,6 +101,13 @@ export interface PaginatedProjectList {
   next: string | null;
   previous: string | null;
   results: Project[];
+}
+
+export interface PaginatedSprintList {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Sprint[];
 }
 
 export interface ApiQueryParams {

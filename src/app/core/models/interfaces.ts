@@ -18,7 +18,8 @@ import {
   ActionTypeEnum,
   LevelEnum,
   SeverityEnum,
-  ErrorLogStatusEnum
+  ErrorLogStatusEnum,
+  ProjectStatusEnum
 } from './enums';
 
 // Base/Common Interfaces
@@ -399,13 +400,13 @@ export interface PaginatedResponse<T> {
 }
 
 // Paginated Lists
-export interface PaginatedOrganizationList extends PaginatedResponse<Organization> {}
-export interface PaginatedWorkspaceList extends PaginatedResponse<Workspace> {}
-export interface PaginatedProjectList extends PaginatedResponse<Project> {}
-export interface PaginatedOrganizationMemberList extends PaginatedResponse<OrganizationMember> {}
-export interface PaginatedWorkspaceMemberList extends PaginatedResponse<WorkspaceMember> {}
-export interface PaginatedSystemLogList extends PaginatedResponse<SystemLog> {}
-export interface PaginatedErrorLogList extends PaginatedResponse<ErrorLog> {}
+export interface PaginatedOrganizationList extends PaginatedResponse<Organization> { }
+export interface PaginatedWorkspaceList extends PaginatedResponse<Workspace> { }
+export interface PaginatedProjectList extends PaginatedResponse<Project> { }
+export interface PaginatedOrganizationMemberList extends PaginatedResponse<OrganizationMember> { }
+export interface PaginatedWorkspaceMemberList extends PaginatedResponse<WorkspaceMember> { }
+export interface PaginatedSystemLogList extends PaginatedResponse<SystemLog> { }
+export interface PaginatedErrorLogList extends PaginatedResponse<ErrorLog> { }
 
 // --- Organization Invitation System ---
 export interface OrganizationInvitation {
@@ -434,7 +435,7 @@ export interface OrganizationInvitationResponse {
   invitation: OrganizationInvitation;
 }
 
-export interface PaginatedOrganizationInvitationList extends PaginatedResponse<OrganizationInvitation> {}
+export interface PaginatedOrganizationInvitationList extends PaginatedResponse<OrganizationInvitation> { }
 
 // Query Parameters
 // Alias for legacy ApiQueryParams used in some services
@@ -462,4 +463,26 @@ export interface ErrorLogQueryParams extends PaginationParams {
   error_type?: string;
   severity?: SeverityEnum;
   status?: ErrorLogStatusEnum;
+}
+
+
+/*Sprints Interfaces*/
+export interface Sprint {
+  id: string;
+  project: ProjectBasic;
+  name: string;
+  status: ProjectStatusEnum;
+  start_date: Date;
+  end_date: Date;
+  issue_count: string;
+  progress_percentage: string;
+  created_at: Date;
+}
+
+export interface SprintRequest {
+  project: string,
+  name: string,
+  goal: string,
+  start_date: Date,
+  end_date: Date,
 }

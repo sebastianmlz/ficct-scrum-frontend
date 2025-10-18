@@ -4,11 +4,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project, ProjectConfig } from '../../../core/models/interfaces';
 import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
-
+import { SprintCreateComponent } from '../project-sprints/sprint-create/sprint-create.component';
+import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.component';
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SprintCreateComponent, SprintListComponent],
   templateUrl: './project-detail.component.html',
 })
 export class ProjectDetailComponent implements OnInit {
@@ -20,6 +21,8 @@ export class ProjectDetailComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   projectConfig = signal<ProjectConfig | null>(null);
+  openModal = signal(false);
+
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -84,6 +87,10 @@ export class ProjectDetailComponent implements OnInit {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  showSprintModal(): void {
+    this.openModal.set(true);
   }
 
   getPriorityBadgeClass(priority: string): string {
