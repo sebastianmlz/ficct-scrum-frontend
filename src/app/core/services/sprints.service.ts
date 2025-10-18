@@ -34,4 +34,9 @@ export class SprintsService {
     return this.http.post<Sprint>(`${this.baseUrl}/`, sprintData, { headers });
   }
 
+  getSprint(sprintId: string): Observable<Sprint> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<Sprint>(`${this.baseUrl}/${sprintId}/`, { headers });
+  }
 }

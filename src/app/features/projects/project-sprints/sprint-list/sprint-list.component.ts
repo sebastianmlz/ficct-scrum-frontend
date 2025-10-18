@@ -3,15 +3,19 @@ import { SprintsService } from '../../../../core/services/sprints.service';
 import { Sprint, PaginationParams, Project } from '../../../../core/models/interfaces';
 import { PaginatedSprintList } from '../../../../core/models/api-interfaces';
 import { CommonModule } from '@angular/common';
-
+import { SprintDetailComponent } from '../sprint-detail/sprint-detail.component';
 @Component({
   selector: 'app-sprint-list',
-  imports: [CommonModule],
+  imports: [
+    CommonModule,
+    SprintDetailComponent
+  ],
   templateUrl: './sprint-list.component.html',
   styleUrl: './sprint-list.component.css'
 })
 export class SprintListComponent {
   @Input() projectId!: string;
+  @Input() sprintId!: string;
   private sprintService = inject(SprintsService);
 
   loading = signal(false);
@@ -19,6 +23,7 @@ export class SprintListComponent {
   sprints = signal<Sprint[]>([]);
   paginationData = signal<PaginatedSprintList | null>(null);
   project = signal<Project | null>(null);
+  openModalDetail = signal(false); 
 
 
   ngOnInit(): void {
@@ -47,5 +52,10 @@ export class SprintListComponent {
       this.loading.set(false);
     }
   }
+
+  showDetailSprintModal(): void {
+    this.openModalDetail.set(true);
+  }
+
 
 }

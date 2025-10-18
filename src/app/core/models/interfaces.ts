@@ -473,16 +473,19 @@ export interface Sprint {
   name: string;
   status: ProjectStatusEnum;
   start_date: Date;
+  goal: string | null;
   end_date: Date;
   issue_count: string;
   progress_percentage: string;
   created_at: Date;
+  committed_points: string;
+  duration_days: number;
 }
 
 export interface SprintRequest {
   project: string,
   name: string,
-  goal: string,
-  start_date: Date,
-  end_date: Date,
+  goal: string  | null,
+  start_date: string,
+  end_date: string,
 }

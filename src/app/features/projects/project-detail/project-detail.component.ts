@@ -2,14 +2,19 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
-import { Project, ProjectConfig } from '../../../core/models/interfaces';
+import { Project, ProjectConfig, Sprint } from '../../../core/models/interfaces';
 import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
 import { SprintCreateComponent } from '../project-sprints/sprint-create/sprint-create.component';
 import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.component';
+
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, SprintCreateComponent, SprintListComponent],
+  imports: [CommonModule,
+    RouterLink,
+    SprintCreateComponent,
+    SprintListComponent,
+  ],
   templateUrl: './project-detail.component.html',
 })
 export class ProjectDetailComponent implements OnInit {
@@ -18,6 +23,7 @@ export class ProjectDetailComponent implements OnInit {
   private projectService = inject(ProjectService);
 
   project = signal<Project | null>(null);
+  sprint = signal<Sprint | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
   projectConfig = signal<ProjectConfig | null>(null);
@@ -91,7 +97,7 @@ export class ProjectDetailComponent implements OnInit {
 
   showSprintModal(): void {
     this.openModal.set(true);
-  }
+  }  
 
   getPriorityBadgeClass(priority: string): string {
     switch (priority) {
