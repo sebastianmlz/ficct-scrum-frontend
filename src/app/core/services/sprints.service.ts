@@ -61,7 +61,18 @@ export class SprintsService {
   starSprint(sprintId: string): Observable<Sprint> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/start/`, { headers });
+    return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/start/`, {}, { headers });
   }
 
+  getSprintProgress(sprintId: string): Observable<any> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>(`${this.baseUrl}/${sprintId}/progress/`, { headers });
+  }
+
+  completeSprint(sprintId: string): Observable<Sprint> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/complete/`, {}, { headers });
+  }
 }

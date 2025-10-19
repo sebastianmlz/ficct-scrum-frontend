@@ -76,4 +76,16 @@ export class SprintListComponent {
     this.openModalEdit.set(true);
   }
 
+  async startSprint(sprintId: string): Promise<void> {
+    this.loading.set(true);
+    try {
+      await this.sprintService.starSprint(sprintId).toPromise();
+    } catch (error) {
+      this.error.set('Error al iniciar el sprint');
+      console.error(error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
 }

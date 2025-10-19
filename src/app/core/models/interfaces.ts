@@ -19,7 +19,8 @@ import {
   LevelEnum,
   SeverityEnum,
   ErrorLogStatusEnum,
-  ProjectStatusEnum
+  ProjectStatusEnum,
+  IssueTypeEnum
 } from './enums';
 
 // Base/Common Interfaces
@@ -494,7 +495,7 @@ export interface SprintBurdown {
   actual_line: {
     day: number,
     date: Date,
-    remaining_points: number  
+    remaining_points: number
   }[]
 
 }
@@ -505,4 +506,12 @@ export interface SprintRequest {
   goal: string | null,
   start_date: string,
   end_date: string,
+}
+
+export interface Issue {
+  id: string;
+  name: string;
+  category: IssueTypeEnum;
+  icon: string;
+  color: string;
 }

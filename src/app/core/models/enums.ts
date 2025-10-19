@@ -165,3 +165,12 @@ export enum ErrorLogStatusEnum {
   RESOLVED = 'resolved',
   CLOSED = 'closed'
 }
+
+export enum IssueTypeEnum {
+  epic = 'Epic',
+  story = 'Story',
+  task = 'Task',
+  bug = 'Bug',
+  improvement = 'Improvement',
+  sub_task = 'Sub-task'
+}

@@ -44,6 +44,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1zm-4 0a1 1 0 011-1h4a1 1 0 011 1v1H6V4z" />
           </svg>
         </button>
+		<button
+			class="mt-2 px-8 py-2 rounded-xl bg-slate-500 text-white"
+			(click)="startSprint(sprint.id)"
+		>
+			<i class="pi pi-play"></i>
+		</button>
       </div>
     </div>
     <app-sprint-edit
