@@ -20,7 +20,6 @@ import {
   SeverityEnum,
   ErrorLogStatusEnum,
   ProjectStatusEnum,
-  IssueTypeEnum
 } from './enums';
 
 // Base/Common Interfaces
@@ -510,8 +509,22 @@ export interface SprintRequest {
 
 export interface Issue {
   id: string;
-  name: string;
-  category: IssueTypeEnum;
+  title: string;
+  issue_type?: {
+    id: string;
+    category: string;
+    color: string;
+    name: string;
+  };
   icon: string;
   color: string;
+  status?: {
+    id: string;    
+    name: string;
+    color: string;
+    is_final: boolean;
+    is_initial: boolean;
+  };
+  priority: string; 
+  reporter?: UserBasic;
 }

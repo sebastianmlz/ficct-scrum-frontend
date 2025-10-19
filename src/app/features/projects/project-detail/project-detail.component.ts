@@ -6,6 +6,7 @@ import { Project, ProjectConfig, Sprint } from '../../../core/models/interfaces'
 import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
 import { SprintCreateComponent } from '../project-sprints/sprint-create/sprint-create.component';
 import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.component';
+import { IssueListComponent } from '../project-issues/issue-list/issue-list.component';
 
 @Component({
   selector: 'app-project-detail',
@@ -14,6 +15,7 @@ import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.
     RouterLink,
     SprintCreateComponent,
     SprintListComponent,
+    IssueListComponent
   ],
   templateUrl: './project-detail.component.html',
 })
