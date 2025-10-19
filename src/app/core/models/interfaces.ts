@@ -450,6 +450,8 @@ export interface PaginationParams {
   email?: string;
   status?: string;
   priority?: string;
+  sprint?: string;
+  project?: string;
 }
 
 export interface SystemLogQueryParams extends PaginationParams {
@@ -507,24 +509,52 @@ export interface SprintRequest {
   end_date: string,
 }
 
+export interface IssueType {
+  id: string;
+  name: string;
+  category: string;
+  icon: string;
+  color: string;
+  is_default: boolean;
+}
+
+export interface IssueStatus {
+  id: string;
+  name: string;
+  category: string;
+  color: string;
+  is_initial: boolean;
+  is_final: boolean;
+}
+
 export interface Issue {
   id: string;
   title: string;
-  issue_type?: {
-    id: string;
-    category: string;
-    color: string;
-    name: string;
-  };
-  icon: string;
-  color: string;
-  status?: {
-    id: string;    
-    name: string;
-    color: string;
-    is_final: boolean;
-    is_initial: boolean;
-  };
-  priority: string; 
+  description?: string;
+  project: ProjectBasic;
+  issue_type?: IssueType;
+  status?: IssueStatus;
+  priority: string;
+  assignee?: UserBasic;
   reporter?: UserBasic;
+  sprint?: string;
+  estimated_hours?: number;
+  actual_hours?: number;
+  story_points?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface IssueRequest {
+  project: string;
+  issue_type: string;
+  title: string;
+  description?: string;
+  priority?: string;
+  assignee?: string;
+  status?: string;
+  sprint?: string;
+  estimated_hours?: number;
+  actual_hours?: number;
+  story_points?: number;
 }

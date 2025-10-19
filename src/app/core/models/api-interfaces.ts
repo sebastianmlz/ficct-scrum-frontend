@@ -1,6 +1,6 @@
 // OpenAPI Specification Interfaces
 
-import { Sprint, Issue } from "./interfaces";
+import { Sprint, Issue, IssueType } from "./interfaces";
 
 export type OrganizationTypeEnum = 'startup' | 'enterprise' | 'agency' | 'nonprofit' | 'education' | 'government' | 'other';
 export type SubscriptionPlanEnum = 'free' | 'basic' | 'professional' | 'enterprise';
@@ -115,6 +115,13 @@ export interface PaginatedIssueList{
   next: string | null;
   previous: string | null;
   results: Issue[];
+}
+
+export interface PaginatedIssueTypeList {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: IssueType[];
 }
 
 export interface ApiQueryParams {

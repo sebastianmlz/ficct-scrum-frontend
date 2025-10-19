@@ -3,49 +3,54 @@ import { CommonModule } from '@angular/common';
 import { IssueService } from '../../../../core/services/issue.service';
 import { PaginationParams, Issue } from '../../../../core/models/interfaces';
 import { PaginatedIssueList } from '../../../../core/models/api-interfaces';
+import { ActivatedRoute, Router } from '@angular/router';
+import { IssueCreateComponent } from '../issue-create/issue-create.component';
+import { IssueDetailComponent } from '../issue-detail/issue-detail.component';
+import { IssueEditComponent } from '../issue-edit/issue-edit.component';
 
 @Component({
   selector: 'app-issue-list',
-  imports: [CommonModule],
+  imports: [CommonModule, IssueCreateComponent, IssueDetailComponent, IssueEditComponent],
   templateUrl: './issue-list.component.html',
   styleUrl: './issue-list.component.css'
 })
 export class IssueListComponent {
   @Input() projectId!: string;
 
-  private issueList = inject(IssueService)
+  private issueService = inject(IssueService)
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   loading = signal(false);
   error = signal<string | null>(null);
   issues = signal<Issue[]>([]);
   paginationData = signal<PaginatedIssueList | null>(null);
+  
+  // Modal states
+  showCreateModal = signal(false);
+  showDetailModal = signal(false);
+  showEditModal = signal(false);
+  selectedIssueId = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.loadIssues();
+    const projectId = this.route.snapshot.paramMap.get('projectId') || '';
+    this.projectId = projectId;
+    // Pasar el parámetro project para que el backend filtre
+    this.loadIssues({ project: this.projectId });
   }
 
   convertirPriority(priority: string | null): string {
     switch (priority) {
       case 'P1':
-        return priority = 'Critical';
+        return 'Critical';
       case 'P2':
-        return priority = 'High';
+        return 'High';
       case 'P3':
-        return priority = 'Medium';
+        return 'Medium';
       case 'P4':
-        return priority = 'Low';
+        return 'Low';
       default:
         return priority || 'Sin prioridad';
-    }
-  }
-
-  getPriorityInfo(priority: string | null): { label: string, color: string } {
-    switch (priority) {
-      case 'P1': return { label: 'Critical', color: 'bg-red-100 text-red-800' };
-      case 'P2': return { label: 'High', color: 'bg-orange-100 text-orange-800' };
-      case 'P3': return { label: 'Medium', color: 'bg-yellow-100 text-yellow-800' };
-      case 'P4': return { label: 'Low', color: 'bg-gray-100 text-gray-800' };
-      default: return { label: 'Sin prioridad', color: 'bg-gray-100 text-gray-800' };
     }
   }
 
@@ -53,16 +58,72 @@ export class IssueListComponent {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const result = await this.issueList.getIssues(params).toPromise();
+      const result = await this.issueService.getIssues(params).toPromise();
       if (result) {
-        this.issues.set(result.results);
-        console.log('Issues loaded:', result.results);
-        this.paginationData.set(result);
+        this.issues.set(result?.results);
+        this.paginationData.set(result || null);
       }
     } catch (error) {
       this.error.set('Error loading issues');
+      console.error(error);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  // Modal methods
+  openCreateModal(): void {
+    this.showCreateModal.set(true);
+  }
+
+  closeCreateModal(): void {
+    this.showCreateModal.set(false);
+  }
+
+  onIssueCreated(): void {
+    this.closeCreateModal();
+    this.loadIssues({ project: this.projectId });
+  }
+
+  viewIssue(issueId: string): void {
+    this.selectedIssueId.set(issueId);
+    this.showDetailModal.set(true);
+  }
+
+  closeDetailModal(): void {
+    this.showDetailModal.set(false);
+    this.selectedIssueId.set(null);
+  }
+
+  editIssue(issueId: string): void {
+    this.selectedIssueId.set(issueId);
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.selectedIssueId.set(null);
+  }
+
+  onIssueUpdated(): void {
+    this.closeEditModal();
+    this.loadIssues({ project: this.projectId });
+  }
+
+  async deleteIssue(issueId: string): Promise<void> {
+    if (confirm('¿Estás seguro de que quieres eliminar esta issue?')) {
+      try {
+        await this.issueService.deleteIssue(issueId).toPromise();
+        this.loadIssues({ project: this.projectId });
+      } catch (error) {
+        console.error('Error deleting issue:', error);
+        this.error.set('Error al eliminar la issue');
+      }
+    }
+  }
+
+  goBack(): void {
+    // Vuelve a la página de detalle del proyecto
+    this.router.navigate(['/projects']);
   }
 }

@@ -5,13 +5,17 @@ import { PaginatedSprintList } from '../../../../core/models/api-interfaces';
 import { CommonModule } from '@angular/common';
 import { SprintDetailComponent } from '../sprint-detail/sprint-detail.component';
 import { SprintEditComponent } from '../sprint-edit/sprint-edit.component';
+import { RouterLink } from '@angular/router';
+import { TableModule } from "primeng/table";
 @Component({
   selector: 'app-sprint-list',
   imports: [
     CommonModule,
     SprintDetailComponent,
-    SprintEditComponent
-  ],
+    SprintEditComponent,
+    RouterLink,
+    TableModule
+],
   templateUrl: './sprint-list.component.html',
   styleUrl: './sprint-list.component.css'
 })

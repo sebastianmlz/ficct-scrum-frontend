@@ -24,5 +24,9 @@ export const projectsRoutes: Routes = [
   {
     path: ':id/config-create',
     loadComponent: () => import('./project-config-create/project-config-create.component').then(m => m.ProjectConfigCreateComponent)
+  },
+  {
+    path: ':id/issues',
+    loadComponent: () => import('./project-issues/issue-list/issue-list.component').then(m => m.IssueListComponent)
   }
 ];

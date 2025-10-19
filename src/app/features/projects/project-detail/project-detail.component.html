@@ -95,19 +95,14 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-xl font-bold text-gray-900">Sprints</h2>
                         <button class="bg-blue-500 text-white px-4 py-2 rounded" (click)="showSprintModal()">Add
-                            Sprint</button>
+                            Sprint
+                        </button>
                     </div>
                     <app-sprint-list [projectId]="project()?.id || ''"></app-sprint-list>
                     <app-sprint-create *ngIf="openModal()" [projectId]="project()?.id || ''"
                         (close)="openModal.set(false)"></app-sprint-create>
                 </div>
-                <div class="mt-6 bg-white rounded-lg shadow p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">Issues</h2>
-                        <app-issue-list [projectId]="project()?.id || ''">
-                        </app-issue-list>
-                    </div>
-                </div>
+
             </div>
             <!-- Project Configuration + Stats + Actions -->
             <div class="space-y-4 lg:w-80">

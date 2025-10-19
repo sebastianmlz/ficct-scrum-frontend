@@ -1,5 +1,6 @@
 <div *ngIf="sprints()?.length">
-  <div *ngFor="let sprint of sprints()" class="flex items-center justify-between p-4 mb-2 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+  <div *ngFor="let sprint of sprints()"
+    class="flex items-center justify-between p-4 mb-2 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
     <div class="flex flex-col gap-1">
       <div class="font-semibold text-gray-900 text-base">{{ sprint.name }}</div>
       <div class="text-xs text-gray-500">
@@ -16,51 +17,41 @@
         {{ sprint.status | titlecase }}
       </span>
       <div class="flex items-center gap-1 bg-gray-50 rounded px-2 py-1 border border-gray-200">
-        <button 
-          class="p-1 rounded hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition"
-          title="Ver Sprint"
-          (click)="showDetailSprintModal()"
-        >
+        <button class="p-1 rounded hover:bg-blue-100 text-blue-500 hover:text-blue-700 transition" title="Ver Sprint"
+          (click)="showDetailSprintModal()">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
         </button>
-        <button
-          class="p-1 rounded hover:bg-yellow-100 text-yellow-500 hover:text-yellow-700 transition"
-          title="Editar Sprint"
-          (click)="showEditSprintModal()"
-        >
+        <button class="p-1 rounded hover:bg-yellow-100 text-yellow-500 hover:text-yellow-700 transition"
+          title="Editar Sprint" (click)="showEditSprintModal()">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21H3v-3.5L16.732 3.732z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21H3v-3.5L16.732 3.732z" />
           </svg>
         </button>
-        <button
-          class="p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700 transition"
-          title="Eliminar Sprint"
-          (click)="deleteSprint(sprint.id)"
-        >
+        <button class="p-1 rounded hover:bg-red-100 text-red-500 hover:text-red-700 transition" title="Eliminar Sprint"
+          (click)="deleteSprint(sprint.id)">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1zm-4 0a1 1 0 011-1h4a1 1 0 011 1v1H6V4z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1zm-4 0a1 1 0 011-1h4a1 1 0 011 1v1H6V4z" />
           </svg>
         </button>
-		<button
-			class="mt-2 px-8 py-2 rounded-xl bg-slate-500 text-white"
-			(click)="startSprint(sprint.id)"
-		>
-			<i class="pi pi-play"></i>
-		</button>
+        <button class="p-1 rounded hover:bg-red-100 text-green-500 hover:text-green-700 transition"
+          title="Iniciar Sprint" (click)="startSprint(sprint.id)">
+          <i class="pi pi-play" style="color: slateblue"></i>
+        </button>
       </div>
+      <a [routerLink]=" ['/projects', projectId, 'issues' ]" class="text-blue-500 hover:underline ">
+        View Issues
+      </a>
     </div>
-    <app-sprint-edit
-      *ngIf="openModalEdit()"
-      [sprintId]="sprint.id || ''"
-      (close)="openModalEdit.set(false)"
-    ></app-sprint-edit>
-    <app-sprint-detail
-      *ngIf="openModalDetail()"
-      [sprintId]="sprint.id || ''"
-      (close)="openModalDetail.set(false)"
-    ></app-sprint-detail>
+    <app-sprint-edit *ngIf="openModalEdit()" [sprintId]="sprint.id || ''"
+      (close)="openModalEdit.set(false)"></app-sprint-edit>
+    <app-sprint-detail *ngIf="openModalDetail()" [sprintId]="sprint.id || ''"
+      (close)="openModalDetail.set(false)"></app-sprint-detail>
   </div>
 </div>
