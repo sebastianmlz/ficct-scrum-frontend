@@ -1,0 +1,75 @@
+<div class="dialog-overlay" (click)="onCancel()">
+  <div class="dialog-content" (click)="$event.stopPropagation()">
+    <h2 style="margin: 0 0 24px 0; font-size: 20px; font-weight: 600; color: #111827;">Create Issue</h2>
+
+    <form [formGroup]="issueForm" (ngSubmit)="onSubmit()">
+      <!-- Title -->
+      <div class="form-group">
+        <label>
+          Title <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          formControlName="title"
+          placeholder="Enter issue title"
+          [class.error]="issueForm.get('title')?.invalid && issueForm.get('title')?.touched"
+        />
+        @if (getFieldError('title')) {
+          <div class="error-text">{{ getFieldError('title') }}</div>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          formControlName="description"
+          placeholder="Enter issue description (optional)"
+        ></textarea>
+      </div>
+
+      <!-- Issue Type -->
+      <div class="form-group">
+        <label>
+          Issue Type <span class="required">*</span>
+        </label>
+        <select
+          formControlName="issue_type"
+          [class.error]="issueForm.get('issue_type')?.invalid && issueForm.get('issue_type')?.touched"
+        >
+          <option value="">Select issue type</option>
+          @for (type of issueTypes(); track type.id) {
+            <option [value]="type.id">{{ type.name }}</option>
+          }
+        </select>
+        @if (getFieldError('issue_type')) {
+          <div class="error-text">{{ getFieldError('issue_type') }}</div>
+        }
+      </div>
+
+      <!-- Priority -->
+      <div class="form-group">
+        <label>Priority</label>
+        <select formControlName="priority">
+          @for (priority of priorities; track priority.value) {
+            <option [value]="priority.value">{{ priority.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="button-group">
+        <button type="button" class="btn-secondary" (click)="onCancel()" [disabled]="loading()">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="loading() || issueForm.invalid">
+          @if (loading()) {
+            <span>Creating...</span>
+          } @else {
+            <span>Create Issue</span>
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

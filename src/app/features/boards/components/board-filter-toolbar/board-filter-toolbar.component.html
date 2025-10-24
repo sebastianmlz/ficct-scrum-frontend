@@ -1,0 +1,371 @@
+<!-- Toolbar Container -->
+<div class="board-filter-toolbar">
+  <!-- Main Controls Row -->
+  <div class="toolbar-controls">
+    <!-- Search Box -->
+    <div class="search-container">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search issues..."
+        [value]="filters().search"
+        (input)="onSearchInput($event)"
+        class="search-input">
+      @if (filters().search) {
+        <button (click)="clearFilterType('search')" class="clear-search-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    <!-- Mobile Filters Button (visible only on mobile) -->
+    <button (click)="toggleMobileFilters()" class="filters-mobile-btn">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+      </svg>
+      <span>Filters</span>
+      @if (hasActiveFilters()) {
+        <span class="filter-count">{{ activeFiltersCount() }}</span>
+      }
+    </button>
+
+    <!-- Filter Dropdowns (hidden on mobile) -->
+    <div class="filter-dropdowns">
+      <!-- Priority Dropdown -->
+      <div class="dropdown-container">
+        <button 
+          (click)="togglePriorityDropdown($event)" 
+          class="dropdown-trigger"
+          [class.active]="filters().priorities.length > 0">
+          <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          <span>Priority</span>
+          @if (filters().priorities.length > 0) {
+            <span class="filter-count">{{ filters().priorities.length }}</span>
+          }
+          <svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Priority Dropdown Content -->
+        @if (showPriorityDropdown()) {
+          <div class="dropdown-content" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <span class="dropdown-title">Filter by Priority</span>
+              @if (filters().priorities.length > 0) {
+                <button (click)="clearFilterType('priority')" class="clear-section-btn">Clear</button>
+              }
+            </div>
+            <div class="dropdown-list">
+              @for (priority of priorities; track priority.code) {
+                <label class="dropdown-item">
+                  <input
+                    type="checkbox"
+                    [checked]="isPrioritySelected(priority.code)"
+                    (change)="togglePriority(priority.code)">
+                  <span 
+                    class="priority-badge"
+                    [style.background-color]="priority.bgColor"
+                    [style.color]="priority.textColor">
+                    {{ priority.label }}
+                  </span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Assignee Dropdown -->
+      <div class="dropdown-container">
+        <button 
+          (click)="toggleAssigneeDropdown($event)" 
+          class="dropdown-trigger"
+          [class.active]="filters().assignees.length > 0">
+          <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span>Assignee</span>
+          @if (filters().assignees.length > 0) {
+            <span class="filter-count">{{ filters().assignees.length }}</span>
+          }
+          <svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Assignee Dropdown Content -->
+        @if (showAssigneeDropdown()) {
+          <div class="dropdown-content dropdown-content-scrollable" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <span class="dropdown-title">Filter by Assignee</span>
+              @if (filters().assignees.length > 0) {
+                <button (click)="clearFilterType('assignee')" class="clear-section-btn">Clear</button>
+              }
+            </div>
+            
+            <!-- Search within assignees -->
+            @if (availableMembers.length > 8) {
+              <div class="dropdown-search">
+                <svg class="search-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search members..."
+                  [value]="assigneeSearch()"
+                  (input)="assigneeSearch.set($any($event.target).value)"
+                  class="search-input-small">
+              </div>
+            }
+
+            <div class="dropdown-list">
+              @for (member of filteredMembers(); track member.user?.id || member.user?.user_uuid) {
+                <label class="dropdown-item">
+                  <input
+                    type="checkbox"
+                    [checked]="isAssigneeSelected(member.user?.id || member.user?.user_uuid)"
+                    (change)="toggleAssignee(member.user?.id || member.user?.user_uuid)">
+                  <div class="user-info">
+                    @if (getUserAvatar(member.user)) {
+                      <img [src]="getUserAvatar(member.user)" [alt]="member.user?.full_name" class="user-avatar">
+                    } @else {
+                      <div class="user-avatar-placeholder">{{ getUserInitials(member.user) }}</div>
+                    }
+                    <span class="user-name">{{ member.user?.full_name || member.user?.email }}</span>
+                  </div>
+                </label>
+              }
+              @if (filteredMembers().length === 0) {
+                <div class="no-results">No members found</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Issue Type Dropdown -->
+      <div class="dropdown-container">
+        <button 
+          (click)="toggleTypeDropdown($event)" 
+          class="dropdown-trigger"
+          [class.active]="filters().issueTypes.length > 0">
+          <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+          <span>Type</span>
+          @if (filters().issueTypes.length > 0) {
+            <span class="filter-count">{{ filters().issueTypes.length }}</span>
+          }
+          <svg class="chevron-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
+        <!-- Issue Type Dropdown Content -->
+        @if (showTypeDropdown()) {
+          <div class="dropdown-content" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <span class="dropdown-title">Filter by Type</span>
+              @if (filters().issueTypes.length > 0) {
+                <button (click)="clearFilterType('type')" class="clear-section-btn">Clear</button>
+              }
+            </div>
+
+            @if (availableIssueTypes.length > 8) {
+              <div class="dropdown-search">
+                <svg class="search-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search types..."
+                  [value]="typeSearch()"
+                  (input)="typeSearch.set($any($event.target).value)"
+                  class="search-input-small">
+              </div>
+            }
+
+            <div class="dropdown-list">
+              @for (type of filteredIssueTypes(); track type.id) {
+                <label class="dropdown-item">
+                  <input
+                    type="checkbox"
+                    [checked]="isIssueTypeSelected(type.id)"
+                    (change)="toggleIssueType(type.id)">
+                  <div class="type-info">
+                    <span class="type-icon">{{ getIssueTypeIcon(type) }}</span>
+                    <span class="type-name">{{ type.name }}</span>
+                  </div>
+                </label>
+              }
+              @if (filteredIssueTypes().length === 0) {
+                <div class="no-results">No types found</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Results Count & Clear All -->
+    <div class="toolbar-actions">
+      @if (totalIssuesCount > 0) {
+        <span class="results-count">
+          {{ filteredIssuesCount }} of {{ totalIssuesCount }}
+        </span>
+      }
+      
+      @if (hasActiveFilters()) {
+        <button (click)="clearAllFilters()" class="clear-all-btn">
+          Clear filters
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Active Filters Badges Row -->
+  @if (activeFilterBadges().length > 0) {
+    <div class="active-filters-row">
+      <span class="active-filters-label">Active filters:</span>
+      <div class="filter-badges">
+        @for (badge of activeFilterBadges(); track $index) {
+          <div class="filter-badge">
+            <span class="badge-label">{{ badge.label }}:</span>
+            <span class="badge-value">{{ badge.value }}</span>
+            <button 
+              (click)="clearFilterType(badge.type, badge.value)" 
+              class="badge-remove"
+              [attr.aria-label]="'Remove ' + badge.label + ' filter'">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Mobile Filters Drawer -->
+@if (showMobileDrawer()) {
+  <div class="mobile-drawer-overlay" (click)="closeMobileFilters()">
+    <div class="mobile-drawer" (click)="$event.stopPropagation()">
+      <!-- Drawer Header -->
+      <div class="drawer-header">
+        <h3 class="drawer-title">Filters</h3>
+        <button (click)="closeMobileFilters()" class="drawer-close-btn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Drawer Content -->
+      <div class="drawer-content">
+        <!-- Priority Filter -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">Priority</h4>
+          <div class="drawer-options">
+            @for (priority of priorities; track priority.code) {
+              <label class="drawer-option">
+                <input
+                  type="checkbox"
+                  [checked]="isPrioritySelected(priority.code)"
+                  (change)="togglePriority(priority.code)">
+                <span 
+                  class="priority-badge"
+                  [style.background-color]="priority.bgColor"
+                  [style.color]="priority.textColor">
+                  {{ priority.label }}
+                </span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Assignee Filter -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">Assignee</h4>
+          @if (availableMembers.length > 8) {
+            <input
+              type="text"
+              placeholder="Search members..."
+              [value]="assigneeSearch()"
+              (input)="assigneeSearch.set($any($event.target).value)"
+              class="drawer-search">
+          }
+          <div class="drawer-options">
+            @for (member of filteredMembers(); track member.user?.id || member.user?.user_uuid) {
+              <label class="drawer-option">
+                <input
+                  type="checkbox"
+                  [checked]="isAssigneeSelected(member.user?.id || member.user?.user_uuid)"
+                  (change)="toggleAssignee(member.user?.id || member.user?.user_uuid)">
+                <div class="user-info">
+                  @if (getUserAvatar(member.user)) {
+                    <img [src]="getUserAvatar(member.user)" [alt]="member.user?.full_name" class="user-avatar">
+                  } @else {
+                    <div class="user-avatar-placeholder">{{ getUserInitials(member.user) }}</div>
+                  }
+                  <span class="user-name">{{ member.user?.full_name || member.user?.email }}</span>
+                </div>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Issue Type Filter -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">Issue Type</h4>
+          @if (availableIssueTypes.length > 8) {
+            <input
+              type="text"
+              placeholder="Search types..."
+              [value]="typeSearch()"
+              (input)="typeSearch.set($any($event.target).value)"
+              class="drawer-search">
+          }
+          <div class="drawer-options">
+            @for (type of filteredIssueTypes(); track type.id) {
+              <label class="drawer-option">
+                <input
+                  type="checkbox"
+                  [checked]="isIssueTypeSelected(type.id)"
+                  (change)="toggleIssueType(type.id)">
+                <div class="type-info">
+                  <span class="type-icon">{{ getIssueTypeIcon(type) }}</span>
+                  <span class="type-name">{{ type.name }}</span>
+                </div>
+              </label>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="drawer-footer">
+        <button (click)="clearAllFilters(); closeMobileFilters()" class="drawer-btn-secondary">
+          Clear All
+        </button>
+        <button (click)="closeMobileFilters()" class="drawer-btn-primary">
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

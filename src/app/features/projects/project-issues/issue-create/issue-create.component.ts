@@ -43,13 +43,23 @@ export class IssueCreateComponent {
 
   async loadIssueTypes(): Promise<void> {
     try {
-      const types = await this.issueService.getIssueTypes().toPromise();
+      console.log('[ISSUE CREATE] Loading issue types for project:', this.projectId);
+      
+      // ✅ CRITICAL FIX: Filter issue types by project
+      const types = await this.issueService.getIssueTypes(this.projectId).toPromise();
+      
       if (types) {
+        console.log('[ISSUE CREATE] ✅ Issue types loaded:', types.results.length);
         this.issuesTypes.set(types);
         this.issueTypes.set(types.results || []);
+        
+        if (types.results.length === 0) {
+          console.warn('[ISSUE CREATE] ⚠️ No issue types found for project:', this.projectId);
+          this.error.set('No issue types available for this project');
+        }
       }
     } catch (error) {
-      console.error('Error loading issue types:', error);
+      console.error('[ISSUE CREATE] ❌ Error loading issue types:', error);
       this.error.set('Error al cargar los tipos de issue');
     }
   }

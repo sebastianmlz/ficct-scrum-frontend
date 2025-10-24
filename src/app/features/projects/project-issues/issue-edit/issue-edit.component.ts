@@ -40,19 +40,29 @@ export class IssueEditComponent {
   }
 
   ngOnInit(): void {
-    this.loadIssueTypes();
+    // Load issue first to get projectId, then load issue types filtered by project
     this.loadIssue();
   }
 
-  async loadIssueTypes(): Promise<void> {
+  async loadIssueTypes(projectId: string): Promise<void> {
     try {
-      const types = await this.issueService.getIssueTypes().toPromise();
+      console.log('[ISSUE EDIT] Loading issue types for project:', projectId);
+      
+      // ✅ CRITICAL FIX: Filter issue types by project
+      const types = await this.issueService.getIssueTypes(projectId).toPromise();
+      
       if (types) {
+        console.log('[ISSUE EDIT] ✅ Issue types loaded:', types.results.length);
         this.issuesTypes.set(types);
         this.issueTypes.set(types.results || []);
+        
+        if (types.results.length === 0) {
+          console.warn('[ISSUE EDIT] ⚠️ No issue types found for project:', projectId);
+          this.error.set('No issue types available for this project');
+        }
       }
     } catch (error) {
-      console.error('Error loading issue types:', error);
+      console.error('[ISSUE EDIT] ❌ Error loading issue types:', error);
       this.error.set('Error al cargar los tipos de issue');
     }
   }
@@ -60,9 +70,22 @@ export class IssueEditComponent {
   async loadIssue(): Promise<void> {
     this.loading.set(true);
     try {
+      console.log('[ISSUE EDIT] Loading issue:', this.issueId);
       const issueData = await this.issueService.getIssue(this.issueId).toPromise();
+      
       if (issueData) {
+        console.log('[ISSUE EDIT] ✅ Issue loaded:', issueData);
         this.issue.set(issueData);
+        
+        // ✅ CRITICAL: Load issue types filtered by project
+        const projectId = issueData.project?.id;
+        if (projectId) {
+          console.log('[ISSUE EDIT] Project ID from issue:', projectId);
+          await this.loadIssueTypes(projectId);
+        } else {
+          console.error('[ISSUE EDIT] ❌ Issue has no project ID');
+        }
+        
         // Llenar el formulario con los datos de la issue
         this.issueForm.patchValue({
           title: issueData.title,
@@ -75,7 +98,7 @@ export class IssueEditComponent {
         });
       }
     } catch (error) {
-      console.error('Error loading issue:', error);
+      console.error('[ISSUE EDIT] ❌ Error loading issue:', error);
       this.error.set('Error al cargar la issue');
     } finally {
       this.loading.set(false);

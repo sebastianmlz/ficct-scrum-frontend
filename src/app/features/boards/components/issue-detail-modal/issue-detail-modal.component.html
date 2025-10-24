@@ -1,0 +1,194 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 flex-1">
+          <span *ngIf="issue()?.issue_type" [class]="'badge ' + getIssueTypeBadgeClass(issue()?.issue_type?.category)">
+            {{ issue()?.issue_type?.name }}
+          </span>
+          <span class="badge bg-gray-100 text-gray-700">
+            {{ issue()?.key || (issue()?.id ? issue()!.id.substring(0, 8) : '') }}
+          </span>
+          <span *ngIf="issue()?.priority" [class]="'badge ' + getPriorityClass(issue()!.priority)">
+            {{ issue()!.priority }}
+          </span>
+        </div>
+        <button
+          (click)="onClose()"
+          class="text-gray-400 hover:text-gray-600 p-2"
+          aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading()" class="modal-body">
+      <div class="flex items-center justify-center py-12">
+        <div class="loading-spinner"></div>
+        <span class="ml-3 text-gray-600">Loading issue details...</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div *ngIf="!loading() && issue()" class="modal-body">
+      <form [formGroup]="issueForm">
+        <!-- Title -->
+        <div class="section">
+          <input
+            type="text"
+            formControlName="title"
+            class="title-input"
+            placeholder="Issue title"
+            [class.border-red-300]="issueForm.get('title')?.invalid && issueForm.get('title')?.touched" />
+          <div *ngIf="issueForm.get('title')?.hasError('required') && issueForm.get('title')?.touched" 
+               class="text-red-500 text-sm mt-1">
+            Title is required
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="section">
+          <label>Description</label>
+          <textarea
+            formControlName="description"
+            placeholder="Add a more detailed description..."
+            rows="6"></textarea>
+        </div>
+
+        <!-- Form Row: Assignee & Status -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Assignee</label>
+            <select formControlName="assignee">
+              <option [ngValue]="null">Unassigned</option>
+              @for (member of workspaceMembers(); track member.id) {
+                <!-- ⚠️ TEMPORAL: Usando user_uuid si existe, sino user.id como fallback -->
+                <!-- TODO: Backend debe agregar user_uuid al serializer UserBasic -->
+                <option [ngValue]="member.user.user_uuid || member.user.id">{{ member.user.full_name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Status</label>
+            <select formControlName="status">
+              <option [ngValue]="null">None</option>
+              @for (status of workflowStatuses(); track status.id) {
+                <option [ngValue]="status.id">{{ status.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Form Row: Issue Type & Priority -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Issue Type</label>
+            <select formControlName="issue_type">
+              <option value="">Select issue type</option>
+              @for (type of issueTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Priority</label>
+            <select formControlName="priority">
+              @for (priority of priorities; track priority.value) {
+                <option [value]="priority.value">{{ priority.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Form Row: Story Points & Estimated Hours -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Story Points</label>
+            <input
+              type="number"
+              formControlName="story_points"
+              min="0"
+              placeholder="0" />
+          </div>
+
+          <div class="form-group">
+            <label>Estimated Hours</label>
+            <input
+              type="number"
+              formControlName="estimated_hours"
+              min="0"
+              step="0.5"
+              placeholder="0.0" />
+          </div>
+        </div>
+
+        <!-- Issue Metadata -->
+        <div class="section">
+          <div class="section-title">Metadata</div>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between py-2 border-b border-gray-100">
+              <span class="text-gray-600">Reporter</span>
+              <div class="flex items-center gap-2">
+                <div *ngIf="issue()?.reporter" class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-medium">
+                  {{ issue()?.reporter?.full_name?.charAt(0) }}
+                </div>
+                <span class="font-medium">{{ issue()?.reporter?.full_name || 'Unknown' }}</span>
+              </div>
+            </div>
+            <div class="flex justify-between py-2 border-b border-gray-100">
+              <span class="text-gray-600">Created</span>
+              <span class="font-medium">{{ issue()?.created_at | date:'short' }}</span>
+            </div>
+            <div class="flex justify-between py-2">
+              <span class="text-gray-600">Updated</span>
+              <span class="font-medium">{{ issue()?.updated_at | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="!loading()" class="modal-footer">
+      <button
+        type="button"
+        (click)="onDelete()"
+        [disabled]="deleting()"
+        class="btn-danger mr-auto">
+        <span *ngIf="!deleting()">Delete</span>
+        <span *ngIf="deleting()" class="flex items-center gap-2">
+          <span class="loading-spinner"></span>
+          Deleting...
+        </span>
+      </button>
+
+      <button
+        type="button"
+        (click)="onClose()"
+        class="btn-secondary"
+        [disabled]="saving() || deleting()">
+        Close
+      </button>
+
+      <button
+        type="button"
+        (click)="onSave()"
+        [disabled]="issueForm.invalid || !hasUnsavedChanges || saving() || deleting()"
+        class="btn-primary">
+        <span *ngIf="!saving()">Save Changes</span>
+        <span *ngIf="saving()" class="flex items-center gap-2">
+          <span class="loading-spinner"></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+
+  </div>
+</div>

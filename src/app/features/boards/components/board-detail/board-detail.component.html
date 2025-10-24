@@ -1,0 +1,186 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex items-center justify-center min-h-screen">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Loading board...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="flex items-center justify-center min-h-screen px-4">
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
+      <div class="flex">
+        <svg class="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">Error loading board</h3>
+          <p class="mt-2 text-sm text-red-700">{{ error() }}</p>
+          <button
+            (click)="loadBoard()"
+            class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+            Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Board Content -->
+  <div *ngIf="board() && !loading()" class="flex flex-col h-screen">
+    <!-- Header - Responsive -->
+    <div class="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-3 md:py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-4">
+          <button
+            *ngIf="board()"
+            (click)="router.navigate(['/projects', board()!.project.id])"
+            class="text-gray-600 hover:text-gray-900">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 truncate">{{ board()?.name }}</h1>
+            <p class="text-xs sm:text-sm text-gray-600 truncate hidden sm:block">{{ board()?.description }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 md:gap-4">
+          <!-- WebSocket Connection Indicator -->
+          <div class="flex items-center gap-2">
+            <div
+              [class]="wsConnected() ? 'w-2 h-2 bg-green-500 rounded-full' : 'w-2 h-2 bg-red-500 rounded-full'">
+            </div>
+            <span class="text-sm text-gray-600">
+              {{ wsConnected() ? 'Connected' : 'Disconnected' }}
+            </span>
+          </div>
+
+          <!-- Active Users - Hidden on mobile -->
+          <div *ngIf="activeUsers().length > 0" class="hidden md:flex items-center gap-2">
+            <div class="flex -space-x-2">
+              <div
+                *ngFor="let user of activeUsers().slice(0, 5)"
+                class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-white"
+                [title]="user.user_name">
+                {{ user.user_name.charAt(0).toUpperCase() }}
+              </div>
+              <div
+                *ngIf="activeUsers().length > 5"
+                class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-medium border-2 border-white">
+                +{{ activeUsers().length - 5 }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions - Responsive -->
+          <button
+            (click)="openSettings()"
+            class="px-2 py-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors hidden sm:inline-flex items-center">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 inline sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span class="hidden sm:inline">Settings</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ NEW: Horizontal Filter Toolbar -->
+    <app-board-filter-toolbar
+      [availableMembers]="availableMembers()"
+      [availableIssueTypes]="availableIssueTypes()"
+      [availableStatuses]="[]"
+      [totalIssuesCount]="getTotalIssuesCount()"
+      [filteredIssuesCount]="getFilteredIssuesCount()"
+      (filtersChanged)="onToolbarFiltersChanged($event)"
+      (searchChanged)="onSearchChange($event)">
+    </app-board-filter-toolbar>
+
+    <!-- Kanban Board - Responsive Layout -->
+    <div class="flex-1 overflow-x-auto overflow-y-hidden bg-gray-50 px-2 sm:px-4 md:px-6 py-3 md:py-4 relative">
+      <!-- Empty State - No Columns -->
+      <div *ngIf="columns().length === 0" class="flex items-center justify-center h-full">
+        <div class="text-center max-w-md">
+          <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
+          <p class="text-sm text-gray-600 mb-6">
+            Get started by adding your first column to organize your work
+          </p>
+          <button
+            (click)="onAddColumn()"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Your First Column
+          </button>
+        </div>
+      </div>
+
+      <!-- Columns - Horizontal on desktop, vertical on mobile -->
+      <div *ngIf="columns().length > 0" class="flex flex-col md:flex-row gap-3 md:gap-4 h-full md:overflow-x-auto">
+        <app-board-column
+          *ngFor="let column of columns(); trackBy: trackByColumnId"
+          [column]="column"
+          [issues]="getIssuesForColumn(column)"
+          [connectedDropLists]="connectedDropLists()"
+          (issueDropped)="onIssueDropped($event)"
+          (createIssueClicked)="onCreateIssueClicked($event)"
+          (issueClicked)="onIssueClicked($event)">
+        </app-board-column>
+
+        <!-- Add Column Button - Responsive -->
+        <div class="bg-gray-200 rounded-lg p-3 w-full md:min-w-[280px] md:max-w-[280px] lg:min-w-[300px] lg:max-w-[300px] flex items-center justify-center md:flex-shrink-0">
+          <button
+            (click)="onAddColumn()"
+            class="w-full px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-300 rounded transition-colors flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Add Column
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Column Dialog Overlay -->
+  <div
+    *ngIf="showCreateColumnDialog() && board()?.project?.id"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <app-create-column-dialog
+      [boardId]="boardId"
+      [projectId]="board()!.project.id"
+      (columnCreated)="onColumnCreated($event)"
+      (canceled)="onColumnDialogCanceled()">
+    </app-create-column-dialog>
+  </div>
+
+  <!-- Create Issue Dialog -->
+  @if (showCreateIssueDialog() && board()?.project?.id) {
+    <app-create-issue-dialog
+      [boardId]="boardId"
+      [projectId]="board()!.project.id"
+      [defaultStatusId]="createIssueColumnId() || undefined"
+      (issueCreated)="onIssueCreatedFromDialog($event)"
+      (canceled)="onIssueDialogCanceled()">
+    </app-create-issue-dialog>
+  }
+
+  <!-- Issue Detail Modal -->
+  @if (showIssueDetailModal() && selectedIssueId() && board()?.project?.id) {
+    <app-issue-detail-modal
+      [issueId]="selectedIssueId()!"
+      [projectId]="board()!.project.id"
+      (closed)="onIssueDetailClosed()"
+      (issueUpdated)="onIssueUpdatedFromModal($event)"
+      (issueDeleted)="onIssueDeletedFromModal($event)">
+    </app-issue-detail-modal>
+  }
+</div>

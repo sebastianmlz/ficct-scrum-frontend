@@ -25,6 +25,7 @@ import {
 // Base/Common Interfaces
 export interface User {
   id: number;
+  user_uuid?: string; // UUID representation for assignee fields
   username: string;
   email: string;
   first_name: string;
@@ -42,6 +43,7 @@ export interface User {
 
 export interface UserBasic {
   id: number;
+  user_uuid?: string; // UUID representation for assignee fields
   username: string;
   email: string;
   first_name: string;
@@ -49,7 +51,6 @@ export interface UserBasic {
   full_name: string;
   avatar_url?: string;
 }
-
 
 export interface UserProfileNested {
   avatar_url: string;
@@ -529,6 +530,7 @@ export interface IssueStatus {
 
 export interface Issue {
   id: string;
+  key?: string;
   title: string;
   description?: string;
   project: ProjectBasic;
@@ -558,3 +560,182 @@ export interface IssueRequest {
   actual_hours?: number;
   story_points?: number;
 }
+
+// Board-related Interfaces
+export interface WorkflowStatus {
+  id: string;
+  name: string;
+  color: string;
+  is_initial: boolean;
+  is_final: boolean;
+}
+
+export interface BoardColumn {
+  id: string;
+  name: string;
+  workflow_status: WorkflowStatus;
+  order: number;
+  min_wip: number | null;
+  max_wip: number | null;
+  issue_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Board {
+  id: string;
+  project: ProjectBasic;
+  name: string;
+  description: string;
+  board_type: 'kanban' | 'scrum';
+  saved_filter: Record<string, any>;
+  columns?: BoardColumn[];
+  column_count: number;
+  issue_count: number;
+  created_by: UserBasic;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateBoardRequest {
+  project: string;
+  name: string;
+  description?: string;
+  board_type?: 'kanban' | 'scrum';
+  saved_filter?: Record<string, any>;
+}
+
+export interface UpdateBoardRequest {
+  name?: string;
+  description?: string;
+  board_type?: 'kanban' | 'scrum';
+  saved_filter?: Record<string, any>;
+}
+
+export interface CreateColumnRequest {
+  workflow_status_id: string;
+  name?: string;
+  order?: number;
+  min_wip?: number;
+  max_wip?: number;
+}
+
+export interface UpdateColumnRequest {
+  name?: string;
+  order?: number;
+  min_wip?: number;
+  max_wip?: number;
+}
+
+export interface MoveIssueRequest {
+  column_id: string;
+}
+
+export interface BoardFilters {
+  assignee?: string[];
+  priority?: string[];
+  issue_type?: string[];
+  search?: string;
+}
+
+export interface CreateIssueQuickRequest {
+  title: string;
+  description?: string;
+  issue_type: string;
+  priority?: string;
+  assignee?: string;
+  story_points?: number;
+}
+
+// WebSocket Event Interfaces
+export interface WebSocketMessage {
+  type: WebSocketEventType;
+  data: any;
+}
+
+export type WebSocketEventType =
+  | 'user.joined'
+  | 'user.left'
+  | 'issue.moved'
+  | 'issue.created'
+  | 'issue.updated'
+  | 'issue.deleted'
+  | 'column.created'
+  | 'column.updated'
+  | 'column.deleted';
+
+export interface UserJoinedData {
+  user_id: string;
+  user_name: string;
+}
+
+export interface IssueMovedData {
+  issue: Issue;
+  from_status: string;
+  to_status: string;
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface IssueCreatedData {
+  issue: Issue;
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface IssueUpdatedData {
+  issue: Issue;
+  fields_changed: string[];
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface IssueDeletedData {
+  issue_id: string;
+  issue_key: string;
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ColumnCreatedData {
+  column: BoardColumn;
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ColumnUpdatedData {
+  column: BoardColumn;
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ColumnDeletedData {
+  column_id: string;
+  column_name: string;
+  timestamp: string;
+  user: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface PaginatedBoardList extends PaginatedResponse<Board> { }
+export interface PaginatedIssueList extends PaginatedResponse<Issue> { }

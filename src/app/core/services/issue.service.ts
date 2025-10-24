@@ -30,10 +30,20 @@ export class IssueService {
     return this.http.get<PaginatedIssueList>(`${this.baseUrl}?${query}`, { headers });
   }
 
-  getIssueTypes(): Observable<PaginatedIssueTypeList> {
+  getIssueTypes(projectId?: string): Observable<PaginatedIssueTypeList> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<PaginatedIssueTypeList>(`${environment.apiUrl}/api/v1/projects/issue-types/`, { headers });
+    
+    // Construir URL con filtro de proyecto si se proporciona
+    let url = `${environment.apiUrl}/api/v1/projects/issue-types/`;
+    if (projectId) {
+      url += `?project=${projectId}`;
+      console.log('[ISSUE SERVICE] Fetching issue types for project:', projectId);
+    } else {
+      console.warn('[ISSUE SERVICE] ⚠️ Fetching ALL issue types (no project filter)');
+    }
+    
+    return this.http.get<PaginatedIssueTypeList>(url, { headers });
   }
 
   createIssue(issueData: IssueRequest): Observable<Issue> {

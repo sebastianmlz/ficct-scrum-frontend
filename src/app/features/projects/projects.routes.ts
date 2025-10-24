@@ -28,5 +28,9 @@ export const projectsRoutes: Routes = [
   {
     path: ':id/issues',
     loadComponent: () => import('./project-issues/issue-list/issue-list.component').then(m => m.IssueListComponent)
+  },
+  {
+    path: ':id/boards',
+    loadChildren: () => import('../boards/boards.routes').then(m => m.boardsRoutes)
   }
 ];
