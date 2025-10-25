@@ -1,231 +1,261 @@
-<div class="min-h-screen bg-gray-50">
-    @if (loading()) {
+<div class="min-h-screen bg-gray-50" (click)="closeAllDropdowns()">
+  <!-- Loading State -->
+  @if (loading()) {
     <div class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
-    } @else if (error()) {
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-red-50 border border-red-200 rounded-md p-4">
-            <div class="flex">
-                <div class="ml-3">
-                    <h3 class="text-sm font-medium text-red-800">Error loading project</h3>
-                    <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
-                </div>
-            </div>
+  }
+  
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex">
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Error loading project</h3>
+            <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
+          </div>
         </div>
+      </div>
     </div>
-    } @else if (project()) {
-    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <button type="button" (click)="goBack()" class="p-2 rounded-md text-gray-400 hover:text-gray-500">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                    </button>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ project()?.name }}</h1>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        [class]="getStatusBadgeClass(project()?.status || '')">
-                        {{ project()?.status }}
-                    </span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        [class]="getPriorityBadgeClass(project()?.priority || '')">
-                        {{ project()?.priority }}
-                    </span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <a [routerLink]="['/projects', project()?.id, 'edit']"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
-                        Edit Project
-                    </a>
-                    <button type="button"
-                        class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700">
-                        Archive Project
-                    </button>
-                    <a [routerLink]="['/projects', project()?.id, 'config-create']"
-                        class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700">
-                        Configure Project
-                    </a>
-                </div>
+  }
+  
+  <!-- Project Loaded -->
+  @else if (project()) {
+    <!-- Sticky Header -->
+    <header class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+      <div class="max-w-[1600px] mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <!-- Left: Back + Project Info -->
+          <div class="flex items-center space-x-4">
+            <button 
+              type="button" 
+              (click)="goBack()" 
+              class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+            </button>
+            
+            @if (project()?.cover_image_url) {
+              <img [src]="project()?.cover_image_url" [alt]="project()?.name" 
+                   class="h-10 w-10 rounded-lg object-cover border border-gray-200">
+            } @else {
+              <div class="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-semibold text-lg">
+                {{ (project()?.name?.charAt(0) || 'P').toUpperCase() }}
+              </div>
+            }
+            
+            <div class="flex items-center gap-3">
+              <h1 class="text-xl font-bold text-gray-900">{{ project()?.name }}</h1>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [class]="getStatusBadgeClass(project()?.status || '')">
+                {{ formatLabel(project()?.status || '') }}
+              </span>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [class]="getPriorityBadgeClass(project()?.priority || '')">
+                {{ formatLabel(project()?.priority || '') }}
+              </span>
             </div>
+          </div>
+          
+          <!-- Right: Action Buttons -->
+          <div class="flex items-center gap-3">
+            <a [routerLink]="['/projects', project()?.id, 'edit']"
+               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+              Edit
+            </a>
+            <a [routerLink]="['/projects', project()?.id, 'config']"
+               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+              Settings
+            </a>
+          </div>
         </div>
+      </div>
+    </header>
 
-        <!-- Cover Image -->
-        @if (project()?.cover_image_url) {
-        <div class="mb-6">
-            <img [src]="project()?.cover_image_url" [alt]="project()?.name" class="w-full h-48 object-cover rounded-lg">
-        </div>
-        }
-
-        <!-- Project Info Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Content -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Description -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Description</h2>
-                    <p class="text-gray-700">{{ project()?.description || 'No description provided.' }}</p>
-                </div>
-
-                <!-- Timeline -->
-                <div class="bg-white shadow rounded-lg p-6">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Project Timeline</h2>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                            <span class="text-sm font-medium text-gray-500">Project Started</span>
-                            <span class="text-sm text-gray-900">{{ project()?.created_at | date:'mediumDate' }}</span>
-                        </div>
-                        @if (project()?.due_date) {
-                        <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                            <span class="text-sm font-medium text-gray-500">Due Date</span>
-                            <span class="text-sm text-gray-900">{{ project()?.due_date | date:'mediumDate' }}</span>
-                        </div>
-                        }
-                        <div class="flex items-center justify-between py-2 border-b border-gray-200">
-                            <span class="text-sm font-medium text-gray-500">Last Updated</span>
-                            <span class="text-sm text-gray-900">{{ project()?.updated_at | date:'mediumDate' }}</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Sprints: carta separada debajo del timeline -->
-                <div class="bg-white shadow rounded-lg p-6 mt-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold text-gray-900">Sprints</h2>
-                        <button class="bg-blue-500 text-white px-4 py-2 rounded" (click)="showSprintModal()">Add
-                            Sprint
-                        </button>
-                    </div>
-                    <app-sprint-list 
-                      [projectId]="project()?.id || ''" 
-                      [projectName]="project()?.name"></app-sprint-list>
-                    <app-sprint-create *ngIf="openModal()" [projectId]="project()?.id || ''"
-                        (close)="openModal.set(false)"></app-sprint-create>
-                </div>
-
-            </div>
-            <!-- Project Configuration + Stats + Actions -->
-            <div class="space-y-4 lg:w-80">
-                <!-- Project Configuration -->
-                <div class="bg-white shadow rounded-lg p-4">
-                    <h2 class="text-lg font-medium mb-3">Project Configuration</h2>
-                    @if (projectConfig()){
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Sprint Duration:</span>
-                            <span class="text-sm text-gray-900">{{projectConfig()?.sprint_duration }} Weeks</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Estimation Type:</span>
-                            <span class="text-sm text-gray-900">{{projectConfig()?.estimation_type}}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Created:</span>
-                            <span class="text-sm text-gray-900">{{ projectConfig()?.created_at | date:'shortDate'
-                                }}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Last Updated:</span>
-                            <span class="text-sm text-gray-900">{{ projectConfig()?.updated_at | date:'shortDate'
-                                }}</span>
-                        </div>
-                    </div>
-                    } @else {
-                    <div class="space-y-2 text-gray-500">
-                        <p>No configuration set for this project.</p>
-                        <p>Configure your project to see more details.</p>
-                    </div>
+    <!-- Sticky Tab Navigation -->
+    <nav class="sticky top-[72px] z-10 bg-white border-b border-gray-200">
+      <div class="max-w-[1600px] mx-auto px-6">
+        <div class="flex items-center gap-1">
+          @for (tab of tabs; track tab.id) {
+            @if (!tab.subTabs) {
+              <button
+                type="button"
+                (click)="setActiveTab(tab.id)"
+                [class.active]="activeTab() === tab.id"
+                class="relative px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition border-b-2 border-transparent hover:border-gray-300"
+                [class.!text-blue-600]="activeTab() === tab.id"
+                [class.!border-blue-600]="activeTab() === tab.id">
+                {{ tab.label }}
+              </button>
+            } @else {
+              <div class="relative">
+                <button
+                  type="button"
+                  (click)="tab.id === 'code' ? toggleCodeDropdown($event) : toggleDiagramsDropdown($event)"
+                  class="flex items-center gap-1 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition">
+                  {{ tab.label }}
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                
+                @if ((tab.id === 'code' && codeDropdownOpen()) || (tab.id === 'diagrams' && diagramsDropdownOpen())) {
+                  <div 
+                    (click)="$event.stopPropagation()"
+                    class="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    @for (subTab of tab.subTabs; track subTab.id) {
+                      <button
+                        type="button"
+                        (click)="navigateToSubTab(subTab.route)"
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+                        {{ subTab.label }}
+                      </button>
                     }
-                </div>
-                <!-- Project Stats -->
-                <div class="bg-white shadow rounded-lg p-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-3">Project Stats</h3>
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Status</span>
-                            <span class="text-sm text-gray-900">{{ project()?.status }}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Priority</span>
-                            <span class="text-sm text-gray-900">{{ project()?.priority }}</span>
-                        </div>
-                        @if (project()?.estimated_hours) {
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Estimated Hours</span>
-                            <span class="text-sm text-gray-900">{{ project()?.estimated_hours }}h</span>
-                        </div>
-                        }
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Created</span>
-                            <span class="text-sm text-gray-900">{{ project()?.created_at | date:'shortDate' }}</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-500">Last Updated</span>
-                            <span class="text-sm text-gray-900">{{ project()?.updated_at | date:'shortDate' }}</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Quick Actions -->
-                <div class="bg-white shadow rounded-lg p-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-3">Quick Actions</h3>
-                    <div class="space-y-2">
-                        <a href="#"
-                            class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100">
-                            <div class="flex items-center">
-                                <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900">Create Task</span>
-                            </div>
-                        </a>
-
-                        <a [routerLink]="['/projects', project()?.id, 'boards']"
-                            class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100">
-                            <div class="flex items-center">
-                                <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900">View Boards</span>
-                            </div>
-                        </a>
-
-                        <a [routerLink]="['/projects', project()?.id, 'config']"
-                            class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100">
-                            <div class="flex items-center">
-                                <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                    </path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900">Project Settings</span>
-                            </div>
-                        </a>
-
-                        <a href="#"
-                            class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100">
-                            <div class="flex items-center">
-                                <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                                    </path>
-                                </svg>
-                                <span class="text-sm font-medium text-gray-900">View Reports</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
+                  </div>
+                }
+              </div>
+            }
+          }
         </div>
-    </div>
-    }
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-[1600px] mx-auto px-6 py-8">
+      <!-- Overview Tab Content -->
+      @if (activeTab() === 'overview') {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Main Content (2/3) -->
+          <div class="lg:col-span-2 space-y-8">
+            <!-- Description Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+              <p class="text-gray-700 leading-relaxed">
+                {{ project()?.description || 'No description provided.' }}
+              </p>
+            </div>
+
+            <!-- Timeline Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">Timeline</h2>
+              <div class="space-y-3">
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                  <span class="text-sm font-medium text-gray-500">Created</span>
+                  <span class="text-sm text-gray-900">{{ project()?.created_at | date:'mediumDate' }}</span>
+                </div>
+                @if (project()?.due_date) {
+                  <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span class="text-sm font-medium text-gray-500">Due Date</span>
+                    <span class="text-sm text-gray-900">{{ project()?.due_date | date:'mediumDate' }}</span>
+                  </div>
+                }
+                <div class="flex items-center justify-between py-2">
+                  <span class="text-sm font-medium text-gray-500">Last Updated</span>
+                  <span class="text-sm text-gray-900">{{ project()?.updated_at | date:'mediumDate' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar (1/3) -->
+          <div class="space-y-6">
+            <!-- Project Info Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Project Details</h3>
+              <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-gray-500">Status</span>
+                  <span class="text-sm text-gray-900">{{ formatLabel(project()?.status || '') }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium text-gray-500">Priority</span>
+                  <span class="text-sm text-gray-900">{{ formatLabel(project()?.priority || '') }}</span>
+                </div>
+                @if (project()?.estimated_hours) {
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Estimated Hours</span>
+                    <span class="text-sm text-gray-900">{{ project()?.estimated_hours }}h</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Configuration Card -->
+            @if (projectConfig()) {
+              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Configuration</h3>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Sprint Duration</span>
+                    <span class="text-sm text-gray-900">{{ projectConfig()?.sprint_duration }} Weeks</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">Estimation Type</span>
+                    <span class="text-sm text-gray-900">{{ formatLabel(projectConfig()?.estimation_type || '') }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Quick Actions Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div class="space-y-2">
+                <a [routerLink]="['/projects', project()?.id, 'boards']"
+                   class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
+                  </svg>
+                  View Boards
+                </a>
+                <a [routerLink]="['/projects', project()?.id, 'config-create']"
+                   class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  Configure Project
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Sprints Tab Content -->
+      @if (activeTab() === 'sprints') {
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-900">Sprints</h2>
+            <button 
+              (click)="showSprintModal()"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+              Add Sprint
+            </button>
+          </div>
+          <app-sprint-list 
+            [projectId]="project()?.id || ''" 
+            [projectName]="project()?.name">
+          </app-sprint-list>
+        </div>
+      }
+
+      <!-- Child Routes (Code, Diagrams, etc.) -->
+      @if (activeTab() === 'code' || activeTab() === 'diagrams') {
+        <router-outlet></router-outlet>
+      }
+    </main>
+  }
+
+  <!-- Modals -->
+  @if (openModal()) {
+    <app-sprint-create 
+      [projectId]="project()?.id || ''"
+      (close)="openModal.set(false)">
+    </app-sprint-create>
+  }
 </div>

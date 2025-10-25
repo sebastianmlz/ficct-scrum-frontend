@@ -1,0 +1,28 @@
+// Metrics Dashboard Component Styles
+// Uses TailwindCSS utility classes in HTML
+// Chart containers with fixed heights
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.chart-container-large {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,250 @@
+<div class="github-integration-container">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="text-gray-500 text-center mt-4">Loading GitHub integration...</p>
+    </div>
+  }
+
+  <!-- Connected State -->
+  @else if (integration() && !showConnectForm()) {
+    <div class="integration-card">
+      <!-- Header -->
+      <div class="card-header">
+        <div class="flex items-center gap-3">
+          <!-- GitHub Icon -->
+          <svg class="w-10 h-10 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+          
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-900">{{ getRepoName() }}</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="status-badge" [class]="'status-' + getStatusColor()">
+                {{ integration()?.status }}
+              </span>
+              <span class="text-sm text-gray-500">•</span>
+              <span class="text-sm text-gray-500">Last synced {{ getTimeSinceSync() }}</span>
+            </div>
+          </div>
+
+          <button 
+            (click)="onSyncCommits()" 
+            [disabled]="syncing()"
+            class="btn-sync"
+            [class.syncing]="syncing()">
+            @if (syncing()) {
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+            }
+            <span>{{ syncing() ? 'Syncing...' : 'Sync Now' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          <div class="stat-info">
+            <p class="stat-label">Commits</p>
+            <p class="stat-value">{{ integration()?.commit_count || 0 }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+          <div class="stat-info">
+            <p class="stat-label">Pull Requests</p>
+            <p class="stat-value">{{ integration()?.pull_request_count || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="settings-section">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">Sync Settings</h4>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <p class="setting-label">Auto-sync commits</p>
+            <p class="setting-description">Automatically fetch new commits from GitHub</p>
+          </div>
+          <label class="toggle-switch">
+            <input 
+              type="checkbox" 
+              [checked]="integration()?.sync_commits"
+              (change)="onUpdateSettings('sync_commits', $any($event.target).checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <p class="setting-label">Auto-sync pull requests</p>
+            <p class="setting-description">Automatically fetch pull requests and reviews</p>
+          </div>
+          <label class="toggle-switch">
+            <input 
+              type="checkbox" 
+              [checked]="integration()?.sync_pull_requests"
+              (change)="onUpdateSettings('sync_pull_requests', $any($event.target).checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <p class="setting-label">Auto-link issues</p>
+            <p class="setting-description">Automatically link commits to issues based on commit messages</p>
+          </div>
+          <label class="toggle-switch">
+            <input 
+              type="checkbox" 
+              [checked]="integration()?.auto_link_issues"
+              (change)="onUpdateSettings('auto_link_issues', $any($event.target).checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-footer">
+        <a 
+          [href]="integration()?.repository_url" 
+          target="_blank" 
+          class="btn-secondary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+          View on GitHub
+        </a>
+        
+        <button 
+          (click)="onShowDisconnectConfirm()" 
+          class="btn-danger">
+          Disconnect Repository
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Not Connected State -->
+  @else if (!showConnectForm()) {
+    <div class="empty-state">
+      <svg class="w-16 h-16 text-gray-400 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-900 mt-4">No GitHub Repository Connected</h3>
+      <p class="text-gray-600 mt-2 max-w-md mx-auto">
+        Connect your GitHub repository to sync commits, pull requests, and automatically link issues.
+      </p>
+      <button (click)="onShowConnectForm()" class="btn-primary mt-6">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        Connect GitHub Repository
+      </button>
+    </div>
+  }
+
+  <!-- Connect Form -->
+  @if (showConnectForm()) {
+    <div class="connect-form-card">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Connect GitHub Repository</h3>
+      
+      <form [formGroup]="connectForm" (ngSubmit)="onConnectRepository()">
+        <div class="form-group">
+          <label class="form-label">Repository URL</label>
+          <input 
+            type="url" 
+            formControlName="repository_url"
+            class="form-input"
+            placeholder="https://github.com/username/repository">
+          @if (connectForm.get('repository_url')?.invalid && connectForm.get('repository_url')?.touched) {
+            <p class="form-error">Please enter a valid GitHub repository URL</p>
+          }
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="sync_commits" class="checkbox">
+            <span>Auto-sync commits</span>
+          </label>
+          <p class="form-helper">Automatically fetch new commits from GitHub</p>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="sync_pull_requests" class="checkbox">
+            <span>Auto-sync pull requests</span>
+          </label>
+          <p class="form-helper">Automatically fetch pull requests and reviews</p>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="auto_link_issues" class="checkbox">
+            <span>Auto-link issues</span>
+          </label>
+          <p class="form-helper">Link commits to issues based on commit messages (#123, PROJ-456)</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="onCancelConnect()" class="btn-secondary">
+            Cancel
+          </button>
+          <button type="submit" [disabled]="connectForm.invalid || loading()" class="btn-primary">
+            @if (loading()) {
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Connecting...</span>
+            } @else {
+              <span>Connect Repository</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Disconnect Confirmation Modal -->
+  @if (showDisconnectConfirm()) {
+    <div class="modal-overlay" (click)="onCancelDisconnect()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Disconnect GitHub Repository?</h3>
+        <p class="modal-message">
+          This will remove the integration with <strong>{{ getRepoName() }}</strong>. 
+          You can reconnect at any time.
+        </p>
+        <div class="modal-actions">
+          <button (click)="onCancelDisconnect()" class="btn-secondary">
+            Cancel
+          </button>
+          <button (click)="onDisconnectRepository()" [disabled]="loading()" class="btn-danger">
+            @if (loading()) {
+              <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
+            <span>{{ loading() ? 'Disconnecting...' : 'Disconnect' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,191 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <button type="button" (click)="goBack()" class="p-2 rounded-md text-gray-400 hover:text-gray-500">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+          </button>
+          <h1 class="text-2xl font-bold text-gray-900">Code Metrics</h1>
+        </div>
+        <button
+          type="button"
+          (click)="refreshMetrics()"
+          [disabled]="loading()"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="h-4 w-4 mr-2" [class.animate-spin]="loading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          {{ loading() ? 'Refreshing...' : 'Refresh Metrics' }}
+        </button>
+      </div>
+    </div>
+
+    @if (loading() && !metrics()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    } @else if (metrics()) {
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <!-- Total Commits -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Total Commits</dt>
+                  <dd class="text-2xl font-semibold text-gray-900">{{ metrics()!.total_commits }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Pull Requests -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Pull Requests</dt>
+                  <dd class="text-2xl font-semibold text-gray-900">{{ metrics()!.total_pull_requests }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avg PR Size -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Avg PR Size</dt>
+                  <dd class="text-2xl font-semibold text-gray-900">{{ metrics()!.avg_pr_size.toFixed(0) }} lines</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code Churn -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Code Churn</dt>
+                  <dd class="text-2xl font-semibold text-gray-900">{{ metrics()!.code_churn.toFixed(1) }}%</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Commit Activity Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Commit Activity</h3>
+          <div class="chart-container">
+            <canvas #commitTrendCanvas></canvas>
+          </div>
+        </div>
+
+        <!-- PR Status Chart -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Pull Request Status</h3>
+          <div class="chart-container">
+            <canvas #prStatusCanvas></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Contributors Chart -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Top Contributors</h3>
+        <div class="chart-container-large">
+          <canvas #contributorCanvas></canvas>
+        </div>
+      </div>
+
+      <!-- PR Metrics Details -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- PR Time Metrics -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Pull Request Timing</h3>
+          <dl class="space-y-4">
+            <div class="flex justify-between">
+              <dt class="text-sm font-medium text-gray-500">Avg Merge Time</dt>
+              <dd class="text-sm font-semibold text-gray-900">{{ metrics()!.pr_metrics.avg_merge_time_hours.toFixed(1) }} hours</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-sm font-medium text-gray-500">Avg Review Time</dt>
+              <dd class="text-sm font-semibold text-gray-900">{{ metrics()!.pr_metrics.avg_review_time_hours.toFixed(1) }} hours</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- PR Success Rates -->
+        <div class="bg-white shadow rounded-lg p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Pull Request Success Rates</h3>
+          <dl class="space-y-4">
+            <div class="flex justify-between items-center">
+              <dt class="text-sm font-medium text-gray-500">Approval Rate</dt>
+              <dd class="flex items-center">
+                <span class="text-sm font-semibold text-gray-900 mr-2">{{ (metrics()!.pr_metrics.approval_rate * 100).toFixed(1) }}%</span>
+                <div class="w-24 bg-gray-200 rounded-full h-2">
+                  <div class="bg-green-600 h-2 rounded-full" [style.width.%]="metrics()!.pr_metrics.approval_rate * 100"></div>
+                </div>
+              </dd>
+            </div>
+            <div class="flex justify-between items-center">
+              <dt class="text-sm font-medium text-gray-500">Merge Rate</dt>
+              <dd class="flex items-center">
+                <span class="text-sm font-semibold text-gray-900 mr-2">{{ (metrics()!.pr_metrics.merge_rate * 100).toFixed(1) }}%</span>
+                <div class="w-24 bg-gray-200 rounded-full h-2">
+                  <div class="bg-purple-600 h-2 rounded-full" [style.width.%]="metrics()!.pr_metrics.merge_rate * 100"></div>
+                </div>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    } @else {
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No metrics available</h3>
+        <p class="mt-1 text-sm text-gray-500">Connect a GitHub repository to see code metrics.</p>
+      </div>
+    }
+  </div>
+</div>

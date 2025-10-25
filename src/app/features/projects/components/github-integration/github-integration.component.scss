@@ -1,0 +1,224 @@
+.github-integration-container {
+  @apply max-w-4xl mx-auto p-6;
+}
+
+// Loading State
+.loading-state {
+  @apply py-12;
+}
+
+// Integration Card
+.integration-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.card-header {
+  @apply p-6 border-b border-gray-200;
+}
+
+.status-badge {
+  @apply px-2 py-1 rounded-full text-xs font-medium uppercase;
+  
+  &.status-green {
+    @apply bg-green-100 text-green-700;
+  }
+  
+  &.status-red {
+    @apply bg-red-100 text-red-700;
+  }
+  
+  &.status-gray {
+    @apply bg-gray-100 text-gray-700;
+  }
+}
+
+.btn-sync {
+  @apply flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  
+  &.syncing {
+    @apply bg-blue-500;
+  }
+}
+
+// Stats Grid
+.stats-grid {
+  @apply grid grid-cols-2 gap-4 p-6 border-b border-gray-200;
+}
+
+.stat-card {
+  @apply flex items-center gap-3 p-4 bg-gray-50 rounded-lg;
+}
+
+.stat-info {
+  @apply flex-1;
+}
+
+.stat-label {
+  @apply text-xs text-gray-600 uppercase tracking-wide;
+}
+
+.stat-value {
+  @apply text-2xl font-bold text-gray-900 mt-1;
+}
+
+// Settings Section
+.settings-section {
+  @apply p-6 border-b border-gray-200;
+}
+
+.setting-item {
+  @apply flex items-center justify-between py-4 border-b border-gray-100 last:border-b-0;
+}
+
+.setting-info {
+  @apply flex-1;
+}
+
+.setting-label {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.setting-description {
+  @apply text-sm text-gray-500 mt-1;
+}
+
+// Toggle Switch
+.toggle-switch {
+  @apply relative inline-block w-12 h-6 cursor-pointer;
+  
+  input {
+    @apply opacity-0 w-0 h-0;
+    
+    &:checked + .toggle-slider {
+      @apply bg-blue-600;
+      
+      &:before {
+        @apply translate-x-6;
+      }
+    }
+    
+    &:focus + .toggle-slider {
+      @apply ring-2 ring-blue-500 ring-offset-2;
+    }
+  }
+}
+
+.toggle-slider {
+  @apply absolute cursor-pointer inset-0 bg-gray-300 rounded-full transition-colors;
+  
+  &:before {
+    @apply absolute content-[''] h-4 w-4 left-1 top-1 bg-white rounded-full transition-transform;
+  }
+}
+
+// Card Footer
+.card-footer {
+  @apply flex items-center justify-between p-6;
+}
+
+// Empty State
+.empty-state {
+  @apply text-center py-12;
+}
+
+// Connect Form
+.connect-form-card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.form-group {
+  @apply mb-6;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  
+  &:invalid {
+    @apply border-red-300;
+  }
+}
+
+.form-error {
+  @apply text-sm text-red-600 mt-1;
+}
+
+.form-helper {
+  @apply text-sm text-gray-500 mt-1 ml-6;
+}
+
+.checkbox-label {
+  @apply flex items-center gap-2 cursor-pointer;
+  
+  span {
+    @apply text-sm font-medium text-gray-700;
+  }
+}
+
+.checkbox {
+  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+}
+
+.form-actions {
+  @apply flex items-center justify-end gap-3 mt-6;
+}
+
+// Buttons
+.btn-primary {
+  @apply flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors;
+}
+
+.btn-danger {
+  @apply px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+// Modal
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-md w-full p-6;
+  animation: slideUp 0.3s ease;
+}
+
+.modal-title {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.modal-message {
+  @apply text-gray-600 mb-6;
+}
+
+.modal-actions {
+  @apply flex items-center justify-end gap-3;
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

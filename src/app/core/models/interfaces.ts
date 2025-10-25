@@ -741,3 +741,409 @@ export interface ColumnDeletedData {
 
 export interface PaginatedBoardList extends PaginatedResponse<Board> { }
 export interface PaginatedIssueList extends PaginatedResponse<Issue> { }
+export interface PaginatedIssueTypeList extends PaginatedResponse<IssueType> { }
+
+// ===========================
+// GITHUB INTEGRATION INTERFACES (Sprint 3)
+// ===========================
+
+export interface GitHubRepository {
+  full_name: string;
+  url: string;
+  description?: string;
+  default_branch: string;
+  visibility: 'public' | 'private';
+}
+
+export interface GitHubIntegration {
+  id: string;
+  project: ProjectBasic;
+  repository_url: string;
+  installation_id?: string;
+  repository_full_name: string;
+  access_token?: string;
+  last_synced_at?: string;
+  sync_commits: boolean;
+  sync_pull_requests: boolean;
+  auto_link_issues: boolean;
+  created_at: string;
+  updated_at: string;
+  status: 'active' | 'inactive' | 'error';
+}
+
+export interface GitHubIntegrationDetail extends GitHubIntegration {
+  repository_data?: GitHubRepository;
+  commit_count?: number;
+  pull_request_count?: number;
+}
+
+export interface GitHubIntegrationRequest {
+  project: string;
+  repository_url: string;
+  installation_id?: string;
+  access_token?: string;
+  sync_commits?: boolean;
+  sync_pull_requests?: boolean;
+  auto_link_issues?: boolean;
+}
+
+export interface PatchedGitHubIntegrationRequest {
+  repository_url?: string;
+  sync_commits?: boolean;
+  sync_pull_requests?: boolean;
+  auto_link_issues?: boolean;
+}
+
+export interface GitHubCommit {
+  id: string;
+  integration: string;
+  sha: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  author_avatar_url?: string;
+  committed_at: string;
+  url: string;
+  additions?: number;
+  deletions?: number;
+  files_changed?: number;
+  created_at: string;
+}
+
+export interface GitHubCommitDetail extends GitHubCommit {
+  linked_issues?: Issue[];
+  files?: GitHubFile[];
+}
+
+export interface GitHubFile {
+  filename: string;
+  additions: number;
+  deletions: number;
+  changes: number;
+  status: 'added' | 'removed' | 'modified' | 'renamed';
+  patch?: string;
+}
+
+export interface CommitIssueLinkRequest {
+  issue_id: string;
+}
+
+export interface PullRequestAuthor {
+  login: string;
+  avatar_url: string;
+  url: string;
+}
+
+export interface PullRequestReview {
+  id: number;
+  user: PullRequestAuthor;
+  state: 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'PENDING';
+  submitted_at: string;
+}
+
+export interface GitHubPullRequest {
+  id: string;
+  integration: string;
+  number: number;
+  title: string;
+  body?: string;
+  state: 'open' | 'closed' | 'merged';
+  author: PullRequestAuthor;
+  created_at: string;
+  updated_at: string;
+  merged_at?: string;
+  closed_at?: string;
+  url: string;
+  additions?: number;
+  deletions?: number;
+  commits_count?: number;
+  reviews?: PullRequestReview[];
+  linked_issues?: Issue[];
+}
+
+export interface GitHubMetrics {
+  total_commits: number;
+  total_pull_requests: number;
+  open_pull_requests: number;
+  merged_pull_requests: number;
+  avg_pr_size: number;
+  code_churn: number;
+  contributors: GitHubContributor[];
+  commit_activity: CommitActivity[];
+  pr_metrics: PullRequestMetrics;
+}
+
+export interface GitHubContributor {
+  user: string;
+  avatar_url?: string;
+  commits: number;
+  lines_added: number;
+  lines_removed: number;
+  pull_requests: number;
+}
+
+export interface CommitActivity {
+  date: string;
+  commits: number;
+  additions: number;
+  deletions: number;
+}
+
+export interface PullRequestMetrics {
+  avg_merge_time_hours: number;
+  avg_review_time_hours: number;
+  approval_rate: number;
+  merge_rate: number;
+}
+
+export interface SmartCommitAction {
+  action: 'close' | 'resolve' | 'fix' | 'implement';
+  issue_key: string;
+  issue_id?: string;
+  new_status?: string;
+}
+
+export interface SyncCommitsResponse {
+  message: string;
+  commits_synced: number;
+  issues_linked: number;
+  smart_actions_performed: SmartCommitAction[];
+}
+
+export interface PaginatedGitHubCommitList extends PaginatedResponse<GitHubCommit> { }
+export interface PaginatedGitHubIntegrationList extends PaginatedResponse<GitHubIntegration> { }
+
+// ===========================
+// DIAGRAM GENERATION INTERFACES (Sprint 3)
+// ===========================
+
+export type DiagramType = 'workflow' | 'dependency' | 'roadmap' | 'uml' | 'architecture' | 'burndown' | 'velocity';
+export type DiagramFormat = 'svg' | 'png' | 'pdf' | 'json';
+
+export interface DiagramRequestRequest {
+  diagram_type: DiagramType;
+  project_id?: string;
+  board_id?: string;
+  sprint_id?: string;
+  format?: DiagramFormat;
+  options?: DiagramOptions;
+}
+
+export interface DiagramOptions {
+  width?: number;
+  height?: number;
+  layout?: 'hierarchical' | 'force-directed' | 'circular' | 'timeline';
+  include_archived?: boolean;
+  date_range?: {
+    start: string;
+    end: string;
+  };
+  filter?: {
+    assignee?: string[];
+    priority?: string[];
+    status?: string[];
+  };
+  style?: {
+    theme?: 'light' | 'dark';
+    color_scheme?: string;
+  };
+}
+
+export interface DiagramResponse {
+  diagram_type: DiagramType;
+  format: DiagramFormat;
+  data: string | DiagramData;
+  metadata?: DiagramMetadata;
+  cached?: boolean;
+}
+
+export interface DiagramMetadata {
+  generated_at: string;
+  node_count?: number;
+  edge_count?: number;
+  cache_key?: string;
+  expires_at?: string;
+}
+
+// Workflow Diagram Data
+export interface WorkflowDiagramData {
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+}
+
+export interface WorkflowNode {
+  id: string;
+  label: string;
+  type: 'start' | 'intermediate' | 'end';
+  category?: string;
+  color?: string;
+  position?: { x: number; y: number };
+  issue_count?: number;
+}
+
+export interface WorkflowEdge {
+  id?: string;
+  from: string;
+  to: string;
+  label?: string;
+  transition_count?: number;
+}
+
+// Dependency Diagram Data
+export interface DependencyDiagramData {
+  nodes: DependencyNode[];
+  links: DependencyLink[];
+  critical_path?: string[];
+}
+
+export interface DependencyNode {
+  id: string;
+  label: string;
+  issue_key?: string;
+  status: string;
+  priority?: string;
+  type?: string;
+  assignee?: string;
+  blocked?: boolean;
+}
+
+export interface DependencyLink {
+  source: string;
+  target: string;
+  type: 'blocks' | 'depends_on' | 'relates_to';
+  strength?: number;
+}
+
+// Roadmap Diagram Data
+export interface RoadmapDiagramData {
+  sprints: RoadmapSprint[];
+  milestones: RoadmapMilestone[];
+  timeline: {
+    start_date: string;
+    end_date: string;
+  };
+}
+
+export interface RoadmapSprint {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  progress: number;
+  issues: RoadmapIssue[];
+  committed_points?: number;
+  completed_points?: number;
+}
+
+export interface RoadmapIssue {
+  id: string;
+  key: string;
+  title: string;
+  status: string;
+  priority?: string;
+  estimate?: number;
+  progress: number;
+  assignee?: string;
+}
+
+export interface RoadmapMilestone {
+  id?: string;
+  date: string;
+  title: string;
+  description?: string;
+  type?: 'release' | 'demo' | 'deadline' | 'custom';
+  achieved?: boolean;
+}
+
+// UML Diagram Data
+export interface UMLDiagramData {
+  diagram_type: 'class' | 'sequence' | 'activity' | 'component';
+  classes?: UMLClass[];
+  relationships?: UMLRelationship[];
+  methods?: UMLMethod[];
+  plantuml_code?: string;
+  mermaid_code?: string;
+}
+
+export interface UMLClass {
+  id: string;
+  name: string;
+  package?: string;
+  properties: UMLProperty[];
+  methods: UMLMethod[];
+  stereotype?: string;
+}
+
+export interface UMLProperty {
+  name: string;
+  type: string;
+  visibility: 'public' | 'private' | 'protected';
+}
+
+export interface UMLMethod {
+  name: string;
+  parameters: UMLParameter[];
+  return_type: string;
+  visibility: 'public' | 'private' | 'protected';
+}
+
+export interface UMLParameter {
+  name: string;
+  type: string;
+}
+
+export interface UMLRelationship {
+  from: string;
+  to: string;
+  type: 'inheritance' | 'composition' | 'aggregation' | 'association' | 'dependency';
+  label?: string;
+}
+
+// Architecture Diagram Data
+export interface ArchitectureDiagramData {
+  layers: ArchitectureLayer[];
+  connections: ArchitectureConnection[];
+  technologies: TechnologyStack;
+}
+
+export interface ArchitectureLayer {
+  id: string;
+  name: string;
+  type: 'frontend' | 'backend' | 'database' | 'infrastructure' | 'external';
+  components: ArchitectureComponent[];
+  position?: { x: number; y: number };
+}
+
+export interface ArchitectureComponent {
+  id: string;
+  name: string;
+  technology: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface ArchitectureConnection {
+  from: string;
+  to: string;
+  protocol?: string;
+  label?: string;
+  bidirectional?: boolean;
+}
+
+export interface TechnologyStack {
+  frontend?: string[];
+  backend?: string[];
+  database?: string[];
+  infrastructure?: string[];
+  tools?: string[];
+}
+
+// Union type for all diagram data
+export type DiagramData = 
+  | WorkflowDiagramData 
+  | DependencyDiagramData 
+  | RoadmapDiagramData 
+  | UMLDiagramData 
+  | ArchitectureDiagramData
+  | string;
