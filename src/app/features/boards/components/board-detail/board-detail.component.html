@@ -48,12 +48,31 @@
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3 md:gap-4">
+          <!-- Sprint Selector (JIRA architecture) -->
+          <div class="relative" *ngIf="sprints().length > 0">
+            <label class="sr-only">Sprint</label>
+            <select
+              [value]="selectedSprintId()"
+              (change)="onSprintChange($any($event.target).value)"
+              class="px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option [value]="activeSprint()?.id" *ngIf="activeSprint()">
+                {{ activeSprint()?.name }} (Active)
+              </option>
+              <option *ngFor="let sprint of sprints()" [value]="sprint.id" [hidden]="sprint.id === activeSprint()?.id">
+                {{ sprint.name }}
+              </option>
+              <option [value]="''">
+                Backlog
+              </option>
+            </select>
+          </div>
+          
           <!-- WebSocket Connection Indicator -->
           <div class="flex items-center gap-2">
             <div
               [class]="wsConnected() ? 'w-2 h-2 bg-green-500 rounded-full' : 'w-2 h-2 bg-red-500 rounded-full'">
             </div>
-            <span class="text-sm text-gray-600">
+            <span class="text-sm text-gray-600 hidden md:inline">
               {{ wsConnected() ? 'Connected' : 'Disconnected' }}
             </span>
           </div>

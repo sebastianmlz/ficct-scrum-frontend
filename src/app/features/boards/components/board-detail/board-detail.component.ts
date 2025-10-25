@@ -7,6 +7,8 @@ import { BoardService } from '../../../../core/services/board.service';
 import { BoardWebSocketService } from '../../services/board-websocket.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { SprintsService } from '../../../../core/services/sprints.service';
+import { IssueService } from '../../../../core/services/issue.service';
 import { getAllPriorities, getPriorityLabel } from '../../../../shared/utils/priority.utils';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
@@ -14,7 +16,8 @@ import {
   Board,
   BoardColumn,
   Issue,
-  UserJoinedData
+  UserJoinedData,
+  Sprint
 } from '../../../../core/models/interfaces';
 import { BoardColumnComponent } from '../board-column/board-column.component';
 import { BoardFilterToolbarComponent, BoardFilters as ToolbarFilters } from '../board-filter-toolbar/board-filter-toolbar.component';
@@ -34,9 +37,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
   private boardWsService = inject(BoardWebSocketService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  private sprintsService = inject(SprintsService);
+  private issueService = inject(IssueService);
   private route = inject(ActivatedRoute);
   public router = inject(Router);
-  private http = inject(HttpClient);  // ✅ Inyectado en field initializer
+  private http = inject(HttpClient);
   private destroy$ = new Subject<void>();
 
   // Signals para state management
@@ -52,6 +57,12 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
   createIssueColumnId = signal<string | null>(null);
   showIssueDetailModal = signal(false);
   selectedIssueId = signal<string | null>(null);
+  
+  // Sprint filtering (JIRA architecture)
+  sprints = signal<Sprint[]>([]);
+  selectedSprintId = signal<string | null>(null);
+  activeSprint = signal<Sprint | null>(null);
+  projectId = signal<string>('');
 
   // Computed signals
   connectedDropLists = computed(() => {
@@ -84,6 +95,18 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         this.subscribeToWebSocketEvents();
       }
     });
+    
+    // Check for sprint query param (JIRA architecture)
+    this.route.queryParams.subscribe(queryParams => {
+      if (queryParams['sprint']) {
+        this.selectedSprintId.set(queryParams['sprint']);
+        console.log('[BOARD] Sprint filter from URL:', queryParams['sprint']);
+      }
+      // Reload issues when sprint changes
+      if (this.board()) {
+        this.loadIssues();
+      }
+    });
   }
   
   ngAfterViewInit(): void {
@@ -103,10 +126,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
       
       if (boardData) {
         this.board.set(boardData);
+        this.projectId.set(boardData.project.id);
         
         // Ordenar columnas por order
         const sortedColumns = (boardData.columns || []).sort((a, b) => a.order - b.order);
         this.columns.set(sortedColumns);
+
+        // Load sprints for this project (JIRA architecture)
+        await this.loadSprints();
 
         // Cargar issues del board
         await this.loadIssues();
@@ -117,16 +144,55 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
       this.loading.set(false);
     }
   }
+  
+  async loadSprints(): Promise<void> {
+    try {
+      console.log('[BOARD] Loading sprints for project:', this.projectId());
+      const result = await this.sprintsService.getSprints(this.projectId()).toPromise();
+      
+      if (result?.results) {
+        this.sprints.set(result.results);
+        
+        // Find active sprint
+        const active = result.results.find(s => s.status === 'active');
+        this.activeSprint.set(active || null);
+        
+        // If no sprint selected and there's an active sprint, default to it
+        if (!this.selectedSprintId() && active) {
+          this.selectedSprintId.set(active.id);
+          console.log('[BOARD] Defaulting to active sprint:', active.name);
+        }
+        
+        console.log('[BOARD] Loaded', result.results.length, 'sprints. Active:', active?.name || 'none');
+      }
+    } catch (error) {
+      console.error('[BOARD] Error loading sprints:', error);
+      // No bloqueamos si falla, board puede funcionar sin sprint filtering
+    }
+  }
 
   async loadIssues(): Promise<void> {
     try {
-      const issues = await this.boardService.getIssuesByBoard(this.boardId).toPromise();
+      const params: any = { project: this.projectId() };
       
-      if (issues) {
-        this.organizeIssuesByColumn(issues);
+      // JIRA architecture: Filter by sprint
+      if (this.selectedSprintId()) {
+        params.sprint = this.selectedSprintId();
+        console.log('[BOARD] Loading issues for sprint:', this.selectedSprintId());
+      } else {
+        // If no sprint selected, show backlog (sprint=null)
+        // NOTE: Depending on backend, might need special param for backlog
+        console.log('[BOARD] Loading backlog issues (no sprint filter)');
+      }
+      
+      const result = await this.issueService.getIssues(params).toPromise();
+      
+      if (result?.results) {
+        console.log('[BOARD] Loaded', result.results.length, 'issues');
+        this.organizeIssuesByColumn(result.results);
       }
     } catch (error: any) {
-      console.error('Error loading issues:', error);
+      console.error('[BOARD] Error loading issues:', error);
     }
   }
 
@@ -200,9 +266,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         console.log('[BOARD-DETAIL] Event user ID:', data.user.id);
         
         if (data.user.id !== this.currentUserId) {
-          console.log('[BOARD-DETAIL] Processing issue moved (from other user)');
-          this.handleIssueMovedEvent(data);
-          this.notificationService.info(`${data.user.name} moved issue ${data.issue.title}`);
+          // JIRA architecture: Check if issue belongs to current sprint filter
+          if (this.issueMatchesSprintFilter(data.issue)) {
+            console.log('[BOARD-DETAIL] Processing issue moved (from other user)');
+            this.handleIssueMovedEvent(data);
+            this.notificationService.info(`${data.user.name} moved issue ${data.issue.title}`);
+          } else {
+            console.log('[BOARD-DETAIL] Issue not in current sprint filter, ignoring');
+          }
         } else {
           console.log('[BOARD-DETAIL] Ignoring own event');
         }
@@ -215,9 +286,13 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         console.log('[BOARD-DETAIL] Issue created event:', data);
         
         if (data.user.id !== this.currentUserId) {
-          console.log('[BOARD-DETAIL] Processing issue created (from other user)');
-          this.handleIssueCreatedEvent(data);
-          this.notificationService.info(`${data.user.name} created issue ${data.issue.title}`);
+          if (this.issueMatchesSprintFilter(data.issue)) {
+            console.log('[BOARD-DETAIL] Processing issue created (from other user)');
+            this.handleIssueCreatedEvent(data);
+            this.notificationService.info(`${data.user.name} created issue ${data.issue.title}`);
+          } else {
+            console.log('[BOARD-DETAIL] Issue not in current sprint filter, ignoring');
+          }
         } else {
           console.log('[BOARD-DETAIL] Ignoring own event');
         }
@@ -230,8 +305,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         console.log('[BOARD-DETAIL] Issue updated event:', data);
         
         if (data.user.id !== this.currentUserId) {
-          console.log('[BOARD-DETAIL] Processing issue updated (from other user)');
-          this.handleIssueUpdatedEvent(data);
+          // Check if issue still matches filter after update
+          if (this.issueMatchesSprintFilter(data.issue)) {
+            console.log('[BOARD-DETAIL] Processing issue updated (from other user)');
+            this.handleIssueUpdatedEvent(data);
+          } else {
+            console.log('[BOARD-DETAIL] Issue moved out of sprint filter, removing from view');
+            this.handleIssueDeletedEvent({ ...data, issue_key: data.issue.key });
+          }
         } else {
           console.log('[BOARD-DETAIL] Ignoring own event');
         }
@@ -806,6 +887,40 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     if (this.board()) {
       this.router.navigate(['/projects', this.board()!.project.id, 'config']);
     }
+  }
+  
+  /**
+   * Sprint filter change handler (JIRA architecture)
+   */
+  onSprintChange(sprintId: string | null): void {
+    console.log('[BOARD] Sprint changed to:', sprintId);
+    this.selectedSprintId.set(sprintId);
+    
+    // Update URL query params
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { sprint: sprintId },
+      queryParamsHandling: 'merge'
+    });
+    
+    // Reload issues with new sprint filter
+    this.loadIssues();
+  }
+  
+  /**
+   * Check if issue belongs to current sprint filter (JIRA architecture)
+   */
+  private issueMatchesSprintFilter(issue: any): boolean {
+    const selectedSprint = this.selectedSprintId();
+    
+    // If no sprint filter, show all (or backlog depending on logic)
+    if (!selectedSprint) {
+      return true; // Or check if issue.sprint === null for backlog
+    }
+    
+    // Check if issue belongs to selected sprint
+    const issueSprint = issue.sprint?.id || issue.sprint;
+    return issueSprint === selectedSprint;
   }
   
   /**

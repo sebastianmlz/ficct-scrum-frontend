@@ -1,21 +1,24 @@
 import { Component, inject, Input, signal } from '@angular/core';
 import { SprintsService } from '../../../../core/services/sprints.service';
+import { IssueService } from '../../../../core/services/issue.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { Sprint, PaginationParams, Project } from '../../../../core/models/interfaces';
+import { Sprint, PaginationParams, Project, Issue } from '../../../../core/models/interfaces';
 import { PaginatedSprintList } from '../../../../core/models/api-interfaces';
 import { ProjectStatusEnum } from '../../../../core/models/enums';
 import { CommonModule } from '@angular/common';
 import { SprintDetailComponent } from '../sprint-detail/sprint-detail.component';
 import { SprintEditComponent } from '../sprint-edit/sprint-edit.component';
-import { RouterLink } from '@angular/router';
+import { AddIssuesToSprintDialogComponent } from '../add-issues-to-sprint-dialog/add-issues-to-sprint-dialog.component';
+import { Router } from '@angular/router';
 import { TableModule } from "primeng/table";
+import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-sprint-list',
   imports: [
     CommonModule,
     SprintDetailComponent,
     SprintEditComponent,
-    RouterLink,
+    AddIssuesToSprintDialogComponent,
     TableModule
 ],
   templateUrl: './sprint-list.component.html',
@@ -23,9 +26,12 @@ import { TableModule } from "primeng/table";
 })
 export class SprintListComponent {
   @Input() projectId!: string;
+  @Input() projectName?: string;
   @Input() sprintId!: string;
   private sprintService = inject(SprintsService);
+  private issueService = inject(IssueService);
   private notificationService = inject(NotificationService);
+  private router = inject(Router);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -34,6 +40,11 @@ export class SprintListComponent {
   project = signal<Project | null>(null);
   openModalDetail = signal(false);
   openModalEdit = signal(false);
+  currentSprintId = signal<string | null>(null);
+  showActionsMenu = signal<string | null>(null);
+  // Add Issues to Sprint Dialog
+  showAddIssuesDialog = signal(false);
+  selectedSprint = signal<Sprint | null>(null);
 
   ngOnInit(): void {
     if (this.projectId) {
@@ -47,16 +58,42 @@ export class SprintListComponent {
     this.loading.set(true);
     this.error.set(null);
     try {
+      console.log('[SPRINT LIST] Loading sprints for project:', this.projectId);
       const result = await this.sprintService.getSprints(this.projectId, params).toPromise();
       if (result) {
-        // Filtrar por projectId por seguridad
+        console.log('[SPRINT LIST] API Response:', result);
+        console.log('[SPRINT LIST] Sprints count:', result.results.length);
+        
         const filtered = result.results.filter(sprint => sprint.project.id === this.projectId);
-        this.sprints.set(filtered);
+        
+        // Load issues for each sprint (JIRA architecture: issues belong to sprints)
+        const sprintsWithIssues = await Promise.all(
+          filtered.map(async (sprint) => {
+            try {
+              console.log(`[SPRINT LIST] Loading issues for sprint: ${sprint.name}`);
+              const issuesResult = await this.issueService.getIssues({ sprint: sprint.id }).toPromise();
+              const issues = issuesResult?.results || [];
+              console.log(`[SPRINT LIST] Sprint "${sprint.name}" has ${issues.length} issues (issue_count=${sprint.issue_count})`);
+              return { ...sprint, issues };
+            } catch (error) {
+              console.error(`[SPRINT LIST] Error loading issues for sprint ${sprint.id}:`, error);
+              return { ...sprint, issues: [] };
+            }
+          })
+        );
+        
+        this.sprints.set(sprintsWithIssues);
         this.paginationData.set(result);
+        
+        console.log('[SPRINT LIST] All sprints loaded with issues:', sprintsWithIssues.map(s => ({
+          name: s.name,
+          issue_count: s.issue_count,
+          loaded_issues: s.issues?.length || 0
+        })));
       }
     } catch (error) {
       this.error.set('Error loading sprints');
-      console.error(error);
+      console.error('[SPRINT LIST] Error loading sprints:', error);
     } finally {
       this.loading.set(false);
     }
@@ -105,12 +142,34 @@ export class SprintListComponent {
     }
   }
 
-  showDetailSprintModal(): void {
+  showDetailSprintModal(sprintId: string): void {
+    this.currentSprintId.set(sprintId);
     this.openModalDetail.set(true);
+    this.showActionsMenu.set(null);
   }
 
-  showEditSprintModal(): void {
+  showEditSprintModal(sprintId: string): void {
+    this.currentSprintId.set(sprintId);
     this.openModalEdit.set(true);
+    this.showActionsMenu.set(null);
+  }
+
+  closeDetailModal(): void {
+    this.openModalDetail.set(false);
+    this.currentSprintId.set(null);
+  }
+
+  closeEditModal(): void {
+    this.openModalEdit.set(false);
+    this.currentSprintId.set(null);
+  }
+
+  toggleActionsMenu(sprintId: string): void {
+    if (this.showActionsMenu() === sprintId) {
+      this.showActionsMenu.set(null);
+    } else {
+      this.showActionsMenu.set(sprintId);
+    }
   }
 
   async startSprint(sprintId: string): Promise<void> {
@@ -161,6 +220,180 @@ export class SprintListComponent {
       `Sprint "${sprint.name}" has no issues. Please add at least one issue before starting the sprint.`,
       6000
     );
+  }
+
+  async completeSprint(sprintId: string): Promise<void> {
+    const sprint = this.sprints().find(s => s.id === sprintId);
+    
+    if (!sprint) {
+      this.notificationService.error('Sprint not found');
+      return;
+    }
+
+    if (sprint.status !== ProjectStatusEnum.ACTIVE) {
+      this.notificationService.warning(
+        'Invalid Operation',
+        'Only active sprints can be completed.',
+        6000
+      );
+      return;
+    }
+
+    const confirmed = confirm(
+      `Complete sprint "${sprint.name}"?\n\n` +
+      `This will move all incomplete issues to the backlog.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.loading.set(true);
+    try {
+      await this.sprintService.completeSprint(sprintId).toPromise();
+      this.notificationService.success(`Sprint "${sprint.name}" completed successfully!`);
+      await this.loadSprints();
+    } catch (error: any) {
+      const errorMessage = error.error?.message || 'Error completing sprint';
+      this.error.set(errorMessage);
+      this.notificationService.error(errorMessage);
+      console.error(error);
+    } finally {
+      this.loading.set(false);
+      this.showActionsMenu.set(null);
+    }
+  }
+
+  canStartSprint(sprint: Sprint): boolean {
+    const issueCount = this.getIssueCount(sprint);
+    return issueCount > 0;
+  }
+
+  getIssueCount(sprint: Sprint): number {
+    return parseInt(sprint.issue_count || '0', 10);
+  }
+
+  getStartSprintTooltip(sprint: Sprint): string {
+    if (!this.canStartSprint(sprint)) {
+      return 'Sprint must have at least 1 issue before starting';
+    }
+    return 'Start this sprint';
+  }
+
+  getStatusBadgeClass(status: ProjectStatusEnum): string {
+    switch (status) {
+      case ProjectStatusEnum.PLANNING:
+        return 'status-planning';
+      case ProjectStatusEnum.ACTIVE:
+        return 'status-active';
+      case ProjectStatusEnum.COMPLETED:
+        return 'status-completed';
+      default:
+        return 'status-default';
+    }
+  }
+
+  getStatusLabel(status: ProjectStatusEnum): string {
+    switch (status) {
+      case ProjectStatusEnum.PLANNING:
+        return 'Planning';
+      case ProjectStatusEnum.ACTIVE:
+        return 'Active';
+      case ProjectStatusEnum.COMPLETED:
+        return 'Completed';
+      default:
+        return status;
+    }
+  }
+
+  formatDateRange(startDate: Date, endDate: Date): string {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const formatOptions: Intl.DateTimeFormatOptions = { 
+      month: 'short', 
+      day: 'numeric'
+    };
+
+    const startFormatted = start.toLocaleDateString('en-US', formatOptions);
+    const endFormatted = end.toLocaleDateString('en-US', formatOptions);
+
+    return `${startFormatted} - ${endFormatted}`;
+  }
+
+  navigateToIssues(sprint: Sprint): void {
+    this.router.navigate(['/projects', this.projectId, 'issues'], {
+      queryParams: { sprint: sprint.id },
+      state: { projectName: this.projectName || 'Project' }
+    });
+  }
+
+  /**
+   * Get issue type icon (simple emoji)
+   */
+  getIssueTypeIcon(issueTypeName?: string): string {
+    if (!issueTypeName) return '📋';
+    const type = issueTypeName.toLowerCase();
+    if (type.includes('bug')) return '🐛';
+    if (type.includes('task')) return '✓';
+    if (type.includes('story')) return '📖';
+    if (type.includes('epic')) return '⚡';
+    return '📋';
+  }
+
+  /**
+   * Get priority CSS class
+   */
+  getPriorityClass(priority: string | null): string {
+    switch (priority) {
+      case 'P1': return 'priority-critical';
+      case 'P2': return 'priority-high';
+      case 'P3': return 'priority-medium';
+      case 'P4': return 'priority-low';
+      default: return 'priority-default';
+    }
+  }
+
+  /**
+   * Get priority label
+   */
+  getPriorityLabel(priority: string | null): string {
+    switch (priority) {
+      case 'P1': return 'Critical';
+      case 'P2': return 'High';
+      case 'P3': return 'Medium';
+      case 'P4': return 'Low';
+      default: return 'None';
+    }
+  }
+
+  /**
+   * Open dialog to add issues to sprint (JIRA architecture)
+   */
+  openAddIssuesDialog(sprint: Sprint): void {
+    console.log('[SPRINT] Opening add issues dialog for:', sprint.name);
+    this.selectedSprint.set(sprint);
+    this.showAddIssuesDialog.set(true);
+  }
+  
+  /**
+   * Handle issues added to sprint
+   */
+  onIssuesAdded(): void {
+    console.log('[SPRINT] Issues added successfully, reloading sprints');
+    this.showAddIssuesDialog.set(false);
+    this.selectedSprint.set(null);
+    // Reload sprints to update counts and issue lists
+    this.loadSprints();
+  }
+  
+  /**
+   * Handle dialog canceled
+   */
+  onAddIssuesDialogCanceled(): void {
+    console.log('[SPRINT] Add issues dialog canceled');
+    this.showAddIssuesDialog.set(false);
+    this.selectedSprint.set(null);
   }
 
 }

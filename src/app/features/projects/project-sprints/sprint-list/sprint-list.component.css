@@ -1,0 +1,605 @@
+/* Sprint List Professional Styles - Jira/Linear Quality */
+
+/* Empty State */
+.sprint-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  background: #FAFBFC;
+  border-radius: 12px;
+  border: 1px dashed #DFE1E6;
+  margin: 24px 0;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  color: #6B778C;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #172B4D;
+  margin: 0 0 8px 0;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: #6B778C;
+  max-width: 400px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Sprint List Container */
+.sprint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+/* Sprint Card */
+.sprint-card {
+  background: #FFFFFF;
+  border: 1px solid #DFE1E6;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sprint-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #C1C7D0;
+}
+
+/* Card Header */
+.sprint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.sprint-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sprint-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #172B4D;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status Badges */
+.sprint-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-planning {
+  background: #FFF0B3;
+  color: #7A4510;
+}
+
+.status-active {
+  background: #DEEBFF;
+  color: #0747A6;
+}
+
+.status-completed {
+  background: #E3FCEF;
+  color: #006644;
+}
+
+.status-default {
+  background: #F4F5F7;
+  color: #6B778C;
+}
+
+/* Action Menu Button */
+.action-menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: #6B778C;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-menu-button:hover {
+  background: #F4F5F7;
+  color: #172B4D;
+}
+
+.action-menu-button:active {
+  background: #EBECF0;
+}
+
+/* Sprint Dates */
+.sprint-dates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6B778C;
+  margin-bottom: 16px;
+}
+
+.date-icon {
+  width: 16px;
+  height: 16px;
+  color: #6B778C;
+}
+
+.sprint-dates .duration {
+  color: #97A0AF;
+  font-size: 13px;
+}
+
+.sprint-dates .duration::before {
+  content: "•";
+  margin: 0 6px;
+}
+
+/* Sprint Metrics */
+.sprint-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #F4F5F7;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.metric:hover {
+  background: #EBECF0;
+}
+
+.metric-icon {
+  width: 20px;
+  height: 20px;
+  color: #6B778C;
+  flex-shrink: 0;
+}
+
+.metric-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #172B4D;
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 11px;
+  color: #6B778C;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+/* Sprint No Issues State */
+.sprint-no-issues {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #FFF4E5;
+  border: 1px solid #FFE380;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.no-issues-text {
+  margin: 0;
+  font-size: 14px;
+  color: #7A4510;
+  font-weight: 500;
+}
+
+.add-issues-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #FFFFFF;
+  border: 1px solid #FFE380;
+  border-radius: 6px;
+  color: #7A4510;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.add-issues-link:hover {
+  background: #FFF9E6;
+  border-color: #FFD666;
+}
+
+/* Issue Preview Styles */
+.issues-preview {
+  margin-top: 16px;
+  padding: 12px;
+  background: #F7F8FA;
+  border-radius: 6px;
+  border: 1px solid #E1E4E8;
+}
+
+.issue-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+  background: white;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.issue-preview-item:last-child {
+  margin-bottom: 0;
+}
+
+.issue-preview-item:hover {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  transform: translateX(2px);
+}
+
+.issue-type-icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+.issue-title {
+  flex: 1;
+  font-size: 13px;
+  color: #172B4D;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.priority-badge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.priority-critical {
+  background: #FFEBE6;
+  color: #BF2600;
+}
+
+.priority-high {
+  background: #FFEBE6;
+  color: #FF5630;
+}
+
+.priority-medium {
+  background: #FFF0B3;
+  color: #FF8B00;
+}
+
+.priority-low {
+  background: #E3FCEF;
+  color: #006644;
+}
+
+.priority-default {
+  background: #F4F5F7;
+  color: #6B778C;
+}
+
+/* Add Issues Button/Link */
+.add-issues-link,
+.add-issues-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  color: #FF9900;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px dashed #FFD666;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-issues-link:hover,
+.add-issues-btn:hover {
+  background: #FFF9E6;
+  border-color: #FFD666;
+}
+
+/* Sprint Actions */
+.sprint-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid #EBECF0;
+}
+
+.view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #0052CC;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.view-all-link:hover {
+  color: #0747A6;
+  text-decoration: underline;
+}
+
+/* Start Sprint Button */
+.btn-start-sprint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #00875A;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-start-sprint:hover:not(:disabled) {
+  background: #006644;
+  box-shadow: 0 2px 8px rgba(0, 135, 90, 0.2);
+}
+
+.btn-start-sprint:active:not(:disabled) {
+  background: #00583D;
+  transform: translateY(1px);
+}
+
+.btn-start-sprint:disabled {
+  background: #F4F5F7;
+  color: #A5ADBA;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Active Indicator */
+.active-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #DEEBFF;
+  border-radius: 6px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #0052CC;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.active-text {
+  font-size: 14px;
+  color: #0052CC;
+  font-weight: 500;
+}
+
+/* Completed Indicator */
+.completed-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #E3FCEF;
+  border-radius: 6px;
+  color: #006644;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Actions Dropdown Menu */
+.actions-dropdown {
+  position: absolute;
+  top: 52px;
+  right: 20px;
+  background: #FFFFFF;
+  border: 1px solid #DFE1E6;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(23, 43, 77, 0.12);
+  padding: 8px 0;
+  min-width: 200px;
+  z-index: 100;
+  animation: dropdown-appear 0.15s ease;
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: #172B4D;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dropdown-item:hover {
+  background: #F4F5F7;
+}
+
+.dropdown-item.danger {
+  color: #DE350B;
+}
+
+.dropdown-item.danger:hover {
+  background: #FFEBE6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sprint-card {
+    padding: 16px;
+  }
+
+  .sprint-name {
+    font-size: 16px;
+  }
+
+  .sprint-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .sprint-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-start-sprint,
+  .view-all-link {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .sprint-no-issues {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .add-issues-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .actions-dropdown {
+    right: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sprint-header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .sprint-dates {
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+
+  .metric-value {
+    font-size: 14px;
+  }
+
+  .metric-label {
+    font-size: 10px;
+  }
+}
+
+/* Accessibility */
+.btn-start-sprint:focus-visible,
+.action-menu-button:focus-visible,
+.dropdown-item:focus-visible,
+.view-all-link:focus-visible,
+.add-issues-link:focus-visible {
+  outline: 2px solid #4C9AFF;
+  outline-offset: 2px;
+}
+
+/* Loading State */
+.sprint-card.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}

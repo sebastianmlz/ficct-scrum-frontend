@@ -75,4 +75,41 @@ export class SprintsService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/complete/`, {}, { headers });
   }
+
+  /**
+   * Add issue to sprint
+   * POST /api/v1/projects/sprints/{id}/issues/
+   */
+  addIssueToSprint(sprintId: string, issueId: string): Observable<any> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post(`${this.baseUrl}/${sprintId}/issues/`, { issue_id: issueId }, { headers });
+  }
+
+  /**
+   * Remove issue from sprint
+   * DELETE /api/v1/projects/sprints/{id}/issues/{issue_id}/
+   */
+  removeIssueFromSprint(sprintId: string, issueId: string): Observable<any> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete(`${this.baseUrl}/${sprintId}/issues/${issueId}/`, { headers });
+  }
+
+  /**
+   * Bulk add issues to sprint
+   */
+  addIssuesToSprint(sprintId: string, issueIds: string[]): Observable<any[]> {
+    const requests = issueIds.map(issueId => 
+      this.addIssueToSprint(sprintId, issueId).toPromise()
+    );
+    return new Observable(observer => {
+      Promise.all(requests)
+        .then(results => {
+          observer.next(results);
+          observer.complete();
+        })
+        .catch(error => observer.error(error));
+    });
+  }
 }

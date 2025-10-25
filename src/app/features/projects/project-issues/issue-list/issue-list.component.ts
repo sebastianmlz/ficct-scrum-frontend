@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { IssueService } from '../../../../core/services/issue.service';
 import { PaginationParams, Issue } from '../../../../core/models/interfaces';
 import { PaginatedIssueList } from '../../../../core/models/api-interfaces';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IssueCreateComponent } from '../issue-create/issue-create.component';
 import { IssueDetailComponent } from '../issue-detail/issue-detail.component';
 import { IssueEditComponent } from '../issue-edit/issue-edit.component';
 
 @Component({
   selector: 'app-issue-list',
-  imports: [CommonModule, IssueCreateComponent, IssueDetailComponent, IssueEditComponent],
+  imports: [CommonModule, RouterLink, IssueCreateComponent, IssueDetailComponent, IssueEditComponent],
   templateUrl: './issue-list.component.html',
   styleUrl: './issue-list.component.css'
 })
@@ -25,6 +25,7 @@ export class IssueListComponent {
   error = signal<string | null>(null);
   issues = signal<Issue[]>([]);
   paginationData = signal<PaginatedIssueList | null>(null);
+  projectName = signal<string>('');
   
   // Modal states
   showCreateModal = signal(false);
@@ -35,7 +36,12 @@ export class IssueListComponent {
   ngOnInit(): void {
     const projectId = this.route.snapshot.paramMap.get('projectId') || '';
     this.projectId = projectId;
-    // Pasar el parámetro project para que el backend filtre
+    
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras.state && navigation.extras.state['projectName']) {
+      this.projectName.set(navigation.extras.state['projectName']);
+    }
+    
     this.loadIssues({ project: this.projectId });
   }
 
@@ -123,7 +129,10 @@ export class IssueListComponent {
   }
 
   goBack(): void {
-    // Vuelve a la página de detalle del proyecto
-    this.router.navigate(['/projects']);
+    if (this.projectId) {
+      this.router.navigate(['/projects', this.projectId]);
+    } else {
+      this.router.navigate(['/projects']);
+    }
   }
 }

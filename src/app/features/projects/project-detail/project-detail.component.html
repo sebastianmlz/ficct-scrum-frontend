@@ -98,7 +98,9 @@
                             Sprint
                         </button>
                     </div>
-                    <app-sprint-list [projectId]="project()?.id || ''"></app-sprint-list>
+                    <app-sprint-list 
+                      [projectId]="project()?.id || ''" 
+                      [projectName]="project()?.name"></app-sprint-list>
                     <app-sprint-create *ngIf="openModal()" [projectId]="project()?.id || ''"
                         (close)="openModal.set(false)"></app-sprint-create>
                 </div>

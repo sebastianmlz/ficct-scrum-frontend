@@ -483,6 +483,8 @@ export interface Sprint {
   created_at: Date;
   committed_points: string;
   duration_days: number;
+  // Optional: Issues loaded separately via GET /issues/?sprint={id}
+  issues?: Issue[];
 }
 
 export interface SprintBurdown {
