@@ -79,7 +79,9 @@
     <!-- Issue Preview OR Empty State -->
     <div *ngIf="sprint.issues && sprint.issues.length > 0; else noIssues" class="issues-preview">
       <div *ngFor="let issue of sprint.issues.slice(0, 3)" class="issue-preview-item">
-        <span class="issue-type-icon">{{ getIssueTypeIcon(issue.issue_type?.name) }}</span>
+        <span [class]="'px-2 py-1 text-xs font-medium rounded ' + getIssueTypeBadgeClass(issue.issue_type?.name)">
+          {{ getIssueTypeLabel(issue.issue_type?.name) }}
+        </span>
         <span class="issue-title">{{ issue.title }}</span>
         <span class="priority-badge" [ngClass]="getPriorityClass(issue.priority)">
           {{ getPriorityLabel(issue.priority) }}

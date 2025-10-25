@@ -78,8 +78,7 @@
                                     [class.border-red-300]="projectForm.get('workspace')?.invalid && projectForm.get('workspace')?.touched">
                                     <option value="">Select workspace...</option>
                                     @for (workspace of workspaces(); track workspace.id) {
-                                    <option [value]="workspace.id">{{ workspace.name }} ({{ workspace.organization.name
-                                        }})</option>
+                                    <option [value]="workspace.id">{{ workspace.name }} ({{ workspace.organization_details.name }})</option>
                                     }
                                 </select>
                                 @if (projectForm.get('workspace')?.invalid && projectForm.get('workspace')?.touched) {

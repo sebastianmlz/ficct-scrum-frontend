@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const workspacesRoutes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./workspaces-list/workspaces-list.component').then(m => m.WorkspacesListComponent)
+    loadComponent: () => import('./workspace-list/workspace-list.component').then(m => m.WorkspaceListComponent)
   },
   {
     path: 'create',
@@ -11,7 +11,11 @@ export const workspacesRoutes: Routes = [
   },
   {
     path: ':id',
-    loadComponent: () => import('./workspaces-detail/workspaces-detail.component').then(m => m.WorkspacesDetailComponent)
+    loadComponent: () => import('./workspace-detail/workspace-detail.component').then(m => m.WorkspaceDetailComponent)
+  },
+  {
+    path: ':id/edit',
+    loadComponent: () => import('./workspace-edit/workspace-edit.component').then(m => m.WorkspaceEditComponent)
   },
   {
     path: ':id/members',

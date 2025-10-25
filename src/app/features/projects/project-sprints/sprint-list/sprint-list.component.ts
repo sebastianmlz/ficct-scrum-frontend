@@ -329,16 +329,29 @@ export class SprintListComponent {
   }
 
   /**
-   * Get issue type icon (simple emoji)
+   * Get issue type badge class (professional colors)
    */
-  getIssueTypeIcon(issueTypeName?: string): string {
-    if (!issueTypeName) return '📋';
+  getIssueTypeBadgeClass(issueTypeName?: string): string {
+    if (!issueTypeName) return 'bg-gray-100 text-gray-800';
     const type = issueTypeName.toLowerCase();
-    if (type.includes('bug')) return '🐛';
-    if (type.includes('task')) return '✓';
-    if (type.includes('story')) return '📖';
-    if (type.includes('epic')) return '⚡';
-    return '📋';
+    if (type.includes('bug')) return 'bg-red-100 text-red-800';
+    if (type.includes('task')) return 'bg-blue-100 text-blue-800';
+    if (type.includes('story')) return 'bg-green-100 text-green-800';
+    if (type.includes('epic')) return 'bg-purple-100 text-purple-800';
+    return 'bg-gray-100 text-gray-800';
+  }
+
+  /**
+   * Get issue type short label
+   */
+  getIssueTypeLabel(issueTypeName?: string): string {
+    if (!issueTypeName) return 'Issue';
+    const type = issueTypeName.toLowerCase();
+    if (type.includes('bug')) return 'Bug';
+    if (type.includes('task')) return 'Task';
+    if (type.includes('story')) return 'Story';
+    if (type.includes('epic')) return 'Epic';
+    return 'Issue';
   }
 
   /**

@@ -290,7 +290,7 @@
             <div class="flex items-center flex-1 min-w-0">
               <!-- Avatar -->
               <div class="flex-shrink-0">
-                @if (member.user.profile.avatar_url) {
+                @if (member.user.profile && member.user.profile.avatar_url) {
                 <img [src]="member.user.profile.avatar_url" [alt]="member.user.full_name"
                   class="h-12 w-12 rounded-full border-2 border-gray-200">
                 } @else {
@@ -307,7 +307,7 @@
                   <p class="text-base font-semibold text-gray-900 truncate">
                     {{ member.user.full_name }}
                   </p>
-                  @if (member.user.profile.is_online) {
+                  @if (member.user.profile && member.user.profile.is_online) {
                   <span class="flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -325,14 +325,14 @@
                   <p class="text-sm text-gray-600">{{ '@' + member.user.username }}</p>
                   <p class="text-sm text-gray-500">{{ member.user.email }}</p>
                 </div>
-                @if (member.user.profile.bio) {
-                <p class="text-sm text-gray-500 mt-1 line-clamp-1">{{ member.user.profile.bio }}</p>
+                @if (member.user.profile?.bio) {
+                <p class="text-sm text-gray-500 mt-1 line-clamp-1">{{ member.user.profile?.bio }}</p>
                 }
                 <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
                   <span>Unido: {{ member.joined_at | date:'short' }}</span>
-                  @if (member.user.profile.last_activity) {
+                  @if (member.user.profile?.last_activity) {
                   <span>•</span>
-                  <span>Última actividad: {{ member.user.profile.last_activity | date:'short' }}</span>
+                  <span>Última actividad: {{ member.user.profile?.last_activity | date:'short' }}</span>
                   }
                 </div>
               </div>
@@ -340,30 +340,25 @@
 
             <!-- Role & Actions -->
             <div class="flex items-center gap-3 ml-4">
-              <!-- Role Select - Solo editable si no es owner -->
-              @if (member.role !== 'owner') {
-                <select 
-                  [(ngModel)]="member.role"
-                  (change)="onRoleChange(member, member.role)"
-                  class="rounded-lg border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm min-w-[140px]">
-                  <option value="admin">Administrador</option>
-                  <option value="member">Miembro</option>
-                  <option value="guest">Invitado</option>
-                </select>
-              } @else {
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                  {{ getRoleLabel(member.role) }}
-                </span>
-              }
+              <!-- Role Select - Editable for all roles -->
+              <select 
+                [(ngModel)]="member.role"
+                (change)="onRoleChange(member, member.role)"
+                class="rounded-lg border-gray-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm min-w-[140px]">
+                <option value="admin">Administrator</option>
+                <option value="manager">Manager</option>
+                <option value="member">Member</option>
+                <option value="viewer">Viewer</option>
+              </select>
 
               @if (!member.is_active) {
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                  Inactivo
+                  Inactive
                 </span>
               }
 
-              <!-- Delete Button - No permitir eliminar al owner -->
-              @if (member.role !== 'owner') {
+              <!-- Delete Button -->
+              @if (true) {
                 <button
                   type="button"
                   (click)="removeMember(member)"

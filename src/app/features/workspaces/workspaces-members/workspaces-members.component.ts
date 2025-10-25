@@ -2,9 +2,9 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { WorkspaceService, WorkspaceMember, WorkspaceMembersResponse, Workspace } from '../../../core/services/workspace.service';
+import { WorkspacesService } from '../../../core/services/workspaces.service';
 import { OrganizationService } from '../../../core/services/organization.service';
-import { OrganizationMember } from '../../../core/models/interfaces';
+import { WorkspaceMember, Workspace, OrganizationMember, WorkspaceMemberRequest } from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-workspaces-members',
@@ -70,17 +70,17 @@ export class WorkspacesMembersComponent implements OnInit {
     this.addMemberError.set('');
     this.addMemberSuccess.set('');
     
-    const data = {
+    const data: WorkspaceMemberRequest = {
       workspace: this.workspaceId(),
-      user_id: orgMember.user.id,
-      role: selectedRole,
+      user_id: orgMember.user.id.toString(),
+      role: selectedRole as any,
       permissions: {},
       is_active: true
     };
     
-    this.workspaceService.addWorkspaceMember(data).subscribe({
+    this.workspacesService.addWorkspaceMember(data).subscribe({
       next: () => {
-        this.addMemberSuccess.set('Miembro agregado exitosamente');
+        this.addMemberSuccess.set('Member added successfully');
         this.addingMember.set(false);
         setTimeout(() => {
           this.addMemberModalVisible = false;
@@ -89,8 +89,8 @@ export class WorkspacesMembersComponent implements OnInit {
           this.loadMembers();
         }, 1000);
       },
-      error: (err) => {
-        this.addMemberError.set(err.error?.message || 'Error al agregar miembro');
+      error: (err: Error) => {
+        this.addMemberError.set(err.message || 'Failed to add member');
         this.addingMember.set(false);
       }
     });
@@ -112,7 +112,7 @@ export class WorkspacesMembersComponent implements OnInit {
   selectedRole = '';
 
   constructor(
-    private workspaceService: WorkspaceService,
+    private workspacesService: WorkspacesService,
     private organizationService: OrganizationService,
     private route: ActivatedRoute,
     private router: Router
@@ -129,22 +129,15 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   loadWorkspaceInfo() {
-    this.workspaceService.getWorkspace(this.workspaceId()).subscribe({
-      next: (workspace: any) => {
+    this.workspacesService.getWorkspace(this.workspaceId()).subscribe({
+      next: (workspace: Workspace) => {
         this.workspaceName.set(workspace.name);
-        // Buscar organizationId en organization o en organization_details
-        let organizationId = '';
-        if (workspace.organization && workspace.organization.id) {
-          organizationId = workspace.organization.id;
-        } else if (workspace.organization_details && workspace.organization_details.id) {
-          organizationId = workspace.organization_details.id;
-        }
-        if (organizationId) {
-          this.loadOrganizationMembers(organizationId);
+        if (workspace.organization_details && workspace.organization_details.id) {
+          this.loadOrganizationMembers(workspace.organization_details.id);
         }
       },
-      error: (err) => {
-        console.error('Error loading workspace info:', err);
+      error: (err: Error) => {
+        console.error('[WorkspaceMembers] Error loading workspace info:', err);
       }
     });
   }
@@ -157,8 +150,8 @@ export class WorkspacesMembersComponent implements OnInit {
         this.organizationMembers.set(membersArray);
         this.loadingOrgMembers.set(false);
       },
-      error: (err) => {
-        console.error('Error loading organization members:', err);
+      error: (err: Error) => {
+        console.error('[WorkspaceMembers] Error loading organization members:', err);
         this.loadingOrgMembers.set(false);
       }
     });
@@ -167,23 +160,23 @@ export class WorkspacesMembersComponent implements OnInit {
   loadMembers() {
     this.loading.set(true);
     this.error.set('');
-    this.workspaceService.getWorkspaceMembers(
-      this.workspaceId(),
-      this.currentPage(),
-      this.searchTerm || undefined
-    ).subscribe({
-      next: (response: any) => {
-        const membersArray = Array.isArray(response) ? response : Array.isArray(response.results) ? response.results : [];
-        this.members.set(membersArray);
-        this.totalRecords.set(Array.isArray(membersArray) ? membersArray.length : (response.count || 0));
+    
+    const params = {
+      page: this.currentPage(),
+      search: this.searchTerm || undefined
+    };
+    
+    this.workspacesService.getWorkspaceMembers(this.workspaceId(), params).subscribe({
+      next: (response) => {
+        this.members.set(response.results || []);
+        this.totalRecords.set(response.count);
         this.loading.set(false);
-        // Actualizar el filtro de miembros disponibles después de cargar
         this.searchUsers();
       },
-      error: (err) => {
-        console.log('Error loading members:', err);
+      error: (err: Error) => {
+        console.error('[WorkspaceMembers] Error loading members:', err);
         this.members.set([]);
-        this.error.set('Error loading members: ' + (err.error?.message || err.message));
+        this.error.set(err.message || 'Failed to load members');
         this.loading.set(false);
       }
     });
@@ -247,23 +240,16 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   onRoleChange(member: WorkspaceMember, newRole: string) {
-    const updateData = {
-      role: newRole
-    };
-    
-    this.workspaceService.updateWorkspaceMember(member.id, updateData).subscribe({
+    this.workspacesService.updateWorkspaceMemberRole(member.id, newRole).subscribe({
       next: (updatedMember) => {
-        console.log('✅ Rol actualizado:', updatedMember);
-        // Actualizar el miembro en la lista local
         const updatedMembers = this.members().map(m => 
           m.id === member.id ? updatedMember : m
         );
         this.members.set(updatedMembers);
       },
-      error: (err) => {
-        console.error('Error updating member role:', err);
-        this.error.set('Error al actualizar el rol del miembro');
-        // Revertir el cambio en el UI
+      error: (err: Error) => {
+        console.error('[WorkspaceMembers] Error updating member role:', err);
+        this.error.set(err.message || 'Failed to update member role');
         this.loadMembers();
       }
     });
@@ -283,20 +269,17 @@ export class WorkspacesMembersComponent implements OnInit {
     const member = this.memberToDelete();
     if (!member) return;
 
-    // member.id es el UUID de la relación workspace-member
-    this.workspaceService.deleteWorkspaceMember(member.id).subscribe({
+    this.workspacesService.removeWorkspaceMember(member.id).subscribe({
       next: () => {
-        console.log('✅ Miembro eliminado');
-        // Remover el miembro de la lista local
         const updatedMembers = this.members().filter(m => m.id !== member.id);
         this.members.set(updatedMembers);
         this.totalRecords.set(this.totalRecords() - 1);
         this.showDeleteConfirm.set(false);
         this.memberToDelete.set(null);
       },
-      error: (err) => {
-        console.error('Error removing member:', err);
-        this.error.set('Error al eliminar el miembro');
+      error: (err: Error) => {
+        console.error('[WorkspaceMembers] Error removing member:', err);
+        this.error.set(err.message || 'Failed to remove member');
         this.showDeleteConfirm.set(false);
         this.memberToDelete.set(null);
       }

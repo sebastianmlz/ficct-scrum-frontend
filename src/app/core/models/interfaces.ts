@@ -227,7 +227,7 @@ export interface WorkspaceBasic {
 }
 
 export interface Workspace extends WorkspaceBasic {
-  organization: OrganizationBasic;
+  organization_details: OrganizationBasic;
   description: string;
   workspace_settings: object;
   created_by: UserBasic;
