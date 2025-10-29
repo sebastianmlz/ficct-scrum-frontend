@@ -2,10 +2,11 @@ import { Component, EventEmitter, Input, Output, inject, signal } from '@angular
 import { CommonModule } from '@angular/common';
 import { IssueService } from '../../../../core/services/issue.service';
 import { Issue } from '../../../../core/models/interfaces';
+import { IssueCommentsComponent } from '../issue-comments/issue-comments.component';
 
 @Component({
   selector: 'app-issue-detail',
-  imports: [CommonModule],
+  imports: [CommonModule, IssueCommentsComponent],
   templateUrl: './issue-detail.component.html',
   styleUrl: './issue-detail.component.css'
 })

@@ -159,7 +159,7 @@ export class AuthStore {
     this.updateState({ loading: true, error: null });
     
     try {
-      const user: User = await firstValueFrom(this.authService.getCurrentUser());
+      const user: User = await firstValueFrom(this.authService.getCurrentUserFromAPI());
       
       this.updateState({
         user,

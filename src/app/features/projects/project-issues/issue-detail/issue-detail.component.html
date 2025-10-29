@@ -153,6 +153,13 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Sección de Comentarios -->
+                @if (issue()?.id) {
+                  <div class="mt-6">
+                    <app-issue-comments [issueId]="issue()!.id"></app-issue-comments>
+                  </div>
+                }
             </div>
             }
         </div>

@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 
 import {
   User,
+  UserBasic,
   UserLoginRequest,
   UserRegistrationRequest,
   LoginResponse,
@@ -64,6 +65,22 @@ export class AuthService {
     return user ? JSON.parse(user) : null;
   }
 
+  getCurrentUser(): UserBasic | null {
+    const user = this.getUser();
+    if (!user) return null;
+    
+    return {
+      id: user.id,
+      user_uuid: user.user_uuid,
+      username: user.username,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      full_name: user.full_name || `${user.first_name} ${user.last_name}`.trim(),
+      avatar_url: user.avatar_url
+    };
+  }
+
 
 
   register(userData: UserRegistrationRequest): Observable<User> {
@@ -75,7 +92,7 @@ export class AuthService {
     return this.http.post<LogoutResponse>(`${this.baseUrl}/logout/`, request);
   }
 
-  getCurrentUser(): Observable<User> {
+  getCurrentUserFromAPI(): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/me/`).pipe(
       retry(2),
       catchError((error: HttpErrorResponse) => {

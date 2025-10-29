@@ -1,0 +1,58 @@
+/* Estilos específicos para el componente de comentarios si es necesario */
+
+.comment-avatar {
+  transition: all 0.2s ease-in-out;
+}
+
+.comment-avatar:hover {
+  transform: scale(1.05);
+}
+
+.comment-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.comment-actions button {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.comment-item:hover .comment-actions button {
+  opacity: 1;
+}
+
+/* Animación para nuevos comentarios */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.new-comment {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Mejorar la apariencia del textarea */
+.comment-textarea {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.comment-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Paginación personalizada */
+.pagination-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.pagination-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

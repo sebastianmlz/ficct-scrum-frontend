@@ -1139,6 +1139,22 @@ export interface TechnologyStack {
   tools?: string[];
 }
 
+export interface IssueComment {
+  id: string;
+  issue: string; // UUID del issue
+  author: UserBasic;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  is_edited: boolean;
+}
+
+export interface IssueCommentRequest {
+  content: string;
+}
+
+export interface PaginatedIssueCommentList extends PaginatedResponse<IssueComment> { }
+
 // Union type for all diagram data
 export type DiagramData = 
   | WorkflowDiagramData 

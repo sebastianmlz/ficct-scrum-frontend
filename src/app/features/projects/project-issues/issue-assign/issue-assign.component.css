@@ -1,0 +1,28 @@
+/* Modal backdrop: cubre toda la pantalla, fondo oscuro translúcido */
+.modal-backdrop-assign {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(16, 23, 42, 0.35); /* similar a tailwind bg-slate-900/35 */
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Modal box: centrado, fondo blanco, bordes redondeados, sombra */
+.modal-assign {
+	background: #fff;
+	border-radius: 0.75rem;
+	box-shadow: 0 10px 32px 0 rgba(16, 23, 42, 0.18), 0 2px 4px 0 rgba(16, 23, 42, 0.08);
+	padding: 2rem 2.5rem 1.5rem 2.5rem;
+	min-width: 320px;
+	max-width: 90vw;
+	max-height: 90vh;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	position: relative;
+}
