@@ -23,7 +23,7 @@ import { Issue, Sprint } from '../../../../core/models/interfaces';
               <!-- Header -->
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                  Add Issues to {{ sprint?.name }}
+                  Add Issues to {{ sprint.name }}
                 </h3>
                 <button
                   type="button"

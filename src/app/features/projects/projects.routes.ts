@@ -13,6 +13,21 @@ export const projectsRoutes: Routes = [
     path: ':id',
     loadComponent: () => import('./project-detail/project-detail.component').then(m => m.ProjectDetailComponent),
     children: [
+      // Dashboard route
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./projects-dashboard/projects-dashboard.component').then(m => m.ProjectsDashboardComponent)
+      },
+      // Issues route
+      {
+        path: 'issues',
+        loadComponent: () => import('./project-issues/issue-list/issue-list.component').then(m => m.IssueListComponent)
+      },
+      // Activity route
+      {
+        path: 'activity',
+        loadComponent: () => import('./project-activity/project-activity.component').then(m => m.ProjectActivityComponent)
+      },
       // GitHub Integration routes
       {
         path: 'github',

@@ -1,0 +1,155 @@
+<div class="space-y-4">
+  <!-- Header with Filters -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-gray-900">Activity History</h2>
+      @if (selectedActionType() || selectedObjectType()) {
+        <button
+          type="button"
+          (click)="clearFilters()"
+          class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          Clear Filters
+        </button>
+      }
+    </div>
+    
+    <!-- Quick Filters -->
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        (click)="filterByActionType('created')"
+        [class.bg-green-100]="selectedActionType() === 'created'"
+        [class.text-green-700]="selectedActionType() === 'created'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Created
+      </button>
+      <button
+        type="button"
+        (click)="filterByActionType('updated')"
+        [class.bg-blue-100]="selectedActionType() === 'updated'"
+        [class.text-blue-700]="selectedActionType() === 'updated'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Updated
+      </button>
+      <button
+        type="button"
+        (click)="filterByActionType('transitioned')"
+        [class.bg-purple-100]="selectedActionType() === 'transitioned'"
+        [class.text-purple-700]="selectedActionType() === 'transitioned'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Transitioned
+      </button>
+      <button
+        type="button"
+        (click)="filterByActionType('commented')"
+        [class.bg-yellow-100]="selectedActionType() === 'commented'"
+        [class.text-yellow-700]="selectedActionType() === 'commented'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Commented
+      </button>
+      <div class="border-l border-gray-300 mx-2"></div>
+      <button
+        type="button"
+        (click)="filterByObjectType('issue')"
+        [class.bg-indigo-100]="selectedObjectType() === 'issue'"
+        [class.text-indigo-700]="selectedObjectType() === 'issue'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Issues
+      </button>
+      <button
+        type="button"
+        (click)="filterByObjectType('sprint')"
+        [class.bg-teal-100]="selectedObjectType() === 'sprint'"
+        [class.text-teal-700]="selectedObjectType() === 'sprint'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Sprints
+      </button>
+      <button
+        type="button"
+        (click)="filterByObjectType('board')"
+        [class.bg-pink-100]="selectedObjectType() === 'board'"
+        [class.text-pink-700]="selectedObjectType() === 'board'"
+        class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+        Boards
+      </button>
+    </div>
+  </div>
+
+  <!-- Activity Timeline -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    @if (loading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    } @else if (error()) {
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Error loading activities</h3>
+        <p class="mt-1 text-sm text-gray-500">{{ error() }}</p>
+      </div>
+    } @else if (activities().length > 0) {
+      <div class="divide-y divide-gray-200">
+        @for (activity of activities(); track activity.id) {
+          <div class="p-4 hover:bg-gray-50 transition-colors">
+            <div class="flex gap-4">
+              <!-- Icon -->
+              <div [class]="'flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center ' + getActionColor(activity.action_type)">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getActionIcon(activity.action_type)"/>
+                </svg>
+              </div>
+              
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-900">
+                      <span class="font-medium">{{ activity.user_detail.full_name || activity.user_detail.email }}</span>
+                      <span class="text-gray-600 mx-1">{{ activity.action_display.toLowerCase() }}</span>
+                      <span class="font-medium">{{ activity.object_repr }}</span>
+                    </p>
+                    
+                    <!-- Changes (for updates/transitions) -->
+                    @if (activity.changes && Object.keys(activity.changes).length > 0) {
+                      <div class="mt-2 space-y-1">
+                        @for (key of Object.keys(activity.changes); track key) {
+                          <div class="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                            <span class="font-medium capitalize">{{ key }}:</span>
+                            <span class="text-red-600 line-through ml-1">{{ activity.changes[key].old || 'None' }}</span>
+                            <span class="mx-1">→</span>
+                            <span class="text-green-600 font-medium">{{ activity.changes[key].new || 'None' }}</span>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                  
+                  <div class="flex-shrink-0 ml-4 text-xs text-gray-500">
+                    {{ activity.time_ago }}
+                  </div>
+                </div>
+                
+                <!-- Object Type Badge -->
+                <div class="mt-2">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                    {{ activity.object_type }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No activity found</h3>
+        <p class="mt-1 text-sm text-gray-500">There's no activity to show for this project yet.</p>
+      </div>
+    }
+  </div>
+</div>

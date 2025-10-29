@@ -25,6 +25,16 @@ import { forkJoin } from 'rxjs';
   styleUrl: './sprint-list.component.css'
 })
 export class SprintListComponent {
+  async removeIssueFromSprint(sprintId: string, issueId: string): Promise<void> {
+    try {
+      await this.sprintService.removeIssueFromSprint(sprintId, issueId).toPromise();
+      this.notificationService.success('Issue removed from sprint');
+      await this.loadSprints();
+    } catch (error) {
+      this.notificationService.error('Error removing issue from sprint');
+      console.error(error);
+    }
+  }
   @Input() projectId!: string;
   @Input() projectName?: string;
   @Input() sprintId!: string;

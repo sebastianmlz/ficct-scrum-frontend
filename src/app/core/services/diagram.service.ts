@@ -53,7 +53,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'workflow',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -73,7 +73,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'dependency',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -93,7 +93,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'roadmap',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -113,7 +113,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'uml',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -133,7 +133,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'architecture',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -153,7 +153,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'burndown',
-      sprint_id: sprintId,
+      sprint: sprintId,
       format,
       options
     });
@@ -173,7 +173,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'velocity',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -189,7 +189,7 @@ export class DiagramService {
   exportAsPNG(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
-      project_id: projectId,
+      project: projectId,
       format: 'png',
       options
     });
@@ -201,7 +201,7 @@ export class DiagramService {
   exportAsPDF(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
-      project_id: projectId,
+      project: projectId,
       format: 'pdf',
       options
     });
@@ -213,7 +213,7 @@ export class DiagramService {
   exportAsSVG(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
-      project_id: projectId,
+      project: projectId,
       format: 'svg',
       options
     });

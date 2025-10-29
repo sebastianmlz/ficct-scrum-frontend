@@ -46,7 +46,10 @@ export class ProjectDetailComponent implements OnInit {
 
   tabs: Tab[] = [
     { id: 'overview', label: 'Overview', icon: 'home' },
+    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
     { id: 'board', label: 'Board', icon: 'view_column', route: 'boards' },
+    { id: 'issues', label: 'Issues', icon: 'list', route: 'issues' },
+    { id: 'activity', label: 'Activity', icon: 'history', route: 'activity' },
     { id: 'sprints', label: 'Sprints', icon: 'schedule' },
     { 
       id: 'code', 
@@ -91,6 +94,12 @@ export class ProjectDetailComponent implements OnInit {
         this.activeTab.set('code');
       } else if (url.includes('/diagrams/')) {
         this.activeTab.set('diagrams');
+      } else if (url.includes('/dashboard')) {
+        this.activeTab.set('dashboard');
+      } else if (url.includes('/issues')) {
+        this.activeTab.set('issues');
+      } else if (url.includes('/activity')) {
+        this.activeTab.set('activity');
       } else if (url.includes('/boards')) {
         this.activeTab.set('board');
       } else if (url.match(/\/projects\/[^/]+$/)) {

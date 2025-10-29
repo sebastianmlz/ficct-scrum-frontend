@@ -170,7 +170,7 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
     // Add zoom behavior
     const zoom = d3.zoom()
       .scaleExtent([0.5, 3])
-      .on('zoom', (event) => {
+      .on('zoom', (event: any) => {
         this.svg.selectAll('g').attr('transform', event.transform);
       });
 

@@ -244,8 +244,8 @@
         </div>
       }
 
-      <!-- Child Routes (Code, Diagrams, etc.) -->
-      @if (activeTab() === 'code' || activeTab() === 'diagrams') {
+      <!-- Child Routes (Dashboard, Issues, Activity, Code, Diagrams, etc.) -->
+      @if (activeTab() === 'dashboard' || activeTab() === 'issues' || activeTab() === 'activity' || activeTab() === 'code' || activeTab() === 'diagrams') {
         <router-outlet></router-outlet>
       }
     </main>
