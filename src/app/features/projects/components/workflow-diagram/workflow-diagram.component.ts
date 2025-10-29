@@ -1,15 +1,19 @@
 import { Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DiagramService } from '../../../../core/services/diagram.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { WorkflowDiagramData, DiagramResponse } from '../../../../core/models/interfaces';
+import { WorkflowDiagramData, DiagramResponse, DiagramFormat } from '../../../../core/models/interfaces';
+import { DiagramExportDropdownComponent } from '../../../../shared/components/diagram-export-dropdown/diagram-export-dropdown.component';
+import { DiagramErrorStateComponent } from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
+import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
 import * as d3 from 'd3';
 
 @Component({
   selector: 'app-workflow-diagram',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DiagramExportDropdownComponent, DiagramErrorStateComponent],
   templateUrl: './workflow-diagram.component.html',
   styleUrls: ['./workflow-diagram.component.scss']
 })
@@ -20,10 +24,15 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
   private router = inject(Router);
   private diagramService = inject(DiagramService);
   private notificationService = inject(NotificationService);
+  private sanitizer = inject(DomSanitizer);
 
   projectId = signal<string>('');
   diagramData = signal<WorkflowDiagramData | null>(null);
+  safeSvgContent = signal<SafeHtml | null>(null);
+  diagramFormat = signal<'svg' | 'json'>('json');
   loading = signal(false);
+  exporting = signal(false);
+  errorState = signal<DiagramErrorState | null>(null);
   
   private svg: any;
   private simulation: any;
@@ -44,23 +53,42 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
 
   loadDiagram(): void {
     this.loading.set(true);
+    this.errorState.set(null);
     
     this.diagramService.generateWorkflowDiagram(this.projectId(), 'json').subscribe({
       next: (response: DiagramResponse) => {
-        if (typeof response.data === 'string') {
-          this.diagramData.set(JSON.parse(response.data));
-        } else {
-          this.diagramData.set(response.data as WorkflowDiagramData);
+        // Check the actual format returned by backend
+        this.diagramFormat.set(response.format as 'svg' | 'json');
+        
+        if (response.format === 'svg') {
+          // Backend returned SVG - sanitize and render directly
+          if (typeof response.data === 'string') {
+            this.safeSvgContent.set(this.sanitizer.bypassSecurityTrustHtml(response.data));
+            this.diagramData.set(null); // Clear D3 data
+          }
+        } else if (response.format === 'json') {
+          // Backend returned JSON data for D3 rendering
+          if (typeof response.data === 'string') {
+            this.diagramData.set(JSON.parse(response.data));
+          } else {
+            this.diagramData.set(response.data as WorkflowDiagramData);
+          }
+          this.safeSvgContent.set(null); // Clear SVG content
+          setTimeout(() => this.renderDiagram(), 100);
         }
+        
         this.loading.set(false);
-        setTimeout(() => this.renderDiagram(), 100);
       },
       error: (error) => {
-        this.notificationService.error('Failed to generate workflow diagram');
-        console.error('Error generating diagram:', error);
+        logDiagramError('WORKFLOW-DIAGRAM', error);
+        this.errorState.set(analyzeDiagramError(error, this.projectId()));
         this.loading.set(false);
       }
     });
+  }
+
+  retryLoadDiagram(): void {
+    this.loadDiagram();
   }
 
   renderDiagram(): void {
@@ -207,32 +235,36 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
     d.fy = null;
   }
 
-  exportAsPNG(): void {
-    this.diagramService.exportAsPNG('workflow', this.projectId()).subscribe({
-      next: (response) => {
-        if (typeof response.data === 'string') {
-          this.diagramService.downloadBase64Image(response.data, 'workflow-diagram.png');
-          this.notificationService.success('Diagram exported as PNG');
+  onExportFormat(format: DiagramFormat): void {
+    this.exporting.set(true);
+    
+    this.diagramService.exportDiagramWithFormat(
+      'workflow',
+      this.projectId(),
+      format
+    ).subscribe({
+      next: (result) => {
+        this.exporting.set(false);
+        if (result.success) {
+          this.notificationService.success(
+            'Export Successful',
+            `Workflow diagram exported as ${format.toUpperCase()}: ${result.filename}`
+          );
+        } else {
+          this.notificationService.error(
+            'Export Failed',
+            result.error || 'An unexpected error occurred'
+          );
         }
       },
       error: () => {
-        this.notificationService.error('Failed to export diagram');
+        this.exporting.set(false);
+        this.notificationService.error(
+          'Export Failed',
+          'Unable to export diagram. Please try again.'
+        );
       }
     });
-  }
-
-  exportAsSVG(): void {
-    if (!this.svg) return;
-    
-    const svgData = this.svg.node().outerHTML;
-    const blob = new Blob([svgData], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'workflow-diagram.svg';
-    link.click();
-    URL.revokeObjectURL(url);
-    this.notificationService.success('Diagram exported as SVG');
   }
 
   refreshDiagram(): void {

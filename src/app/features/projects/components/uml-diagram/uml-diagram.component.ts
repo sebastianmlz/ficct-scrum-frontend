@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { DiagramService } from '../../../../core/services/diagram.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { UMLDiagramData } from '../../../../core/models/interfaces';
@@ -14,23 +15,23 @@ import { UMLDiagramData } from '../../../../core/models/interfaces';
     <div class="min-h-screen bg-gray-50">
       <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="mb-6">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div class="flex items-center space-x-3">
               <button type="button" (click)="goBack()" class="p-2 rounded-md text-gray-400 hover:text-gray-500">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
               </button>
-              <h1 class="text-2xl font-bold text-gray-900">UML Diagrams</h1>
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900">UML Diagrams</h1>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <select [(ngModel)]="diagramType" (change)="loadDiagram()" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                 <option value="class">Class Diagram</option>
                 <option value="sequence">Sequence Diagram</option>
                 <option value="activity">Activity Diagram</option>
                 <option value="component">Component Diagram</option>
               </select>
-              <button (click)="exportDiagram()" [disabled]="loading()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
+              <button (click)="exportDiagram()" [disabled]="loading()" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
                 Export
               </button>
             </div>
@@ -41,6 +42,16 @@ import { UMLDiagramData } from '../../../../core/models/interfaces';
           @if (loading()) {
             <div class="flex justify-center items-center py-12">
               <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          } @else if (safeSvgContent()) {
+            <!-- SVG Content (rendered by backend) -->
+            <div class="mb-4">
+              <p class="text-sm text-gray-600">
+                UML {{ diagramType }} diagram showing class structure and relationships.
+              </p>
+            </div>
+            <div class="w-full mx-auto bg-gray-50 rounded-lg p-4">
+              <div class="diagram-svg-container" [innerHTML]="safeSvgContent()"></div>
             </div>
           } @else if (diagramData()) {
             <div class="space-y-4">
@@ -117,6 +128,11 @@ import { UMLDiagramData } from '../../../../core/models/interfaces';
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    .diagram-svg-container svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
   `]
 })
 export class UMLDiagramComponent implements OnInit {
@@ -124,9 +140,12 @@ export class UMLDiagramComponent implements OnInit {
   private router = inject(Router);
   private diagramService = inject(DiagramService);
   private notificationService = inject(NotificationService);
+  private sanitizer = inject(DomSanitizer);
 
   projectId = signal<string>('');
   diagramData = signal<UMLDiagramData | null>(null);
+  safeSvgContent = signal<SafeHtml | null>(null);
+  diagramFormat = signal<'svg' | 'json'>('json');
   loading = signal(false);
   diagramType: 'class' | 'sequence' | 'activity' | 'component' = 'class';
 
@@ -144,11 +163,25 @@ export class UMLDiagramComponent implements OnInit {
     this.loading.set(true);
     this.diagramService.generateUMLDiagram(this.projectId(), 'json', { diagram_type: this.diagramType }).subscribe({
       next: (response) => {
-        if (typeof response.data === 'string') {
-          this.diagramData.set(JSON.parse(response.data));
-        } else {
-          this.diagramData.set(response.data as UMLDiagramData);
+        // Check the actual format returned by backend
+        this.diagramFormat.set(response.format as 'svg' | 'json');
+        
+        if (response.format === 'svg') {
+          // Backend returned SVG - sanitize and render directly
+          if (typeof response.data === 'string') {
+            this.safeSvgContent.set(this.sanitizer.bypassSecurityTrustHtml(response.data));
+            this.diagramData.set(null); // Clear JSON data
+          }
+        } else if (response.format === 'json') {
+          // Backend returned JSON data
+          if (typeof response.data === 'string') {
+            this.diagramData.set(JSON.parse(response.data));
+          } else {
+            this.diagramData.set(response.data as UMLDiagramData);
+          }
+          this.safeSvgContent.set(null); // Clear SVG content
         }
+        
         this.loading.set(false);
       },
       error: () => {
