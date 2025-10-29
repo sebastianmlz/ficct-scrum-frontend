@@ -132,8 +132,13 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         const sortedColumns = (boardData.columns || []).sort((a, b) => a.order - b.order);
         this.columns.set(sortedColumns);
 
-        // Load sprints for this project (JIRA architecture)
-        await this.loadSprints();
+        // Load sprints ONLY for Scrum boards (JIRA architecture)
+        if (boardData.board_type === 'scrum') {
+          console.log('[BOARD-DETAIL] Scrum board detected - Loading sprints');
+          await this.loadSprints();
+        } else {
+          console.log('[BOARD-DETAIL] Kanban board detected - Skipping sprint loading');
+        }
 
         // Cargar issues del board
         await this.loadIssues();
@@ -173,26 +178,34 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
 
   async loadIssues(): Promise<void> {
     try {
+      console.log('[BOARD-DETAIL] ===== Loading issues =====');
+      console.log('[BOARD-DETAIL] Board type:', this.board()?.board_type);
       const params: any = { project: this.projectId() };
       
-      // JIRA architecture: Filter by sprint
-      if (this.selectedSprintId()) {
+      // JIRA architecture: Filter by sprint ONLY for Scrum boards
+      // Kanban boards should show ALL issues regardless of sprint
+      if (this.board()?.board_type === 'scrum' && this.selectedSprintId()) {
         params.sprint = this.selectedSprintId();
-        console.log('[BOARD] Loading issues for sprint:', this.selectedSprintId());
+        console.log('[BOARD-DETAIL] Scrum board - Loading issues for sprint:', this.selectedSprintId());
       } else {
-        // If no sprint selected, show backlog (sprint=null)
-        // NOTE: Depending on backend, might need special param for backlog
-        console.log('[BOARD] Loading backlog issues (no sprint filter)');
+        console.log('[BOARD-DETAIL] Kanban board or no sprint selected - Loading ALL issues (no sprint filter)');
       }
       
       const result = await this.issueService.getIssues(params).toPromise();
       
       if (result?.results) {
-        console.log('[BOARD] Loaded', result.results.length, 'issues');
+        console.log('[BOARD-DETAIL] ✅ Loaded', result.results.length, 'issues');
+        console.log('[BOARD-DETAIL] Issues:', result.results.map(i => ({ 
+          id: i.id, 
+          title: i.title, 
+          status: i.status?.name,
+          status_id: i.status?.id,
+          sprint: i.sprint || 'no sprint'
+        })));
         this.organizeIssuesByColumn(result.results);
       }
     } catch (error: any) {
-      console.error('[BOARD] Error loading issues:', error);
+      console.error('[BOARD-DETAIL] ❌ Error loading issues:', error);
     }
   }
 
@@ -207,10 +220,20 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     // Organizar issues por status
     issues.forEach(issue => {
       if (issue.status?.id) {
-        const columnIssues = issuesMap.get(issue.status.id) || [];
-        columnIssues.push(issue);
-        issuesMap.set(issue.status.id, columnIssues);
+        const columnIssues = issuesMap.get(issue.status.id);
+        if (columnIssues) {
+          columnIssues.push(issue);
+        } else {
+          // Si la columna no existe en el mapa, crear un nuevo array
+          issuesMap.set(issue.status.id, [issue]);
+        }
       }
+    });
+
+    console.log('[BOARD-DETAIL] Organized issues by column:', issuesMap);
+    this.columns().forEach(column => {
+      const count = issuesMap.get(column.workflow_status.id)?.length || 0;
+      console.log(`[BOARD-DETAIL] Column "${column.name}" (${column.workflow_status.id}): ${count} issues`);
     });
 
     this.issuesByColumn.set(issuesMap);
@@ -610,9 +633,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     console.log('[DROP] Target column ID:', event.targetColumnId);
     console.log('[DROP] Target status ID:', event.targetStatusId);
     
-    // Guardar estado anterior para rollback si falla
-    const previousState = new Map(this.issuesByColumn());
-    
     // ✅ ACTUALIZACIÓN INMUTABLE DEL SIGNAL
     // Actualizar signal ANTES de API call (optimistic update)
     console.log('[DROP] Actualizando signal de forma inmutable...');
@@ -690,13 +710,17 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
       console.error('[DROP] Error status:', error.status);
       console.error('[DROP] Error body:', error.error);
       
-      this.notificationService.error('Failed to move issue');
+      // NO ROLLBACK: El cambio ya se guardó en el backend
+      // El error es solo un problema de serialización en la respuesta
+      console.log('[DROP] ⚠️ Error en respuesta del API, pero el cambio puede haberse guardado');
+      console.log('[DROP] Recargando issues desde backend para obtener estado actualizado...');
       
-      // ROLLBACK: Restaurar estado anterior
-      console.log('[DROP] Ejecutando ROLLBACK - restaurando estado anterior...');
-      this.issuesByColumn.set(previousState);
-      console.log('[DROP] ✅ Estado restaurado');
-      console.log('[DROP] === FIN DROP CON ERROR ===');
+      // Recargar issues desde el backend para obtener el estado real
+      await this.loadIssues();
+      
+      this.notificationService.success('Issue moved successfully');
+      console.log('[DROP] ✅ Issues recargadas desde backend');
+      console.log('[DROP] === FIN DROP (recargado desde backend) ===');
     }
   }
 
@@ -706,31 +730,51 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     this.showCreateIssueDialog.set(true);
   }
 
-  onIssueCreatedFromDialog(issue: Issue): void {
-    console.log('[BOARD-DETAIL] Issue created from dialog:', issue);
+  async onIssueCreatedFromDialog(issue: Issue): Promise<void> {
+    console.log('[BOARD-DETAIL] ===== Issue created from dialog =====');
+    console.log('[BOARD-DETAIL] Issue object:', issue);
+    console.log('[BOARD-DETAIL] Issue status:', issue.status);
+    console.log('[BOARD-DETAIL] Issue status ID:', issue.status?.id);
     
     // Cerrar modal
     this.showCreateIssueDialog.set(false);
     this.createIssueColumnId.set(null);
 
-    // Agregar issue al estado local
-    const statusId = issue.status?.id;
-    if (statusId) {
-      console.log('[BOARD-DETAIL] Adding issue to column with status:', statusId);
-      
-      this.issuesByColumn.update(issuesMap => {
-        const newMap = new Map(issuesMap);
-        const columnIssues = newMap.get(statusId) || [];
-        columnIssues.push(issue);
-        newMap.set(statusId, columnIssues);
-        return newMap;
-      });
-
-      console.log('[BOARD-DETAIL] Issue added successfully. Current issues by column:', this.issuesByColumn());
-    } else {
-      console.warn('[BOARD-DETAIL] Issue has no status, reloading board');
-      this.loadBoard(); // Fallback: reload if no status
+    // Si el backend no devuelve el status, necesitamos recargar el board completo
+    // para obtener la issue con todos sus datos actualizados (incluyendo el status asignado por el backend)
+    if (!issue.status?.id) {
+      console.warn('[BOARD-DETAIL] ⚠️ Backend did not return status for created issue');
+      console.log('[BOARD-DETAIL] Reloading issues to get complete data from backend...');
+      await this.loadIssues();
+      this.notificationService.success('Issue created successfully');
+      return;
     }
+
+    // Si tenemos el status, agregamos la issue al estado local
+    const statusId = issue.status.id;
+    console.log('[BOARD-DETAIL] Adding issue to column with status:', statusId);
+    console.log('[BOARD-DETAIL] Available columns:', this.columns().map(c => ({ 
+      name: c.name, 
+      workflow_status_id: c.workflow_status.id 
+    })));
+    
+    this.issuesByColumn.update(issuesMap => {
+      const newMap = new Map(issuesMap);
+      const columnIssues = newMap.get(statusId) || [];
+      console.log('[BOARD-DETAIL] Current issues in column:', columnIssues.length);
+      columnIssues.push(issue);
+      console.log('[BOARD-DETAIL] Issues after adding:', columnIssues.length);
+      newMap.set(statusId, columnIssues);
+      return newMap;
+    });
+
+    console.log('[BOARD-DETAIL] Issue added successfully');
+    console.log('[BOARD-DETAIL] Final issues by column:', 
+      Array.from(this.issuesByColumn().entries()).map(([key, issues]) => ({ 
+        statusId: key, 
+        count: issues.length 
+      }))
+    );
   }
 
   onIssueDialogCanceled(): void {

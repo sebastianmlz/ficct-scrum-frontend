@@ -449,10 +449,27 @@ export interface PaginationParams {
   role?: string;
   workspace_type?: string;
   email?: string;
+  
+  // Issue filters - UUID based
   status?: string;
   priority?: string;
   sprint?: string;
   project?: string;
+  assignee?: string;
+  reporter?: string;
+  issue_type?: string;
+  board?: string;
+  
+  // Issue filters - User-friendly (NEW)
+  status_name?: string;           // "In Progress", "To Do", "Done"
+  status_category?: string;       // "to_do", "in_progress", "done"
+  assignee_email?: string;        // "user@example.com"
+  reporter_email?: string;        // "user@example.com"
+  issue_type_category?: string;   // "epic", "story", "task", "bug"
+  project_key?: string;           // "FICCT"
+  workspace_key?: string;         // "SCRUM"
+  organization?: string;          // UUID
+  is_active?: boolean;
 }
 
 export interface SystemLogQueryParams extends PaginationParams {
@@ -922,9 +939,9 @@ export type DiagramFormat = 'svg' | 'png' | 'pdf' | 'json';
 
 export interface DiagramRequestRequest {
   diagram_type: DiagramType;
-  project_id?: string;
-  board_id?: string;
-  sprint_id?: string;
+  project?: string;  // UUID del proyecto
+  board?: string;    // UUID del board
+  sprint?: string;   // UUID del sprint
   format?: DiagramFormat;
   options?: DiagramOptions;
 }

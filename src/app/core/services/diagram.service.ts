@@ -53,7 +53,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'workflow',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -73,7 +73,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'dependency',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -93,7 +93,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'roadmap',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -113,7 +113,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'uml',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -133,7 +133,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'architecture',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -153,7 +153,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'burndown',
-      sprint_id: sprintId,
+      sprint: sprintId,
       format,
       options
     });
@@ -173,7 +173,7 @@ export class DiagramService {
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'velocity',
-      project_id: projectId,
+      project: projectId,
       format,
       options
     });
@@ -189,7 +189,7 @@ export class DiagramService {
   exportAsPNG(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
-      project_id: projectId,
+      project: projectId,
       format: 'png',
       options
     });
@@ -201,7 +201,7 @@ export class DiagramService {
   exportAsPDF(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
-      project_id: projectId,
+      project: projectId,
       format: 'pdf',
       options
     });
@@ -213,7 +213,7 @@ export class DiagramService {
   exportAsSVG(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
-      project_id: projectId,
+      project: projectId,
       format: 'svg',
       options
     });
@@ -222,6 +222,29 @@ export class DiagramService {
   // ===========================
   // HELPER METHODS
   // ===========================
+
+  /**
+   * Generate filename with timestamp for diagram export
+   */
+  generateFilename(diagramType: DiagramType, format: DiagramFormat, projectName?: string): string {
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    const sanitizedProjectName = projectName 
+      ? this.sanitizeFilename(projectName) + '-'
+      : '';
+    return `${sanitizedProjectName}${diagramType}-diagram-${timestamp}.${format}`;
+  }
+
+  /**
+   * Sanitize filename by removing special characters
+   */
+  private sanitizeFilename(name: string): string {
+    return name
+      .replace(/[^a-zA-Z0-9-_]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .toLowerCase()
+      .slice(0, 50); // Limit length
+  }
 
   /**
    * Download diagram data as file
@@ -240,14 +263,82 @@ export class DiagramService {
 
   /**
    * Convert base64 image to downloadable file
+   * Handles both data URLs and raw base64 strings
    */
   downloadBase64Image(base64Data: string, filename: string): void {
+    // Ensure data URL format
+    let dataUrl = base64Data;
+    if (!base64Data.startsWith('data:')) {
+      // If backend returns raw base64, add data URL prefix
+      const mimeType = filename.endsWith('.png') ? 'image/png' : 'image/jpeg';
+      dataUrl = `data:${mimeType};base64,${base64Data}`;
+    }
+    
     const link = document.createElement('a');
-    link.href = base64Data;
+    link.href = dataUrl;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  /**
+   * Export diagram with automatic filename generation and format handling
+   */
+  exportDiagramWithFormat(
+    diagramType: DiagramType, 
+    projectId: string, 
+    format: DiagramFormat,
+    projectName?: string
+  ): Observable<{success: boolean; filename: string; error?: string}> {
+    return new Observable(observer => {
+      const filename = this.generateFilename(diagramType, format, projectName);
+      
+      this.generateDiagram({
+        diagram_type: diagramType,
+        project: projectId,
+        format
+      }).subscribe({
+        next: (response) => {
+          try {
+            const mimeType = this.getMimeType(format);
+            
+            if (format === 'png') {
+              // PNG format returned as base64
+              if (typeof response.data === 'string') {
+                this.downloadBase64Image(response.data, filename);
+              } else {
+                throw new Error('Invalid data format for PNG export');
+              }
+            } else {
+              // Text formats (SVG, JSON)
+              const dataString = typeof response.data === 'string' 
+                ? response.data 
+                : JSON.stringify(response.data, null, 2);
+              this.downloadDiagram(dataString, filename, mimeType);
+            }
+            
+            observer.next({ success: true, filename });
+            observer.complete();
+          } catch (error) {
+            observer.next({ 
+              success: false, 
+              filename,
+              error: error instanceof Error ? error.message : 'Export failed'
+            });
+            observer.complete();
+          }
+        },
+        error: (error) => {
+          observer.next({ 
+            success: false, 
+            filename,
+            error: error.error?.message || error.message || 'Failed to generate diagram'
+          });
+          observer.complete();
+        }
+      });
+    });
   }
 
   /**

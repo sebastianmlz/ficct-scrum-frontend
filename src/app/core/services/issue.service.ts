@@ -22,9 +22,14 @@ export class IssueService {
       if (params.page) query += `&page=${params.page}`;
       if (params.ordering) query += `&ordering=${params.ordering}`;
       if (params.search) query += `&search=${params.search}`;
-      if (params.status) query += `&status=${params.status}`;
+      if (params.status_name) query += `&status_name=${params.status_name}`;
+      if (params.priority) query += `&priority=${params.priority}`;
+      if (params.assignee_email) query += `&assignee_email=${params.assignee_email}`;
+      if (params.issue_type_category) query += `&issue_type_category=${params.issue_type_category}`;
       if (params.sprint) query += `&sprint=${params.sprint}`;
       if (params.project) query += `&project=${params.project}`;
+      if (params.project_key) query += `&project_key=${params.project_key}`;
+      if (params.workspace_key) query += `&workspace_key=${params.workspace_key}`;
     }
     return this.http.get<PaginatedIssueList>(`${this.baseUrl}?${query}`, { headers });
   }

@@ -1,9 +1,10 @@
-import { Component, inject, Input, signal } from '@angular/core';
+import { Component, inject, Input, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { IssueService } from '../../../../core/services/issue.service';
 import { PaginationParams, Issue } from '../../../../core/models/interfaces';
 import { PaginatedIssueList } from '../../../../core/models/api-interfaces';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IssueCreateComponent } from '../issue-create/issue-create.component';
 import { IssueDetailComponent } from '../issue-detail/issue-detail.component';
 import { IssueEditComponent } from '../issue-edit/issue-edit.component';
@@ -67,9 +68,10 @@ export class IssueListComponent {
 
   @Input() projectId!: string;
 
-  private issueService = inject(IssueService)
+  private issueService = inject(IssueService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
 
   loading = signal(false);
   error = signal<string | null>(null);
@@ -133,7 +135,11 @@ export class IssueListComponent {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const result = await this.issueService.getIssues(params).toPromise();
+      const filters = {
+        project: this.projectId,
+        ...params
+      };
+      const result = await this.issueService.getIssues(filters).toPromise();
       if (result) {
         this.issues.set(result?.results);
         this.paginationData.set(result || null);
@@ -144,6 +150,81 @@ export class IssueListComponent {
     } finally {
       this.loading.set(false);
     }
+  }
+  
+  // UC-064: Search issues by text
+  onSearch(searchTerm: string): void {
+    this.searchSubject.next(searchTerm);
+  }
+  
+  // UC-065: Filter issues by criteria
+  applyFilters(): void {
+    const formValue = this.filterForm.value;
+    const params: any = {};
+    
+    // Only include non-empty values
+    Object.keys(formValue).forEach(key => {
+      if (formValue[key] !== '' && formValue[key] !== null) {
+        params[key] = formValue[key];
+      }
+    });
+    
+    this.loadIssues(params);
+  }
+  
+  clearFilters(): void {
+    this.filterForm.reset({
+      search: '',
+      ordering: '-created_at'
+    });
+    this.applyFilters();
+  }
+  
+  toggleFilters(): void {
+    this.showFilters.update(v => !v);
+  }
+  
+  // UC-066: Save custom filters
+  saveCurrentFilter(): void {
+    const filterName = prompt('Enter a name for this filter:');
+    if (!filterName) return;
+    
+    const filter = {
+      id: Date.now().toString(),
+      name: filterName,
+      filters: this.filterForm.value,
+      createdAt: new Date().toISOString()
+    };
+    
+    const filters = this.savedFilters();
+    filters.push(filter);
+    this.savedFilters.set(filters);
+    
+    // Save to localStorage
+    localStorage.setItem(`saved-filters-${this.projectId}`, JSON.stringify(filters));
+  }
+  
+  loadSavedFilters(): void {
+    const saved = localStorage.getItem(`saved-filters-${this.projectId}`);
+    if (saved) {
+      this.savedFilters.set(JSON.parse(saved));
+    }
+  }
+  
+  applySavedFilter(filter: any): void {
+    this.filterForm.patchValue(filter.filters);
+    this.applyFilters();
+  }
+  
+  deleteSavedFilter(filterId: string): void {
+    const filters = this.savedFilters().filter(f => f.id !== filterId);
+    this.savedFilters.set(filters);
+    localStorage.setItem(`saved-filters-${this.projectId}`, JSON.stringify(filters));
+  }
+  
+  // UC-067: Advanced search (JQL basic)
+  toggleAdvancedSearch(): void {
+    this.showAdvancedSearch.update(v => !v);
   }
 
   // Modal methods

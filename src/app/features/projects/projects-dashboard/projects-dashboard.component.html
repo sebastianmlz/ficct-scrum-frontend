@@ -1,0 +1,100 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Project Dashboard</h2>
+      <p class="mt-1 text-sm text-gray-600">Reports, Analytics, and Metrics</p>
+    </div>
+    <button class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+      Export Report
+    </button>
+  </div>
+
+  <!-- Reportes y Analytics Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- UC-058: Velocity Chart -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Velocity Chart</h3>
+        <span class="text-xs text-gray-500">UC-058</span>
+      </div>
+      <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+        <p class="text-gray-500">Velocity chart will be displayed here</p>
+      </div>
+    </div>
+
+    <!-- UC-061: Cumulative Flow Diagram -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Cumulative Flow Diagram</h3>
+        <span class="text-xs text-gray-500">UC-061</span>
+      </div>
+      <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+        <p class="text-gray-500">Cumulative flow diagram will be displayed here</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC-059: Sprint Report -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Sprint Report</h3>
+      <span class="text-xs text-gray-500">UC-059</span>
+    </div>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+        <div>
+          <p class="font-medium text-gray-900">Current Sprint</p>
+          <p class="text-sm text-gray-600">Sprint 3: Integraciones y Reportes</p>
+        </div>
+        <button class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
+          View Full Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC-060: Team Metrics -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Team Metrics</h3>
+      <span class="text-xs text-gray-500">UC-060</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="p-4 bg-blue-50 rounded-lg">
+        <p class="text-sm text-gray-600">Completed Issues</p>
+        <p class="text-2xl font-bold text-blue-600">24</p>
+      </div>
+      <div class="p-4 bg-green-50 rounded-lg">
+        <p class="text-sm text-gray-600">In Progress</p>
+        <p class="text-2xl font-bold text-green-600">8</p>
+      </div>
+      <div class="p-4 bg-yellow-50 rounded-lg">
+        <p class="text-sm text-gray-600">Pending</p>
+        <p class="text-2xl font-bold text-yellow-600">12</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- UC-062: Export to CSV & UC-063: Project Dashboard -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+      <span class="text-xs text-gray-500">UC-062 | UC-063</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Export Dashboard to CSV
+      </button>
+      <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Generate Full Report
+      </button>
+    </div>
+  </div>
+</div>

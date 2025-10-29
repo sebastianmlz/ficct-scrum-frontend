@@ -76,8 +76,8 @@
       </div>
     </div>
 
-    <!-- Issue Preview OR Empty State -->
-    <div *ngIf="sprint.issues && sprint.issues.length > 0; else noIssues" class="issues-preview">
+    <!-- Issue Preview -->
+    <div *ngIf="sprint.issues && sprint.issues.length > 0" class="issues-preview">
       <div *ngFor="let issue of sprint.issues.slice(0, 3)" class="issue-preview-item">
         <span [class]="'px-2 py-1 text-xs font-medium rounded ' + getIssueTypeBadgeClass(issue.issue_type?.name)">
           {{ getIssueTypeLabel(issue.issue_type?.name) }}
@@ -86,20 +86,31 @@
         <span class="priority-badge" [ngClass]="getPriorityClass(issue.priority)">
           {{ getPriorityLabel(issue.priority) }}
         </span>
-      </div>
-    </div>
-    
-    <ng-template #noIssues>
-      <div class="sprint-no-issues">
-        <p class="no-issues-text">No issues assigned to this sprint yet</p>
-        <button class="add-issues-btn" (click)="openAddIssuesDialog(sprint)">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        <!-- Botón eliminar issue -->
+        <button (click)="removeIssueFromSprint(sprint.id, issue.id)" class="delete-issue-btn" title="Remove from sprint" style="margin-left:8px;background:none;border:none;cursor:pointer;color:#ef4444;">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
-          Add Issues
         </button>
       </div>
-    </ng-template>
+      <!-- Botón Add Issues siempre visible -->
+      <button class="add-issues-btn" (click)="openAddIssuesDialog(sprint)" style="margin-top:8px;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Issues
+      </button>
+    </div>
+    <!-- Empty State si no hay issues -->
+    <div *ngIf="!sprint.issues || sprint.issues.length === 0" class="sprint-no-issues">
+      <p class="no-issues-text">No issues assigned to this sprint yet</p>
+      <button class="add-issues-btn" (click)="openAddIssuesDialog(sprint)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Issues
+      </button>
+    </div>
 
     <!-- Sprint Actions -->
     <div class="sprint-actions">
