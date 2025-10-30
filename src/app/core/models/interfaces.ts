@@ -20,6 +20,7 @@ import {
   SeverityEnum,
   ErrorLogStatusEnum,
   ProjectStatusEnum,
+  IssueLinkTypeEnum,
 } from './enums';
 
 // Base/Common Interfaces
@@ -759,6 +760,63 @@ export interface ColumnDeletedData {
 export interface PaginatedBoardList extends PaginatedResponse<Board> { }
 export interface PaginatedIssueList extends PaginatedResponse<Issue> { }
 export interface PaginatedIssueTypeList extends PaginatedResponse<IssueType> { }
+
+// Issue Links Interfaces
+export interface IssueLink {
+  id: string;
+  source_issue: Issue;
+  target_issue: Issue;
+  link_type: IssueLinkTypeEnum | string;
+  created_at: string;
+  created_by: UserBasic;
+}
+
+export interface IssueLinkDetail {
+  id: string;
+  source_issue: {
+    id: string;
+    key: string;
+    title: string;
+    priority: PriorityEnum;
+    status: IssueStatus;
+    assignee?: UserBasic;
+    reporter: UserBasic;
+    issue_type: IssueType;
+    created_at: string;
+    updated_at: string;
+  };
+  target_issue: {
+    id: string;
+    key: string;
+    title: string;
+    priority: PriorityEnum;
+    status: IssueStatus;
+    assignee?: UserBasic;
+    reporter: UserBasic;
+    issue_type: IssueType;
+    created_at: string;
+    updated_at: string;
+  };
+  link_type: IssueLinkTypeEnum | string;
+  created_by: UserBasic;
+  created_at: string;
+}
+
+export interface IssueLinkType {
+  id: string;
+  name: string;
+  inward_description: string;
+  outward_description: string;
+  is_system: boolean;
+}
+
+export interface IssueLinkRequest {
+  source_issue_id: string;
+  target_issue_id: string;
+  link_type: IssueLinkTypeEnum;
+}
+
+export interface PaginatedIssueLinkList extends PaginatedResponse<IssueLink> { }
 
 // ===========================
 // GITHUB INTEGRATION INTERFACES (Sprint 3)

@@ -1,71 +1,25 @@
 import { Component, inject, Input, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { IssueService } from '../../../../core/services/issue.service';
 import { PaginationParams, Issue } from '../../../../core/models/interfaces';
 import { PaginatedIssueList } from '../../../../core/models/api-interfaces';
-import { ActivatedRoute, Router } from '@angular/router';
 import { IssueCreateComponent } from '../issue-create/issue-create.component';
 import { IssueDetailComponent } from '../issue-detail/issue-detail.component';
 import { IssueEditComponent } from '../issue-edit/issue-edit.component';
 import { IssueAssignComponent } from '../issue-assign/issue-assign.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
 @Component({
   selector: 'app-issue-list',
-  imports: [CommonModule, RouterLink, IssueCreateComponent, IssueDetailComponent, IssueEditComponent, IssueAssignComponent],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, IssueCreateComponent, IssueDetailComponent, IssueEditComponent, IssueAssignComponent],
   templateUrl: './issue-list.component.html',
   styleUrl: './issue-list.component.css'
 })
-export class IssueListComponent {
-  // Estado para el menú desplegable de prioridad por issue
-  private priorityMenuOpenMap = new Map<string, boolean>();
-
-  isPriorityMenuOpen(issueId: string): boolean {
-    return !!this.priorityMenuOpenMap.get(issueId);
-  }
-
-  openPriorityMenu(issueId: string): void {
-    this.priorityMenuOpenMap.set(issueId, true);
-  }
-
-  closePriorityMenu(issueId: string): void {
-    this.priorityMenuOpenMap.set(issueId, false);
-  }
-
-  togglePriorityMenu(issueId: string): void {
-    this.priorityMenuOpenMap.set(issueId, !this.isPriorityMenuOpen(issueId));
-  }
-
-    // Estado para el menú desplegable de estado por issue
-  public statusMenuOpenMap = new Map<string, boolean>();
-
-  public isStatusMenuOpen(issueId: string): boolean {
-    return !!this.statusMenuOpenMap.get(issueId);
-  }
-
-  public openStatusMenu(issueId: string): void {
-    this.statusMenuOpenMap.set(issueId, true);
-  }
-
-  public closeStatusMenu(issueId: string): void {
-    this.statusMenuOpenMap.set(issueId, false);
-  }
-
-  public toggleStatusMenu(issueId: string): void {
-    this.statusMenuOpenMap.set(issueId, !this.isStatusMenuOpen(issueId));
-  }
-
-  // Opciones de transición/estado
-  public readonly STATUS_OPTIONS = [
-    { value: 'to_do', label: 'To Do' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'done', label: 'Done' },
-  ];
-
-  public convertirStatus(status: string | null): string {
-    const found = this.STATUS_OPTIONS.find(opt => opt.value === status);
-    return found ? found.label : (status || 'Sin estado');
-  }
-
+export class IssueListComponent implements OnInit {
   @Input() projectId!: string;
 
   private issueService = inject(IssueService);
@@ -85,32 +39,47 @@ export class IssueListComponent {
   showEditModal = signal(false);
   showAssignModal = signal(false);
   selectedIssueId = signal<string | null>(null);
-  // Asignar Issue
-  openAssignModal(issueId: string): void {
-    this.selectedIssueId.set(issueId);
-    this.showAssignModal.set(true);
-  }
-
-  closeAssignModal(): void {
-    this.showAssignModal.set(false);
-    this.selectedIssueId.set(null);
-  }
-
-  onIssueAssigned(): void {
-    this.closeAssignModal();
-    this.loadIssues({ project: this.projectId });
-  }
+  
+  // Search & Filter states
+  showFilters = signal(false);
+  showAdvancedSearch = signal(false);
+  savedFilters = signal<any[]>([]);
+  
+  // Search subject for debouncing
+  private searchSubject = new Subject<string>();
+  
+  // Filter form
+  filterForm: FormGroup = this.fb.group({
+    search: [''],
+    status_name: [''],  // Changed from 'status' to 'status_name'
+    priority: [''],
+    assignee_email: [''],  // Changed from 'assignee' to 'assignee_email'
+    issue_type_category: [''],  // Changed from 'issue_type' to 'issue_type_category'
+    sprint: [''],
+    ordering: ['-created_at']
+  });
 
   ngOnInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('projectId') || '';
-    this.projectId = projectId;
-
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state && navigation.extras.state['projectName']) {
-      this.projectName.set(navigation.extras.state['projectName']);
-    }
-
-    this.loadIssues({ project: this.projectId });
+    // Get project ID from route params
+    this.route.parent?.params.subscribe(params => {
+      const id = params['id'];
+      if (id) {
+        this.projectId = id;
+        this.loadIssues();
+      }
+    });
+    
+    // Setup search debouncing
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      this.filterForm.patchValue({ search: searchTerm });
+      this.applyFilters();
+    });
+    
+    // Load saved filters from localStorage
+    this.loadSavedFilters();
   }
 
   // Mapeo de prioridades para mostrar y enviar
@@ -129,6 +98,61 @@ export class IssueListComponent {
   getPriorityValueFromLabel(label: string): string | null {
     const found = this.PRIORITY_OPTIONS.find(opt => opt.label === label);
     return found ? found.value : null;
+  }
+
+  // Status options para el menú desplegable
+  STATUS_OPTIONS = [
+    { value: 'to_do', label: 'Por hacer' },
+    { value: 'in_progress', label: 'En progreso' }, 
+    { value: 'done', label: 'Hecho' }
+  ];
+
+  // Conversión de status
+  convertirStatus(status: string | null): string {
+    if (!status) return '';
+    const map: Record<string, string> = {
+      'to_do': 'Por hacer',
+      'in_progress': 'En progreso',
+      'done': 'Hecho'
+    };
+    return map[status] || status;
+  }
+
+  // Menú de status
+  statusMenuOpen: Record<string, boolean> = {};
+  isStatusMenuOpen(id: string): boolean {
+    return !!this.statusMenuOpen[id];
+  }
+  toggleStatusMenu(id: string): void {
+    this.statusMenuOpen[id] = !this.statusMenuOpen[id];
+  }
+
+  // Menú de prioridad
+  priorityMenuOpen: Record<string, boolean> = {};
+  isPriorityMenuOpen(id: string): boolean {
+    return !!this.priorityMenuOpen[id];
+  }
+  togglePriorityMenu(id: string): void {
+    this.priorityMenuOpen[id] = !this.priorityMenuOpen[id];
+  }
+  closePriorityMenu(id: string): void {
+    this.priorityMenuOpen[id] = false;
+  }
+
+  // Modal de asignación - usando signals compatibles con el template
+  openAssignModal(id: string): void {
+    this.selectedIssueId.set(id);
+    this.showAssignModal.set(true);
+  }
+  
+  closeAssignModal(): void {
+    this.showAssignModal.set(false);
+    this.selectedIssueId.set(null);
+  }
+  
+  onIssueAssigned(): void {
+    this.closeAssignModal();
+    this.loadIssues({ project: this.projectId });
   }
 
   async loadIssues(params?: PaginationParams): Promise<void> {

@@ -1,0 +1,112 @@
+/* Estilos específicos para el componente de issue links */
+
+.link-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.link-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.link-type-badge {
+  transition: all 0.2s ease-in-out;
+}
+
+.link-type-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Animación para nuevos enlaces */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.new-link {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Mejorar la apariencia de los selects y inputs */
+.form-input, .form-select {
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.form-input:focus, .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Estados de carga */
+.loading-spinner {
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Selector de issues */
+.issue-selector {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.issue-item {
+  transition: all 0.15s ease-in-out;
+}
+
+.issue-item:hover {
+  background-color: #f9fafb;
+  transform: translateX(2px);
+}
+
+.issue-item:active {
+  background-color: #f3f4f6;
+}
+
+/* Badges en el selector */
+.issue-badge {
+  font-size: 0.65rem;
+  padding: 0.125rem 0.375rem;
+}
+
+/* Scroll personalizado para el selector */
+.issue-selector::-webkit-scrollbar {
+  width: 6px;
+}
+
+.issue-selector::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.issue-selector::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.issue-selector::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .link-card {
+    padding: 1rem;
+  }
+  
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}

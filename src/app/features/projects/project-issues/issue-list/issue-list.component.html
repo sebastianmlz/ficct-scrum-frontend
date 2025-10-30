@@ -159,7 +159,9 @@
     (issueCreated)="onIssueCreated()">
   </app-issue-create>
 
-  <app-issue-detail *ngIf="showDetailModal() && selectedIssueId()" [issueId]="selectedIssueId()!"
+  <app-issue-detail *ngIf="showDetailModal() && selectedIssueId()" 
+    [issueId]="selectedIssueId()!"
+    [projectId]="projectId"
     (close)="closeDetailModal()">
   </app-issue-detail>
 

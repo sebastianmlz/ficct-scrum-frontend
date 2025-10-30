@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Issue, PaginationParams, IssueRequest, IssueType, IssueComment, IssueCommentRequest, PaginatedIssueCommentList } from '../models/interfaces';
+import { Issue, PaginationParams, IssueRequest, IssueType, IssueComment, IssueCommentRequest, PaginatedIssueCommentList, IssueLink, IssueLinkDetail, IssueLinkRequest, PaginatedIssueLinkList } from '../models/interfaces';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PaginatedIssueList } from '../models/api-interfaces';
@@ -126,4 +126,41 @@ export class IssueService {
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.delete<void>(`${this.baseUrl}/${issueId}/comments/${commentId}/`, { headers });
   }
+
+  /*Issues Links*/
+  
+  // Crear link entre issues
+  createIssueLink(issueId: string, linkData: IssueLinkRequest): Observable<IssueLink> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<IssueLink>(`${this.baseUrl}/${issueId}/links/`, linkData, { headers });
+  }
+
+  // Obtener todos los links de una issue
+  getIssueLinks(issueId: string, params?: PaginationParams): Observable<PaginatedIssueLinkList> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    let query = '';
+    if (params) {
+      if (params.page) query += `&page=${params.page}`;
+      if (params.ordering) query += `&ordering=${params.ordering}`;
+      if (params.search) query += `&search=${params.search}`;
+    }
+    return this.http.get<PaginatedIssueLinkList>(`${this.baseUrl}/${issueId}/links/?${query}`, { headers });
+  }
+
+  // Obtener detalle de un link específico
+  getIssueLinkDetail(issueId: string, linkId: string): Observable<IssueLinkDetail> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<IssueLinkDetail>(`${this.baseUrl}/${issueId}/links/${linkId}/`, { headers });
+  }
+
+  // Eliminar link entre issues
+  deleteIssueLink(issueId: string, linkId: string): Observable<void> {
+    const token = localStorage.getItem('access');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete<void>(`${this.baseUrl}/${issueId}/links/${linkId}/`, { headers });
+  }
+
 }

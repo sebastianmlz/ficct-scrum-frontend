@@ -3,15 +3,17 @@ import { CommonModule } from '@angular/common';
 import { IssueService } from '../../../../core/services/issue.service';
 import { Issue } from '../../../../core/models/interfaces';
 import { IssueCommentsComponent } from '../issue-comments/issue-comments.component';
+import { IssueLinksComponent } from '../issue-links/issue-links.component';
 
 @Component({
   selector: 'app-issue-detail',
-  imports: [CommonModule, IssueCommentsComponent],
+  imports: [CommonModule, IssueCommentsComponent, IssueLinksComponent],
   templateUrl: './issue-detail.component.html',
   styleUrl: './issue-detail.component.css'
 })
 export class IssueDetailComponent {
   @Input() issueId!: string;
+  @Input() projectId!: string;
   @Output() close = new EventEmitter<void>();
 
   private issueService = inject(IssueService);
@@ -19,6 +21,7 @@ export class IssueDetailComponent {
   loading = signal(false);
   error = signal<string | null>(null);
   issue = signal<Issue | null>(null);
+  activeTab = signal<'details' | 'links' | 'comments'>('details');
 
   ngOnInit(): void {
     this.loadIssue();
@@ -72,5 +75,9 @@ export class IssueDetailComponent {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  setActiveTab(tab: 'details' | 'links' | 'comments'): void {
+    this.activeTab.set(tab);
   }
 }

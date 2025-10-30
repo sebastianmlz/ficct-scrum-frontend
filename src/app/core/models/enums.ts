@@ -166,3 +166,14 @@ export enum ErrorLogStatusEnum {
   CLOSED = 'closed'
 }
 
+// Issue Link Types Enum
+export enum IssueLinkTypeEnum {
+  BLOCKS = 'blocks',
+  BLOCKED_BY = 'blocked_by',
+  RELATES_TO = 'relates_to',
+  DUPLICATES = 'duplicates',
+  DUPLICATED_BY = 'duplicated_by',
+  DEPENDS_ON = 'depends_on',
+  DEPENDENCY_OF = 'dependency_of'
+}
+
