@@ -1,15 +1,14 @@
 <div class="min-h-screen bg-gray-50">
-  <header class="bg-white shadow">
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900">Organizations</h1>
-        <a 
-          routerLink="/organizations/create"
-          class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 font-medium"
-        >
-          Create Organization
-        </a>
-      </div>
+  <header class="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 shadow-lg rounded-b-2xl animate-fade-in">
+    <div class="max-w-7xl mx-auto py-4 px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-extrabold text-white tracking-wide drop-shadow-lg">Organizaciones</h1>
+      <a 
+        routerLink="/organizations/create"
+        class="bg-primary text-white px-5 py-2 rounded-xl hover:bg-primary/90 font-semibold flex items-center gap-2 shadow-md transition-all duration-200"
+      >
+        <i class="pi pi-plus text-lg"></i>
+        Crear organización
+      </a>
     </div>
   </header>
 
@@ -116,15 +115,17 @@
                 <div class="flex space-x-2">
                   <a
                     [routerLink]="['/organizations', org.id]"
-                    class="flex-1 text-center bg-blue-500 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
+                    class="flex-1 text-center bg-blue-500 text-white px-3 py-2 rounded-xl text-base font-semibold hover:bg-blue-600 flex items-center gap-2 justify-center"
                   >
-                    View Details
+                    <i class="pi pi-eye text-lg"></i>
+                    Ver detalles
                   </a>
                   <a
                     [routerLink]="['/organizations', org.id, 'members']"
-                    class="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-200"
+                    class="flex-1 text-center bg-gray-100 text-gray-700 px-3 py-2 rounded-xl text-base font-semibold hover:bg-gray-200 flex items-center gap-2 justify-center"
                   >
-                    Members
+                    <i class="pi pi-users text-lg"></i>
+                    Miembros
                   </a>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50" (click)="closeAllDropdowns()">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-100 animate-fade-in" (click)="closeAllDropdowns()">
   <!-- Loading State -->
   @if (loading()) {
     <div class="flex justify-center items-center py-12">
@@ -22,71 +22,74 @@
   
   <!-- Project Loaded -->
   @else if (project()) {
-    <!-- Sticky Header -->
-    <header class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
-      <div class="max-w-[1600px] mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-          <!-- Left: Back + Project Info -->
-          <div class="flex items-center space-x-4">
-            <button 
-              type="button" 
-              (click)="goBack()" 
-              class="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-              </svg>
-            </button>
-            
-            @if (project()?.cover_image_url) {
-              <img [src]="project()?.cover_image_url" [alt]="project()?.name" 
-                   class="h-10 w-10 rounded-lg object-cover border border-gray-200">
-            } @else {
-              <div class="h-10 w-10 rounded-lg bg-blue-500 flex items-center justify-center text-white font-semibold text-lg">
-                {{ (project()?.name?.charAt(0) || 'P').toUpperCase() }}
-              </div>
-            }
-            
-            <div class="flex items-center gap-3">
-              <h1 class="text-xl font-bold text-gray-900">{{ project()?.name }}</h1>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    [class]="getStatusBadgeClass(project()?.status || '')">
-                {{ formatLabel(project()?.status || '') }}
+    <!-- Sticky Header Modernizado -->
+    <header class="sticky top-0 z-20 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 shadow-xl rounded-b-2xl animate-fade-in">
+      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+        <!-- Left: Back + Project Info -->
+        <div class="flex items-center gap-5">
+          <button 
+            type="button" 
+            (click)="goBack()" 
+            class="p-2 rounded-xl text-white hover:text-pink-100 hover:bg-white/10 transition shadow-lg">
+            <i class="pi pi-arrow-left text-xl"></i>
+          </button>
+          @if (project()?.cover_image_url) {
+            <img [src]="project()?.cover_image_url" [alt]="project()?.name" 
+                 class="h-12 w-12 rounded-2xl object-cover border-2 border-white shadow-lg">
+          } @else {
+            <div class="h-12 w-12 rounded-2xl bg-blue-500 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+              <i class="pi pi-briefcase"></i>
+            </div>
+          }
+          <div class="flex flex-col gap-1">
+            <h1 class="text-2xl font-extrabold text-white drop-shadow">{{ project()?.name }}</h1>
+            <div class="flex gap-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white shadow">
+                <i class="pi pi-check-circle mr-1"></i> {{ formatLabel(project()?.status || '') }}
               </span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    [class]="getPriorityBadgeClass(project()?.priority || '')">
-                {{ formatLabel(project()?.priority || '') }}
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white/20 text-white shadow">
+                <i class="pi pi-star mr-1"></i> {{ formatLabel(project()?.priority || '') }}
               </span>
             </div>
           </div>
-          
-          <!-- Right: Action Buttons -->
-          <div class="flex items-center gap-3">
-            <a [routerLink]="['/projects', project()?.id, 'edit']"
-               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-              Edit
-            </a>
-            <a [routerLink]="['/projects', project()?.id, 'config']"
-               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
-              Settings
-            </a>
-          </div>
+        </div>
+        <!-- Right: Action Buttons -->
+        <div class="flex items-center gap-3">
+          <a [routerLink]="['/projects', project()?.id, 'edit']"
+             class="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl shadow-lg hover:scale-105 transition flex items-center gap-2">
+            <i class="pi pi-pencil"></i> Editar
+          </a>
+          <a [routerLink]="['/projects', project()?.id, 'config']"
+             class="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-xl shadow-lg hover:scale-105 transition flex items-center gap-2">
+            <i class="pi pi-cog"></i> Configuración
+          </a>
         </div>
       </div>
     </header>
 
-    <!-- Sticky Tab Navigation -->
-    <nav class="sticky top-[72px] z-10 bg-white border-b border-gray-200">
-      <div class="max-w-[1600px] mx-auto px-6">
-        <div class="flex items-center gap-1">
+    <!-- Sticky Tab Navigation Modernizada -->
+    <nav class="sticky top-[80px] z-10 bg-gradient-to-r from-blue-100 via-white to-purple-100 border-b border-purple-200 shadow">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="flex items-center gap-2 justify-center">
           @for (tab of tabs; track tab.id) {
             @if (!tab.subTabs) {
               <button
                 type="button"
                 (click)="setActiveTab(tab.id)"
                 [class.active]="activeTab() === tab.id"
-                class="relative px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition border-b-2 border-transparent hover:border-gray-300"
-                [class.!text-blue-600]="activeTab() === tab.id"
-                [class.!border-blue-600]="activeTab() === tab.id">
+                class="relative px-6 py-3 text-sm font-bold rounded-xl transition border-b-4 border-transparent hover:border-purple-400 hover:bg-purple-50 text-gray-700 hover:text-purple-700 flex items-center gap-2"
+                [class.!text-purple-700]="activeTab() === tab.id"
+                [class.!border-purple-700]="activeTab() === tab.id">
+                <ng-container [ngSwitch]="tab.id">
+                  <i *ngSwitchCase="'overview'" class="pi pi-eye mr-2"></i>
+                  <i *ngSwitchCase="'dashboard'" class="pi pi-chart-bar mr-2"></i>
+                  <i *ngSwitchCase="'board'" class="pi pi-th-large mr-2"></i>
+                  <i *ngSwitchCase="'issues'" class="pi pi-bug mr-2"></i>
+                  <i *ngSwitchCase="'activity'" class="pi pi-calendar mr-2"></i>
+                  <i *ngSwitchCase="'sprints'" class="pi pi-forward mr-2"></i>
+                  <i *ngSwitchCase="'settings'" class="pi pi-cog mr-2"></i>
+                  <span *ngSwitchDefault class="pi pi-hashtag mr-2"></span>
+                </ng-container>
                 {{ tab.label }}
               </button>
             } @else {
@@ -94,23 +97,20 @@
                 <button
                   type="button"
                   (click)="tab.id === 'code' ? toggleCodeDropdown($event) : toggleDiagramsDropdown($event)"
-                  class="flex items-center gap-1 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 transition">
-                  {{ tab.label }}
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
+                  class="flex items-center gap-2 px-6 py-3 text-sm font-bold rounded-xl transition border-b-4 border-transparent hover:border-purple-400 hover:bg-purple-50 text-gray-700 hover:text-purple-700">
+                  <i [ngClass]="tab.id === 'code' ? 'pi pi-code' : 'pi pi-sitemap'" class="mr-1"></i>{{ tab.label }}
+                  <i class="pi pi-chevron-down"></i>
                 </button>
-                
                 @if ((tab.id === 'code' && codeDropdownOpen()) || (tab.id === 'diagrams' && diagramsDropdownOpen())) {
                   <div 
                     (click)="$event.stopPropagation()"
-                    class="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    class="absolute top-full left-0 mt-1 w-56 bg-white rounded-xl shadow-xl border border-purple-200 py-1 z-50">
                     @for (subTab of tab.subTabs; track subTab.id) {
                       <button
                         type="button"
                         (click)="navigateToSubTab(subTab.route)"
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-                        {{ subTab.label }}
+                        class="w-full text-left px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition flex items-center gap-2">
+                        <i class="pi pi-angle-right mr-1"></i>{{ subTab.label }}
                       </button>
                     }
                   </div>
@@ -123,37 +123,37 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="max-w-[1600px] mx-auto px-6 py-8">
+  <main class="max-w-6xl mx-auto px-4 py-10">
       <!-- Overview Tab Content -->
       @if (activeTab() === 'overview') {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Main Content (2/3) -->
           <div class="lg:col-span-2 space-y-8">
             <!-- Description Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
-              <p class="text-gray-700 leading-relaxed">
-                {{ project()?.description || 'No description provided.' }}
+            <div class="bg-gradient-to-br from-blue-100 via-white to-purple-100 rounded-2xl shadow-xl border border-purple-100 p-6 animate-fade-in">
+              <h2 class="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2"><i class="pi pi-align-left"></i> Descripción</h2>
+              <p class="text-gray-700 leading-relaxed text-lg">
+                {{ project()?.description || 'No se ha proporcionado descripción.' }}
               </p>
             </div>
 
             <!-- Timeline Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Timeline</h2>
+            <div class="bg-gradient-to-br from-pink-100 via-white to-blue-100 rounded-2xl shadow-xl border border-pink-100 p-6 animate-fade-in">
+              <h2 class="text-xl font-bold text-pink-700 mb-4 flex items-center gap-2"><i class="pi pi-calendar"></i> Cronología</h2>
               <div class="space-y-3">
-                <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                  <span class="text-sm font-medium text-gray-500">Created</span>
-                  <span class="text-sm text-gray-900">{{ project()?.created_at | date:'mediumDate' }}</span>
+                <div class="flex items-center justify-between py-2 border-b border-pink-100">
+                  <span class="text-sm font-bold text-pink-500">Creado</span>
+                  <span class="text-sm text-pink-700">{{ project()?.created_at | date:'mediumDate' }}</span>
                 </div>
                 @if (project()?.due_date) {
-                  <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span class="text-sm font-medium text-gray-500">Due Date</span>
-                    <span class="text-sm text-gray-900">{{ project()?.due_date | date:'mediumDate' }}</span>
+                  <div class="flex items-center justify-between py-2 border-b border-pink-100">
+                    <span class="text-sm font-bold text-pink-500">Fecha límite</span>
+                    <span class="text-sm text-pink-700">{{ project()?.due_date | date:'mediumDate' }}</span>
                   </div>
                 }
                 <div class="flex items-center justify-between py-2">
-                  <span class="text-sm font-medium text-gray-500">Last Updated</span>
-                  <span class="text-sm text-gray-900">{{ project()?.updated_at | date:'mediumDate' }}</span>
+                  <span class="text-sm font-bold text-pink-500">Última actualización</span>
+                  <span class="text-sm text-pink-700">{{ project()?.updated_at | date:'mediumDate' }}</span>
                 </div>
               </div>
             </div>
@@ -162,21 +162,21 @@
           <!-- Sidebar (1/3) -->
           <div class="space-y-6">
             <!-- Project Info Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Project Details</h3>
-              <div class="space-y-3">
+            <div class="bg-gradient-to-br from-purple-100 via-white to-blue-100 rounded-2xl shadow-xl border border-purple-100 p-6 animate-fade-in">
+              <h3 class="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2"><i class="pi pi-info-circle"></i> Detalles del proyecto</h3>
+              <div class="space-y-2">
                 <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-gray-500">Status</span>
-                  <span class="text-sm text-gray-900">{{ formatLabel(project()?.status || '') }}</span>
+                  <span class="text-sm font-bold text-blue-500">Estado</span>
+                  <span class="text-sm text-blue-700">{{ formatLabel(project()?.status || '') }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span class="text-sm font-medium text-gray-500">Priority</span>
-                  <span class="text-sm text-gray-900">{{ formatLabel(project()?.priority || '') }}</span>
+                  <span class="text-sm font-bold text-blue-500">Prioridad</span>
+                  <span class="text-sm text-blue-700">{{ formatLabel(project()?.priority || '') }}</span>
                 </div>
                 @if (project()?.estimated_hours) {
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-500">Estimated Hours</span>
-                    <span class="text-sm text-gray-900">{{ project()?.estimated_hours }}h</span>
+                    <span class="text-sm font-bold text-blue-500">Horas estimadas</span>
+                    <span class="text-sm text-blue-700">{{ project()?.estimated_hours }}h</span>
                   </div>
                 }
               </div>
@@ -184,41 +184,32 @@
 
             <!-- Configuration Card -->
             @if (projectConfig()) {
-              <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Configuration</h3>
+              <div class="bg-gradient-to-br from-blue-100 via-white to-pink-100 rounded-2xl shadow-xl border border-blue-100 p-6 animate-fade-in">
+                <h3 class="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2"><i class="pi pi-cog"></i> Configuración</h3>
                 <div class="space-y-3">
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-500">Sprint Duration</span>
-                    <span class="text-sm text-gray-900">{{ projectConfig()?.sprint_duration }} Weeks</span>
+                    <span class="text-sm font-bold text-purple-500">Duración Sprint</span>
+                    <span class="text-sm text-purple-700">{{ projectConfig()?.sprint_duration }} Semanas</span>
                   </div>
                   <div class="flex items-center justify-between">
-                    <span class="text-sm font-medium text-gray-500">Estimation Type</span>
-                    <span class="text-sm text-gray-900">{{ formatLabel(projectConfig()?.estimation_type || '') }}</span>
+                    <span class="text-sm font-bold text-purple-500">Tipo de estimación</span>
+                    <span class="text-sm text-purple-700">{{ formatLabel(projectConfig()?.estimation_type || '') }}</span>
                   </div>
                 </div>
               </div>
             }
 
             <!-- Quick Actions Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div class="space-y-2">
+            <div class="bg-gradient-to-br from-pink-100 via-white to-blue-100 rounded-2xl shadow-xl border border-pink-100 p-6 animate-fade-in">
+              <h3 class="text-xl font-bold text-pink-700 mb-4 flex items-center gap-2"><i class="pi pi-bolt"></i> Acciones rápidas</h3>
+              <div class="space-y-3">
                 <a [routerLink]="['/projects', project()?.id, 'boards']"
-                   class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
-                  </svg>
-                  View Boards
+                   class="flex items-center gap-3 px-5 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl shadow-lg hover:scale-105 transition">
+                  <i class="pi pi-th-large"></i> Ver tableros
                 </a>
                 <a [routerLink]="['/projects', project()?.id, 'config-create']"
-                   class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  </svg>
-                  Configure Project
+                   class="flex items-center gap-3 px-5 py-3 text-sm font-bold text-white bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-xl shadow-lg hover:scale-105 transition">
+                  <i class="pi pi-cog"></i> Configurar proyecto
                 </a>
               </div>
             </div>
@@ -228,13 +219,13 @@
 
       <!-- Sprints Tab Content -->
       @if (activeTab() === 'sprints') {
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-gray-900">Sprints</h2>
+  <div class="bg-gradient-to-br from-blue-100 via-white to-purple-100 rounded-2xl shadow-xl border border-purple-100 p-6 animate-fade-in">
+          <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-extrabold text-purple-700 flex items-center gap-2"><i class="pi pi-forward"></i> Sprints</h2>
             <button 
               (click)="showSprintModal()"
-              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
-              Add Sprint
+              class="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-xl shadow-lg hover:scale-105 transition flex items-center gap-2">
+              <i class="pi pi-plus"></i> Agregar Sprint
             </button>
           </div>
           <app-sprint-list 
@@ -246,7 +237,9 @@
 
       <!-- Child Routes (Dashboard, Issues, Activity, Code, Diagrams, etc.) -->
       @if (activeTab() === 'dashboard' || activeTab() === 'issues' || activeTab() === 'activity' || activeTab() === 'code' || activeTab() === 'diagrams') {
-        <router-outlet></router-outlet>
+  <div class="bg-gradient-to-br from-blue-100 via-white to-purple-100 rounded-2xl shadow-xl border border-purple-100 p-6 animate-fade-in">
+          <router-outlet></router-outlet>
+        </div>
       }
     </main>
   }

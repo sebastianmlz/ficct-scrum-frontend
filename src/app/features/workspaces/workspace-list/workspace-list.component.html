@@ -1,127 +1,119 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-100">
   <!-- Header -->
-  <div class="bg-white shadow-sm border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <button
-            (click)="goBack()"
-            class="text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Back to organizations"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">Workspaces</h1>
-            @if (organizationName()) {
-              <p class="text-sm text-gray-500 mt-1">{{ organizationName() }}</p>
-            }
-          </div>
-        </div>
+  <header class="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 shadow-lg rounded-b-2xl animate-fade-in">
+    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
         <button
-          (click)="createWorkspace()"
-          class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm"
+          (click)="goBack()"
+          class="text-white hover:text-gray-200 transition-transform transform hover:-translate-x-1"
+          aria-label="Back to organizations"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Create Workspace
+          <i class="pi pi-arrow-left text-2xl"></i>
         </button>
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-wide drop-shadow-lg">Workspaces</h1>
+          @if (organizationName()) {
+            <p class="text-sm text-purple-100 font-medium">{{ organizationName() }}</p>
+          }
+        </div>
       </div>
+      <button
+        (click)="createWorkspace()"
+        class="bg-white hover:bg-gray-100 text-blue-700 px-4 py-2 rounded-xl text-base font-semibold shadow-md flex items-center gap-2 transition-all duration-200"
+      >
+        <i class="pi pi-plus text-lg"></i>
+        Crear Workspace
+      </button>
     </div>
-  </div>
+  </header>
 
   <!-- Filters & Search -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Search -->
-        <div class="md:col-span-2">
-          <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-          <div class="relative">
-            <input
-              id="search"
-              type="text"
-              [ngModel]="searchTerm()"
-              (ngModelChange)="searchTerm.set($event)"
-              (keyup.enter)="onSearch()"
-              placeholder="Search workspaces..."
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+      <div class="bg-white overflow-hidden shadow-xl rounded-2xl border border-purple-100 animate-fade-in mb-6">
+        <div class="px-6 py-7 sm:p-8">
+          <h3 class="text-2xl font-bold text-purple-700 mb-4">Buscar y filtrar</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Search -->
+            <div class="md:col-span-2">
+              <label for="search" class="block text-base font-medium text-gray-500 mb-2">Buscar</label>
+              <div class="relative">
+                <input
+                  id="search"
+                  type="text"
+                  [ngModel]="searchTerm()"
+                  (ngModelChange)="searchTerm.set($event)"
+                  (keyup.enter)="onSearch()"
+                  placeholder="Buscar workspaces..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                />
+                <i class="pi pi-search absolute left-3 top-2.5 text-gray-400"></i>
+              </div>
+            </div>
+
+            <!-- Type Filter -->
+            <div>
+              <label for="type-filter" class="block text-base font-medium text-gray-500 mb-2">Tipo</label>
+              <select
+                id="type-filter"
+                [ngModel]="selectedType()"
+                (ngModelChange)="selectedType.set($event); onFilterChange()"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+              >
+                <option value="">Todos los tipos</option>
+                @for (type of workspaceTypes; track type) {
+                  <option [value]="type">{{ getTypeLabel(type) }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Sort Filter -->
+            <div>
+              <label for="sort-filter" class="block text-base font-medium text-gray-500 mb-2">Ordenar</label>
+              <select
+                id="sort-filter"
+                [ngModel]="sortBy()"
+                (ngModelChange)="onSortChange($event)"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+              >
+                <option value="created_at">Más nuevos</option>
+                <option value="-created_at">Más antiguos</option>
+                <option value="name">Nombre (A-Z)</option>
+                <option value="-name">Nombre (Z-A)</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Type Filter -->
-        <div>
-          <label for="type-filter" class="block text-sm font-medium text-gray-700 mb-2">Type</label>
-          <select
-            id="type-filter"
-            [ngModel]="selectedType()"
-            (ngModelChange)="selectedType.set($event); onFilterChange()"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All Types</option>
-            @for (type of workspaceTypes; track type) {
-              <option [value]="type">{{ getTypeLabel(type) }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Sort Filter -->
-        <div>
-          <label for="sort-filter" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-          <select
-            id="sort-filter"
-            [ngModel]="sortBy()"
-            (ngModelChange)="onSortChange($event)"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="created_at">Newest First</option>
-            <option value="-created_at">Oldest First</option>
-            <option value="name">Name (A-Z)</option>
-            <option value="-name">Name (Z-A)</option>
-          </select>
+          <!-- Active Filters -->
+          @if (searchTerm() || selectedType()) {
+            <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+              <span class="text-sm text-gray-500">Filtros activos:</span>
+              @if (searchTerm()) {
+                <span class="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
+                  Búsqueda: {{ searchTerm() }}
+                  <button (click)="searchTerm.set(''); onSearch()" class="ml-2 hover:text-purple-900">
+                    <i class="pi pi-times text-xs"></i>
+                  </button>
+                </span>
+              }
+              @if (selectedType()) {
+                <span class="inline-flex items-center px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
+                  Tipo: {{ getTypeLabel(selectedType()) }}
+                  <button (click)="selectedType.set(''); onFilterChange()" class="ml-2 hover:text-purple-900">
+                    <i class="pi pi-times text-xs"></i>
+                  </button>
+                </span>
+              }
+              <button
+                (click)="clearFilters()"
+                class="text-sm text-gray-600 hover:text-gray-900 underline ml-2"
+              >
+                Limpiar todo
+              </button>
+            </div>
+          }
         </div>
       </div>
-
-      <!-- Active Filters -->
-      @if (searchTerm() || selectedType()) {
-        <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
-          <span class="text-sm text-gray-500">Active filters:</span>
-          @if (searchTerm()) {
-            <span class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-              Search: {{ searchTerm() }}
-              <button (click)="searchTerm.set(''); onSearch()" class="ml-2 hover:text-blue-900">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </span>
-          }
-          @if (selectedType()) {
-            <span class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
-              Type: {{ getTypeLabel(selectedType()) }}
-              <button (click)="selectedType.set(''); onFilterChange()" class="ml-2 hover:text-blue-900">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </span>
-          }
-          <button
-            (click)="clearFilters()"
-            class="text-sm text-gray-600 hover:text-gray-900 underline ml-2"
-          >
-            Clear all
-          </button>
-        </div>
-      }
-    </div>
 
     <!-- Loading State -->
     @if (loading()) {
@@ -189,63 +181,60 @@
         Showing {{ workspaces().length }} of {{ totalRecords() }} workspaces
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
         @for (workspace of workspaces(); track workspace.id) {
-          <div
-            (click)="viewWorkspace(workspace)"
-            class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group"
-          >
-            <!-- Cover Image -->
-            @if (workspace.cover_image_url) {
-              <div class="h-32 rounded-t-lg bg-cover bg-center" [style.backgroundImage]="'url(' + workspace.cover_image_url + ')'"></div>
-            } @else {
-              <div class="h-32 rounded-t-lg bg-gradient-to-br from-blue-500 to-blue-600"></div>
-            }
-
-            <!-- Content -->
-            <div class="p-6">
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center flex-1">
-                  <div [class]="'w-12 h-12 rounded-lg flex items-center justify-center mr-3 font-semibold text-xs ' + getTypeBadgeClass(workspace.workspace_type)">
-                    {{ getTypeInitials(workspace.workspace_type) }}
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
-                      {{ workspace.name }}
-                    </h3>
-                    <p class="text-sm text-gray-500">{{ getTypeLabel(workspace.workspace_type) }}</p>
+          <div class="bg-white overflow-hidden shadow-xl rounded-2xl border border-blue-100 hover:shadow-2xl transition-shadow cursor-pointer animate-fade-in" (click)="viewWorkspace(workspace)">
+            <div class="px-6 py-7 sm:p-8">
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                  @if (workspace.cover_image_url) {
+                    <img [src]="workspace.cover_image_url" [alt]="workspace.name" class="w-16 h-16 rounded-xl object-cover border-2 border-purple-200 shadow-lg mr-4">
+                  } @else {
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center text-white text-2xl font-extrabold shadow-lg mr-4">
+                      {{ workspace.name.charAt(0).toUpperCase() }}
+                    </div>
+                  }
+                  <div>
+                    <h3 class="text-xl font-bold text-gray-900">{{ workspace.name }}</h3>
+                    <p class="text-sm text-purple-500 font-medium">{{ getTypeLabel(workspace.workspace_type) }}</p>
                   </div>
                 </div>
                 <span
-                  [class]="'px-2 py-1 text-xs font-medium rounded-full ' + getVisibilityBadgeClass(workspace.visibility)"
+                  [class]="'px-3 py-1 text-xs font-bold rounded-full shadow-md ' + getVisibilityBadgeClass(workspace.visibility)"
                 >
                   {{ workspace.visibility }}
                 </span>
               </div>
-
+              
               @if (workspace.description) {
-                <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ workspace.description }}</p>
+                <p class="text-gray-700 text-base mb-4 line-clamp-2">{{ workspace.description }}</p>
+              } @else {
+                <p class="text-gray-400 italic text-sm mb-4">Sin descripción.</p>
               }
 
-              <!-- Stats -->
-              <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-                <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  <span>{{ workspace.member_count }} members</span>
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="text-center">
+                  <div class="bg-blue-100 rounded-full p-3 mb-2 shadow inline-block">
+                    <i class="pi pi-users text-2xl text-blue-500"></i>
+                  </div>
+                  <div class="text-2xl font-extrabold text-blue-600">{{ workspace.member_count }}</div>
+                  <div class="text-sm text-gray-500">Miembros</div>
                 </div>
-                <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>{{ workspace.project_count }} projects</span>
+                <div class="text-center">
+                  <div class="bg-purple-100 rounded-full p-3 mb-2 shadow inline-block">
+                    <i class="pi pi-briefcase text-2xl text-purple-500"></i>
+                  </div>
+                  <div class="text-2xl font-extrabold text-purple-600">{{ workspace.project_count }}</div>
+                  <div class="text-sm text-gray-500">Proyectos</div>
                 </div>
               </div>
 
-              <!-- Created Date -->
-              <div class="text-xs text-gray-400 mt-3">
-                Created {{ workspace.created_at | date:'short' }}
+              <div class="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                <span class="flex items-center gap-1">
+                  <i class="pi pi-calendar"></i>
+                  {{ workspace.created_at | date:'short' }}
+                </span>
+                <i class="pi pi-arrow-right text-purple-500"></i>
               </div>
             </div>
           </div>
@@ -313,5 +302,6 @@
         </div>
       }
     }
-  </div>
+    </div>
+  </main>
 </div>

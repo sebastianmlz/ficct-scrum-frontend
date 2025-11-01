@@ -1,5 +1,13 @@
-<div class="max-w-lg mx-auto mt-12 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
-	<h2 class="text-2xl font-bold text-primary mb-4">Invitación a organización</h2>
+<div class="max-w-lg mx-auto mt-12">
+	<header class="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 shadow-lg rounded-b-2xl animate-fade-in mb-6">
+		<div class="max-w-lg mx-auto py-4 px-4 flex items-center gap-4">
+			<a routerLink="/organizations" class="text-white hover:text-gray-200 transition-transform transform hover:-translate-x-1">
+				<i class="pi pi-arrow-left text-2xl"></i>
+			</a>
+			<h2 class="text-2xl font-extrabold text-white tracking-wide drop-shadow-lg">Invitación a organización</h2>
+		</div>
+	</header>
+	<div class="p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
 	<p-progressSpinner *ngIf="loading" styleClass="mx-auto block" strokeWidth="4" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
 	<div *ngIf="error" class="text-red-500 mb-4">{{ error }}</div>
 

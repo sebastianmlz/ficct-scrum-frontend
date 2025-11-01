@@ -1,14 +1,18 @@
-<div class="min-h-screen bg-gray-50">
-    <header class="bg-white shadow">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-100">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 shadow-lg rounded-b-2xl animate-fade-in">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center space-x-4">
-                <a [routerLink]="['/projects', projectId]" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
+            <div class="flex items-center gap-3">
+                <a [routerLink]="['/projects', projectId]" class="text-white hover:text-gray-200 transition-transform transform hover:-translate-x-1">
+                    <i class="pi pi-arrow-left text-2xl"></i>
                 </a>
-                <h1 class="text-3xl font-bold text-gray-900">Edit Project</h1>
+                <div class="bg-white rounded-full p-3 shadow-lg">
+                    <i class="pi pi-briefcase text-2xl text-blue-600"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold text-white tracking-wide drop-shadow-lg">Edit Project</h1>
+                    <p class="text-sm text-purple-100 font-medium">Update your project details and settings.</p>
+                </div>
             </div>
         </div>
     </header>
@@ -29,10 +33,10 @@
                 </div>
             </div>
             } @else {
-            <div class="bg-white shadow rounded-lg">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-medium text-gray-900">Project Information</h2>
-                    <p class="mt-1 text-sm text-gray-600">
+            <div class="bg-white rounded-2xl shadow-xl border border-purple-100 animate-fade-in">
+                <div class="px-6 py-4 border-b border-blue-100">
+                    <h2 class="text-lg font-bold text-blue-700">Project Information</h2>
+                    <p class="mt-1 text-sm text-gray-500">
                         Update your project details and settings.
                     </p>
                 </div>
@@ -59,212 +63,176 @@
                 </div>
                 }
 
-                <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="p-6 space-y-6">
-                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="p-6 space-y-8">
+                    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
                         <!-- Left Column -->
-                        <div class="space-y-6">
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">
-                                    Project Name *
-                                </label>
-                                <input id="name" type="text" formControlName="name" placeholder="Enter project name"
-                                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    [class.border-red-300]="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" />
-                                @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
-                                <p class="mt-1 text-sm text-red-600">Project name is required</p>
-                                }
-                            </div>
-
-                            <div>
-                                <label for="slug" class="block text-sm font-medium text-gray-700">
-                                    URL Slug *
-                                </label>
-                                <input id="slug" type="text" formControlName="slug" placeholder="project-url-slug"
-                                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    [class.border-red-300]="projectForm.get('slug')?.invalid && projectForm.get('slug')?.touched" />
-                                @if (projectForm.get('slug')?.invalid && projectForm.get('slug')?.touched) {
-                                <p class="mt-1 text-sm text-red-600">
-                                    @if (projectForm.get('slug')?.errors?.['required']) {
-                                    URL slug is required
-                                    }
-                                    @if (projectForm.get('slug')?.errors?.['pattern']) {
-                                    URL slug can only contain lowercase letters, numbers, and hyphens
-                                    }
-                                </p>
-                                }
-                            </div>
-
-                            <div>
-                                <label for="workspace" class="block text-sm font-medium text-gray-700">
-                                    Workspace *
-                                </label>
-                                <select id="workspace" formControlName="workspace"
-                                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    [class.border-red-300]="projectForm.get('workspace')?.invalid && projectForm.get('workspace')?.touched">
-                                    <option value="">Select workspace...</option>
-                                    @for (workspace of workspaces(); track workspace.id) {
-                                    <option [value]="workspace.id">{{ workspace.name }} ({{ workspace.organization_details.name }})</option>
-                                    }
-                                </select>
-                                @if (projectForm.get('workspace')?.invalid && projectForm.get('workspace')?.touched) {
-                                <p class="mt-1 text-sm text-red-600">Workspace selection is required</p>
-                                }
-                            </div>
-
-                            <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700">
-                                    Description
-                                </label>
-                                <textarea id="description" formControlName="description" rows="4"
-                                    placeholder="Describe your project goals and objectives..."
-                                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="status" class="block text-sm font-medium text-gray-700">
-                                        Status
-                                    </label>
-                                    <select id="status" formControlName="status"
-                                        class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                        @for (status of projectStatuses; track status.value) {
-                                        <option [value]="status.value">{{ status.label }}</option>
+                        <div class="space-y-8">
+                            <!-- Card: Basic Info -->
+                            <div class="bg-white rounded-xl shadow-lg border border-blue-100 p-6 animate-fade-in">
+                                <h3 class="text-xl font-bold text-blue-700 mb-4">Basic Information</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Project Name <span class="text-red-500">*</span></label>
+                                        <input id="name" type="text" formControlName="name" placeholder="Enter project name"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            [class.border-red-500]="projectForm.get('name')?.invalid && projectForm.get('name')?.touched" />
+                                        @if (projectForm.get('name')?.invalid && projectForm.get('name')?.touched) {
+                                            <p class="mt-1 text-sm text-red-600">Project name is required</p>
                                         }
-                                    </select>
+                                    </div>
+                                    <div>
+                                        <label for="slug" class="block text-sm font-medium text-gray-700 mb-2">URL Slug <span class="text-red-500">*</span></label>
+                                        <input id="slug" type="text" formControlName="slug" placeholder="project-url-slug"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                                            [class.border-red-500]="projectForm.get('slug')?.invalid && projectForm.get('slug')?.touched" />
+                                        @if (projectForm.get('slug')?.invalid && projectForm.get('slug')?.touched) {
+                                            <p class="mt-1 text-sm text-red-600">
+                                                @if (projectForm.get('slug')?.errors?.['required']) {URL slug is required}
+                                                @if (projectForm.get('slug')?.errors?.['pattern']) {URL slug can only contain lowercase letters, numbers, and hyphens}
+                                            </p>
+                                        }
+                                    </div>
+                                    <div>
+                                        <label for="workspace" class="block text-sm font-medium text-gray-700 mb-2">Workspace <span class="text-red-500">*</span></label>
+                                        <select id="workspace" formControlName="workspace"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            [class.border-red-500]="projectForm.get('workspace')?.invalid && projectForm.get('workspace')?.touched">
+                                            <option value="">Select workspace...</option>
+                                            @for (workspace of workspaces(); track workspace.id) {
+                                                <option [value]="workspace.id">{{ workspace.name }} ({{ workspace.organization_details.name }})</option>
+                                            }
+                                        </select>
+                                        @if (projectForm.get('workspace')?.invalid && projectForm.get('workspace')?.touched) {
+                                            <p class="mt-1 text-sm text-red-600">Workspace selection is required</p>
+                                        }
+                                    </div>
+                                    <div>
+                                        <label for="description" class="block text-base font-medium text-gray-500 mb-2">Description</label>
+                                        <textarea id="description" formControlName="description" rows="4"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
+                                            placeholder="Describe your project goals and objectives..."></textarea>
+                                    </div>
                                 </div>
-
-                                <div>
-                                    <label for="priority" class="block text-sm font-medium text-gray-700">
-                                        Priority
-                                    </label>
-                                    <select id="priority" formControlName="priority"
-                                        class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                        @for (priority of projectPriorities; track priority.value) {
-                                        <option [value]="priority.value">{{ priority.label }}</option>
-                                        }
-                                    </select>
+                            </div>
+                            <!-- Card: Project Settings -->
+                            <div class="bg-white rounded-xl shadow-lg border border-pink-100 p-6 animate-fade-in">
+                                <h3 class="text-xl font-bold text-pink-700 mb-4">Project Settings</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                        <select id="status" formControlName="status"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                            @for (status of projectStatuses; track status.value) {
+                                                <option [value]="status.value">{{ status.label }}</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                                        <select id="priority" formControlName="priority"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                            @for (priority of projectPriorities; track priority.value) {
+                                                <option [value]="priority.value">{{ priority.label }}</option>
+                                            }
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Right Column -->
-                        <div class="space-y-6">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="startDate" class="block text-sm font-medium text-gray-700">
-                                        Start Date
-                                    </label>
-                                    <input id="startDate" type="date" formControlName="start_date"
-                                        class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                                </div>
-
-                                <div>
-                                    <label for="dueDate" class="block text-sm font-medium text-gray-700">
-                                        Due Date
-                                    </label>
-                                    <input id="dueDate" type="date" formControlName="due_date"
-                                        class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="budget" class="block text-sm font-medium text-gray-700">
-                                    Budget
-                                </label>
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span class="text-gray-500 sm:text-sm">$</span>
+                        <div class="space-y-8">
+                            <!-- Card: Dates & Budget -->
+                            <div class="bg-white rounded-xl shadow-lg border border-blue-100 p-6 animate-fade-in">
+                                <h3 class="text-xl font-bold text-blue-700 mb-4">Dates & Budget</h3>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="startDate" class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                                        <input id="startDate" type="date" formControlName="start_date"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                     </div>
-                                    <input id="budget" type="number" step="0.01" min="0" formControlName="budget"
-                                        placeholder="0.00"
-                                        class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
+                                    <div>
+                                        <label for="dueDate" class="block text-sm font-medium text-gray-700 mb-2">Due Date</label>
+                                        <input id="dueDate" type="date" formControlName="due_date"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="budget" class="block text-sm font-medium text-gray-700 mb-2">Budget</label>
+                                    <div class="relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input id="budget" type="number" step="0.01" min="0" formControlName="budget"
+                                            placeholder="0.00"
+                                            class="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <label for="estimatedHours" class="block text-sm font-medium text-gray-700 mb-2">Estimated Hours</label>
+                                    <input id="estimatedHours" type="number" min="0" formControlName="estimated_hours"
+                                        placeholder="Total estimated hours"
+                                        class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                 </div>
                             </div>
-
-                            <div>
-                                <label for="estimatedHours" class="block text-sm font-medium text-gray-700">
-                                    Estimated Hours
-                                </label>
-                                <input id="estimatedHours" type="number" min="0" formControlName="estimated_hours"
-                                    placeholder="Total estimated hours"
-                                    class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" />
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Cover Image
-                                </label>
-
-                                @if (currentCoverUrl()) {
-                                <div class="mb-4">
-                                    <p class="text-sm text-gray-600 mb-2">Current cover:</p>
-                                    <img [src]="currentCoverUrl()" alt="Current cover"
-                                        class="h-20 w-32 object-cover rounded-lg">
-                                </div>
-                                }
-
-                                <div
-                                    class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                                    <div class="space-y-1 text-center">
-                                        @if (selectedFile) {
-                                        <div class="flex items-center justify-center">
+                            <!-- Card: Cover Image -->
+                            <div class="bg-white rounded-xl shadow-lg border border-purple-100 p-6 animate-fade-in">
+                                <h3 class="text-xl font-bold text-purple-700 mb-4">Cover Image</h3>
+                                <div class="flex flex-col items-center justify-center w-full">
+                                    @if (currentCoverUrl()) {
+                                        <div class="mb-4">
+                                            <p class="text-sm text-gray-600 mb-2">Current cover:</p>
+                                            <img [src]="currentCoverUrl()" alt="Current cover"
+                                                class="h-24 w-40 object-cover rounded-lg shadow-lg border border-purple-200">
+                                        </div>
+                                    }
+                                    @if (selectedFile) {
+                                        <div class="flex items-center justify-center mb-4">
                                             <img [src]="previewUrl" alt="Cover preview"
-                                                class="h-20 w-32 object-cover rounded-lg">
+                                                class="h-24 w-40 object-cover rounded-lg shadow-lg border border-purple-200">
                                             <button type="button" (click)="removeFile()"
                                                 class="ml-2 text-red-600 hover:text-red-800">
-                                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
+                                                <i class="pi pi-times text-xl"></i>
                                             </button>
                                         </div>
-                                        } @else {
-                                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
-                                            viewBox="0 0 48 48">
-                                            <path
-                                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        <div class="flex text-sm text-gray-600">
-                                            <label for="coverUpload"
-                                                class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary/80 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary">
-                                                <span>Upload a new cover</span>
-                                                <input id="coverUpload" type="file" class="sr-only" accept="image/*"
-                                                    (change)="onFileSelected($event)">
-                                            </label>
-                                            <p class="pl-1">or drag and drop</p>
-                                        </div>
-                                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                                        }
-                                    </div>
+                                    } @else {
+                                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <i class="pi pi-image text-4xl text-purple-400 mb-3"></i>
+                                                <span class="text-sm text-gray-600 font-semibold">Click to upload</span>
+                                                <span class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</span>
+                                            </div>
+                                            <input id="coverUpload" type="file" class="hidden" accept="image/*" (change)="onFileSelected($event)">
+                                        </label>
+                                    }
                                 </div>
                             </div>
-
-                            <div class="flex items-center">
-                                <input id="isActive" type="checkbox" formControlName="is_active"
-                                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" />
-                                <label for="isActive" class="ml-2 block text-sm text-gray-900">
-                                    Active project
-                                </label>
+                            <!-- Card: Active -->
+                            <div class="bg-white rounded-xl shadow-lg border border-pink-100 p-6 animate-fade-in">
+                                <div class="flex items-center">
+                                    <input id="isActive" type="checkbox" formControlName="is_active"
+                                        class="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-400" />
+                                    <label for="isActive" class="ml-2 text-base font-medium text-gray-700">Active project</label>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end space-x-3 bg-white overflow-hidden shadow-xl rounded-2xl border border-gray-100 p-6 mt-8">
                         <a [routerLink]="['/projects', projectId]"
-                            class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            class="px-6 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-semibold">
                             Cancel
                         </a>
                         <button type="submit" [disabled]="projectForm.invalid || saving()"
-                            class="bg-primary border border-transparent rounded-md shadow-sm py-2 px-4 text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-semibold shadow-lg">
                             @if (saving()) {
-                            <div class="flex items-center">
-                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
                                 Saving...
-                            </div>
                             } @else {
-                            Save Changes
+                                Save Changes
                             }
                         </button>
                     </div>
