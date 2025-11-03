@@ -104,29 +104,98 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
                 </div>
               }
 
-              @for (layer of diagramData()!.layers; track layer.name) {
-                <div class="border rounded-lg p-4">
-                  <h3 class="font-medium text-gray-900 mb-3">{{ layer.name }}</h3>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    @for (component of layer.components; track component.id) {
-                      <div class="border rounded p-3 bg-gray-50">
-                        <div class="font-medium text-gray-900">{{ component.name }}</div>
-                        @if (component.description) {
-                          <div class="text-xs text-gray-600 mt-1">{{ component.description }}</div>
-                        }
-                        @if (component.technology) {
-                          <div class="flex flex-wrap gap-1 mt-2">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                              {{ component.technology }}
-                            </span>
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
+              <!-- VERTICAL LAYERS ARCHITECTURE VIEW -->
+              <div class="border rounded-lg overflow-hidden">
+                <div class="bg-purple-50 px-4 py-3 border-b">
+                  <h3 class="font-semibold text-purple-900 text-lg">🏗️ Architecture Layers View</h3>
+                  <p class="text-sm text-purple-700 mt-1">Vertical representation of {{ diagramData()!.layers.length }} architectural layers</p>
                 </div>
-              }
+                
+                <div class="p-6 space-y-4">
+                  @for (layer of diagramData()!.layers; track layer.name; let index = $index) {
+                    <!-- Layer Card -->
+                    <div class="relative">
+                      <div class="border-2 rounded-lg overflow-hidden" [ngClass]="{
+                        'border-blue-400 bg-blue-50': layer.type === 'frontend',
+                        'border-green-400 bg-green-50': layer.type === 'backend',
+                        'border-orange-400 bg-orange-50': layer.type === 'database',
+                        'border-purple-400 bg-purple-50': layer.type === 'infrastructure',
+                        'border-gray-400 bg-gray-50': layer.type === 'external'
+                      }">
+                        <!-- Layer Header -->
+                        <div class="px-4 py-3 border-b-2" [ngClass]="{
+                          'bg-blue-100 border-blue-400': layer.type === 'frontend',
+                          'bg-green-100 border-green-400': layer.type === 'backend',
+                          'bg-orange-100 border-orange-400': layer.type === 'database',
+                          'bg-purple-100 border-purple-400': layer.type === 'infrastructure',
+                          'bg-gray-100 border-gray-400': layer.type === 'external'
+                        }">
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                              <span class="text-2xl">{{ getLayerIcon(layer.type) }}</span>
+                              <h4 class="font-bold text-gray-900">{{ layer.name }}</h4>
+                              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white text-gray-700">
+                                {{ layer.components.length }} components
+                              </span>
+                            </div>
+                            <span class="text-xs font-medium uppercase tracking-wide" [ngClass]="{
+                              'text-blue-700': layer.type === 'frontend',
+                              'text-green-700': layer.type === 'backend',
+                              'text-orange-700': layer.type === 'database',
+                              'text-purple-700': layer.type === 'infrastructure',
+                              'text-gray-700': layer.type === 'external'
+                            }">{{ layer.type }}</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Components Grid -->
+                        <div class="p-4">
+                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                            @for (component of layer.components; track component.id) {
+                              <div class="border-2 border-white rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                                <div class="flex items-start space-x-2">
+                                  <div class="flex-shrink-0 w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                    <span class="text-white font-bold text-xs">{{ getComponentInitials(component.name) }}</span>
+                                  </div>
+                                  <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-sm text-gray-900 truncate" [title]="component.name">
+                                      {{ component.name }}
+                                    </div>
+                                    @if (component.description) {
+                                      <div class="text-xs text-gray-600 mt-1 line-clamp-2" [title]="component.description">
+                                        {{ component.description }}
+                                      </div>
+                                    }
+                                    @if (component.technology) {
+                                      <div class="mt-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                          🔧 {{ component.technology }}
+                                        </span>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Connection Arrow to Next Layer -->
+                      @if (index < diagramData()!.layers.length - 1) {
+                        <div class="flex justify-center py-2">
+                          <div class="flex flex-col items-center">
+                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v10.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="text-xs text-gray-500 font-medium mt-1">uses / accesses</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
 
               @if (diagramData()!.connections && diagramData()!.connections.length > 0) {
                 <div class="border rounded-lg p-4">
@@ -277,5 +346,26 @@ export class ArchitectureDiagramComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/projects', this.projectId()]);
+  }
+
+  // Visual rendering helper methods
+  getLayerIcon(layerType: string): string {
+    switch (layerType) {
+      case 'frontend': return '🎨';
+      case 'backend': return '⚙️';
+      case 'database': return '🗄️';
+      case 'infrastructure': return '☁️';
+      case 'external': return '🔌';
+      default: return '📦';
+    }
+  }
+
+  getComponentInitials(componentName: string): string {
+    return componentName
+      .split(/[\s_-]/)
+      .map(word => word[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
   }
 }

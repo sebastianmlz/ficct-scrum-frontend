@@ -20,7 +20,6 @@ Chart.register(...registerables);
 })
 export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('commitTrendCanvas') commitTrendCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('contributorCanvas') contributorCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('prStatusCanvas') prStatusCanvas!: ElementRef<HTMLCanvasElement>;
 
   private route = inject(ActivatedRoute);
@@ -36,7 +35,6 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
   noIntegration = signal(false);
   
   private commitTrendChart: Chart | null = null;
-  private contributorChart: Chart | null = null;
   private prStatusChart: Chart | null = null;
 
   ngOnInit(): void {
@@ -81,8 +79,10 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   loadMetrics(integrationId: string): void {
+    console.log('[METRICS] Loading metrics for integration:', integrationId);
     this.githubService.getMetrics(integrationId).subscribe({
       next: (metrics) => {
+        console.log('[METRICS] Raw metrics received:', metrics);
         this.metrics.set(metrics);
         this.loading.set(false);
         // Initialize charts after view is ready
@@ -90,7 +90,7 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
       },
       error: (error) => {
         this.notificationService.error('Failed to load metrics');
-        console.error('Error loading metrics:', error);
+        console.error('[METRICS] Error loading metrics:', error);
         this.loading.set(false);
       }
     });
@@ -101,7 +101,6 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
     if (!metrics) return;
 
     this.createCommitTrendChart();
-    this.createContributorChart();
     this.createPRStatusChart();
   }
 
@@ -117,8 +116,28 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
       this.commitTrendChart.destroy();
     }
 
-    const labels = metrics.commit_activity.map(activity => {
-      const date = new Date(activity.date);
+    // Parse commit_frequency (dict format from backend)
+    let commitData: { date: string; count: number }[] = [];
+    
+    if (metrics.commit_frequency) {
+      // Backend sends: { "2025-10-04": 5, "2025-10-05": 3, ... }
+      commitData = Object.entries(metrics.commit_frequency)
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      console.log('[METRICS] Parsed commit_frequency:', commitData.length, 'data points');
+    } else if (metrics.commit_activity) {
+      // Fallback to legacy format
+      commitData = metrics.commit_activity.map(a => ({ date: a.date, count: a.commits }));
+    }
+
+    if (commitData.length === 0) {
+      console.warn('[METRICS] No commit data available for chart');
+      return;
+    }
+
+    const labels = commitData.map(item => {
+      const date = new Date(item.date);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
@@ -129,25 +148,9 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
         datasets: [
           {
             label: 'Commits',
-            data: metrics.commit_activity.map(a => a.commits),
+            data: commitData.map(item => item.count),
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.4,
-            fill: true
-          },
-          {
-            label: 'Additions',
-            data: metrics.commit_activity.map(a => a.additions),
-            borderColor: '#10B981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            tension: 0.4,
-            fill: true
-          },
-          {
-            label: 'Deletions',
-            data: metrics.commit_activity.map(a => a.deletions),
-            borderColor: '#EF4444',
-            backgroundColor: 'rgba(239, 68, 68, 0.1)',
             tension: 0.4,
             fill: true
           }
@@ -178,60 +181,6 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
     });
   }
 
-  createContributorChart(): void {
-    const metrics = this.metrics();
-    if (!metrics || !this.contributorCanvas) return;
-
-    const ctx = this.contributorCanvas.nativeElement.getContext('2d');
-    if (!ctx) return;
-
-    // Destroy existing chart if any
-    if (this.contributorChart) {
-      this.contributorChart.destroy();
-    }
-
-    // Get top 10 contributors by commit count
-    const topContributors = [...metrics.contributors]
-      .sort((a, b) => b.commits - a.commits)
-      .slice(0, 10);
-
-    this.contributorChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: topContributors.map(c => c.user),
-        datasets: [
-          {
-            label: 'Commits',
-            data: topContributors.map(c => c.commits),
-            backgroundColor: '#3B82F6'
-          },
-          {
-            label: 'Pull Requests',
-            data: topContributors.map(c => c.pull_requests),
-            backgroundColor: '#8B5CF6'
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top'
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
-            }
-          }
-        }
-      }
-    });
-  }
 
   createPRStatusChart(): void {
     const metrics = this.metrics();
@@ -245,18 +194,24 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
       this.prStatusChart.destroy();
     }
 
-    const closedPRs = metrics.total_pull_requests - metrics.open_pull_requests - metrics.merged_pull_requests;
+    const totalPRs = metrics.total_pull_requests || 0;
+    const openPRs = metrics.open_pull_requests || 0;
+    const mergedPRs = metrics.merged_pull_requests || 0;
+    const closedPRs = metrics.closed_pull_requests || (totalPRs - openPRs - mergedPRs);
+
+    if (totalPRs === 0) {
+      console.warn('[METRICS] No pull requests data available for chart');
+      return;
+    }
+
+    console.log('[METRICS] PR status:', { open: openPRs, merged: mergedPRs, closed: closedPRs });
 
     this.prStatusChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
         labels: ['Open', 'Merged', 'Closed'],
         datasets: [{
-          data: [
-            metrics.open_pull_requests,
-            metrics.merged_pull_requests,
-            closedPRs
-          ],
+          data: [openPRs, mergedPRs, closedPRs],
           backgroundColor: [
             '#10B981', // green for open
             '#8B5CF6', // purple for merged
@@ -291,9 +246,6 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
     // Clean up charts
     if (this.commitTrendChart) {
       this.commitTrendChart.destroy();
-    }
-    if (this.contributorChart) {
-      this.contributorChart.destroy();
     }
     if (this.prStatusChart) {
       this.prStatusChart.destroy();

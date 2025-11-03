@@ -156,15 +156,25 @@ export class GitHubIntegrationService {
 
   /**
    * List all commits (paginated)
+   * IMPORTANT: Should be filtered by project to show only project-specific commits
    */
-  getAllCommits(params?: PaginationParams): Observable<PaginatedGitHubCommitList> {
+  getAllCommits(params?: any): Observable<PaginatedGitHubCommitList> {
     let httpParams = new HttpParams();
 
+    if (params?.project) {
+      httpParams = httpParams.set('project', params.project);
+    }
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
     }
+    if (params?.page_size) {
+      httpParams = httpParams.set('page_size', params.page_size.toString());
+    }
     if (params?.search) {
       httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.author) {
+      httpParams = httpParams.set('author', params.author);
     }
     if (params?.ordering) {
       httpParams = httpParams.set('ordering', params.ordering);

@@ -14,6 +14,16 @@
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             {{ totalCommits() }} total
           </span>
+          @if (lastSyncAt()) {
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              Last synced: {{ getTimeAgo(lastSyncAt()) }}
+            </span>
+          }
+          @if (syncCount() > 0) {
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              +{{ syncCount() }} new
+            </span>
+          }
         </div>
         <button
           type="button"
@@ -97,27 +107,45 @@
 
                   <!-- Content -->
                   <div class="flex-1 min-w-0">
-                    <!-- Commit Message -->
-                    <p class="text-sm font-medium text-gray-900 break-words">
-                      {{ commit.message }}
+                    <!-- Commit Message (formatted_message = first line) -->
+                    <p class="text-sm font-medium text-gray-900 break-words" [title]="commit.message">
+                      {{ commit.formatted_message }}
                     </p>
 
                     <!-- Metadata -->
-                    <div class="mt-1 flex items-center space-x-4 text-xs text-gray-500">
-                      <span class="font-medium">{{ commit.author_name }}</span>
+                    <div class="mt-1 flex items-center flex-wrap gap-2 text-xs text-gray-500">
+                      <span class="font-medium" [title]="commit.author_email">{{ commit.author_name }}</span>
                       <span>•</span>
                       <button
                         type="button"
                         (click)="openCommitUrl(commit)"
-                        class="font-mono hover:text-blue-600">
-                        {{ getShortSha(commit.sha) }}
+                        class="font-mono hover:text-blue-600 transition-colors"
+                        [title]="commit.sha">
+                        {{ commit.short_sha }}
                       </button>
                       <span>•</span>
-                      <span>{{ getTimeAgo(commit.committed_at) }}</span>
+                      <span [title]="commit.commit_date">{{ getTimeAgo(commit.commit_date) }}</span>
+                      @if (commit.branch) {
+                        <span>•</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          {{ commit.branch }}
+                        </span>
+                      }
                       @if (commit.additions !== undefined || commit.deletions !== undefined) {
                         <span>•</span>
                         <span class="text-green-600">+{{ commit.additions || 0 }}</span>
                         <span class="text-red-600">-{{ commit.deletions || 0 }}</span>
+                      }
+                      @if (commit.issue_keys_mentioned && commit.issue_keys_mentioned.length > 0) {
+                        <span>•</span>
+                        @for (issueKey of commit.issue_keys_mentioned; track issueKey) {
+                          <button
+                            type="button"
+                            (click)="openIssue(issueKey)"
+                            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
+                            {{ issueKey }}
+                          </button>
+                        }
                       }
                     </div>
                   </div>

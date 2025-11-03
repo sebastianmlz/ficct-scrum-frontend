@@ -871,18 +871,28 @@ export interface PatchedGitHubIntegrationRequest {
 
 export interface GitHubCommit {
   id: string;
-  integration: string;
-  sha: string;
-  message: string;
+  integration?: string;
+  sha: string;                        // Full commit hash
+  short_sha: string;                  // First 7 characters
+  message: string;                    // Full commit message (multi-line)
+  formatted_message: string;          // First line only
   author_name: string;
   author_email: string;
   author_avatar_url?: string;
-  committed_at: string;
-  url: string;
+  commit_date: string;                // ISO 8601 timestamp
+  branch: string;                     // Branch name (e.g., "main")
+  url: string;                        // GitHub commit URL
+  issue_keys_mentioned: string[];     // Auto-detected issue keys (e.g., ["PROJ-123"])
+  synced_at: string;                  // When this commit was synced
+  // Legacy/optional fields
+  committed_at?: string;
+  commit_hash?: string;
+  commit_url?: string;
+  repository_url?: string;
   additions?: number;
   deletions?: number;
   files_changed?: number;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface GitHubCommitDetail extends GitHubCommit {
@@ -937,15 +947,29 @@ export interface GitHubPullRequest {
 }
 
 export interface GitHubMetrics {
+  // Core metrics
   total_commits: number;
-  total_pull_requests: number;
-  open_pull_requests: number;
-  merged_pull_requests: number;
-  avg_pr_size: number;
-  code_churn: number;
-  contributors: GitHubContributor[];
-  commit_activity: CommitActivity[];
-  pr_metrics: PullRequestMetrics;
+  commits_last_30_days?: number;
+  avg_commits_per_day?: number;
+  
+  // Commit frequency (backend sends as dict)
+  commit_frequency?: { [date: string]: number };  // { "2025-10-04": 5, ... }
+  
+  // Contributors (backend sends as array)
+  top_contributors?: GitHubContributor[];
+  
+  // Pull requests
+  total_pull_requests?: number;
+  open_pull_requests?: number;
+  merged_pull_requests?: number;
+  closed_pull_requests?: number;
+  avg_pr_size?: number;
+  
+  // Legacy fields (for backward compatibility)
+  contributors?: GitHubContributor[];
+  commit_activity?: CommitActivity[];
+  code_churn?: number;
+  pr_metrics?: PullRequestMetrics;
 }
 
 export interface GitHubContributor {
@@ -979,10 +1003,18 @@ export interface SmartCommitAction {
 }
 
 export interface SyncCommitsResponse {
-  message: string;
-  commits_synced: number;
-  issues_linked: number;
-  smart_actions_performed: SmartCommitAction[];
+  message: string;                      // "Successfully synced 51 commits"
+  synced_count: number;                 // How many NEW commits were synced
+  last_sync_at: string;                 // ISO 8601 timestamp
+  total_commits: number;                // Total commits in database (historical)
+  commits: GitHubCommit[];              // Array of up to 50 commits
+  // Legacy fields (optional)
+  status?: string;
+  sync_count?: number;
+  last_sync?: string;
+  commits_synced?: number;
+  issues_linked?: number;
+  smart_actions_performed?: SmartCommitAction[];
 }
 
 export interface PaginatedGitHubCommitList extends PaginatedResponse<GitHubCommit> { }

@@ -29,6 +29,10 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   syncing = signal(false);
   noIntegration = signal(false);
   
+  // Sync status
+  syncCount = signal(0);              // How many NEW commits were synced
+  lastSyncAt = signal<string | null>(null);  // Last sync timestamp
+  
   // Pagination
   page = signal(1);
   pageSize = 50;
@@ -55,24 +59,61 @@ export class CommitsListComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.noIntegration.set(false);
     
-    console.log('[COMMITS] Using centralized state service');
-    
     // Use centralized state service
     this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
         if (integration) {
-          console.log('[COMMITS] Integration found via state service');
-          this.loadCommits();
+          // AUTO-SYNC: Automatically sync commits from GitHub on component load
+          this.autoSyncCommits(integration.id);
         } else {
-          console.log('[COMMITS] No GitHub integration (from state service)');
           this.noIntegration.set(true);
           this.loading.set(false);
         }
       },
       error: (error) => {
-        console.error('[COMMITS] Error from state service:', error);
+        console.error('[COMMITS] Error checking integration status:', error);
         this.noIntegration.set(true);
         this.loading.set(false);
+      }
+    });
+  }
+
+  autoSyncCommits(integrationId: string): void {
+    console.log('[COMMITS] Auto-syncing commits on component load...');
+    this.syncing.set(true);
+    this.loading.set(false); // Hide initial loading, show sync state
+    
+    this.githubService.syncCommits(integrationId).subscribe({
+      next: (syncResponse) => {
+        console.log('[COMMITS] Auto-sync completed:', syncResponse);
+        // Backend returns commits directly (up to 50)
+        if (syncResponse.commits && syncResponse.commits.length > 0) {
+          this.commits.set(syncResponse.commits);
+          this.totalCommits.set(syncResponse.total_commits);
+          this.syncCount.set(syncResponse.synced_count);
+          this.lastSyncAt.set(syncResponse.last_sync_at);
+          
+          if (syncResponse.synced_count > 0) {
+            this.notificationService.success(
+              `Auto-synced ${syncResponse.synced_count} new commits`
+            );
+          } else {
+            this.notificationService.info('Already up to date');
+          }
+        } else {
+          this.notificationService.info('No commits to display');
+        }
+        this.syncing.set(false);
+        this.page.set(1);
+        this.hasMore.set(syncResponse.total_commits > 50);
+      },
+      error: (error) => {
+        console.error('[COMMITS] Auto-sync failed:', error);
+        this.syncing.set(false);
+        
+        // Fallback: Load existing commits from DB if sync fails
+        this.notificationService.error('Sync failed, loading existing commits');
+        this.loadCommits();
       }
     });
   }
@@ -83,6 +124,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     
     const params: any = {
+      project: this.projectId(),  // CRITICAL: Filter by project
       page: this.page(),
       page_size: this.pageSize
     };
@@ -132,15 +174,33 @@ export class CommitsListComponent implements OnInit, OnDestroy {
           const integration = response.results[0];
           this.githubService.syncCommits(integration.id).subscribe({
             next: (syncResponse) => {
-              this.notificationService.success(
-                `Synced ${syncResponse.commits_synced} commits, linked ${syncResponse.issues_linked} issues`
-              );
+              // Backend returns commits directly in response (up to 50)
+              if (syncResponse.commits && syncResponse.commits.length > 0) {
+                this.commits.set(syncResponse.commits);
+                this.totalCommits.set(syncResponse.total_commits);  // Total in database
+                this.syncCount.set(syncResponse.synced_count);      // New commits synced
+                this.lastSyncAt.set(syncResponse.last_sync_at);     // Timestamp
+                
+                this.notificationService.success(
+                  `Successfully synced ${syncResponse.synced_count} new commits`
+                );
+              } else {
+                this.notificationService.info('No new commits to sync');
+              }
               this.syncing.set(false);
+              // Reset pagination (showing first 50)
               this.page.set(1);
-              this.loadCommits();
+              this.hasMore.set(syncResponse.total_commits > 50);
             },
-            error: () => {
-              this.notificationService.error('Failed to sync commits');
+            error: (error) => {
+              console.error('Error syncing commits:', error);
+              if (error.status === 403) {
+                this.notificationService.error('No permission to sync commits');
+              } else if (error.status === 404) {
+                this.notificationService.error('Repository not found');
+              } else {
+                this.notificationService.error('Failed to sync commits');
+              }
               this.syncing.set(false);
             }
           });
@@ -157,19 +217,22 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   }
 
   openCommitUrl(commit: GitHubCommit): void {
-    window.open(commit.url, '_blank', 'noopener,noreferrer');
+    if (commit.url) {
+      window.open(commit.url, '_blank', 'noopener,noreferrer');
+    }
   }
 
-  openIssue(issueId: string): void {
-    // Navigate to issue detail
-    this.router.navigate(['/projects', this.projectId(), 'issues', issueId]);
+  openIssue(issueKey: string): void {
+    // Navigate to issue detail by key
+    this.router.navigate(['/projects', this.projectId(), 'issues'], { 
+      queryParams: { search: issueKey } 
+    });
   }
 
-  getShortSha(sha: string): string {
-    return sha.slice(0, 7);
-  }
+  getTimeAgo(date: string | null | undefined): string {
+    if (!date) return '';
+    
 
-  getTimeAgo(date: string): string {
     const now = new Date();
     const commitDate = new Date(date);
     const seconds = Math.floor((now.getTime() - commitDate.getTime()) / 1000);

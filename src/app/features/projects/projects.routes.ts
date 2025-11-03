@@ -47,6 +47,10 @@ export const projectsRoutes: Routes = [
       },
       // Diagram Generation routes
       {
+        path: 'diagrams',
+        loadComponent: () => import('./components/diagram-generator/diagram-generator.component').then(m => m.DiagramGeneratorComponent)
+      },
+      {
         path: 'diagrams/workflow',
         loadComponent: () => import('./components/workflow-diagram/workflow-diagram.component').then(m => m.WorkflowDiagramComponent)
       },
