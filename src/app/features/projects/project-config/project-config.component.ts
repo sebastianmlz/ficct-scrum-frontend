@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project, ProjectConfigRequest } from '../../../core/models/interfaces';
+import { GitHubIntegrationComponent } from '../components/github-integration/github-integration.component';
 
 @Component({
   selector: 'app-project-config',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, GitHubIntegrationComponent],
   templateUrl: './project-config.component.html',
 })
 
@@ -40,6 +41,13 @@ export class ProjectConfigComponent implements OnInit {
       this.projectId = params['id'];
       if (this.projectId) {
         this.loadProject();
+      }
+    });
+
+    // Check for fragment to auto-activate integrations tab
+    this.route.fragment.subscribe(fragment => {
+      if (fragment === 'integrations') {
+        this.activeTab.set('integrations');
       }
     });
   }

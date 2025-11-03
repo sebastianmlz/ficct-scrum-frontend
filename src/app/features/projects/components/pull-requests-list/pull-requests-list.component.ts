@@ -3,14 +3,16 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
+import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { GitHubPullRequest } from '../../../../core/models/interfaces';
+import { GitHubConnectPromptComponent } from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pull-requests-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, GitHubConnectPromptComponent],
   templateUrl: './pull-requests-list.component.html',
   styleUrls: ['./pull-requests-list.component.scss']
 })
@@ -18,6 +20,7 @@ export class PullRequestsListComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private githubService = inject(GitHubIntegrationService);
+  private integrationState = inject(GitHubIntegrationStateService);
   private notificationService = inject(NotificationService);
 
   projectId = signal<string>('');
@@ -25,6 +28,7 @@ export class PullRequestsListComponent implements OnInit, OnDestroy {
   pullRequests = signal<GitHubPullRequest[]>([]);
   filteredPRs = signal<GitHubPullRequest[]>([]);
   loading = signal(false);
+  noIntegration = signal(false);
   
   // Filters
   activeTab = signal<'all' | 'open' | 'closed' | 'merged'>('all');
@@ -38,32 +42,41 @@ export class PullRequestsListComponent implements OnInit, OnDestroy {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
-        this.loadIntegrationAndPRs();
+        this.checkIntegrationAndLoadPRs();
       }
     });
   }
 
-  loadIntegrationAndPRs(): void {
+  checkIntegrationAndLoadPRs(): void {
     this.loading.set(true);
+    this.noIntegration.set(false);
     
-    // First, find the integration for this project
-    this.githubService.getIntegrations({ project: this.projectId() }).subscribe({
-      next: (response) => {
-        if (response.results.length > 0) {
-          const integration = response.results[0];
+    console.log('[PULL REQUESTS] Using centralized state service');
+    
+    // Use centralized state service
+    this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
+      next: (integration) => {
+        if (integration) {
+          console.log('[PULL REQUESTS] Integration found via state service:', integration.id);
           this.integrationId.set(integration.id);
           this.loadPullRequests(integration.id);
         } else {
-          this.notificationService.error('No GitHub integration found for this project');
+          console.log('[PULL REQUESTS] No GitHub integration (from state service)');
+          this.noIntegration.set(true);
           this.loading.set(false);
         }
       },
       error: (error) => {
-        this.notificationService.error('Failed to load GitHub integration');
-        console.error('Error loading integration:', error);
+        console.error('[PULL REQUESTS] Error from state service:', error);
+        this.noIntegration.set(true);
         this.loading.set(false);
       }
     });
+  }
+
+  // Deprecated - replaced by checkIntegrationAndLoadPRs
+  loadIntegrationAndPRs(): void {
+    this.checkIntegrationAndLoadPRs();
   }
 
   loadPullRequests(integrationId: string): void {

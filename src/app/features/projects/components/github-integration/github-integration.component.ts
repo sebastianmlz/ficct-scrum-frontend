@@ -1,7 +1,8 @@
-import { Component, Input, OnInit, signal, inject } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
+import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import {
   GitHubIntegration,
@@ -16,10 +17,11 @@ import {
   templateUrl: './github-integration.component.html',
   styleUrl: './github-integration.component.scss'
 })
-export class GitHubIntegrationComponent implements OnInit {
+export class GitHubIntegrationComponent implements OnInit, OnChanges {
   @Input() projectId!: string;
 
   private githubService = inject(GitHubIntegrationService);
+  private integrationState = inject(GitHubIntegrationStateService);
   private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
 
@@ -29,6 +31,7 @@ export class GitHubIntegrationComponent implements OnInit {
   syncing = signal(false);
   showConnectForm = signal(false);
   showDisconnectConfirm = signal(false);
+  connectingOAuth = signal(false);
 
   // Forms
   connectForm: FormGroup = this.fb.group({
@@ -39,7 +42,23 @@ export class GitHubIntegrationComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // CRITICAL: Validate project ID on init
+    if (!this.projectId) {
+      console.warn('[GITHUB] ⚠️ Project ID not provided on init, waiting for input binding...');
+      return;
+    }
+    console.log('[GITHUB] Component initialized with project ID:', this.projectId);
     this.loadIntegration();
+  }
+
+  /**
+   * Angular lifecycle hook - called when input properties change
+   */
+  ngOnChanges(): void {
+    if (this.projectId && !this.integration()) {
+      console.log('[GITHUB] Project ID changed to:', this.projectId);
+      this.loadIntegration();
+    }
   }
 
   /**
@@ -95,7 +114,54 @@ export class GitHubIntegrationComponent implements OnInit {
   }
 
   /**
-   * Connect GitHub repository
+   * Initiate GitHub OAuth flow
+   * User will be redirected to GitHub for authorization
+   */
+  onConnectWithOAuth(): void {
+    // CRITICAL: Validate project ID before proceeding
+    if (!this.projectId || this.projectId.trim() === '') {
+      console.error('[GITHUB] ❌ CRITICAL: Project ID is empty or undefined!');
+      this.notificationService.error('Project ID is missing. Please refresh the page.');
+      return;
+    }
+
+    console.log('[GITHUB] Initiating OAuth flow for project:', this.projectId);
+    console.log('[GITHUB] Project ID length:', this.projectId.length);
+    console.log('[GITHUB] Project ID type:', typeof this.projectId);
+    this.connectingOAuth.set(true);
+
+    // Save project ID to localStorage for callback
+    localStorage.setItem('github_oauth_project_id', this.projectId);
+
+    this.githubService.initiateOAuth(this.projectId).subscribe({
+      next: (response) => {
+        console.log('[GITHUB] OAuth initiation successful, authorization URL:', response.authorization_url);
+        console.log('[GITHUB] OAuth state:', response.state);
+        
+        // Redirect to GitHub authorization page
+        window.location.href = response.authorization_url;
+      },
+      error: (error) => {
+        console.error('[GITHUB] Error initiating OAuth:', error);
+        this.connectingOAuth.set(false);
+        
+        // Handle specific error cases
+        if (error.status === 403) {
+          this.notificationService.error(
+            'You need project admin permissions to connect GitHub'
+          );
+        } else {
+          this.notificationService.error(
+            error.error?.detail || 'Failed to initiate GitHub connection'
+          );
+        }
+      }
+    });
+  }
+
+  /**
+   * Connect GitHub repository (Direct method with Personal Access Token)
+   * @deprecated Use onConnectWithOAuth() instead for OAuth flow
    */
   onConnectRepository(): void {
     if (this.connectForm.invalid) {
@@ -212,6 +278,11 @@ export class GitHubIntegrationComponent implements OnInit {
         this.integration.set(null);
         this.showDisconnectConfirm.set(false);
         this.loading.set(false);
+        
+        // Clear and refresh state service cache
+        console.log('[GITHUB] Clearing state service cache after disconnect');
+        this.integrationState.clearCache(this.projectId);
+        this.integrationState.updateCache(this.projectId, null);
       },
       error: (error) => {
         console.error('[GITHUB] Error disconnecting:', error);

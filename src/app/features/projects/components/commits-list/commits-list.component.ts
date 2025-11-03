@@ -3,14 +3,16 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
+import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { GitHubCommit, PaginatedGitHubCommitList } from '../../../../core/models/interfaces';
+import { GitHubConnectPromptComponent } from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-commits-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, GitHubConnectPromptComponent],
   templateUrl: './commits-list.component.html',
   styleUrls: ['./commits-list.component.scss']
 })
@@ -18,12 +20,14 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private githubService = inject(GitHubIntegrationService);
+  private integrationState = inject(GitHubIntegrationStateService);
   private notificationService = inject(NotificationService);
 
   projectId = signal<string>('');
   commits = signal<GitHubCommit[]>([]);
   loading = signal(false);
   syncing = signal(false);
+  noIntegration = signal(false);
   
   // Pagination
   page = signal(1);
@@ -42,7 +46,33 @@ export class CommitsListComponent implements OnInit, OnDestroy {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
-        this.loadCommits();
+        this.checkIntegrationAndLoadCommits();
+      }
+    });
+  }
+
+  checkIntegrationAndLoadCommits(): void {
+    this.loading.set(true);
+    this.noIntegration.set(false);
+    
+    console.log('[COMMITS] Using centralized state service');
+    
+    // Use centralized state service
+    this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
+      next: (integration) => {
+        if (integration) {
+          console.log('[COMMITS] Integration found via state service');
+          this.loadCommits();
+        } else {
+          console.log('[COMMITS] No GitHub integration (from state service)');
+          this.noIntegration.set(true);
+          this.loading.set(false);
+        }
+      },
+      error: (error) => {
+        console.error('[COMMITS] Error from state service:', error);
+        this.noIntegration.set(true);
+        this.loading.set(false);
       }
     });
   }

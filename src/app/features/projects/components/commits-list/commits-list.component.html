@@ -57,20 +57,28 @@
     </div>
 
     <!-- Commits List -->
-    <div class="bg-white shadow rounded-lg overflow-hidden">
-      @if (loading() && commits().length === 0) {
-        <div class="flex justify-center items-center py-12">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      } @else if (commits().length === 0) {
-        <div class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No commits found</h3>
-          <p class="mt-1 text-sm text-gray-500">Try syncing commits or adjusting your filters.</p>
-        </div>
-      } @else {
+    @if (noIntegration()) {
+      <app-github-connect-prompt 
+        [projectId]="projectId()"
+        [title]="'GitHub Integration Required for Commits'"
+        [message]="'Connect your GitHub repository to sync and track commit history, link commits to issues, and view code contributions.'"
+        [showFeatures]="true">
+      </app-github-connect-prompt>
+    } @else {
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        @if (loading() && commits().length === 0) {
+          <div class="flex justify-center items-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        } @else if (commits().length === 0) {
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No commits found</h3>
+            <p class="mt-1 text-sm text-gray-500">Try syncing commits or adjusting your filters.</p>
+          </div>
+        } @else {
         <ul class="divide-y divide-gray-200">
           @for (commit of commits(); track commit.id) {
             <li class="hover:bg-gray-50 transition-colors">
@@ -152,6 +160,7 @@
           </div>
         }
       }
-    </div>
+      </div>
+    }
   </div>
 </div>
