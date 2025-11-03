@@ -2,9 +2,11 @@ import { Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
+import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { GitHubMetrics } from '../../../../core/models/interfaces';
 import { Chart, registerables } from 'chart.js';
+import { GitHubConnectPromptComponent } from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -12,7 +14,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-metrics-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GitHubConnectPromptComponent],
   templateUrl: './metrics-dashboard.component.html',
   styleUrls: ['./metrics-dashboard.component.scss']
 })
@@ -24,12 +26,14 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private githubService = inject(GitHubIntegrationService);
+  private integrationState = inject(GitHubIntegrationStateService);
   private notificationService = inject(NotificationService);
 
   projectId = signal<string>('');
   integrationId = signal<string | null>(null);
   metrics = signal<GitHubMetrics | null>(null);
   loading = signal(false);
+  noIntegration = signal(false);
   
   private commitTrendChart: Chart | null = null;
   private contributorChart: Chart | null = null;
@@ -51,22 +55,26 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
 
   loadIntegrationAndMetrics(): void {
     this.loading.set(true);
+    this.noIntegration.set(false);
     
-    // First, find the integration for this project
-    this.githubService.getIntegrations({ project: this.projectId() }).subscribe({
-      next: (response) => {
-        if (response.results.length > 0) {
-          const integration = response.results[0];
+    console.log('[METRICS] Using centralized state service for integration check');
+    
+    // Use centralized state service
+    this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
+      next: (integration) => {
+        if (integration) {
+          console.log('[METRICS] Integration found via state service:', integration.id);
           this.integrationId.set(integration.id);
           this.loadMetrics(integration.id);
         } else {
-          this.notificationService.error('No GitHub integration found for this project');
+          console.log('[METRICS] No GitHub integration (from state service)');
+          this.noIntegration.set(true);
           this.loading.set(false);
         }
       },
       error: (error) => {
-        this.notificationService.error('Failed to load GitHub integration');
-        console.error('Error loading integration:', error);
+        console.error('[METRICS] Error from state service:', error);
+        this.noIntegration.set(true);
         this.loading.set(false);
       }
     });

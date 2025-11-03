@@ -68,6 +68,11 @@ export const projectsRoutes: Routes = [
       }
     ]
   },
+  // GitHub OAuth Callback (no requiere :id porque el backend maneja directamente)
+  {
+    path: 'github/oauth/callback',
+    loadComponent: () => import('./components/github-oauth-callback/github-oauth-callback.component').then(m => m.GitHubOAuthCallbackComponent)
+  },
   {
     path: ':id/edit',
     loadComponent: () => import('./project-edit/project-edit.component').then(m => m.ProjectEditComponent)

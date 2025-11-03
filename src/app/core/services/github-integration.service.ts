@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   GitHubIntegration,
   GitHubIntegrationDetail,
@@ -14,7 +15,9 @@ import {
   SyncCommitsResponse,
   PaginatedGitHubIntegrationList,
   PaginatedGitHubCommitList,
-  PaginationParams
+  PaginationParams,
+  GitHubOAuthRepositoriesResponse,
+  GitHubOAuthCompleteRequest
 } from '../models/interfaces';
 import { environment } from '../../../environments/environment';
 
@@ -77,6 +80,71 @@ export class GitHubIntegrationService {
    */
   disconnectRepository(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/github/${id}/`);
+  }
+
+  // ===========================
+  // OAUTH FLOW
+  // ===========================
+
+  /**
+   * Initiate GitHub OAuth flow
+   * Returns authorization URL to redirect user to GitHub
+   */
+  initiateOAuth(projectId: string): Observable<{ authorization_url: string; state: string }> {
+    // CRITICAL: Log payload details for debugging
+    console.log('[GITHUB SERVICE] initiateOAuth called');
+    console.log('[GITHUB SERVICE] Project ID received:', projectId);
+    console.log('[GITHUB SERVICE] Project ID type:', typeof projectId);
+    console.log('[GITHUB SERVICE] Project ID length:', projectId?.length);
+    
+    const payload = { project: projectId };
+    console.log('[GITHUB SERVICE] Payload constructed:', JSON.stringify(payload));
+    console.log('[GITHUB SERVICE] Endpoint:', `${this.baseUrl}/github/oauth/initiate/`);
+    
+    return this.http.post<{ authorization_url: string; state: string }>(
+      `${this.baseUrl}/github/oauth/initiate/`,
+      payload
+    );
+  }
+
+  /**
+   * Check if project has GitHub integration
+   * Returns integration details if exists, null if not
+   */
+  checkIntegrationStatus(projectId: string): Observable<GitHubIntegration | null> {
+    return this.getIntegrations({ project: projectId }).pipe(
+      map(response => {
+        if (response.results && response.results.length > 0) {
+          return response.results[0];
+        }
+        return null;
+      })
+    );
+  }
+
+  /**
+   * Get available repositories for OAuth user
+   * Called after OAuth callback with temp token
+   */
+  getAvailableRepositories(projectId: string, tempToken: string): Observable<GitHubOAuthRepositoriesResponse> {
+    console.log('[GITHUB SERVICE] Getting available repositories for project:', projectId);
+    console.log('[GITHUB SERVICE] Temp token present:', tempToken ? 'yes' : 'no');
+    return this.http.get<GitHubOAuthRepositoriesResponse>(
+      `${this.baseUrl}/github/oauth/repositories/`,
+      { params: { project: projectId, temp_token: tempToken } }
+    );
+  }
+
+  /**
+   * Complete GitHub integration with selected repository
+   * Final step in OAuth flow
+   */
+  completeIntegration(data: GitHubOAuthCompleteRequest): Observable<{status: string; message: string; integration_id: string; repository: string}> {
+    console.log('[GITHUB SERVICE] Completing integration with repository:', data.repository_name);
+    return this.http.post<{status: string; message: string; integration_id: string; repository: string}>(
+      `${this.baseUrl}/github/oauth/complete/`,
+      data
+    );
   }
 
   // ===========================

@@ -33,7 +33,7 @@ export function analyzeDiagramError(error: any, projectId?: string): DiagramErro
       title: 'GitHub Integration Required',
       message: 'Connect your GitHub repository to view code metrics, dependencies, and architecture diagrams.',
       actionLabel: 'Connect GitHub',
-      actionRoute: projectId ? `/projects/${projectId}/integrations` : '/projects',
+      actionRoute: projectId ? `/projects/${projectId}/config` : '/projects',
       icon: 'github',
       canRetry: false
     };

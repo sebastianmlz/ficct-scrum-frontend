@@ -988,6 +988,30 @@ export interface SyncCommitsResponse {
 export interface PaginatedGitHubCommitList extends PaginatedResponse<GitHubCommit> { }
 export interface PaginatedGitHubIntegrationList extends PaginatedResponse<GitHubIntegration> { }
 
+// OAuth Flow Interfaces
+export interface GitHubOAuthRepository {
+  id: number;
+  name: string;
+  full_name: string;
+  html_url: string;
+  description: string | null;
+  private: boolean;
+  default_branch: string;
+}
+
+export interface GitHubOAuthRepositoriesResponse {
+  repositories: GitHubOAuthRepository[];
+  project_id: string;
+  temp_token?: string;
+}
+
+export interface GitHubOAuthCompleteRequest {
+  temp_token: string;
+  repository_url: string;
+  repository_name: string;
+  project: string;
+}
+
 // ===========================
 // DIAGRAM GENERATION INTERFACES (Sprint 3)
 // ===========================
