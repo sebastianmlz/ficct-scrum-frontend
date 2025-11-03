@@ -18,9 +18,35 @@
         <h3 class="text-lg font-semibold text-gray-900">Velocity Chart</h3>
         <span class="text-xs text-gray-500">UC-058</span>
       </div>
-      <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-        <p class="text-gray-500">Velocity chart will be displayed here</p>
+      <div class="flex items-center gap-4 mb-4">
+        <label for="velocity-num-sprints" class="text-sm text-gray-700">Sprints to show:</label>
+        <select id="velocity-num-sprints" [value]="velocityNumSprints()" (change)="onVelocityNumSprintsChange(+$any($event.target).value)" class="px-2 py-1 border rounded-lg text-sm">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
       </div>
+      @if (loadingVelocityChart()) {
+        <div class="flex items-center justify-center h-64">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      } @else if (velocityChart()) {
+        <div style="position: relative; height: 300px; width: 100%;">
+          <canvas #velocityChartCanvas></canvas>
+        </div>
+        <div class="mt-4 text-sm text-gray-700">
+          <strong>Average Velocity:</strong> {{ velocityChart()!.average_velocity }}
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center h-64 text-gray-500">
+          <svg class="h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <span>Error loading velocity chart.</span>
+        </div>
+      }
     </div>
 
     <!-- UC-061: Cumulative Flow Diagram -->
@@ -29,9 +55,33 @@
         <h3 class="text-lg font-semibold text-gray-900">Cumulative Flow Diagram</h3>
         <span class="text-xs text-gray-500">UC-061</span>
       </div>
-      <div class="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-        <p class="text-gray-500">Cumulative flow diagram will be displayed here</p>
+      <div class="flex items-center gap-4 mb-4">
+        <label for="cfd-days" class="text-sm text-gray-700">Days to show:</label>
+        <select id="cfd-days" [value]="cumulativeFlowDays()" (change)="onCumulativeFlowDaysChange(+$any($event.target).value)" class="px-2 py-1 border rounded-lg text-sm">
+          <option value="7">7</option>
+          <option value="14">14</option>
+          <option value="30">30</option>
+          <option value="60">60</option>
+          <option value="90">90</option>
+          <option value="180">180</option>
+        </select>
       </div>
+      @if (loadingCumulativeFlow()) {
+        <div class="flex items-center justify-center h-64">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      } @else if (cumulativeFlow()) {
+        <div style="position: relative; height: 300px; width: 100%;">
+          <canvas #cumulativeFlowCanvas></canvas>
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center h-64 text-gray-500">
+          <svg class="h-12 w-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span>Error loading cumulative flow diagram.</span>
+        </div>
+      }
     </div>
   </div>
 
@@ -42,15 +92,31 @@
       <span class="text-xs text-gray-500">UC-059</span>
     </div>
     <div class="space-y-4">
-      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-        <div>
-          <p class="font-medium text-gray-900">Current Sprint</p>
-          <p class="text-sm text-gray-600">Sprint 3: Integraciones y Reportes</p>
+      @if (sprints().length > 0) {
+        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div class="flex-1">
+            <p class="font-medium text-gray-900 mb-2">Select Sprint</p>
+            <select 
+              (change)="onSprintChange($any($event.target).value)"
+              [value]="selectedSprintId()"
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              @for (sprint of sprints(); track sprint.id) {
+                <option [value]="sprint.id">{{ sprint.name }} ({{ sprint.status }})</option>
+              }
+            </select>
+          </div>
+          <button 
+            (click)="openSprintReportModal()"
+            [disabled]="!selectedSprintId()"
+            class="ml-4 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+            View Full Report
+          </button>
         </div>
-        <button class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
-          View Full Report
-        </button>
-      </div>
+      } @else {
+        <div class="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+          No sprints available
+        </div>
+      }
     </div>
   </div>
 
@@ -60,20 +126,49 @@
       <h3 class="text-lg font-semibold text-gray-900">Team Metrics</h3>
       <span class="text-xs text-gray-500">UC-060</span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="p-4 bg-blue-50 rounded-lg">
-        <p class="text-sm text-gray-600">Completed Issues</p>
-        <p class="text-2xl font-bold text-blue-600">24</p>
-      </div>
-      <div class="p-4 bg-green-50 rounded-lg">
-        <p class="text-sm text-gray-600">In Progress</p>
-        <p class="text-2xl font-bold text-green-600">8</p>
-      </div>
-      <div class="p-4 bg-yellow-50 rounded-lg">
-        <p class="text-sm text-gray-600">Pending</p>
-        <p class="text-2xl font-bold text-yellow-600">12</p>
-      </div>
+    <div class="flex items-center gap-4 mb-4">
+      <label for="team-metrics-period" class="text-sm text-gray-700">Period (days):</label>
+      <select id="team-metrics-period" [value]="teamMetricsPeriod()" (change)="onTeamMetricsPeriodChange(+$any($event.target).value)" class="px-2 py-1 border rounded-lg text-sm">
+        <option value="7">7</option>
+        <option value="14">14</option>
+        <option value="30">30</option>
+        <option value="90">90</option>
+        <option value="180">180</option>
+        <option value="365">365</option>
+      </select>
     </div>
+    @if (loadingTeamMetrics()) {
+      <div class="flex items-center justify-center h-32">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    } @else if (teamMetrics()) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 bg-blue-50 rounded-lg">
+          <p class="text-sm text-gray-600">Total Issues</p>
+          <p class="text-2xl font-bold text-blue-600">{{ teamMetrics()!.team_aggregates.total_issues }}</p>
+        </div>
+        <div class="p-4 bg-green-50 rounded-lg">
+          <p class="text-sm text-gray-600">Total Completed</p>
+          <p class="text-2xl font-bold text-green-600">{{ teamMetrics()!.team_aggregates.total_completed }}</p>
+        </div>
+        <div class="p-4 bg-yellow-50 rounded-lg">
+          <p class="text-sm text-gray-600">Work In Progress</p>
+          <p class="text-2xl font-bold text-yellow-600">{{ teamMetrics()!.team_aggregates.work_in_progress }}</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div class="p-4 bg-purple-50 rounded-lg">
+          <p class="text-sm text-gray-600">Throughput</p>
+          <p class="text-2xl font-bold text-purple-600">{{ teamMetrics()!.team_aggregates.throughput }}</p>
+        </div>
+        <div class="p-4 bg-pink-50 rounded-lg">
+          <p class="text-sm text-gray-600">Avg. Cycle Time</p>
+          <p class="text-2xl font-bold text-pink-600">{{ teamMetrics()!.team_aggregates.avg_cycle_time }}</p>
+        </div>
+      </div>
+    } @else {
+      <div class="p-4 text-gray-500">No team metrics available.</div>
+    }
   </div>
 
   <!-- UC-062: Export to CSV & UC-063: Project Dashboard -->
@@ -83,18 +178,199 @@
       <span class="text-xs text-gray-500">UC-062 | UC-063</span>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+      <button 
+        (click)="exportDashboardData()"
+        [disabled]="loading()"
+        class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>
-        Export Dashboard to CSV
+        @if (loading()) {
+          <span>Exporting...</span>
+        } @else {
+          <span>Export Issues to CSV</span>
+        }
       </button>
-      <button class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+      <button 
+        (click)="exportActivityLog()"
+        [disabled]="loading()"
+        class="flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        Generate Full Report
+        @if (loading()) {
+          <span>Exporting...</span>
+        } @else {
+          <span>Export Activity Log to CSV</span>
+        }
       </button>
     </div>
   </div>
 </div>
+
+<!-- Sprint Report Modal -->
+@if (showSprintReportModal()) {
+  <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Background overlay -->
+      <div 
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+        aria-hidden="true"
+        (click)="closeSprintReportModal()">
+      </div>
+
+      <!-- Modal panel -->
+      <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+        @if (loadingSprintReport()) {
+          <!-- Loading State -->
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="flex items-center justify-center h-64">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        } @else if (sprintReport()) {
+          <!-- Sprint Report Content -->
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-6">
+              <div>
+                <h3 class="text-2xl font-bold text-gray-900" id="modal-title">
+                  Sprint Report
+                </h3>
+                <div class="mt-2 space-y-1">
+                  <p class="text-lg font-semibold text-blue-600">{{ sprintReport()!.sprint.name }}</p>
+                  <p class="text-sm text-gray-600">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                          [class.bg-green-100]="sprintReport()!.sprint.status === 'active'"
+                          [class.text-green-800]="sprintReport()!.sprint.status === 'active'"
+                          [class.bg-blue-100]="sprintReport()!.sprint.status === 'planning'"
+                          [class.text-blue-800]="sprintReport()!.sprint.status === 'planning'"
+                          [class.bg-gray-100]="sprintReport()!.sprint.status === 'completed'"
+                          [class.text-gray-800]="sprintReport()!.sprint.status === 'completed'">
+                      {{ sprintReport()!.sprint.status }}
+                    </span>
+                    <span class="ml-2">{{ sprintReport()!.sprint.start_date }} to {{ sprintReport()!.sprint.end_date }}</span>
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                (click)="closeSprintReportModal()"
+                class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <span class="sr-only">Close</span>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                <p class="text-xs font-medium text-blue-600 uppercase tracking-wide">Velocity</p>
+                <p class="mt-2 text-3xl font-bold text-blue-900">{{ sprintReport()!.metrics.velocity }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
+                <p class="text-xs font-medium text-green-600 uppercase tracking-wide">Completion Rate</p>
+                <p class="mt-2 text-3xl font-bold text-green-900">{{ sprintReport()!.metrics.completion_rate }}%</p>
+              </div>
+              <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+                <p class="text-xs font-medium text-purple-600 uppercase tracking-wide">Completed Points</p>
+                <p class="mt-2 text-3xl font-bold text-purple-900">{{ sprintReport()!.metrics.completed_points }}</p>
+                <p class="text-xs text-purple-600 mt-1">of {{ sprintReport()!.metrics.planned_points }}</p>
+              </div>
+              <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4">
+                <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Defect Rate</p>
+                <p class="mt-2 text-3xl font-bold text-yellow-900">{{ sprintReport()!.defect_rate }}%</p>
+              </div>
+            </div>
+
+            <!-- Issues Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-gray-600">Total Issues</p>
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <p class="mt-2 text-2xl font-bold text-gray-900">{{ sprintReport()!.metrics.total_issues }}</p>
+              </div>
+              <div class="bg-white border border-green-200 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-green-600">Completed</p>
+                  <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p class="mt-2 text-2xl font-bold text-green-900">{{ sprintReport()!.metrics.completed_issues }}</p>
+              </div>
+              <div class="bg-white border border-red-200 rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-red-600">Incomplete</p>
+                  <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p class="mt-2 text-2xl font-bold text-red-900">{{ sprintReport()!.metrics.incomplete_issues }}</p>
+              </div>
+            </div>
+
+            <!-- Issues by Status and Type -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Issues by Status -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                  <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Issues by Status
+                </h4>
+                <div class="space-y-2">
+                  @for (status of getObjectKeys(sprintReport()!.issues_by_status); track status) {
+                    <div class="flex items-center justify-between bg-white rounded px-3 py-2">
+                      <span class="text-sm font-medium text-gray-700">{{ status }}</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                        {{ sprintReport()!.issues_by_status[status] }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Issues by Type -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                  <svg class="h-5 w-5 text-purple-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  Issues by Type
+                </h4>
+                <div class="space-y-2">
+                  @for (type of getObjectKeys(sprintReport()!.issues_by_type); track type) {
+                    <div class="flex items-center justify-between bg-white rounded px-3 py-2">
+                      <span class="text-sm font-medium text-gray-700">{{ type }}</span>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
+                        {{ sprintReport()!.issues_by_type[type] }}
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button 
+              type="button"
+              (click)="closeSprintReportModal()"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+              Close
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

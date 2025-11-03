@@ -1294,3 +1294,85 @@ export type DiagramData =
   | UMLDiagramData 
   | ArchitectureDiagramData
   | string;
+
+// Sprint Report Interfaces
+export interface SprintReportMetrics {
+  planned_points: number;
+  completed_points: number;
+  completion_rate: number;
+  total_issues: number;
+  completed_issues: number;
+  incomplete_issues: number;
+  velocity: number;
+}
+
+export interface SprintReportSprint {
+  id: string;
+  name: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+}
+
+export interface SprintReport {
+  sprint: SprintReportSprint;
+  metrics: SprintReportMetrics;
+  issues_by_status: Record<string, number>;
+  issues_by_type: Record<string, number>;
+  defect_rate: number;
+}
+
+// Team Metrics Interfaces
+export interface TeamMetricsUser {
+  // Define fields if needed, for now it's an empty array in the example
+}
+
+export interface TeamMetricsAggregates {
+  total_issues: number;
+  total_completed: number;
+  throughput: number;
+  avg_cycle_time: number;
+  work_in_progress: number;
+}
+
+export interface TeamMetricsResponse {
+  user_metrics: TeamMetricsUser[];
+  team_aggregates: TeamMetricsAggregates;
+}
+
+// Velocity Chart Interfaces
+export interface VelocityChartResponse {
+  labels: string[];
+  velocities: number[];
+  planned_points: number[];
+  average_velocity: number;
+}
+
+// Cumulative Flow Diagram Interfaces
+export interface CumulativeFlowResponse {
+  dates: string[];
+  status_counts: Record<string, number[]>;
+}
+
+// Export Interfaces
+export interface ExportRequest {
+  data_type: 'issues' | 'sprints' | 'activity';
+  project: string;
+  start_date?: string;
+  end_date?: string;
+  sprint_id?: string;
+  status_id?: string;
+  assignee_id?: string;
+  issue_type_id?: string;
+  priority?: string;
+  user_id?: string;
+  action_type?: string;
+}
+
+export interface ExportResponse {
+  message: string;
+  download_url: string;
+  snapshot_id: string;
+  rows_exported: number;
+  data_type: string;
+}
