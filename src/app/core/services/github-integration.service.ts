@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import {
   GitHubIntegration,
   GitHubIntegrationDetail,
@@ -56,9 +56,19 @@ export class GitHubIntegrationService {
 
   /**
    * Get single GitHub integration details
+   * Returns null if integration not found (404)
    */
-  getIntegration(id: string): Observable<GitHubIntegrationDetail> {
-    return this.http.get<GitHubIntegrationDetail>(`${this.baseUrl}/github/${id}/`);
+  getIntegration(id: string): Observable<GitHubIntegrationDetail | null> {
+    return this.http.get<GitHubIntegrationDetail>(`${this.baseUrl}/github/${id}/`).pipe(
+      catchError(error => {
+        if (error.status === 404) {
+          console.info('[GITHUB] Integration not found:', id);
+          return of(null);
+        }
+        console.error('[GITHUB] Error loading integration:', error);
+        throw error;
+      })
+    );
   }
 
   /**
@@ -228,9 +238,19 @@ export class GitHubIntegrationService {
 
   /**
    * Get code metrics for integration
+   * Returns null if integration not found (404)
    */
-  getMetrics(integrationId: string): Observable<GitHubMetrics> {
-    return this.http.get<GitHubMetrics>(`${this.baseUrl}/github/${integrationId}/metrics/`);
+  getMetrics(integrationId: string): Observable<GitHubMetrics | null> {
+    return this.http.get<GitHubMetrics>(`${this.baseUrl}/github/${integrationId}/metrics/`).pipe(
+      catchError(error => {
+        if (error.status === 404) {
+          console.info('[GITHUB] Metrics not found for integration:', integrationId);
+          return of(null);
+        }
+        console.error('[GITHUB] Error loading metrics:', error);
+        throw error;
+      })
+    );
   }
 
   // ===========================

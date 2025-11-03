@@ -73,22 +73,31 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
           // Project already has integration, load details
           this.githubService.getIntegration(response.results[0].id).subscribe({
             next: (detail) => {
-              this.integration.set(detail);
+              if (detail) {
+                this.integration.set(detail);
+                console.log('[GITHUB] Integration loaded:', detail.repository_full_name);
+              } else {
+                console.info('[GITHUB] Integration not found (404)');
+                this.integration.set(null);
+              }
               this.loading.set(false);
             },
             error: (error) => {
               console.error('[GITHUB] Error loading integration details:', error);
+              this.integration.set(null);
               this.loading.set(false);
             }
           });
         } else {
           // No integration found
+          console.info('[GITHUB] No integration configured for this project');
           this.integration.set(null);
           this.loading.set(false);
         }
       },
       error: (error) => {
         console.error('[GITHUB] Error checking integration:', error);
+        this.integration.set(null);
         this.loading.set(false);
       }
     });

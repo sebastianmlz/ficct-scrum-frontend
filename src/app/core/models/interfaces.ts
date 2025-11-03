@@ -1231,35 +1231,37 @@ export interface UMLRelationship {
   label?: string;
 }
 
-// Architecture Diagram Data
+// Architecture Diagram Data (Backend Structure)
 export interface ArchitectureDiagramData {
+  project?: {
+    id: string;
+    name: string;
+    key: string;
+  };
+  architecture_pattern?: string;
   layers: ArchitectureLayer[];
   connections: ArchitectureConnection[];
-  technologies: TechnologyStack;
+  technologies?: TechnologyStack;
 }
 
 export interface ArchitectureLayer {
-  id: string;
   name: string;
-  type: 'frontend' | 'backend' | 'database' | 'infrastructure' | 'external';
+  description: string;
   components: ArchitectureComponent[];
-  position?: { x: number; y: number };
 }
 
 export interface ArchitectureComponent {
-  id: string;
   name: string;
-  technology: string;
+  type: 'viewset' | 'serializer' | 'service' | 'model' | 'middleware' | 'manager' | 'admin' | 'form' | 'filter';
+  app: string;
   description?: string;
-  icon?: string;
 }
 
 export interface ArchitectureConnection {
   from: string;
   to: string;
-  protocol?: string;
+  type: 'uses' | 'accesses' | 'calls' | 'imports' | 'extends';
   label?: string;
-  bidirectional?: boolean;
 }
 
 export interface TechnologyStack {

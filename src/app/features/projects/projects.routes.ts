@@ -64,7 +64,7 @@ export const projectsRoutes: Routes = [
       },
       {
         path: 'diagrams/uml',
-        loadComponent: () => import('./components/uml-diagram/uml-diagram.component').then(m => m.UMLDiagramComponent)
+        loadComponent: () => import('./components/uml-diagram/uml-diagram-simple.component').then(m => m.UMLDiagramSimpleComponent)
       },
       {
         path: 'diagrams/architecture',

@@ -1,0 +1,103 @@
+<div class="mermaid-viewer" [class.fullscreen]="isFullscreen()">
+  
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <h3>{{ title }}</h3>
+    </div>
+    
+    <div class="toolbar-controls">
+      <!-- Zoom Controls -->
+      <div class="zoom-controls">
+        <button (click)="zoomOut()" title="Zoom Out" class="btn-icon" [disabled]="zoomLevel() <= 50">
+          <span>−</span>
+        </button>
+        <span class="zoom-level">{{ zoomLevel() }}%</span>
+        <button (click)="zoomIn()" title="Zoom In" class="btn-icon" [disabled]="zoomLevel() >= 300">
+          <span>+</span>
+        </button>
+        <button (click)="fitToScreen()" title="Fit to Screen" class="btn-icon">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+          </svg>
+        </button>
+        <button (click)="resetView()" title="Reset View" class="btn-icon">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Export Controls -->
+      <div class="export-controls">
+        <button (click)="exportDiagram('svg')" class="btn-small" [disabled]="isExporting()">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          SVG
+        </button>
+        <button (click)="exportDiagram('png')" class="btn-small" [disabled]="isExporting()">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          PNG
+        </button>
+        <button (click)="exportDiagram('json')" class="btn-small" [disabled]="isExporting()">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          JSON
+        </button>
+      </div>
+      
+      <!-- Fullscreen Toggle -->
+      <button (click)="toggleFullscreen()" class="btn-icon" title="Toggle Fullscreen">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          @if (isFullscreen()) {
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          } @else {
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+          }
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- DIAGRAM CONTAINER -->
+  <div class="diagram-container" #mermaidContainer>
+    <!-- Mermaid renders here -->
+    @if (isExporting()) {
+      <div class="exporting-overlay">
+        <div class="spinner"></div>
+        <p>Exporting diagram...</p>
+      </div>
+    }
+  </div>
+  
+  <!-- HINTS -->
+  <div class="hints">
+    <p>
+      <span class="hint-item">
+        <svg class="w-3 h-3 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+        </svg>
+        Scroll to zoom
+      </span>
+      <span class="hint-separator">|</span>
+      <span class="hint-item">
+        <svg class="w-3 h-3 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+        </svg>
+        Ctrl+Drag to pan
+      </span>
+      <span class="hint-separator">|</span>
+      <span class="hint-item">
+        <svg class="w-3 h-3 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+        </svg>
+        Click class to view details
+      </span>
+    </p>
+  </div>
+  
+</div>

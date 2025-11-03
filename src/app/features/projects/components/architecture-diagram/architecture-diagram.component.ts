@@ -62,155 +62,152 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
               </div>
             </div>
           } @else if (diagramData()) {
-            <!-- JSON Data Visualization -->
-            <div class="p-6 space-y-6">
-              @if (diagramData()!.technologies) {
-                <div class="border rounded-lg p-4 bg-blue-50">
-                  <h3 class="font-medium text-blue-900 mb-3">Technology Stack</h3>
-                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @if (diagramData()!.technologies.frontend) {
-                      <div>
-                        <div class="text-xs text-blue-700 font-medium mb-1">Frontend</div>
-                        @for (tech of diagramData()!.technologies.frontend; track tech) {
-                          <div class="text-sm text-blue-900">{{ tech }}</div>
-                        }
-                      </div>
+            <!-- JSON Data Visualization - NEW BACKEND STRUCTURE -->
+            <div class="p-6">
+              <!-- Header with Architecture Pattern and Cache -->
+              <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div class="flex items-center justify-between">
+                  <div>
+                    @if (diagramData()!.architecture_pattern) {
+                      <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ diagramData()!.architecture_pattern }}</h3>
                     }
-                    @if (diagramData()!.technologies.backend) {
-                      <div>
-                        <div class="text-xs text-blue-700 font-medium mb-1">Backend</div>
-                        @for (tech of diagramData()!.technologies.backend; track tech) {
-                          <div class="text-sm text-blue-900">{{ tech }}</div>
-                        }
-                      </div>
-                    }
-                    @if (diagramData()!.technologies.database) {
-                      <div>
-                        <div class="text-xs text-blue-700 font-medium mb-1">Database</div>
-                        @for (tech of diagramData()!.technologies.database; track tech) {
-                          <div class="text-sm text-blue-900">{{ tech }}</div>
-                        }
-                      </div>
-                    }
-                    @if (diagramData()!.technologies.infrastructure) {
-                      <div>
-                        <div class="text-xs text-blue-700 font-medium mb-1">Infrastructure</div>
-                        @for (tech of diagramData()!.technologies.infrastructure; track tech) {
-                          <div class="text-sm text-blue-900">{{ tech }}</div>
-                        }
-                      </div>
+                    @if (diagramData()!.project) {
+                      <p class="text-sm text-gray-600">{{ diagramData()?.project?.name ?? 'Unknown' }} ({{ diagramData()?.project?.key ?? '---' }})</p>
                     }
                   </div>
-                </div>
-              }
-
-              <!-- VERTICAL LAYERS ARCHITECTURE VIEW -->
-              <div class="border rounded-lg overflow-hidden">
-                <div class="bg-purple-50 px-4 py-3 border-b">
-                  <h3 class="font-semibold text-purple-900 text-lg">🏗️ Architecture Layers View</h3>
-                  <p class="text-sm text-purple-700 mt-1">Vertical representation of {{ diagramData()!.layers.length }} architectural layers</p>
-                </div>
-                
-                <div class="p-6 space-y-4">
-                  @for (layer of diagramData()!.layers; track layer.name; let index = $index) {
-                    <!-- Layer Card -->
-                    <div class="relative">
-                      <div class="border-2 rounded-lg overflow-hidden" [ngClass]="{
-                        'border-blue-400 bg-blue-50': layer.type === 'frontend',
-                        'border-green-400 bg-green-50': layer.type === 'backend',
-                        'border-orange-400 bg-orange-50': layer.type === 'database',
-                        'border-purple-400 bg-purple-50': layer.type === 'infrastructure',
-                        'border-gray-400 bg-gray-50': layer.type === 'external'
-                      }">
-                        <!-- Layer Header -->
-                        <div class="px-4 py-3 border-b-2" [ngClass]="{
-                          'bg-blue-100 border-blue-400': layer.type === 'frontend',
-                          'bg-green-100 border-green-400': layer.type === 'backend',
-                          'bg-orange-100 border-orange-400': layer.type === 'database',
-                          'bg-purple-100 border-purple-400': layer.type === 'infrastructure',
-                          'bg-gray-100 border-gray-400': layer.type === 'external'
-                        }">
-                          <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                              <span class="text-2xl">{{ getLayerIcon(layer.type) }}</span>
-                              <h4 class="font-bold text-gray-900">{{ layer.name }}</h4>
-                              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white text-gray-700">
-                                {{ layer.components.length }} components
-                              </span>
-                            </div>
-                            <span class="text-xs font-medium uppercase tracking-wide" [ngClass]="{
-                              'text-blue-700': layer.type === 'frontend',
-                              'text-green-700': layer.type === 'backend',
-                              'text-orange-700': layer.type === 'database',
-                              'text-purple-700': layer.type === 'infrastructure',
-                              'text-gray-700': layer.type === 'external'
-                            }">{{ layer.type }}</span>
-                          </div>
-                        </div>
-                        
-                        <!-- Components Grid -->
-                        <div class="p-4">
-                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                            @for (component of layer.components; track component.id) {
-                              <div class="border-2 border-white rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                                <div class="flex items-start space-x-2">
-                                  <div class="flex-shrink-0 w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                    <span class="text-white font-bold text-xs">{{ getComponentInitials(component.name) }}</span>
-                                  </div>
-                                  <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-sm text-gray-900 truncate" [title]="component.name">
-                                      {{ component.name }}
-                                    </div>
-                                    @if (component.description) {
-                                      <div class="text-xs text-gray-600 mt-1 line-clamp-2" [title]="component.description">
-                                        {{ component.description }}
-                                      </div>
-                                    }
-                                    @if (component.technology) {
-                                      <div class="mt-2">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                          🔧 {{ component.technology }}
-                                        </span>
-                                      </div>
-                                    }
-                                  </div>
-                                </div>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <!-- Connection Arrow to Next Layer -->
-                      @if (index < diagramData()!.layers.length - 1) {
-                        <div class="flex justify-center py-2">
-                          <div class="flex flex-col items-center">
-                            <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v10.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V4a1 1 0 011-1z" clip-rule="evenodd"></path>
-                            </svg>
-                            <span class="text-xs text-gray-500 font-medium mt-1">uses / accesses</span>
-                          </div>
-                        </div>
+                  @if (cacheStatus()) {
+                    <div class="text-right">
+                      @if (cacheStatus() === 'HIT') {
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                          </svg>
+                          Cached
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          Fresh
+                        </span>
                       }
                     </div>
                   }
                 </div>
               </div>
 
+              <!-- Layers - Vertical Layout -->
+              @if (diagramData()!.layers && diagramData()!.layers.length > 0) {
+                <div class="space-y-4">
+                  @for (layer of diagramData()!.layers; track layer.name; let idx = $index) {
+                    <div class="border-2 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                         [class.border-blue-300]="idx === 0"
+                         [class.border-green-300]="idx === 1"
+                         [class.border-gray-300]="idx === 2">
+                      <!-- Layer Header -->
+                      <div class="p-4"
+                           [class.bg-gradient-to-r]="true"
+                           [class.from-blue-50]="idx === 0"
+                           [class.to-blue-100]="idx === 0"
+                           [class.from-green-50]="idx === 1"
+                           [class.to-green-100]="idx === 1"
+                           [class.from-gray-50]="idx === 2"
+                           [class.to-gray-100]="idx === 2">
+                        <div class="flex items-start gap-3">
+                          <div class="flex-shrink-0 mt-1">
+                            @if (idx === 0) {
+                              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                              </svg>
+                            } @else if (idx === 1) {
+                              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                              </svg>
+                            } @else {
+                              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                              </svg>
+                            }
+                          </div>
+                          <div class="flex-1">
+                            <h4 class="text-lg font-semibold text-gray-900">{{ layer.name }}</h4>
+                            <p class="text-sm text-gray-600 mt-1">{{ layer.description }}</p>
+                          </div>
+                          <div class="flex-shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-gray-700 border border-gray-300">
+                              {{ layer.components.length }} components
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Layer Components -->
+                      @if (layer.components && layer.components.length > 0) {
+                        <div class="p-4 bg-white border-t-2"
+                             [class.border-blue-100]="idx === 0"
+                             [class.border-green-100]="idx === 1"
+                             [class.border-gray-100]="idx === 2">
+                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            @for (component of layer.components; track component.name) {
+                              <div class="flex items-start gap-2 p-2.5 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors">
+                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                                      [class.bg-blue-100]="component.type === 'viewset'"
+                                      [class.text-blue-700]="component.type === 'viewset'"
+                                      [class.bg-purple-100]="component.type === 'serializer'"
+                                      [class.text-purple-700]="component.type === 'serializer'"
+                                      [class.bg-green-100]="component.type === 'service'"
+                                      [class.text-green-700]="component.type === 'service'"
+                                      [class.bg-gray-100]="component.type === 'model'"
+                                      [class.text-gray-700]="component.type === 'model'"
+                                      [class.bg-orange-100]="component.type === 'middleware'"
+                                      [class.text-orange-700]="component.type === 'middleware'"
+                                      [class.bg-teal-100]="component.type === 'manager'"
+                                      [class.text-teal-700]="component.type === 'manager'"
+                                      [class.bg-red-100]="component.type === 'admin'"
+                                      [class.text-red-700]="component.type === 'admin'">
+                                  {{ component.type }}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                  <div class="text-sm font-medium text-gray-900 truncate">{{ component.name }}</div>
+                                  <div class="text-xs text-gray-500">{{ component.app }}</div>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Connection Arrow -->
+                    @if (idx < diagramData()!.layers.length - 1) {
+                      <div class="flex justify-center py-2">
+                        <div class="flex flex-col items-center">
+                          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                          </svg>
+                          <span class="text-xs text-gray-500 mt-1">uses / accesses</span>
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+
+              <!-- Connections Detail -->
               @if (diagramData()!.connections && diagramData()!.connections.length > 0) {
-                <div class="border rounded-lg p-4">
+                <div class="mt-6 border rounded-lg p-4 bg-gray-50">
                   <h3 class="font-medium text-gray-900 mb-3">Connections ({{ diagramData()!.connections.length }})</h3>
                   <div class="space-y-2">
                     @for (conn of diagramData()!.connections; track conn.from + conn.to) {
-                      <div class="flex items-center text-sm">
-                        <span class="text-gray-700">{{ conn.from }}</span>
-                        <svg class="h-4 w-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div class="flex items-center gap-2 text-sm p-2 bg-white rounded border">
+                        <span class="font-medium text-gray-700">{{ conn.from }}</span>
+                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                         </svg>
-                        <span class="text-gray-700">{{ conn.to }}</span>
-                        @if (conn.protocol) {
-                          <span class="ml-2 text-xs text-gray-500">({{ conn.protocol }})</span>
-                        }
+                        <span class="font-medium text-gray-700">{{ conn.to }}</span>
+                        <span class="ml-auto text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{{ conn.type }}</span>
                       </div>
                     }
                   </div>
@@ -259,6 +256,7 @@ export class ArchitectureDiagramComponent implements OnInit {
   errorState = signal<DiagramErrorState | null>(null);
   loading = signal(false);
   exporting = signal(false);
+  cacheStatus = signal<'HIT' | 'MISS' | null>(null);
 
   ngOnInit(): void {
     this.route.parent?.params.subscribe(params => {
@@ -275,9 +273,19 @@ export class ArchitectureDiagramComponent implements OnInit {
     this.errorState.set(null);
     this.safeSvgContent.set(null);
     this.diagramData.set(null);
+    this.cacheStatus.set(null);
+    
+    console.log('[ARCHITECTURE] Loading diagram for project:', this.projectId());
     
     this.diagramService.generateArchitectureDiagram(this.projectId(), 'json').subscribe({
       next: (response) => {
+        console.log('[ARCHITECTURE] Response received:', response);
+        
+        // Parse cache status from response metadata
+        if (response.cached !== undefined) {
+          this.cacheStatus.set(response.cached ? 'HIT' : 'MISS');
+        }
+        
         // Check the actual format returned by backend
         this.diagramFormat.set(response.format as 'svg' | 'json');
         
@@ -286,15 +294,25 @@ export class ArchitectureDiagramComponent implements OnInit {
           if (typeof response.data === 'string') {
             this.safeSvgContent.set(this.sanitizer.bypassSecurityTrustHtml(response.data));
             this.diagramData.set(null);
+            console.log('[ARCHITECTURE] SVG content rendered');
           }
         } else if (response.format === 'json') {
-          // Backend returned JSON data
+          // Backend returned JSON data as STRING - MUST parse
+          let parsed: ArchitectureDiagramData;
           if (typeof response.data === 'string') {
-            this.diagramData.set(JSON.parse(response.data));
+            parsed = JSON.parse(response.data);
           } else {
-            this.diagramData.set(response.data as ArchitectureDiagramData);
+            parsed = response.data as ArchitectureDiagramData;
           }
+          
+          this.diagramData.set(parsed);
           this.safeSvgContent.set(null);
+          
+          console.log('[ARCHITECTURE] JSON parsed:', {
+            pattern: parsed.architecture_pattern,
+            layers: parsed.layers?.length || 0,
+            connections: parsed.connections?.length || 0
+          });
         }
         
         this.loading.set(false);
