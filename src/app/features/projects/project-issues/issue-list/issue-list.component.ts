@@ -9,13 +9,14 @@ import { IssueCreateComponent } from '../issue-create/issue-create.component';
 import { IssueDetailComponent } from '../issue-detail/issue-detail.component';
 import { IssueEditComponent } from '../issue-edit/issue-edit.component';
 import { IssueAssignComponent } from '../issue-assign/issue-assign.component';
+import { MlSuggestAssignmentComponent } from '../ml-suggest-assignment/ml-suggest-assignment.component';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-issue-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IssueCreateComponent, IssueDetailComponent, IssueEditComponent, IssueAssignComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, IssueCreateComponent, IssueDetailComponent, IssueEditComponent, IssueAssignComponent, MlSuggestAssignmentComponent],
   templateUrl: './issue-list.component.html',
   styleUrl: './issue-list.component.css'
 })
@@ -38,6 +39,7 @@ export class IssueListComponent implements OnInit {
   showDetailModal = signal(false);
   showEditModal = signal(false);
   showAssignModal = signal(false);
+  showSuggestAssignment = signal(false);
   selectedIssueId = signal<string | null>(null);
   
   // Search & Filter states
@@ -330,5 +332,16 @@ export class IssueListComponent implements OnInit {
     } else {
       this.router.navigate(['/projects']);
     }
+  }
+
+  openSuggestAssignmentModal(issueId: string): void {
+    this.selectedIssueId.set(issueId);
+    this.showSuggestAssignment.set(true);
+  }
+
+  closeSuggestAssignmentModal(): void {
+    this.showSuggestAssignment.set(false);
+    this.selectedIssueId.set(null);
+    this.loadIssues();
   }
 }

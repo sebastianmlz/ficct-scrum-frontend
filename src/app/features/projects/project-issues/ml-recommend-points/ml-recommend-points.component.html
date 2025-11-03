@@ -1,0 +1,95 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center p-6 border-b">
+      <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+        </svg>
+        AI Story Points Recommendation
+      </h2>
+      <button type="button" (click)="onClose()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      @if (loading()) {
+        <div class="flex flex-col items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+          <p class="text-gray-600">Analyzing similar issues...</p>
+        </div>
+      } @else if (error()) {
+        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+          <p class="text-red-700">{{ error() }}</p>
+        </div>
+      } @else if (recommendation()) {
+        <div class="space-y-6">
+          <!-- Recommended Points -->
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-8 border border-purple-200 text-center">
+            <div class="text-sm text-purple-600 font-medium mb-2">Recommended Story Points</div>
+            <div class="text-5xl font-bold text-purple-900 mb-2">{{ recommendation()!.recommended_points }}</div>
+            <div class="flex items-center justify-center gap-1">
+              @for (star of getStars(recommendation()!.recommended_points); track $index) {
+                <svg class="w-6 h-6 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              }
+            </div>
+          </div>
+
+          <!-- Confidence Score -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Confidence Level</span>
+              <span class="text-sm font-bold text-gray-900">{{ (recommendation()!.confidence * 100).toFixed(1) }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-500"
+                [class.bg-green-500]="recommendation()!.confidence >= 0.7"
+                [class.bg-yellow-500]="recommendation()!.confidence >= 0.4 && recommendation()!.confidence < 0.7"
+                [class.bg-red-500]="recommendation()!.confidence < 0.4"
+                [style.width.%]="recommendation()!.confidence * 100">
+              </div>
+            </div>
+          </div>
+
+          <!-- Similar Issues -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+              </svg>
+              <h3 class="text-sm font-semibold text-blue-900">Based on Similar Issues</h3>
+            </div>
+            <p class="text-sm text-blue-800">
+              This recommendation is based on analysis of <span class="font-bold">{{ recommendation()!.similar_issues_count }}</span> similar issues in your project history.
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-6 border-t">
+      @if (recommendation() && !loading()) {
+        <button
+          type="button"
+          (click)="applyRecommendation()"
+          class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-colors">
+          Apply Recommendation
+        </button>
+      }
+      <button
+        type="button"
+        (click)="onClose()"
+        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

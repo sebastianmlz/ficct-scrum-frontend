@@ -1,0 +1,125 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center p-6 border-b">
+      <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        AI Effort Prediction
+      </h2>
+      <button type="button" (click)="onClose()" class="text-gray-400 hover:text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      @if (loading()) {
+        <div class="flex flex-col items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p class="text-gray-600">AI is analyzing the issue...</p>
+        </div>
+      } @else if (error()) {
+        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+          <p class="text-red-700">{{ error() }}</p>
+        </div>
+      } @else if (prediction()) {
+        <div class="space-y-6">
+          <!-- Prediction Results -->
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-8 border border-blue-200 text-center">
+            <div class="text-sm text-blue-600 font-medium mb-2">Estimated Hours</div>
+            <div class="text-5xl font-bold text-blue-900 mb-2">{{ prediction()!.predicted_hours.toFixed(1) }}</div>
+            <div class="text-sm text-blue-700">hours</div>
+            
+            <!-- Prediction Range -->
+            @if (prediction()!.prediction_range) {
+              <div class="mt-4 pt-4 border-t border-blue-200">
+                <div class="text-xs text-blue-600 mb-2">Prediction Range</div>
+                <div class="flex items-center justify-center gap-2 text-sm text-blue-900">
+                  <span class="font-semibold">{{ prediction()!.prediction_range.min.toFixed(1) }}h</span>
+                  <span class="text-blue-400">→</span>
+                  <span class="font-semibold">{{ prediction()!.prediction_range.max.toFixed(1) }}h</span>
+                </div>
+              </div>
+            }
+
+            <!-- Method Badge -->
+            @if (prediction()!.method) {
+              <div class="flex justify-center mt-4">
+                <span class="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+                  Method: {{ prediction()!.method }}
+                </span>
+              </div>
+            }
+          </div>
+
+          <!-- Confidence Score -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Confidence Level</span>
+              <span class="text-sm font-bold text-gray-900">{{ (prediction()!.confidence * 100).toFixed(1) }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-500"
+                [class.bg-green-500]="prediction()!.confidence >= 0.7"
+                [class.bg-yellow-500]="prediction()!.confidence >= 0.4 && prediction()!.confidence < 0.7"
+                [class.bg-red-500]="prediction()!.confidence < 0.4"
+                [style.width.%]="prediction()!.confidence * 100">
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Reasoning -->
+          @if (prediction()!.reasoning) {
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                AI Reasoning
+              </h3>
+              <p class="text-sm text-blue-800 leading-relaxed">{{ prediction()!.reasoning }}</p>
+            </div>
+          }
+
+          <!-- Similar Issues -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+              </svg>
+              <h3 class="text-sm font-semibold text-blue-900">Similar Issues Found</h3>
+            </div>
+            <p class="text-sm text-blue-800">
+              {{ prediction()!.similar_issues.length > 0 ?
+                'Based on ' + prediction()!.similar_issues.length + ' similar issues in your project.' :
+                'No similar issues found for this type.' }}
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 p-6 border-t">
+      @if (prediction() && !loading()) {
+        <button
+          type="button"
+          (click)="applyPrediction()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+          Apply Prediction
+        </button>
+      }
+      <button
+        type="button"
+        (click)="onClose()"
+        class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

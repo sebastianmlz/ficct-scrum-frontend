@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
 import { SprintDetailComponent } from '../sprint-detail/sprint-detail.component';
 import { SprintEditComponent } from '../sprint-edit/sprint-edit.component';
 import { AddIssuesToSprintDialogComponent } from '../add-issues-to-sprint-dialog/add-issues-to-sprint-dialog.component';
+import { MlEstimateSprintComponent } from '../ml-estimate-sprint/ml-estimate-sprint.component';
+import { MlSprintRiskComponent } from '../ml-sprint-risk/ml-sprint-risk.component';
 import { Router } from '@angular/router';
 import { TableModule } from "primeng/table";
 import { forkJoin } from 'rxjs';
@@ -19,6 +21,8 @@ import { forkJoin } from 'rxjs';
     SprintDetailComponent,
     SprintEditComponent,
     AddIssuesToSprintDialogComponent,
+    MlEstimateSprintComponent,
+    MlSprintRiskComponent,
     TableModule
 ],
   templateUrl: './sprint-list.component.html',
@@ -55,6 +59,9 @@ export class SprintListComponent {
   // Add Issues to Sprint Dialog
   showAddIssuesDialog = signal(false);
   selectedSprint = signal<Sprint | null>(null);
+  // ML Modals
+  showEstimateSprint = signal(false);
+  showSprintRisk = signal(false);
 
   ngOnInit(): void {
     if (this.projectId) {
@@ -417,6 +424,40 @@ export class SprintListComponent {
     console.log('[SPRINT] Add issues dialog canceled');
     this.showAddIssuesDialog.set(false);
     this.selectedSprint.set(null);
+  }
+
+  /**
+   * Open AI Estimate Sprint Duration modal
+   */
+  openEstimateSprintModal(sprintId: string): void {
+  this.currentSprintId.set(sprintId);
+  this.showEstimateSprint.set(true);
+  this.showActionsMenu.set(null); // Cierra el menú al abrir el modal
+  }
+
+  /**
+   * Close AI Estimate Sprint modal
+   */
+  closeEstimateSprintModal(): void {
+    this.showEstimateSprint.set(false);
+    this.currentSprintId.set(null);
+  }
+
+  /**
+   * Open AI Sprint Risk Assessment modal
+   */
+  openSprintRiskModal(sprintId: string): void {
+  this.currentSprintId.set(sprintId);
+  this.showSprintRisk.set(true);
+  this.showActionsMenu.set(null); // Cierra el menú al abrir el modal
+  }
+
+  /**
+   * Close AI Sprint Risk modal
+   */
+  closeSprintRiskModal(): void {
+    this.showSprintRisk.set(false);
+    this.currentSprintId.set(null);
   }
 
 }

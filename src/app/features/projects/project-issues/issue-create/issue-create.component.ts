@@ -4,10 +4,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { IssueService } from '../../../../core/services/issue.service';
 import { IssueType, IssueRequest } from '../../../../core/models/interfaces';
 import { PaginatedIssueTypeList } from '../../../../core/models/api-interfaces';
+import { MlPredictEffortComponent } from '../ml-predict-effort/ml-predict-effort.component';
+import { MlRecommendPointsComponent } from '../ml-recommend-points/ml-recommend-points.component';
 
 @Component({
   selector: 'app-issue-create',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MlPredictEffortComponent, MlRecommendPointsComponent],
   templateUrl: './issue-create.component.html',
   styleUrl: './issue-create.component.css'
 })
@@ -23,6 +25,10 @@ export class IssueCreateComponent {
   error = signal<string | null>(null);
   issueTypes = signal<IssueType[]>([]);
   issuesTypes = signal<PaginatedIssueTypeList | null>(null);
+
+  // ML Feature states
+  showPredictEffort = signal(false);
+  showRecommendPoints = signal(false);
 
   issueForm: FormGroup;
 
@@ -94,5 +100,46 @@ export class IssueCreateComponent {
 
   onClose(): void {
     this.close.emit();
+  }
+
+  // ML Feature Methods
+  openPredictEffort(): void {
+    const title = this.issueForm.get('title')?.value;
+    if (!title || title.trim().length < 3) {
+      this.error.set('Please enter a title first (at least 3 characters)');
+      return;
+    }
+    this.showPredictEffort.set(true);
+  }
+
+  closePredictEffort(): void {
+    this.showPredictEffort.set(false);
+  }
+
+  applyPrediction(hours: number): void {
+    this.issueForm.patchValue({
+      estimated_hours: hours
+    });
+    this.showPredictEffort.set(false);
+  }
+
+  openRecommendPoints(): void {
+    const title = this.issueForm.get('title')?.value;
+    if (!title || title.trim().length < 3) {
+      this.error.set('Please enter a title first (at least 3 characters)');
+      return;
+    }
+    this.showRecommendPoints.set(true);
+  }
+
+  closeRecommendPoints(): void {
+    this.showRecommendPoints.set(false);
+  }
+
+  applyPoints(points: number): void {
+    this.issueForm.patchValue({
+      story_points: points
+    });
+    this.showRecommendPoints.set(false);
   }
 }
