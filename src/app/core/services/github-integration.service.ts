@@ -91,19 +91,9 @@ export class GitHubIntegrationService {
    * Returns authorization URL to redirect user to GitHub
    */
   initiateOAuth(projectId: string): Observable<{ authorization_url: string; state: string }> {
-    // CRITICAL: Log payload details for debugging
-    console.log('[GITHUB SERVICE] initiateOAuth called');
-    console.log('[GITHUB SERVICE] Project ID received:', projectId);
-    console.log('[GITHUB SERVICE] Project ID type:', typeof projectId);
-    console.log('[GITHUB SERVICE] Project ID length:', projectId?.length);
-    
-    const payload = { project: projectId };
-    console.log('[GITHUB SERVICE] Payload constructed:', JSON.stringify(payload));
-    console.log('[GITHUB SERVICE] Endpoint:', `${this.baseUrl}/github/oauth/initiate/`);
-    
     return this.http.post<{ authorization_url: string; state: string }>(
       `${this.baseUrl}/github/oauth/initiate/`,
-      payload
+      { project: projectId }
     );
   }
 
@@ -127,8 +117,6 @@ export class GitHubIntegrationService {
    * Called after OAuth callback with temp token
    */
   getAvailableRepositories(projectId: string, tempToken: string): Observable<GitHubOAuthRepositoriesResponse> {
-    console.log('[GITHUB SERVICE] Getting available repositories for project:', projectId);
-    console.log('[GITHUB SERVICE] Temp token present:', tempToken ? 'yes' : 'no');
     return this.http.get<GitHubOAuthRepositoriesResponse>(
       `${this.baseUrl}/github/oauth/repositories/`,
       { params: { project: projectId, temp_token: tempToken } }
@@ -140,7 +128,6 @@ export class GitHubIntegrationService {
    * Final step in OAuth flow
    */
   completeIntegration(data: GitHubOAuthCompleteRequest): Observable<{status: string; message: string; integration_id: string; repository: string}> {
-    console.log('[GITHUB SERVICE] Completing integration with repository:', data.repository_name);
     return this.http.post<{status: string; message: string; integration_id: string; repository: string}>(
       `${this.baseUrl}/github/oauth/complete/`,
       data

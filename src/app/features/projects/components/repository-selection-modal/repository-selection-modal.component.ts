@@ -332,23 +332,20 @@ export class RepositorySelectionModalComponent implements OnInit {
   errorMessage = signal('');
 
   ngOnInit(): void {
-    console.log('[REPO SELECTION] Modal opened for project:', this.projectId);
     this.loadRepositories();
   }
 
   loadRepositories(): void {
-    console.log('[REPO SELECTION] Loading repositories with temp token:', this.tempToken ? 'present' : 'missing');
     this.loading.set(true);
     this.error.set(false);
     
     this.githubService.getAvailableRepositories(this.projectId, this.tempToken).subscribe({
       next: (response) => {
-        console.log('[REPO SELECTION] Repositories loaded:', response.repositories.length);
         this.repositories.set(response.repositories);
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('[REPO SELECTION] Error loading repositories:', err);
+        console.error('Error loading repositories:', err);
         this.error.set(true);
         this.errorMessage.set(err.error?.error || 'Failed to load repositories');
         this.loading.set(false);
@@ -361,7 +358,6 @@ export class RepositorySelectionModalComponent implements OnInit {
   }
 
   selectRepository(repo: GitHubOAuthRepository): void {
-    console.log('[REPO SELECTION] Repository selected:', repo.full_name);
     this.selectedRepository.set(repo);
   }
 
@@ -369,7 +365,6 @@ export class RepositorySelectionModalComponent implements OnInit {
     const selected = this.selectedRepository();
     if (!selected) return;
 
-    console.log('[REPO SELECTION] Confirming repository:', selected.full_name);
     this.completing.set(true);
 
     this.githubService.completeIntegration({
@@ -379,13 +374,12 @@ export class RepositorySelectionModalComponent implements OnInit {
       project: this.projectId
     }).subscribe({
       next: (response) => {
-        console.log('[REPO SELECTION] Integration completed:', response);
         this.notificationService.success('GitHub repository connected successfully!');
         this.completing.set(false);
         this.completed.emit();
       },
       error: (err) => {
-        console.error('[REPO SELECTION] Error completing integration:', err);
+        console.error('Error completing integration:', err);
         this.notificationService.error(err.error?.error || 'Failed to complete integration');
         this.completing.set(false);
       }
@@ -394,7 +388,6 @@ export class RepositorySelectionModalComponent implements OnInit {
 
   onCancel(): void {
     if (!this.completing()) {
-      console.log('[REPO SELECTION] Modal cancelled');
       this.cancelled.emit();
     }
   }
