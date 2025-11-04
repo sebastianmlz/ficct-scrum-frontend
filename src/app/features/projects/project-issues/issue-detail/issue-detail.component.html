@@ -66,6 +66,16 @@
 
                     <!-- Panel lateral -->
                     <div class="space-y-6">
+                        <!-- AI Issue Summary -->
+                        <app-ai-issue-summary [issueId]="issueId"></app-ai-issue-summary>
+
+                        <!-- AI Similar Issues -->
+                        <app-ai-similar-issues 
+                          [issueId]="issueId" 
+                          [projectId]="projectId"
+                          [limit]="5">
+                        </app-ai-similar-issues>
+
                         <!-- Información del proyecto -->
                         <div class="bg-gray-50 rounded-lg p-4">
                             <h4 class="font-medium text-gray-900 mb-3">Proyecto</h4>

@@ -1,0 +1,77 @@
+<div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl border border-blue-200 p-6">
+  <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+    </svg>
+    Similar Issues (AI)
+  </h3>
+
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
+      <p class="text-sm text-gray-600">Finding similar issues...</p>
+    </div>
+  } @else if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <p class="text-sm text-red-700">{{ error() }}</p>
+    </div>
+  } @else if (similarIssues().length === 0) {
+    <div class="text-center py-8 text-gray-500">
+      <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <p class="text-sm font-semibold">No similar issues found</p>
+      <p class="text-xs">This issue appears to be unique</p>
+    </div>
+  } @else {
+    <div class="space-y-3">
+      @for (issue of similarIssues(); track issue.id) {
+        <div 
+          (click)="navigateToIssue(issue.id)"
+          class="bg-white rounded-lg border border-blue-200 p-4 hover:shadow-lg transition cursor-pointer group">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">
+                  {{ issue.key }}
+                </span>
+                <span class="px-2 py-1 text-xs font-semibold rounded"
+                      [ngClass]="getScoreColor(issue.similarity_score)">
+                  {{ getScoreLabel(issue.similarity_score) }} Similarity
+                </span>
+              </div>
+              <h4 class="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition">
+                {{ issue.title }}
+              </h4>
+            </div>
+            <div class="ml-3 text-right">
+              <div class="text-xl font-bold text-blue-600">
+                {{ (issue.similarity_score * 100).toFixed(0) }}%
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-end mt-2 pt-2 border-t border-blue-100">
+            <span class="text-xs text-blue-600 font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+              View Issue
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (similarIssues().length > 0) {
+      <div class="mt-4 pt-4 border-t border-blue-200">
+        <p class="text-xs text-gray-600 flex items-center gap-1">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+          Based on AI semantic analysis
+        </p>
+      </div>
+    }
+  }
+</div>

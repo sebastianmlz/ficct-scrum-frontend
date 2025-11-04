@@ -6,6 +6,7 @@ import { Project, ProjectConfig, Sprint } from '../../../core/models/interfaces'
 import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
 import { SprintCreateComponent } from '../project-sprints/sprint-create/sprint-create.component';
 import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.component';
+import { AiService, ProjectReportResponse } from '../../../core/services/ai.service';
 
 interface Tab {
   id: string;
@@ -31,6 +32,7 @@ export class ProjectDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private projectService = inject(ProjectService);
+  private aiService = inject(AiService);
 
   project = signal<Project | null>(null);
   sprint = signal<Sprint | null>(null);
@@ -38,6 +40,12 @@ export class ProjectDetailComponent implements OnInit {
   error = signal<string | null>(null);
   projectConfig = signal<ProjectConfig | null>(null);
   openModal = signal(false);
+
+  // AI Project Report
+  aiReportLoading = signal(false);
+  aiReportError = signal<string | null>(null);
+  aiReport = signal<ProjectReportResponse | null>(null);
+  showAiReport = signal(false);
 
   // Tab navigation
   activeTab = signal<string>('overview');
@@ -239,5 +247,45 @@ export class ProjectDetailComponent implements OnInit {
   closeAllDropdowns(): void {
     this.codeDropdownOpen.set(false);
     this.diagramsDropdownOpen.set(false);
+  }
+
+  // AI Project Report Methods
+  async generateAiReport(): Promise<void> {
+    if (!this.project()) {
+      this.aiReportError.set('Project not loaded');
+      return;
+    }
+
+    this.aiReportLoading.set(true);
+    this.aiReportError.set(null);
+    this.showAiReport.set(true);
+
+    try {
+      const response = await this.aiService.generateProjectReport({
+        project_id: this.project()!.id,
+        include_sprints: true,
+        include_issues: true
+      }).toPromise();
+
+      if (response) {
+        this.aiReport.set(response);
+      }
+    } catch (err: any) {
+      console.error('Error generating AI report:', err);
+      this.aiReportError.set(err.error?.error || 'Failed to generate AI report. Please try again.');
+    } finally {
+      this.aiReportLoading.set(false);
+    }
+  }
+
+  toggleAiReport(): void {
+    this.showAiReport.update(v => !v);
+    if (this.showAiReport() && !this.aiReport()) {
+      this.generateAiReport();
+    }
+  }
+
+  refreshAiReport(): void {
+    this.generateAiReport();
   }
 }

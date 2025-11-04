@@ -4,10 +4,19 @@ import { IssueService } from '../../../../core/services/issue.service';
 import { Issue } from '../../../../core/models/interfaces';
 import { IssueCommentsComponent } from '../issue-comments/issue-comments.component';
 import { IssueLinksComponent } from '../issue-links/issue-links.component';
+import { AiIssueSummaryComponent } from '../ai/ai-issue-summary/ai-issue-summary.component';
+import { AiSimilarIssuesComponent } from '../ai/ai-similar-issues/ai-similar-issues.component';
 
 @Component({
   selector: 'app-issue-detail',
-  imports: [CommonModule, IssueCommentsComponent, IssueLinksComponent],
+  standalone: true,
+  imports: [
+    CommonModule, 
+    IssueCommentsComponent, 
+    IssueLinksComponent,
+    AiIssueSummaryComponent,
+    AiSimilarIssuesComponent
+  ],
   templateUrl: './issue-detail.component.html',
   styleUrl: './issue-detail.component.css'
 })

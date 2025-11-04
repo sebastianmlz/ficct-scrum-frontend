@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Sprint, SprintBurdown } from '../../../../core/models/interfaces';
 import { SprintsService } from '../../../../core/services/sprints.service';
 import { firstValueFrom } from 'rxjs';
-import { ChartModule } from 'primeng/chart'
+import { ChartModule } from 'primeng/chart';
+import { AiSprintSummaryComponent } from '../ai-sprint-summary/ai-sprint-summary.component';
 
 @Component({
   selector: 'app-sprint-detail',
-  imports: [CommonModule, ChartModule],
+  standalone: true,
+  imports: [CommonModule, ChartModule, AiSprintSummaryComponent],
   templateUrl: './sprint-detail.component.html',
   styleUrls: ['./sprint-detail.component.css']
 })

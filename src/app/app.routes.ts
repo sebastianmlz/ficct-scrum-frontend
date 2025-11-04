@@ -87,6 +87,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/profile/profile.routes').then(m => m.profileRoutes)
   },
 
+  // Notifications routes (protected)
+  {
+    path: 'notifications',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/notifications/notifications.routes').then(m => m.notificationsRoutes)
+  },
+
   // Redirección global para enlaces externos de reset-password
   {
     path: 'reset-password/:token',

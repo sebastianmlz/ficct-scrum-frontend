@@ -1,2 +1,5 @@
 <app-header *ngIf="!isLoginRoute && hasAccessToken" />
 <router-outlet />
+
+<!-- AI Chat Assistant (Global) -->
+<app-ai-chat *ngIf="!isLoginRoute && hasAccessToken && currentProjectId()" [projectId]="currentProjectId()!" />
