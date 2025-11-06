@@ -18,34 +18,52 @@ export class AiIssueSummaryComponent implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
   summary = signal<IssueSummaryResponse | null>(null);
+  manualLoadRequired = signal(true); // User must click to load
 
   ngOnInit(): void {
-    if (this.issueId) {
-      this.loadSummary();
-    }
+    // ❌ NO AUTO-LOAD - User must explicitly request summary
+    console.log('[AI-SUMMARY] Component initialized - waiting for user action');
   }
 
-  async loadSummary(): Promise<void> {
+  async loadSummary(forceRefresh: boolean = false): Promise<void> {
     if (!this.issueId) {
       this.error.set('Issue ID is required');
       return;
     }
 
+    console.log(`[AI-SUMMARY] User requested summary for ${this.issueId}`);
     this.loading.set(true);
     this.error.set(null);
+    this.manualLoadRequired.set(false);
 
     try {
-      const response = await this.aiService.getIssueSummary(this.issueId).toPromise();
+      const response = await this.aiService.getIssueSummary(this.issueId, forceRefresh).toPromise();
 
       if (response) {
         this.summary.set(response);
+        console.log('[AI-SUMMARY] Summary loaded successfully');
       }
     } catch (err: any) {
-      console.error('Error loading issue summary:', err);
+      console.error('[AI-SUMMARY] Error loading summary:', err);
       this.error.set(err.error?.error || 'Failed to load issue summary.');
+      this.manualLoadRequired.set(true); // Allow retry
     } finally {
       this.loading.set(false);
     }
+  }
+  
+  /**
+   * User action: Generate AI summary
+   */
+  onGenerateSummary(): void {
+    this.loadSummary(false);
+  }
+  
+  /**
+   * User action: Refresh summary
+   */
+  onRefreshSummary(): void {
+    this.loadSummary(true);
   }
 
   getComplexityColor(complexity?: string): string {

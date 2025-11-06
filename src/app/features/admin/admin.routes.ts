@@ -16,5 +16,9 @@ export const adminRoutes: Routes = [
   {
     path: 'logs/errors',
     loadComponent: () => import('./error-logs/error-logs.component').then(m => m.ErrorLogsComponent)
+  },
+  {
+    path: 'sync-pinecone',
+    loadComponent: () => import('./sync-pinecone-manager/sync-pinecone-manager.component').then(m => m.SyncPineconeManagerComponent)
   }
 ];

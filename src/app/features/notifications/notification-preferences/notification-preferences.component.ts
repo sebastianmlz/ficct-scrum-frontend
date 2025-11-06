@@ -55,20 +55,41 @@ export class NotificationPreferencesComponent implements OnInit {
   }
 
   savePreferences(): void {
+    console.log('[PREFERENCES] Starting save preferences...');
+    console.log('[PREFERENCES] Current preferences:', this.preferences());
+    
     this.saving.set(true);
     this.error.set(null);
 
     this.notificationsBackendService.updatePreferences(this.preferences()).subscribe({
-      next: (updatedPrefs) => {
-        this.preferences.set(updatedPrefs);
+      next: (response) => {
+        console.log('[PREFERENCES] ✅ Save successful!');
+        console.log('[PREFERENCES] Response message:', response.message);
+        console.log('[PREFERENCES] Updated preferences:', response.preferences);
+        
+        // Extract preferences from wrapper
+        this.preferences.set(response.preferences);
         this.saving.set(false);
-        this.notificationService.success('Success', 'Preferences saved successfully');
+        this.notificationService.success('Success', response.message || 'Preferences saved successfully');
       },
       error: (err) => {
-        console.error('Error saving preferences:', err);
-        this.error.set('Failed to save preferences. Please try again.');
+        console.error('[PREFERENCES] ❌ Error saving preferences:', err);
+        console.error('[PREFERENCES] Status:', err.status);
+        console.error('[PREFERENCES] Error body:', err.error);
+        
+        let errorMessage = 'Failed to save preferences. Please try again.';
+        
+        if (err.status === 405) {
+          errorMessage = 'Method not allowed. Please contact support.';
+        } else if (err.status === 400) {
+          errorMessage = err.error?.detail || 'Invalid preferences data.';
+        } else if (err.status === 401 || err.status === 403) {
+          errorMessage = 'Authentication required. Please login again.';
+        }
+        
+        this.error.set(errorMessage);
         this.saving.set(false);
-        this.notificationService.error('Error', 'Failed to save preferences');
+        this.notificationService.error('Error', errorMessage);
       }
     });
   }

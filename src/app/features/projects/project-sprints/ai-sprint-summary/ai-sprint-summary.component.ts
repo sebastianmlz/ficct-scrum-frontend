@@ -20,6 +20,7 @@ export class AiSprintSummaryComponent implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
   summary = signal<SprintSummaryResponse | null>(null);
+  manualLoadRequired = signal(true); // User must click to load
 
   // Computed: Convert Markdown to HTML
   formattedSummary = computed(() => {
@@ -52,35 +53,45 @@ export class AiSprintSummaryComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    if (this.sprintId) {
-      this.loadSummary();
-    }
+    // ❌ NO AUTO-LOAD - User must explicitly request sprint summary
+    console.log('[AI-SPRINT-SUMMARY] Component initialized - waiting for user action');
   }
 
-  async loadSummary(): Promise<void> {
+  async loadSummary(forceRefresh: boolean = false): Promise<void> {
     if (!this.sprintId) {
       this.error.set('Sprint ID is required');
       return;
     }
 
+    console.log(`[AI-SPRINT-SUMMARY] User requested summary for sprint ${this.sprintId}`);
     this.loading.set(true);
     this.error.set(null);
+    this.manualLoadRequired.set(false);
 
     try {
-      const response = await this.aiService.getSprintSummary(this.sprintId).toPromise();
+      const response = await this.aiService.getSprintSummary(this.sprintId, forceRefresh).toPromise();
 
       if (response) {
         this.summary.set(response);
+        console.log('[AI-SPRINT-SUMMARY] Summary loaded successfully');
       }
     } catch (err: any) {
-      console.error('Error loading sprint summary:', err);
+      console.error('[AI-SPRINT-SUMMARY] Error loading summary:', err);
       this.error.set(err.error?.error || 'Failed to load sprint summary.');
+      this.manualLoadRequired.set(true); // Allow retry
     } finally {
       this.loading.set(false);
     }
   }
+  
+  /**
+   * User action: Generate sprint summary
+   */
+  onGenerateSummary(): void {
+    this.loadSummary(false);
+  }
 
   async refresh(): Promise<void> {
-    await this.loadSummary();
+    await this.loadSummary(true);
   }
 }

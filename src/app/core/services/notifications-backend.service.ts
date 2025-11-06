@@ -29,11 +29,20 @@ export interface NotificationListResponse {
 }
 
 export interface NotificationPreferences {
+  id?: string;
   email_enabled: boolean;
   in_app_enabled: boolean;
   slack_enabled: boolean;
   digest_enabled: boolean;
+  quiet_hours_enabled?: boolean;
   notification_types?: Record<string, boolean>;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface NotificationPreferencesResponse {
+  message: string;
+  preferences: NotificationPreferences;
 }
 
 export interface ProjectNotificationSettings {
@@ -156,9 +165,13 @@ export class NotificationsBackendService {
   /**
    * Update user's notification preferences
    * PATCH /api/v1/notifications/preferences/
+   * Backend now returns: {message: string, preferences: NotificationPreferences}
    */
-  updatePreferences(preferences: Partial<NotificationPreferences>): Observable<NotificationPreferences> {
-    return this.http.patch<NotificationPreferences>(
+  updatePreferences(preferences: Partial<NotificationPreferences>): Observable<NotificationPreferencesResponse> {
+    console.log('[NOTIFICATION SERVICE] Updating preferences with PATCH');
+    console.log('[NOTIFICATION SERVICE] Payload:', JSON.stringify(preferences));
+    
+    return this.http.patch<NotificationPreferencesResponse>(
       `${this.apiUrl}/preferences/`,
       preferences
     );

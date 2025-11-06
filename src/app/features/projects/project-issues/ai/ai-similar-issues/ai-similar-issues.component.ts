@@ -22,11 +22,11 @@ export class AiSimilarIssuesComponent implements OnInit {
   loading = signal(false);
   error = signal<string | null>(null);
   similarIssues = signal<SimilarIssue[]>([]);
+  manualLoadRequired = signal(true); // User must click to load
 
   ngOnInit(): void {
-    if (this.issueId) {
-      this.loadSimilarIssues();
-    }
+    // ❌ NO AUTO-LOAD - User must explicitly request similar issues
+    console.log('[AI-SIMILAR] Component initialized - waiting for user action');
   }
 
   async loadSimilarIssues(): Promise<void> {
@@ -35,23 +35,34 @@ export class AiSimilarIssuesComponent implements OnInit {
       return;
     }
 
+    console.log(`[AI-SIMILAR] User requested similar issues for ${this.issueId}`);
     this.loading.set(true);
     this.error.set(null);
+    this.manualLoadRequired.set(false);
 
     try {
       const response = await this.aiService.findSimilar(this.issueId, this.limit).toPromise();
       if (response && Array.isArray(response.similar_issues)) {
         this.similarIssues.set(response.similar_issues);
+        console.log(`[AI-SIMILAR] Found ${response.similar_issues.length} similar issues`);
       } else {
         this.similarIssues.set([]);
       }
     } catch (err: any) {
-      console.error('Error loading similar issues:', err);
+      console.error('[AI-SIMILAR] Error loading similar issues:', err);
       this.error.set(err.error?.error || 'Failed to load similar issues.');
       this.similarIssues.set([]);
+      this.manualLoadRequired.set(true); // Allow retry
     } finally {
       this.loading.set(false);
     }
+  }
+  
+  /**
+   * User action: Find similar issues
+   */
+  onFindSimilar(): void {
+    this.loadSimilarIssues();
   }
 
   navigateToIssue(issueId: string): void {

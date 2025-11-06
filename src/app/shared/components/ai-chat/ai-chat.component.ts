@@ -1,20 +1,23 @@
 import { Component, Input, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AiService, AIChatResponse } from '../../../core/services/ai.service';
+import { AiService, AIChatResponse, AISource } from '../../../core/services/ai.service';
+import { IssueDetailModalComponent } from '../../../features/boards/components/issue-detail-modal/issue-detail-modal.component';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  sources?: string[];
+  sources?: AISource[];  // Backend returns source objects with issue_id, title, similarity
+  confidence?: number;
+  tokens_used?: number;
   suggested_actions?: string[];
 }
 
 @Component({
   selector: 'app-ai-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IssueDetailModalComponent],
   templateUrl: './ai-chat.component.html',
   styleUrl: './ai-chat.component.css'
 })
@@ -22,6 +25,10 @@ export class AiChatComponent implements OnInit {
   @Input() projectId!: string;
   
   private aiService = inject(AiService);
+  
+  // Issue detail modal
+  showIssueDetailModal = signal(false);
+  selectedIssueId = signal<string | null>(null);
 
   // State
   isOpen = signal(false);
@@ -38,7 +45,7 @@ export class AiChatComponent implements OnInit {
     // Mensaje de bienvenida
     this.messages.set([{
       role: 'assistant',
-      content: '👋 ¡Hola! Soy tu asistente AI. Puedo ayudarte con información del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ayudarte?',
+      content: '¡Hola! Soy tu asistente AI. Puedo ayudarte con información del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ayudarte?',
       timestamp: new Date()
     }]);
   }
@@ -101,18 +108,18 @@ export class AiChatComponent implements OnInit {
           content: response.response,
           timestamp: new Date(),
           sources: response.sources,
+          confidence: response.confidence,
+          tokens_used: response.tokens_used,
           suggested_actions: response.suggested_actions
         };
         this.messages.update(msgs => [...msgs, assistantMessage]);
       }
     } catch (err: any) {
-      console.error('Error sending message:', err);
       this.error.set(err.error?.error || 'Failed to send message. Please try again.');
       
-      // Agregar mensaje de error
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: '❌ Lo siento, ocurrió un error al procesar tu mensaje. Por favor intenta de nuevo.',
+        content: 'Lo siento, ocurrió un error al procesar tu mensaje. Por favor intenta de nuevo.',
         timestamp: new Date()
       };
       this.messages.update(msgs => [...msgs, errorMessage]);
@@ -124,7 +131,7 @@ export class AiChatComponent implements OnInit {
   clearConversation(): void {
     this.messages.set([{
       role: 'assistant',
-      content: '👋 ¡Hola! Soy tu asistente AI. Puedo ayudarte con información del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ayudarte?',
+      content: '¡Hola! Soy tu asistente AI. Puedo ayudarte con información del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ayudarte?',
       timestamp: new Date()
     }]);
     this.conversationId.set(null);
@@ -137,5 +144,30 @@ export class AiChatComponent implements OnInit {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  getScorePercentage(score: number): number {
+    return Math.round(score * 100);
+  }
+
+  getScoreClass(score: number): string {
+    if (score >= 0.8) return 'bg-green-100 text-green-800 border border-green-200';
+    if (score >= 0.6) return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    return 'bg-gray-100 text-gray-800 border border-gray-200';
+  }
+
+  openIssueDetail(issueId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectedIssueId.set(issueId);
+    this.showIssueDetailModal.set(true);
+  }
+
+  onIssueDetailClosed(): void {
+    this.showIssueDetailModal.set(false);
+    this.selectedIssueId.set(null);
+  }
+
+  onIssueUpdated(): void {
+    // Issue was updated, no need to reload anything in chat
   }
 }

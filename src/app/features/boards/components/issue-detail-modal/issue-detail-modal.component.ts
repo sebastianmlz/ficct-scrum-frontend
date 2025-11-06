@@ -497,11 +497,7 @@ export class IssueDetailModalComponent implements OnInit {
   }
 
   onClose(): void {
-    console.log('[MODAL] === CERRANDO MODAL ===');
-    console.log('[MODAL] Issue actual:', this.issue());
-    console.log('[MODAL] Form pristine:', this.issueForm.pristine);
     this.closed.emit();
-    console.log('[MODAL] Evento closed emitido');
   }
 
   onOverlayClick(event: MouseEvent): void {

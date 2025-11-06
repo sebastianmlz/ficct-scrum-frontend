@@ -64,26 +64,68 @@
         <div class="space-y-4">
           <p class="text-sm text-gray-600 mb-4">Found {{ results().length }} relevant issue(s)</p>
           
-          @for (result of results(); track result.issue.id) {
+          @for (result of results(); track result.issue_id) {
             <div class="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4 hover:shadow-lg transition cursor-pointer"
-                 (click)="navigateToIssue(result.issue.id)">
-              <div class="flex items-start justify-between mb-2">
+                 (click)="navigateToIssue(result.issue_id)">
+              <div class="flex items-start justify-between mb-3">
                 <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
-                      {{ result.issue.key }}
-                    </span>
+                  <div class="flex items-center gap-2 mb-2">
+                    @if (result.key) {
+                      <span class="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded">
+                        {{ result.key }}
+                      </span>
+                    }
                     <span class="px-2 py-1 text-xs font-semibold rounded"
-                          [ngClass]="getScoreColor(result.similarity_score)">
-                      {{ getScoreLabel(result.similarity_score) }}
+                          [ngClass]="getScoreColor(result.score)">
+                      {{ getScoreLabel(result.score) }}
                     </span>
                   </div>
-                  <h3 class="text-lg font-bold text-gray-900 mb-2">{{ result.issue.title }}</h3>
-                  <p class="text-sm text-gray-700 line-clamp-2">{{ result.matched_content }}</p>
+                  <h3 class="text-lg font-bold text-gray-900 mb-3">{{ result.title }}</h3>
+                  
+                  <!-- Metadata Row -->
+                  <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <!-- Assignee -->
+                    <div class="flex items-center gap-1 text-xs">
+                      @if (isUnassigned(result.metadata.assignee_name)) {
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <span class="text-gray-500 italic">Unassigned</span>
+                      } @else {
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        <span class="text-gray-700 font-medium">{{ result.metadata.assignee_name }}</span>
+                      }
+                    </div>
+                    
+                    <span class="text-gray-300">•</span>
+                    
+                    <!-- Reporter -->
+                    <div class="flex items-center gap-1 text-xs">
+                      @if (isUnknownReporter(result.metadata.reporter_name)) {
+                        <span class="text-gray-400 italic">Unknown Reporter</span>
+                      } @else {
+                        <span class="text-gray-600">by {{ result.metadata.reporter_name }}</span>
+                      }
+                    </div>
+                    
+                    <span class="text-gray-300">•</span>
+                    
+                    <!-- Status Badge -->
+                    <span class="px-2 py-1 text-xs font-semibold rounded border" [ngClass]="getStatusColor(result.metadata.status)">
+                      {{ result.metadata.status }}
+                    </span>
+                    
+                    <!-- Priority Badge -->
+                    <span class="px-2 py-1 text-xs font-semibold rounded border" [ngClass]="getPriorityColor(result.metadata.priority)">
+                      {{ result.metadata.priority }}
+                    </span>
+                  </div>
                 </div>
-                <div class="ml-4 text-right">
-                  <div class="text-2xl font-bold" [ngClass]="getScoreColor(result.similarity_score)">
-                    {{ (result.similarity_score * 100).toFixed(0) }}%
+                <div class="ml-4 text-right flex-shrink-0">
+                  <div class="text-2xl font-bold" [ngClass]="getScoreColor(result.score)">
+                    {{ getScorePercentage(result.score) }}%
                   </div>
                   <p class="text-xs text-gray-500">Match</p>
                 </div>
@@ -91,7 +133,7 @@
               
               <div class="flex items-center justify-end mt-3 pt-3 border-t border-purple-200">
                 <button
-                  (click)="navigateToIssue(result.issue.id); $event.stopPropagation()"
+                  (click)="navigateToIssue(result.issue_id); $event.stopPropagation()"
                   class="text-sm text-purple-600 hover:text-purple-800 font-semibold flex items-center gap-1">
                   View Issue
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

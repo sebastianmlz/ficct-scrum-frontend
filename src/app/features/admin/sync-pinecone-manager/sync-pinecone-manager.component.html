@@ -1,0 +1,265 @@
+<div class="max-w-4xl mx-auto p-6">
+  <!-- Header -->
+  <div class="mb-8">
+    <h2 class="text-3xl font-bold text-gray-900 mb-2">🔄 Pinecone Sync Manager</h2>
+    <p class="text-gray-600">Manage and synchronize the Pinecone vector database for AI semantic search</p>
+    
+    <!-- Warning Banner -->
+    <div class="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <div class="flex-1">
+          <h3 class="text-sm font-semibold text-red-900 mb-1">Destructive Operation</h3>
+          <p class="text-sm text-red-800">
+            Full sync will <strong>clear all Pinecone vectors</strong> and re-index all projects. 
+            This operation takes <strong>5-10 minutes</strong> and cannot be cancelled once started.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync Actions -->
+  @if (!syncing() && !syncResult() && !error()) {
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Synchronization Actions</h3>
+      
+      <div class="space-y-4">
+        <button
+          (click)="confirmSync()"
+          class="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center justify-center gap-2 text-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Full Sync Pinecone
+        </button>
+        
+        <p class="text-sm text-gray-600 text-center">
+          This will clear and rebuild the entire Pinecone index. Use when:
+        </p>
+        <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+          <li>Search results are stale or incorrect</li>
+          <li>Issues were modified outside the system</li>
+          <li>Metadata structure has changed</li>
+        </ul>
+      </div>
+    </div>
+  }
+
+  <!-- Syncing State -->
+  @if (syncing()) {
+    <div class="bg-gradient-to-br from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg p-8">
+      <div class="flex flex-col items-center justify-center">
+        <!-- Spinning Icon -->
+        <div class="mb-6">
+          <svg class="animate-spin h-16 w-16 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        
+        <!-- Loading Message -->
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Syncing in Progress...</h3>
+        <p class="text-lg text-purple-700 mb-4">{{ loadingMessage() }}</p>
+        
+        <!-- Elapsed Time -->
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-purple-200 mb-4">
+          <p class="text-sm text-gray-600 mb-1">Elapsed Time</p>
+          <p class="text-3xl font-bold text-purple-600">{{ getFormattedTime() }}</p>
+        </div>
+        
+        <p class="text-sm text-gray-600 text-center max-w-md">
+          Please do not close this page or refresh. The operation may take up to 10 minutes.
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Success Result -->
+  @if (syncResult() && !syncing()) {
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="flex items-center gap-3 mb-6">
+        @if (syncResult()!.status === 'success' && syncResult()!.success_rate === 100) {
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-green-600">Sync Completed Successfully!</h3>
+            <p class="text-sm text-gray-600">All issues indexed with 100% success rate</p>
+          </div>
+        } @else {
+          <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-yellow-600">Sync Completed with Errors</h3>
+            <p class="text-sm text-gray-600">Some issues could not be indexed</p>
+          </div>
+        }
+      </div>
+
+      <!-- Statistics Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <p class="text-sm text-gray-600 mb-1">Projects</p>
+          <p class="text-2xl font-bold text-gray-900">{{ syncResult()!.projects_processed }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <p class="text-sm text-gray-600 mb-1">Total Issues</p>
+          <p class="text-2xl font-bold text-gray-900">{{ syncResult()!.total_issues }}</p>
+        </div>
+        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+          <p class="text-sm text-green-700 mb-1">Indexed</p>
+          <p class="text-2xl font-bold text-green-600">{{ syncResult()!.indexed }}</p>
+        </div>
+        <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+          <p class="text-sm text-red-700 mb-1">Failed</p>
+          <p class="text-2xl font-bold text-red-600">{{ syncResult()!.failed }}</p>
+        </div>
+      </div>
+
+      <!-- Success Rate and Duration -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
+          <p class="text-sm text-gray-700 mb-1">Success Rate</p>
+          <p class="text-3xl font-bold" [ngClass]="getSuccessRateColor(syncResult()!.success_rate)">
+            {{ syncResult()!.success_rate.toFixed(1) }}%
+          </p>
+        </div>
+        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
+          <p class="text-sm text-gray-700 mb-1">Duration</p>
+          <p class="text-3xl font-bold text-purple-600">{{ syncResult()!.duration_seconds.toFixed(1) }}s</p>
+        </div>
+      </div>
+
+      <!-- Errors Section -->
+      @if (syncResult()!.failed > 0) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h4 class="text-sm font-semibold text-red-900 mb-3">Indexing Errors ({{ syncResult()!.total_errors }})</h4>
+          <div class="space-y-2">
+            @for (error of getDisplayErrors(); track error.issue_id) {
+              <div class="bg-white rounded p-3 border border-red-200">
+                <p class="text-sm font-medium text-gray-900 mb-1">
+                  {{ error.issue_title || error.issue_id }}
+                </p>
+                <p class="text-xs text-red-700">{{ error.error }}</p>
+              </div>
+            }
+            @if (hasMoreErrors()) {
+              <p class="text-sm text-red-700 italic">
+                ...and {{ getRemainingErrorsCount() }} more errors
+              </p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Action Buttons -->
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="clearResults()"
+          class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition">
+          Clear Results
+        </button>
+        @if (syncResult()!.failed > 0) {
+          <button
+            (click)="retrySync()"
+            class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Retry Sync
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !syncing()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+      <div class="flex items-start gap-3">
+        <svg class="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Sync Failed</h3>
+          <p class="text-sm text-red-700 mb-4">{{ error() }}</p>
+          
+          @if (error()!.includes('timeout') || error()!.includes('10 minutes')) {
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-3 mb-4">
+              <p class="text-sm text-yellow-800">
+                <strong>Timeout occurred:</strong> The sync may still be running on the backend. 
+                Check backend logs for status or wait a few minutes and try searching to verify.
+              </p>
+            </div>
+          }
+          
+          <div class="flex gap-3">
+            <button
+              (click)="retrySync()"
+              class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Retry Sync
+            </button>
+            <button
+              (click)="clearResults()"
+              class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Confirmation Dialog -->
+  @if (showConfirmDialog()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg mx-4 p-6">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Confirm Full Sync</h3>
+            <p class="text-sm text-gray-700 mb-3">
+              This will <strong class="text-red-600">permanently delete all vectors</strong> in Pinecone 
+              and re-index all projects. This operation:
+            </p>
+            <ul class="text-sm text-gray-700 space-y-1 list-disc list-inside mb-4">
+              <li>Takes <strong>5-10 minutes</strong></li>
+              <li>Cannot be cancelled once started</li>
+              <li>Will affect search results during sync</li>
+              <li>Requires admin permissions</li>
+            </ul>
+            <p class="text-sm font-semibold text-red-600">Are you sure you want to continue?</p>
+          </div>
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            (click)="cancelSync()"
+            class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold transition">
+            Cancel
+          </button>
+          <button
+            (click)="startFullSync()"
+            class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition">
+            Yes, Start Sync
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
