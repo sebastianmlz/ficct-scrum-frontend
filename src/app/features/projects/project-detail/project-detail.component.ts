@@ -260,6 +260,8 @@ export class ProjectDetailComponent implements OnInit {
     this.aiReportError.set(null);
     this.showAiReport.set(true);
 
+    console.log('[PROJECT-DETAIL] 🤖 Requesting AI report for project:', this.project()!.id);
+
     try {
       const response = await this.aiService.generateProjectReport({
         project_id: this.project()!.id,
@@ -267,12 +269,44 @@ export class ProjectDetailComponent implements OnInit {
         include_issues: true
       }).toPromise();
 
+      console.log('[PROJECT-DETAIL] ✅ AI report received:', response);
+
       if (response) {
         this.aiReport.set(response);
+        
+        // Warn if all metrics are zero (no data available)
+        if (response.completion === 0 && response.velocity === 0 && response.risk_score === 0) {
+          console.warn('[PROJECT-DETAIL] ⚠️ All metrics are zero - project may have no completed work');
+        }
       }
     } catch (err: any) {
-      console.error('Error generating AI report:', err);
-      this.aiReportError.set(err.error?.error || 'Failed to generate AI report. Please try again.');
+      console.error('[PROJECT-DETAIL] ❌ AI report generation failed:', {
+        status: err.status,
+        statusText: err.statusText,
+        message: err.message,
+        error: err.error
+      });
+
+      // Provide user-friendly error messages based on error type
+      let errorMessage = 'Failed to generate AI report. Please try again.';
+      
+      if (err.status === 401 || err.status === 403) {
+        errorMessage = 'You do not have permission to generate reports for this project.';
+      } else if (err.status === 404) {
+        errorMessage = 'Project not found or ML service unavailable.';
+      } else if (err.status === 408 || err.name === 'TimeoutError') {
+        errorMessage = 'Report generation timed out. The ML model may be busy. Please try again in a moment.';
+      } else if (err.status === 500) {
+        errorMessage = err.error?.error || err.error?.detail || 'Server error while generating report. Please try again later.';
+      } else if (err.status === 0) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (err.error?.error) {
+        errorMessage = err.error.error;
+      } else if (err.error?.detail) {
+        errorMessage = err.error.detail;
+      }
+      
+      this.aiReportError.set(errorMessage);
     } finally {
       this.aiReportLoading.set(false);
     }

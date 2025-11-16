@@ -204,35 +204,69 @@
                     <div class="grid grid-cols-3 gap-3">
                       <div class="bg-white rounded-lg p-3 text-center">
                         <div class="text-2xl font-bold text-indigo-600">
-                          {{ ((aiReport()?.metrics?.completion_rate || 0) * 100).toFixed(1) + '%' }}
+                          {{ (aiReport()?.completion || 0).toFixed(1) + '%' }}
                         </div>
                         <p class="text-xs text-gray-600">Completion</p>
                       </div>
                       <div class="bg-white rounded-lg p-3 text-center">
                         <div class="text-2xl font-bold text-purple-600">
-                          {{ (aiReport()?.metrics?.velocity || 0).toFixed(1) }}
+                          {{ (aiReport()?.velocity || 0).toFixed(1) }}
                         </div>
                         <p class="text-xs text-gray-600">Velocity</p>
                       </div>
                       <div class="bg-white rounded-lg p-3 text-center">
                         <div class="text-2xl font-bold text-pink-600">
-                          {{ ((aiReport()?.metrics?.risk_score || 0) * 100).toFixed(0) + '%' }}
+                          {{ (aiReport()?.risk_score || 0).toFixed(0) + '%' }}
                         </div>
                         <p class="text-xs text-gray-600">Risk Score</p>
                       </div>
                     </div>
 
-                    <!-- Report Content (Markdown) -->
-                    <div class="bg-white rounded-lg p-4 max-h-96 overflow-y-auto">
-                      <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans">{{ aiReport()!.report }}</pre>
-                    </div>
+                    <!-- Metrics Breakdown -->
+                    @if (aiReport()?.metrics_breakdown) {
+                      <div class="bg-white rounded-lg p-4">
+                        <h4 class="text-sm font-bold text-indigo-700 mb-3">Project Insights</h4>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Total Issues:</span>
+                            <span class="font-semibold text-gray-800">{{ aiReport()?.metrics_breakdown?.total_issues || 0 }}</span>
+                          </div>
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Completed:</span>
+                            <span class="font-semibold text-green-600">{{ aiReport()?.metrics_breakdown?.completed_issues || 0 }}</span>
+                          </div>
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Sprints Analyzed:</span>
+                            <span class="font-semibold text-purple-600">{{ aiReport()?.metrics_breakdown?.sprints_analyzed || 0 }}</span>
+                          </div>
+                          <div class="flex justify-between">
+                            <span class="text-gray-600">Unassigned:</span>
+                            <span class="font-semibold text-orange-600">{{ aiReport()?.metrics_breakdown?.unassigned_issues || 0 }}</span>
+                          </div>
+                          @if (aiReport()?.metrics_breakdown?.overdue_issues !== undefined) {
+                            <div class="flex justify-between">
+                              <span class="text-gray-600">Overdue:</span>
+                              <span class="font-semibold text-red-600">{{ aiReport()?.metrics_breakdown?.overdue_issues || 0 }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
 
-                    <!-- Recommendations -->
-                    @if (aiReport()!.recommendations && aiReport()!.recommendations.length > 0) {
+                    <!-- Report Content (Optional - for future ML-generated reports) -->
+                    @if (aiReport()?.report) {
+                      <div class="bg-white rounded-lg p-4 max-h-96 overflow-y-auto">
+                        <h4 class="text-sm font-bold text-indigo-700 mb-2">AI Analysis</h4>
+                        <pre class="text-sm text-gray-700 whitespace-pre-wrap font-sans">{{ aiReport()?.report }}</pre>
+                      </div>
+                    }
+
+                    <!-- Recommendations (Optional - for future ML recommendations) -->
+                    @if (aiReport()?.recommendations && aiReport()?.recommendations.length > 0) {
                       <div class="bg-white rounded-lg p-4">
                         <h4 class="text-sm font-bold text-indigo-700 mb-2">Recommendations</h4>
                         <ul class="space-y-2">
-                          @for (recommendation of aiReport()!.recommendations; track $index) {
+                          @for (recommendation of aiReport()?.recommendations; track $index) {
                             <li class="flex items-start gap-2 text-sm text-gray-700">
                               <span class="text-indigo-600 font-bold">💡</span>
                               <span>{{ recommendation }}</span>

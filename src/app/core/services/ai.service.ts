@@ -147,14 +147,28 @@ export interface ProjectReportRequest {
   include_issues?: boolean;
 }
 
+// NEW: AI Project Summary Response matching backend /ml/{id}/project-summary/
 export interface ProjectReportResponse {
-  report: string;
-  metrics: {
-    completion_rate: number;
-    velocity: number;
-    risk_score: number;
+  completion: number;           // Completion percentage (0-100)
+  velocity: number;             // Sprint velocity
+  risk_score: number;           // Risk score (0-100)
+  project_id: string;
+  generated_at: string;         // ISO timestamp
+  metrics_breakdown?: {
+    total_issues: number;
+    completed_issues: number;
+    sprints_analyzed: number;
+    unassigned_issues: number;
+    overdue_issues: number;
   };
-  recommendations: string[];
+  // Legacy fields for backward compatibility (optional)
+  report?: string;
+  recommendations?: string[];
+  metrics?: {                   // Nested metrics (legacy format)
+    completion_rate?: number;
+    velocity?: number;
+    risk_score?: number;
+  };
 }
 
 @Injectable({
@@ -365,11 +379,58 @@ export class AiService {
   }
 
   /**
-   * Generate Project Report - Comprehensive AI-generated project report
+   * Generate Project Report - AI-powered project metrics summary
+   * NEW ENDPOINT: POST /api/v1/ml/{project_id}/project-summary/
+   * 
+   * Response: {completion, velocity, risk_score, project_id, generated_at, metrics_breakdown}
+   * - completion: Percentage (0-100), NOT decimal (37.5 means 37.5%)
+   * - velocity: Sprint velocity metric
+   * - risk_score: Risk percentage (0-100)
+   * 
+   * TIMEOUT: 45 seconds (ML model may need reasoning time)
    */
   generateProjectReport(request: ProjectReportRequest): Observable<ProjectReportResponse> {
-    // POST /api/v1/ai/{id}/index-project/
-    return this.http.post<ProjectReportResponse>(`${this.apiUrl}/${request.project_id}/index-project/`, request);
+    const mlUrl = `${environment.apiUrl}/api/v1/ml`;
+    
+    console.log('[AI-SERVICE] 🤖 Generating project report');
+    console.log('[AI-SERVICE] Project ID:', request.project_id);
+    console.log('[AI-SERVICE] Endpoint:', `${mlUrl}/${request.project_id}/project-summary/`);
+    
+    return this.http.post<ProjectReportResponse>(
+      `${mlUrl}/${request.project_id}/project-summary/`,
+      {}  // Empty body - backend doesn't require payload
+    ).pipe(
+      timeout(O_SERIES_MODEL_TIMEOUT),
+      map(response => {
+        console.log('[AI-SERVICE] ✅ Report received:', response);
+        console.log('[AI-SERVICE] Metrics:', {
+          completion: response.completion,
+          velocity: response.velocity,
+          risk_score: response.risk_score
+        });
+        return response;
+      }),
+      catchError((error) => {
+        console.error('[AI-SERVICE] ❌ Report generation failed:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          url: error.url,
+          errorBody: error.error
+        });
+        
+        if (error instanceof TimeoutError || error.name === 'TimeoutError') {
+          return throwError(() => ({
+            name: 'TimeoutError',
+            status: 408,
+            message: 'Report generation timed out. Please try again.',
+            error: { type: 'timeout', detail: 'Request timeout' }
+          }));
+        }
+        
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
