@@ -1,17 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Issue, PaginationParams, IssueRequest, IssueType, IssueComment, IssueCommentRequest, PaginatedIssueCommentList, IssueLink, IssueLinkDetail, IssueLinkRequest, PaginatedIssueLinkList } from '../models/interfaces';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { PaginatedIssueList } from '../models/api-interfaces';
 import { PaginatedIssueTypeList } from '../models/api-interfaces';
+import { AiService } from './ai.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class IssueService {
+  private http = inject(HttpClient);
+  private aiService = inject(AiService);
 
-  constructor(private http: HttpClient) { }
+  constructor() { }
   private baseUrl = `${environment.apiUrl}/api/v1/projects/issues`;
 
   getIssues(params?: PaginationParams): Observable<PaginatedIssueList> {
@@ -53,7 +57,16 @@ export class IssueService {
   createIssue(issueData: IssueRequest): Observable<Issue> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<Issue>(`${this.baseUrl}/`, issueData, { headers });
+    
+    return this.http.post<Issue>(`${this.baseUrl}/`, issueData, { headers }).pipe(
+      tap((createdIssue) => {
+        // Invalidate project summary cache when new issue created
+        if (issueData.project) {
+          this.aiService.invalidateProjectCache(issueData.project);
+          console.log('[ISSUE SERVICE] 🔄 Invalidated project cache after issue creation');
+        }
+      })
+    );
   }
 
   getIssue(issueId: string): Observable<Issue> {
@@ -65,13 +78,41 @@ export class IssueService {
   editIssue(issueId: string, issueData: Partial<IssueRequest>): Observable<Issue> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.patch<Issue>(`${this.baseUrl}/${issueId}/`, issueData, { headers });
+    
+    return this.http.patch<Issue>(`${this.baseUrl}/${issueId}/`, issueData, { headers }).pipe(
+      tap((updatedIssue) => {
+        // Invalidate project cache if status changed (affects completion rate)
+        // or if story points/estimated hours changed (affects metrics)
+        const affectsMetrics = issueData.status || 
+                               issueData.story_points !== undefined || 
+                               issueData.estimated_hours !== undefined;
+        
+        if (affectsMetrics && updatedIssue.project?.id) {
+          this.aiService.invalidateProjectCache(updatedIssue.project.id);
+          console.log('[ISSUE SERVICE] 🔄 Invalidated project cache after issue update');
+        }
+      })
+    );
   }
 
-  deleteIssue(issueId: string): Observable<void> {
+  /**
+   * Delete an issue and optionally invalidate project cache
+   * @param issueId - UUID of the issue to delete
+   * @param projectId - Optional project ID to invalidate cache
+   */
+  deleteIssue(issueId: string, projectId?: string): Observable<void> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete<void>(`${this.baseUrl}/${issueId}/`, { headers });
+    
+    return this.http.delete<void>(`${this.baseUrl}/${issueId}/`, { headers }).pipe(
+      tap(() => {
+        // Invalidate project cache if projectId provided
+        if (projectId) {
+          this.aiService.invalidateProjectCache(projectId);
+          console.log('[ISSUE SERVICE] 🔄 Invalidated project cache after issue deletion');
+        }
+      })
+    );
   }
 
   /**

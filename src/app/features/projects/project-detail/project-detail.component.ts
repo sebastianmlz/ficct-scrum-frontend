@@ -250,7 +250,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   // AI Project Report Methods
-  async generateAiReport(): Promise<void> {
+  async generateAiReport(forceRefresh: boolean = false): Promise<void> {
     if (!this.project()) {
       this.aiReportError.set('Project not loaded');
       return;
@@ -260,14 +260,18 @@ export class ProjectDetailComponent implements OnInit {
     this.aiReportError.set(null);
     this.showAiReport.set(true);
 
-    console.log('[PROJECT-DETAIL] 🤖 Requesting AI report for project:', this.project()!.id);
+    if (forceRefresh) {
+      console.log('[PROJECT-DETAIL] 🔄 Force refreshing AI report');
+    } else {
+      console.log('[PROJECT-DETAIL] 🤖 Requesting AI report for project:', this.project()!.id);
+    }
 
     try {
       const response = await this.aiService.generateProjectReport({
         project_id: this.project()!.id,
         include_sprints: true,
         include_issues: true
-      }).toPromise();
+      }, forceRefresh).toPromise();
 
       console.log('[PROJECT-DETAIL] ✅ AI report received:', response);
 
@@ -277,6 +281,7 @@ export class ProjectDetailComponent implements OnInit {
         // Warn if all metrics are zero (no data available)
         if (response.completion === 0 && response.velocity === 0 && response.risk_score === 0) {
           console.warn('[PROJECT-DETAIL] ⚠️ All metrics are zero - project may have no completed work');
+          this.aiReportError.set('No metrics available. Ensure project has completed issues and active sprints.');
         }
       }
     } catch (err: any) {
@@ -320,6 +325,47 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   refreshAiReport(): void {
-    this.generateAiReport();
+    this.generateAiReport(true); // Force refresh bypasses cache
+  }
+
+  /**
+   * Check if cached data is fresh (< 5 minutes old)
+   */
+  isCacheFresh(): boolean {
+    const report = this.aiReport();
+    if (!report || !report.generated_at) {
+      return false;
+    }
+    
+    const generatedAt = new Date(report.generated_at).getTime();
+    const now = Date.now();
+    const ageMinutes = (now - generatedAt) / 1000 / 60;
+    
+    return ageMinutes < 5;
+  }
+
+  /**
+   * Get human-readable cache age
+   */
+  getCacheAge(): string {
+    const report = this.aiReport();
+    if (!report || !report.generated_at) {
+      return 'Unknown';
+    }
+    
+    const generatedAt = new Date(report.generated_at).getTime();
+    const now = Date.now();
+    const ageMinutes = Math.floor((now - generatedAt) / 1000 / 60);
+    
+    if (ageMinutes < 1) {
+      return 'Just now';
+    } else if (ageMinutes === 1) {
+      return '1 min ago';
+    } else if (ageMinutes < 60) {
+      return `${ageMinutes} mins ago`;
+    } else {
+      const ageHours = Math.floor(ageMinutes / 60);
+      return ageHours === 1 ? '1 hour ago' : `${ageHours} hours ago`;
+    }
   }
 }

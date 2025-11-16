@@ -387,10 +387,31 @@ export class AiService {
    * - velocity: Sprint velocity metric
    * - risk_score: Risk percentage (0-100)
    * 
+   * CACHING STRATEGY:
+   * - TTL: 15 minutes (good balance between freshness and API cost reduction)
+   * - Invalidation: Manual via invalidateProjectCache() when issues/sprints change
+   * - Force Refresh: Bypass cache with forceRefresh=true
+   * 
    * TIMEOUT: 45 seconds (ML model may need reasoning time)
+   * 
+   * @param request - Project report request with project_id
+   * @param forceRefresh - If true, bypass cache and fetch fresh data
    */
-  generateProjectReport(request: ProjectReportRequest): Observable<ProjectReportResponse> {
+  generateProjectReport(request: ProjectReportRequest, forceRefresh: boolean = false): Observable<ProjectReportResponse> {
+    const cacheKey = `project_summary_${request.project_id}`;
     const mlUrl = `${environment.apiUrl}/api/v1/ml`;
+    
+    // Check cache first (unless force refresh)
+    if (!forceRefresh) {
+      const cached = this.cache.get<ProjectReportResponse>(cacheKey);
+      if (cached) {
+        const age = Date.now() - (new Date(cached.generated_at).getTime());
+        console.log(`[AI-SERVICE] 🚀 Returning cached project summary (age: ${Math.floor(age / 1000)}s)`);
+        return of(cached);
+      }
+    } else {
+      console.log('[AI-SERVICE] 🔄 Force refresh - bypassing cache');
+    }
     
     console.log('[AI-SERVICE] 🤖 Generating project report');
     console.log('[AI-SERVICE] Project ID:', request.project_id);
@@ -408,6 +429,12 @@ export class AiService {
           velocity: response.velocity,
           risk_score: response.risk_score
         });
+        
+        // Cache the response for 15 minutes
+        const TTL_15_MINUTES = 15 * 60 * 1000;
+        this.cache.set(cacheKey, response, TTL_15_MINUTES);
+        console.log('[AI-SERVICE] 💾 Cached project summary (TTL: 15min)');
+        
         return response;
       }),
       catchError((error) => {
@@ -428,6 +455,7 @@ export class AiService {
           }));
         }
         
+        // Don't cache errors - let user retry
         return throwError(() => error);
       })
     );
@@ -457,6 +485,26 @@ export class AiService {
     );
   }
   
+  /**
+   * Invalidate project summary cache when project data changes
+   * Call this when:
+   * - Issue created/updated/deleted
+   * - Sprint started/completed
+   * - Issue status changed (affects completion rate)
+   */
+  invalidateProjectCache(projectId: string): void {
+    this.cache.invalidate(`project_summary_${projectId}`);
+    console.log(`[AI-SERVICE] 🗑️ Invalidated project summary cache for: ${projectId}`);
+  }
+  
+  /**
+   * Invalidate index status cache (forces re-index check)
+   */
+  invalidateIndexCache(projectId: string): void {
+    this.cache.invalidate(`index_status_${projectId}`);
+    console.log(`[AI-SERVICE] 🗑️ Invalidated index status cache for: ${projectId}`);
+  }
+
   /**
    * NEW: Sync All Pinecone - DESTRUCTIVE operation
    * POST /api/v1/ai/sync-all/

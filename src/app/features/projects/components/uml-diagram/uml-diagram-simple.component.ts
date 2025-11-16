@@ -228,7 +228,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       to { transform: rotate(360deg); }
     }
 
-    // Detail panel styles (same as before)
+    /* Detail panel styles (same as before) */
     .detail-panel-overlay {
       position: fixed;
       top: 0;
