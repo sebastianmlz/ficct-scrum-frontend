@@ -1,0 +1,455 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 flex-1">
+          <span *ngIf="issue()?.issue_type" [class]="'badge ' + getIssueTypeBadgeClass(issue()?.issue_type?.category)">
+            {{ issue()?.issue_type?.name }}
+          </span>
+          <span class="badge bg-gray-100 text-gray-700">
+            {{ issue()?.key || (issue()?.id ? issue()!.id.substring(0, 8) : '') }}
+          </span>
+          <span *ngIf="issue()?.priority" [class]="'badge ' + getPriorityClass(issue()!.priority)">
+            {{ issue()!.priority }}
+          </span>
+        </div>
+        <button
+          (click)="onClose()"
+          class="text-gray-400 hover:text-gray-600 p-2"
+          aria-label="Close modal">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading()" class="modal-body">
+      <div class="flex items-center justify-center py-12">
+        <div class="loading-spinner"></div>
+        <span class="ml-3 text-gray-600">Loading issue details...</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div *ngIf="!loading() && issue()" class="modal-body">
+      <form [formGroup]="issueForm" class="contents">
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- LEFT COLUMN (45%): Content -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <div class="flex flex-col gap-4">
+        <!-- Description Card -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+            </svg>
+            Descripción
+          </h3>
+          <textarea
+            formControlName="description"
+            placeholder="Añadir descripción detallada..."
+            rows="6"
+            class="w-full text-sm border border-gray-300 rounded-md p-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"></textarea>
+        </div>
+
+        <!-- Comments Card -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+            Comentarios
+          </h3>
+          <div class="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-300 rounded-md">
+            No hay comentarios todavía
+          </div>
+        </div>
+
+        <!-- Links Card -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+            Enlaces
+          </h3>
+          <div class="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-300 rounded-md">
+            No hay enlaces
+          </div>
+        </div>
+
+        <!-- Attachments Card -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>
+            Adjuntos
+          </h3>
+          <div class="text-sm text-gray-500 text-center py-6 border border-dashed border-gray-300 rounded-md">
+            No hay archivos adjuntos
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- MIDDLE COLUMN (30%): Core Fields -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <div class="flex flex-col gap-4">
+        <!-- Status -->
+        <div class="form-group">
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Estado
+          </label>
+          <select formControlName="status" class="w-full text-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <option [ngValue]="null">Sin estado</option>
+            @for (status of workflowStatuses(); track status.id) {
+              <option [ngValue]="status.id">{{ status.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Assignee -->
+        <div class="form-group">
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            Asignado a
+          </label>
+          <select formControlName="assignee" class="w-full text-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <option [ngValue]="null">Sin asignar</option>
+            @for (member of workspaceMembers(); track member.id) {
+              <option [ngValue]="member.user.user_uuid || member.user.id">{{ member.user.full_name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Priority -->
+        <div class="form-group">
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            Prioridad
+          </label>
+          <select formControlName="priority" class="w-full text-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            @for (priority of priorities; track priority.value) {
+              <option [value]="priority.value">{{ priority.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Sprint (Placeholder) -->
+        <div class="form-group">
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Sprint
+          </label>
+          <select class="w-full text-sm border border-gray-300 rounded-md p-2 bg-gray-50 text-gray-500 cursor-not-allowed" disabled>
+            <option>Sprint 3</option>
+          </select>
+        </div>
+
+        <!-- Story Points -->
+        <div class="form-group">
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+            </svg>
+            Story Points
+          </label>
+          <input
+            type="number"
+            formControlName="story_points"
+            min="0"
+            placeholder="0"
+            class="w-full text-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+        </div>
+
+        <!-- Estimated Hours -->
+        <div class="form-group">
+          <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Horas Estimadas
+          </label>
+          <input
+            type="number"
+            formControlName="estimated_hours"
+            min="0"
+            step="0.5"
+            placeholder="0.0"
+            class="w-full text-sm border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+        </div>
+
+        <!-- Dates Card -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mt-2">
+          <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Fechas
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-gray-100">
+              <span class="text-gray-600">Creado</span>
+              <span class="font-medium text-gray-700">{{ issue()?.created_at | date:'short' }}</span>
+            </div>
+            <div class="flex justify-between py-1.5">
+              <span class="text-gray-600">Actualizado</span>
+              <span class="font-medium text-gray-700">{{ issue()?.updated_at | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- RIGHT COLUMN (25%): AI + Details -->
+      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Project Details Card -->
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Detalles
+          </h3>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between py-1.5 border-b border-gray-100">
+              <span class="text-gray-600">Proyecto</span>
+              <span class="font-medium text-gray-700">{{ issue()?.project?.name || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-gray-100">
+              <span class="text-gray-600">Clave</span>
+              <span class="font-medium text-purple-600">{{ issue()?.key || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-gray-100">
+              <span class="text-gray-600">Tipo</span>
+              <span class="font-medium text-gray-700">{{ issue()?.issue_type?.name || 'N/A' }}</span>
+            </div>
+            <div class="flex justify-between py-1.5">
+              <span class="text-gray-600">Reportado por</span>
+              <div class="flex items-center gap-1.5">
+                <div *ngIf="issue()?.reporter" class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-medium">
+                  {{ issue()?.reporter?.full_name?.charAt(0) }}
+                </div>
+                <span class="font-medium text-gray-700 text-xs">{{ issue()?.reporter?.full_name || 'Unknown' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Summary Card -->
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl overflow-hidden transition-all hover:border-purple-300 hover:shadow-md">
+          <div class="flex items-center gap-2.5 px-4 py-3.5 bg-white border-b border-gray-200 cursor-pointer select-none transition-colors hover:bg-gray-50"
+               (click)="aiSummaryCollapsed.set(!aiSummaryCollapsed())">
+            <svg class="w-5 h-5 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            <span class="text-sm font-semibold text-gray-700 flex-1">AI Summary</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform flex-shrink-0"
+                 [class.rotate-180]="!aiSummaryCollapsed()"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+          
+          <div *ngIf="!aiSummaryCollapsed()" class="p-4">
+            <!-- Loading State -->
+            <div *ngIf="aiSummaryLoading()" class="flex flex-col items-center justify-center py-6 px-4 gap-3 text-gray-600 text-sm">
+              <div class="loading-spinner"></div>
+              <span>Generating AI summary...</span>
+            </div>
+            
+            <!-- Error State -->
+            <div *ngIf="aiSummaryError() && !aiSummaryLoading()" class="flex flex-col items-center justify-center py-6 px-4 gap-3 text-red-600 text-sm">
+              <svg class="w-8 h-8 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>Failed to generate summary</span>
+              <button type="button" 
+                      (click)="refreshAISummary(); $event.stopPropagation()"
+                      class="flex items-center gap-1.5 mt-2 px-3.5 py-1.5 bg-white border border-gray-300 rounded-md text-gray-700 text-xs font-medium cursor-pointer transition-all hover:bg-gray-50 hover:border-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Retry
+              </button>
+            </div>
+            
+            <!-- Success State -->
+            <div *ngIf="!aiSummaryLoading() && !aiSummaryError()" class="flex flex-col gap-4">
+              <!-- Summary Section -->
+              <div class="flex flex-col gap-2">
+                <h4 class="flex items-center gap-1.5 text-xs font-semibold text-purple-600 uppercase tracking-wider">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  Summary
+                </h4>
+                <p class="text-sm leading-relaxed text-gray-700 p-3 bg-white rounded-lg border-l-3 border-purple-600">
+                  {{ aiSummary() || 'No discussion yet for this issue.' }}
+                </p>
+              </div>
+              
+              <!-- Complexity Badge -->
+              <div *ngIf="complexity() !== 'unknown'" class="flex flex-col gap-2 pt-2 border-t border-gray-200">
+                <h4 class="flex items-center gap-1.5 text-xs font-semibold text-purple-600 uppercase tracking-wider">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  Estimated Complexity
+                </h4>
+                <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-semibold w-fit transition-all"
+                     [class.bg-green-100]="complexity() === 'low'"
+                     [class.text-green-800]="complexity() === 'low'"
+                     [class.bg-yellow-100]="complexity() === 'medium'"
+                     [class.text-yellow-800]="complexity() === 'medium'"
+                     [class.bg-red-100]="complexity() === 'high'"
+                     [class.text-red-800]="complexity() === 'high'"
+                     [class.bg-blue-100]="complexity() === 'very-high' || complexity() === 'very high'"
+                     [class.text-blue-800]="complexity() === 'very-high' || complexity() === 'very high'"
+                     [class.bg-gray-200]="complexity() === 'unknown'"
+                     [class.text-gray-700]="complexity() === 'unknown'">
+                  <div class="w-3 h-3 rounded-full flex-shrink-0"
+                       [class.bg-green-500]="complexity() === 'low'"
+                       [class.bg-yellow-500]="complexity() === 'medium'"
+                       [class.bg-red-500]="complexity() === 'high'"
+                       [class.bg-blue-500]="complexity() === 'very-high' || complexity() === 'very high'"
+                       [class.bg-gray-400]="complexity() === 'unknown'"></div>
+                  <span class="font-semibold">{{ complexity() | titlecase }}</span>
+                  <span *ngIf="complexityConfidence() > 0" class="text-xs opacity-80 font-normal ml-0.5">
+                    ({{ complexityConfidence() * 100 | number:'1.0-0' }}%)
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Generated by AI footer with Refresh -->
+              <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+                <div class="flex items-center gap-1.5 text-xs text-gray-400 uppercase tracking-wider">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                  </svg>
+                  Generated by AI
+                </div>
+                <button 
+                  type="button"
+                  (click)="refreshAISummary(); $event.stopPropagation()"
+                  [disabled]="aiSummaryLoading()"
+                  class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-gray-600 text-xs font-medium cursor-pointer transition-all hover:bg-gray-50 hover:border-purple-600 hover:text-purple-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <svg class="w-4 h-4" [class.animate-spin]="aiSummaryLoading()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Similar Issues Card -->
+        <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl mb-5 overflow-hidden transition-all hover:border-gray-300 hover:shadow-md">
+          <div class="flex items-center gap-2.5 px-4 py-3.5 bg-white border-b border-gray-200 cursor-pointer select-none transition-colors hover:bg-gray-50"
+               (click)="similarIssuesCollapsed.set(!similarIssuesCollapsed())">
+            <svg class="w-5 h-5 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <span class="text-sm font-semibold text-gray-700 flex-1">Similar Issues</span>
+            <span *ngIf="similarIssues().length > 0" class="text-xs text-gray-600 font-medium">({{ similarIssues().length }})</span>
+            <svg class="w-4 h-4 text-gray-400 transition-transform flex-shrink-0"
+                 [class.rotate-180]="!similarIssuesCollapsed()"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+          
+          <div *ngIf="!similarIssuesCollapsed()" class="p-4">
+            <!-- Loading -->
+            <div *ngIf="similarIssuesLoading()" class="flex flex-col items-center justify-center py-6 px-4 gap-3 text-gray-600 text-sm">
+              <div class="loading-spinner"></div>
+              <span>Finding similar issues...</span>
+            </div>
+            
+            <!-- Empty State -->
+            <div *ngIf="!similarIssuesLoading() && similarIssues().length === 0" class="flex flex-col items-center justify-center py-6 px-4 gap-3 text-gray-600 text-sm">
+              <svg class="w-8 h-8 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span>No similar issues found</span>
+            </div>
+            
+            <!-- Similar Issues List -->
+            <div *ngIf="!similarIssuesLoading() && similarIssues().length > 0" class="flex flex-col gap-2.5">
+              <div *ngFor="let similar of similarIssues()" 
+                   class="flex items-center gap-3 px-3 py-2.5 bg-white border border-gray-200 rounded-lg transition-all cursor-pointer hover:border-purple-600 hover:shadow-md">
+                <div class="inline-flex items-center justify-center px-2 py-0.5 rounded-xl text-xs font-bold min-w-[50px] text-center flex-shrink-0"
+                     [class.bg-green-100]="similar.similarity_score > 0.9"
+                     [class.text-green-800]="similar.similarity_score > 0.9"
+                     [class.bg-yellow-100]="similar.similarity_score > 0.75 && similar.similarity_score <= 0.9"
+                     [class.text-yellow-800]="similar.similarity_score > 0.75 && similar.similarity_score <= 0.9"
+                     [class.bg-gray-100]="similar.similarity_score <= 0.75"
+                     [class.text-gray-700]="similar.similarity_score <= 0.75">
+                  {{ similar.similarity_score * 100 | number:'1.0-0' }}%
+                </div>
+                <div class="flex flex-col gap-1 flex-1 min-w-0">
+                  <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">{{ similar.key }}</span>
+                  <span class="text-xs text-gray-700 leading-snug overflow-hidden text-ellipsis whitespace-nowrap">{{ similar.title }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div *ngIf="!loading()" class="modal-footer">
+      <button
+        type="button"
+        (click)="onDelete()"
+        [disabled]="deleting()"
+        class="btn-danger mr-auto">
+        <span *ngIf="!deleting()">Delete</span>
+        <span *ngIf="deleting()" class="flex items-center gap-2">
+          <span class="loading-spinner"></span>
+          Deleting...
+        </span>
+      </button>
+
+      <button
+        type="button"
+        (click)="onClose()"
+        class="btn-secondary"
+        [disabled]="saving() || deleting()">
+        Close
+      </button>
+
+      <button
+        type="button"
+        (click)="onSave()"
+        [disabled]="issueForm.invalid || !hasUnsavedChanges || saving() || deleting()"
+        class="btn-primary">
+        <span *ngIf="!saving()">Save Changes</span>
+        <span *ngIf="saving()" class="flex items-center gap-2">
+          <span class="loading-spinner"></span>
+          Saving...
+        </span>
+      </button>
+    </div>
+
+  </div>
+</div>

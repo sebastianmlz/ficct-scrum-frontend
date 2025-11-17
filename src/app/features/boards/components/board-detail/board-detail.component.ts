@@ -23,7 +23,7 @@ import { BoardColumnComponent } from '../board-column/board-column.component';
 import { BoardFilterToolbarComponent, BoardFilters as ToolbarFilters } from '../board-filter-toolbar/board-filter-toolbar.component';
 import { CreateColumnDialogComponent } from '../create-column-dialog/create-column-dialog.component';
 import { CreateIssueDialogComponent } from '../create-issue-dialog/create-issue-dialog.component';
-import { IssueDetailModalComponent } from '../issue-detail-modal/issue-detail-modal.component';
+import { IssueDetailModalComponent } from '../../../../shared/components/issue-detail-modal/issue-detail-modal.component';
 
 @Component({
   selector: 'app-board-detail',

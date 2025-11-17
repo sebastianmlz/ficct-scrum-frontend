@@ -30,6 +30,9 @@ export class ProjectService {
     if (params?.ordering) {
       httpParams = httpParams.set('ordering', params.ordering);
     }
+    if (params?.workspace) {
+      httpParams = httpParams.set('workspace', params.workspace);
+    }
 
     return this.http.get<PaginatedProjectList>(`${this.baseUrl}/projects/`, { params: httpParams });
   }

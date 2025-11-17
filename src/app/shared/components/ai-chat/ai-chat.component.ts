@@ -2,7 +2,7 @@ import { Component, Input, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AiService, AIChatResponse, AISource } from '../../../core/services/ai.service';
-import { IssueDetailModalComponent } from '../../../features/boards/components/issue-detail-modal/issue-detail-modal.component';
+import { IssueDetailModalComponent } from '../issue-detail-modal/issue-detail-modal.component';
 
 interface ChatMessage {
   role: 'user' | 'assistant';

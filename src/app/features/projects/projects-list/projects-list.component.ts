@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { ProjectService } from '../../../core/services/project.service';
 import { Project, PaginatedProjectList, PaginationParams } from '../../../core/models/interfaces';
@@ -14,12 +14,14 @@ import { Project, PaginatedProjectList, PaginationParams } from '../../../core/m
 export class ProjectsListComponent implements OnInit {
   private projectService = inject(ProjectService);
   private fb = inject(FormBuilder);
+  private route = inject(ActivatedRoute);
 
   projects = signal<Project[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
   paginationData = signal<PaginatedProjectList | null>(null);
   currentPage = signal(1);
+  workspaceId = signal<string | null>(null);
 
   searchForm: FormGroup = this.fb.group({
     search: [''],
@@ -31,15 +33,25 @@ export class ProjectsListComponent implements OnInit {
   Math = Math;
 
   ngOnInit(): void {
-    this.loadProjects();
+    // Read workspace ID from URL query params
+    this.route.queryParams.subscribe(params => {
+      this.workspaceId.set(params['workspace'] || null);
+      this.loadProjects();
+    });
   }
 
   async loadProjects(params?: PaginationParams): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
 
+    // Always include workspace filter if present
+    const filterParams: PaginationParams = {
+      ...params,
+      workspace: this.workspaceId() || undefined
+    };
+
     try {
-      const response = await this.projectService.getProjects(params).toPromise();
+      const response = await this.projectService.getProjects(filterParams).toPromise();
       if (response) {
         const normalizeProjects = response.results.map(project => ({
           ...project,

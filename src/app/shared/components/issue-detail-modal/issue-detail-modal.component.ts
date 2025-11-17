@@ -1,12 +1,13 @@
 import { Component, inject, OnInit, signal, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Issue, IssueType, IssueStatus, WorkspaceMember } from '../../../../core/models/interfaces';
-import { IssueService } from '../../../../core/services/issue.service';
-import { NotificationService } from '../../../../core/services/notification.service';
+import { Issue, IssueType, IssueStatus, WorkspaceMember } from '../../../core/models/interfaces';
+import { IssueService } from '../../../core/services/issue.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { AiService, IssueSummaryResponse, FindSimilarResponse, SimilarIssue } from '../../../core/services/ai.service';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
-import { getAllPriorities, PriorityConfig, getPriorityTailwindClasses } from '../../../../shared/utils/priority.utils';
+import { environment } from '../../../../environments/environment';
+import { getAllPriorities, PriorityConfig, getPriorityTailwindClasses } from '../../utils/priority.utils';
 
 @Component({
   selector: 'app-issue-detail-modal',
@@ -28,60 +29,85 @@ import { getAllPriorities, PriorityConfig, getPriorityTailwindClasses } from '..
       padding: 0;
     }
 
-    /* Mobile: Full screen modal */
+    .modal-content {
+      position: relative;
+      background: white;
+      width: 95vw;
+      max-width: 1600px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-height: 85vh;
+      height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      flex-shrink: 0;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 24px;
+      z-index: 10;
+    }
+
+    .modal-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.8fr 1.2fr 1fr;
+      gap: 20px;
+      padding: 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* Better scrollbar */
+    .modal-body::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* Tablet: 2 columns (content + fields | AI+details stacked) */
+    @media (max-width: 1200px) {
+      .modal-body {
+        grid-template-columns: 1.5fr 1fr;
+      }
+      
+      .modal-body > :nth-child(3) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    /* Mobile: Single column */
     @media (max-width: 768px) {
       .modal-content {
-        background: white;
-        border-radius: 0;
         width: 100%;
         height: 100%;
         max-width: 100%;
         max-height: 100%;
-        overflow-y: auto;
-        box-shadow: none;
+        border-radius: 0;
       }
 
       .modal-header {
-        position: sticky;
-        top: 0;
-        background: white;
-        border-bottom: 1px solid #e5e7eb;
         padding: 16px;
-        z-index: 10;
       }
 
       .modal-body {
+        grid-template-columns: 1fr;
+        gap: 16px;
         padding: 16px;
-      }
-    }
-
-    /* Tablet and Desktop: Centered modal with max-width */
-    @media (min-width: 769px) {
-      .modal-overlay {
-        padding: 20px;
-      }
-
-      .modal-content {
-        background: white;
-        border-radius: 12px;
-        width: 100%;
-        max-width: 900px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      }
-
-      .modal-header {
-        position: sticky;
-        top: 0;
-        background: white;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 20px 24px;
-        z-index: 10;
-      }
-
-      .modal-body {
-        padding: 24px;
       }
     }
 
@@ -235,6 +261,7 @@ export class IssueDetailModalComponent implements OnInit {
   private issueService = inject(IssueService);
   private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
+  private aiService = inject(AiService);
 
   issue = signal<Issue | null>(null);
   issueTypes = signal<IssueType[]>([]);
@@ -243,6 +270,21 @@ export class IssueDetailModalComponent implements OnInit {
   loading = signal(true);
   saving = signal(false);
   deleting = signal(false);
+  
+  // AI Features state
+  aiSummary = signal<string>('');
+  aiSummaryLoading = signal(false);
+  aiSummaryError = signal(false);
+  
+  complexity = signal<string>('unknown');
+  complexityConfidence = signal(0);
+  
+  similarIssues = signal<SimilarIssue[]>([]);
+  similarIssuesLoading = signal(false);
+  
+  // Collapsed states for AI cards
+  aiSummaryCollapsed = signal(true);  // Collapsed by default
+  similarIssuesCollapsed = signal(true);  // Collapsed by default
   
   private http = inject(HttpClient);
 
@@ -269,6 +311,9 @@ export class IssueDetailModalComponent implements OnInit {
     this.loadIssueTypes();
     this.loadWorkspaceMembers();
     this.loadWorkflowStatuses();
+    
+    // Load AI features in parallel (non-blocking)
+    this.loadAIFeatures();
   }
 
   async loadIssue(): Promise<void> {
@@ -454,6 +499,16 @@ export class IssueDetailModalComponent implements OnInit {
         console.log('[MODAL SAVE] Event payload - ID:', updatedIssue.id, 'Assignee:', updatedIssue.assignee);
         this.issueUpdated.emit(updatedIssue);
         
+        // Invalidate AI cache if title or description changed
+        const fieldsAffectingAI = ['title', 'description', 'status', 'priority'];
+        const aiFieldsChanged = Object.keys(updateData).some(key => fieldsAffectingAI.includes(key));
+        if (aiFieldsChanged) {
+          console.log('[MODAL SAVE] AI-affecting fields changed, invalidating cache');
+          this.aiService.invalidateIssueSummary(this.issueId);
+          // Optionally auto-refresh AI features
+          setTimeout(() => this.refreshAIFeatures(), 500);
+        }
+        
         // Reset form pristine state
         this.issueForm.markAsPristine();
         console.log('[MODAL SAVE] === FIN GUARDADO EXITOSO ===');
@@ -613,4 +668,88 @@ export class IssueDetailModalComponent implements OnInit {
   get hasUnsavedChanges(): boolean {
     return this.issueForm.dirty;
   }
+  
+  // ════════════════════════════════════════════════════════════════════════════
+  // AI FEATURES METHODS
+  // ════════════════════════════════════════════════════════════════════════════
+  
+  /**
+   * Load all AI-powered features in parallel (non-blocking)
+   */
+  loadAIFeatures(): void {
+    this.loadAISummary();
+    this.loadSimilarIssues();
+  }
+  
+  /**
+   * Load AI summary with complexity estimation (cached for 1 hour)
+   * @param forceRefresh - Bypass cache and fetch fresh data
+   */
+  loadAISummary(forceRefresh = false): void {
+    this.aiSummaryLoading.set(true);
+    this.aiSummaryError.set(false);
+    
+    console.log(`[ISSUE-DETAIL] Loading AI summary for issue: ${this.issueId}, forceRefresh: ${forceRefresh}`);
+    
+    this.aiService.getIssueSummary(this.issueId, forceRefresh).subscribe({
+      next: (response: IssueSummaryResponse) => {
+        console.log('[ISSUE-DETAIL] ✅ AI Summary loaded:', response);
+        this.aiSummary.set(response.summary || 'No summary available');
+        this.complexity.set(response.estimated_complexity || 'unknown');
+        
+        // Mock confidence (backend doesn't return it yet)
+        // TODO: Backend should include confidence score in response
+        this.complexityConfidence.set(0.85);
+        
+        this.aiSummaryLoading.set(false);
+      },
+      error: (error) => {
+        console.error('[ISSUE-DETAIL] ❌ AI Summary failed:', error);
+        this.aiSummaryError.set(true);
+        this.aiSummary.set('Failed to generate summary');
+        this.aiSummaryLoading.set(false);
+      }
+    });
+  }
+  
+  /**
+   * Load similar issues using AI semantic search (cached for 1 hour)
+   * @param forceRefresh - Bypass cache and fetch fresh data
+   */
+  loadSimilarIssues(forceRefresh = false): void {
+    this.similarIssuesLoading.set(true);
+    
+    console.log(`[ISSUE-DETAIL] Loading similar issues for: ${this.issueId}`);
+    
+    this.aiService.findSimilar(this.issueId, 5, true).subscribe({
+      next: (response: FindSimilarResponse) => {
+        console.log('[ISSUE-DETAIL] ✅ Similar issues loaded:', response);
+        this.similarIssues.set(response.similar_issues || []);
+        this.similarIssuesLoading.set(false);
+      },
+      error: (error) => {
+        console.error('[ISSUE-DETAIL] ❌ Similar issues load failed:', error);
+        this.similarIssues.set([]);
+        this.similarIssuesLoading.set(false);
+      }
+    });
+  }
+  
+  /**
+   * Refresh all AI features (bypass cache)
+   */
+  refreshAIFeatures(): void {
+    console.log('[ISSUE-DETAIL] Refreshing all AI features (bypass cache)');
+    this.loadAISummary(true);
+    this.loadSimilarIssues(true);
+  }
+  
+  /**
+   * Refresh only AI summary (for individual refresh button)
+   */
+  refreshAISummary(): void {
+    console.log('[ISSUE-DETAIL] Refreshing AI summary only');
+    this.loadAISummary(true);
+  }
+  
 }

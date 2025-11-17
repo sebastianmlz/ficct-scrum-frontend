@@ -312,10 +312,11 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       const datasets = Object.keys(flowData.status_counts).map(status => ({
         label: status,
         data: flowData.status_counts[status],
-        backgroundColor: colors[status as keyof typeof colors]?.bg || 'rgba(156, 163, 175, 0.5)',
+        backgroundColor: colors[status as keyof typeof colors]?.bg || 'rgba(156, 163, 175, 0.1)',
         borderColor: colors[status as keyof typeof colors]?.border || 'rgba(156, 163, 175, 1)',
-        borderWidth: 1,
-        fill: true
+        borderWidth: 2,
+        fill: false,  // ✅ No fill - show lines only, not area
+        tension: 0.4  // ✅ Smooth curves
       }));
 
       this.cumulativeFlowInstance = new Chart(ctx, {
@@ -332,20 +333,40 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
             title: {
               display: true,
               text: 'Cumulative Flow Diagram'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
             }
           },
           scales: {
             x: {
-              stacked: true,
+              stacked: false,  // ✅ No stacking on x-axis
               ticks: {
                 maxRotation: 45,
                 minRotation: 45
+              },
+              title: {
+                display: true,
+                text: 'Date'
               }
             },
             y: {
-              stacked: true,
-              beginAtZero: true
+              stacked: false,  // ✅ No stacking on y-axis - separate lines
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Issues'
+              },
+              ticks: {
+                stepSize: 1  // ✅ Integer steps only
+              }
             }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
           }
         }
       });

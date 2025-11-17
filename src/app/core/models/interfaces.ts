@@ -438,8 +438,6 @@ export interface OrganizationInvitationResponse {
 }
 
 export interface PaginatedOrganizationInvitationList extends PaginatedResponse<OrganizationInvitation> { }
-
-// Query Parameters
 // Alias for legacy ApiQueryParams used in some services
 export type ApiQueryParams = PaginationParams;
 
@@ -450,6 +448,7 @@ export interface PaginationParams {
   role?: string;
   workspace_type?: string;
   email?: string;
+  workspace?: string;             // UUID - Filter by workspace
   
   // Issue filters - UUID based
   status?: string;

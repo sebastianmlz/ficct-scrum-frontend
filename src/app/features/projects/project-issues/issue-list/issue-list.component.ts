@@ -6,7 +6,7 @@ import { IssueService } from '../../../../core/services/issue.service';
 import { PaginationParams, Issue } from '../../../../core/models/interfaces';
 import { PaginatedIssueList } from '../../../../core/models/api-interfaces';
 import { IssueCreateComponent } from '../issue-create/issue-create.component';
-import { IssueDetailComponent } from '../issue-detail/issue-detail.component';
+import { IssueDetailModalComponent } from '../../../../shared/components/issue-detail-modal/issue-detail-modal.component';
 import { IssueEditComponent } from '../issue-edit/issue-edit.component';
 import { IssueAssignComponent } from '../issue-assign/issue-assign.component';
 import { MlSuggestAssignmentComponent } from '../ml-suggest-assignment/ml-suggest-assignment.component';
@@ -22,7 +22,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     ReactiveFormsModule, 
     RouterModule, 
     IssueCreateComponent, 
-    IssueDetailComponent, 
+    IssueDetailModalComponent, 
     IssueEditComponent, 
     IssueAssignComponent, 
     MlSuggestAssignmentComponent,

@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-gray-50">
+<div class="bg-gray-50">
   <!-- Loading State -->
-  <div *ngIf="loading()" class="flex items-center justify-center min-h-screen">
+  <div *ngIf="loading()" class="flex items-center justify-center py-12">
     <div class="text-center">
       <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
       <p class="mt-4 text-gray-600">Loading board...</p>
@@ -8,7 +8,7 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error() && !loading()" class="flex items-center justify-center min-h-screen px-4">
+  <div *ngIf="error() && !loading()" class="flex items-center justify-center py-12 px-4">
     <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
       <div class="flex">
         <svg class="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
@@ -28,87 +28,8 @@
   </div>
 
   <!-- Board Content -->
-  <div *ngIf="board() && !loading()" class="flex flex-col h-screen">
-    <!-- Header - Responsive -->
-    <div class="bg-white border-b border-gray-200 px-3 sm:px-4 md:px-6 py-3 md:py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2 sm:gap-4">
-          <button
-            *ngIf="board()"
-            (click)="router.navigate(['/projects', board()!.project.id])"
-            class="text-gray-600 hover:text-gray-900">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-          <div class="flex-1 min-w-0">
-            <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 truncate">{{ board()?.name }}</h1>
-            <p class="text-xs sm:text-sm text-gray-600 truncate hidden sm:block">{{ board()?.description }}</p>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 sm:gap-3 md:gap-4">
-          <!-- Sprint Selector (JIRA architecture) -->
-          <div class="relative" *ngIf="sprints().length > 0">
-            <label class="sr-only">Sprint</label>
-            <select
-              [value]="selectedSprintId()"
-              (change)="onSprintChange($any($event.target).value)"
-              class="px-3 py-2 pr-8 text-sm border border-gray-300 rounded-md bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option [value]="activeSprint()?.id" *ngIf="activeSprint()">
-                {{ activeSprint()?.name }} (Active)
-              </option>
-              <option *ngFor="let sprint of sprints()" [value]="sprint.id" [hidden]="sprint.id === activeSprint()?.id">
-                {{ sprint.name }}
-              </option>
-              <option [value]="''">
-                Backlog
-              </option>
-            </select>
-          </div>
-          
-          <!-- WebSocket Connection Indicator -->
-          <div class="flex items-center gap-2">
-            <div
-              [class]="wsConnected() ? 'w-2 h-2 bg-green-500 rounded-full' : 'w-2 h-2 bg-red-500 rounded-full'">
-            </div>
-            <span class="text-sm text-gray-600 hidden md:inline">
-              {{ wsConnected() ? 'Connected' : 'Disconnected' }}
-            </span>
-          </div>
-
-          <!-- Active Users - Hidden on mobile -->
-          <div *ngIf="activeUsers().length > 0" class="hidden md:flex items-center gap-2">
-            <div class="flex -space-x-2">
-              <div
-                *ngFor="let user of activeUsers().slice(0, 5)"
-                class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium border-2 border-white"
-                [title]="user.user_name">
-                {{ user.user_name.charAt(0).toUpperCase() }}
-              </div>
-              <div
-                *ngIf="activeUsers().length > 5"
-                class="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gray-500 flex items-center justify-center text-white text-xs font-medium border-2 border-white">
-                +{{ activeUsers().length - 5 }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions - Responsive -->
-          <button
-            (click)="openSettings()"
-            class="px-2 py-2 sm:px-3 md:px-4 text-xs sm:text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors hidden sm:inline-flex items-center">
-            <svg class="w-4 h-4 sm:w-5 sm:h-5 inline sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-            <span class="hidden sm:inline">Settings</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ✅ NEW: Horizontal Filter Toolbar -->
+  <div *ngIf="board() && !loading()" class="flex flex-col">
+    <!-- ✅ Horizontal Filter Toolbar -->
     <app-board-filter-toolbar
       [availableMembers]="availableMembers()"
       [availableIssueTypes]="availableIssueTypes()"
@@ -120,7 +41,7 @@
     </app-board-filter-toolbar>
 
     <!-- Kanban Board - Responsive Layout -->
-    <div class="flex-1 overflow-x-auto overflow-y-hidden bg-gray-50 px-2 sm:px-4 md:px-6 py-3 md:py-4 relative">
+    <div class="overflow-x-auto overflow-y-auto bg-gray-50 px-2 sm:px-4 md:px-6 py-3 md:py-4 relative min-h-[500px] max-h-[calc(100vh-400px)]">
       <!-- Empty State - No Columns -->
       <div *ngIf="columns().length === 0" class="flex items-center justify-center h-full">
         <div class="text-center max-w-md">

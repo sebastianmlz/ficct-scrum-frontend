@@ -388,8 +388,8 @@
         </div>
       }
 
-      <!-- Child Routes (Dashboard, Issues, Activity, Code, Diagrams, etc.) -->
-      @if (activeTab() === 'dashboard' || activeTab() === 'issues' || activeTab() === 'activity' || activeTab() === 'code' || activeTab() === 'diagrams') {
+      <!-- Child Routes (Dashboard, Board, Issues, Activity, Code, Diagrams, etc.) -->
+      @if (activeTab() === 'dashboard' || activeTab() === 'board' || activeTab() === 'issues' || activeTab() === 'activity' || activeTab() === 'code' || activeTab() === 'diagrams') {
   <div class="bg-gradient-to-br from-blue-100 via-white to-purple-100 rounded-2xl shadow-xl border border-purple-100 p-6 animate-fade-in">
           <router-outlet></router-outlet>
         </div>
