@@ -22,26 +22,28 @@
   <!-- Footer -->
   <div class="flex items-center justify-between text-xs text-gray-500">
     <div class="flex items-center gap-2">
-      <!-- Assignee Avatar with improved styling -->
+      <!-- Assignee Avatar with improved styling and click to edit -->
       <div 
         *ngIf="issue.assignee" 
-        class="flex items-center group relative"
-        [title]="issue.assignee.full_name">
+        class="flex items-center group relative cursor-pointer"
+        [title]="issue.assignee.full_name + ' (click to change)'"
+        (click)="onAvatarClick($event)">
         <div 
-          [class]="'w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shadow-sm transition-transform hover:scale-110 ' + getAvatarColor(issue.assignee.full_name)">
+          [class]="'w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shadow-sm transition-transform hover:scale-110 hover:ring-2 hover:ring-blue-400 ' + getAvatarColor(issue.assignee.full_name)">
           {{ getInitials(issue.assignee.full_name) }}
         </div>
         <!-- Tooltip on hover -->
         <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-          {{ issue.assignee.full_name }}
+          {{ issue.assignee.full_name }} (click to change)
         </div>
       </div>
       
-      <!-- Unassigned Icon -->
+      <!-- Unassigned Icon with click to assign -->
       <div 
         *ngIf="!issue.assignee" 
-        class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center"
-        title="Unassigned">
+        class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200 hover:ring-2 hover:ring-blue-400 transition-all"
+        title="Unassigned (click to assign)"
+        (click)="onAvatarClick($event)">
         <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
         </svg>
@@ -57,3 +59,14 @@
     </div>
   </div>
 </div>
+
+<!-- Quick Assignee Popover -->
+@if (showAssigneePopover() && avatarElement) {
+  <app-quick-assignee-popover
+    [issue]="issue"
+    [projectId]="projectId"
+    [triggerElement]="avatarElement"
+    (assigneeChanged)="onAssigneeChanged($event)"
+    (closed)="closeAssigneePopover()">
+  </app-quick-assignee-popover>
+}

@@ -38,6 +38,12 @@ export enum WorkspaceMemberRoleEnum {
   VIEWER = 'viewer'
 }
 
+export enum ProjectMemberRoleEnum {
+  ADMIN = 'admin',
+  MEMBER = 'member',
+  VIEWER = 'viewer'
+}
+
 export enum WorkspaceTypeEnum {
   DEVELOPMENT = 'development',
   DESIGN = 'design',

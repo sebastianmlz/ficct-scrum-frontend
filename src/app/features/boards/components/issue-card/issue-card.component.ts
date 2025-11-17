@@ -1,21 +1,43 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Issue } from '../../../../core/models/interfaces';
 import { getPriorityLabel, getPriorityTailwindClasses } from '../../../../shared/utils/priority.utils';
+import { QuickAssigneePopoverComponent } from '../../../../shared/components/quick-assignee-popover/quick-assignee-popover.component';
 
 @Component({
   selector: 'app-issue-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, QuickAssigneePopoverComponent],
   templateUrl: './issue-card.component.html',
 })
 export class IssueCardComponent {
   @Input() issue!: Issue;
+  @Input() projectId!: string;
   @Input() draggable: boolean = true;
   @Output() clicked = new EventEmitter<Issue>();
+  @Output() assigneeChanged = new EventEmitter<{ issueId: string, assigneeId: string | null }>();
+
+  showAssigneePopover = signal(false);
+  avatarElement: HTMLElement | null = null;
 
   onClick(): void {
     this.clicked.emit(this.issue);
+  }
+
+  onAvatarClick(event: MouseEvent): void {
+    event.stopPropagation(); // Prevent card click
+    this.avatarElement = event.currentTarget as HTMLElement;
+    this.showAssigneePopover.set(true);
+  }
+
+  closeAssigneePopover(): void {
+    this.showAssigneePopover.set(false);
+    this.avatarElement = null;
+  }
+
+  onAssigneeChanged(assigneeId: string | null): void {
+    this.assigneeChanged.emit({ issueId: this.issue.id, assigneeId });
+    this.closeAssigneePopover();
   }
 
   /**

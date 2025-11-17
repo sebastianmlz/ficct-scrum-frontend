@@ -29,7 +29,28 @@ export class DiagramService {
    * Generate diagram based on request
    */
   generateDiagram(request: DiagramRequestRequest): Observable<DiagramResponse> {
+    console.log('[DIAGRAM SERVICE] 📤 Generating diagram:', {
+      type: request.diagram_type,
+      project: request.project,
+      format: request.format,
+      parameters: request.parameters,
+      parametersCount: request.parameters ? Object.keys(request.parameters).length : 0
+    });
+    console.log('[DIAGRAM SERVICE] 🔍 Full request object:', JSON.stringify(request, null, 2));
     return this.http.post<DiagramResponse>(`${this.baseUrl}/generate/`, request);
+  }
+
+  /**
+   * Export diagram - dedicated endpoint for exports
+   * Uses /export/ endpoint instead of /generate/
+   */
+  exportDiagram(request: DiagramRequestRequest): Observable<DiagramResponse> {
+    console.log('[DIAGRAM SERVICE] 📦 Exporting diagram:', {
+      type: request.diagram_type,
+      project: request.project,
+      format: request.format
+    });
+    return this.http.post<DiagramResponse>(`${this.baseUrl}/export/`, request);
   }
 
   /**
@@ -45,12 +66,16 @@ export class DiagramService {
 
   /**
    * Generate workflow diagram for a project
+   * @param projectId - Project UUID
+   * @param format - Diagram format (svg or json)
+   * @param forceRefresh - Force backend to regenerate (ignore cache)
    */
   generateWorkflowDiagram(
     projectId: string, 
     format: DiagramFormat = 'json',
-    options?: any
+    forceRefresh: boolean = false
   ): Observable<DiagramResponse> {
+    const options = forceRefresh ? { force_refresh: true } : undefined;
     return this.generateDiagram({
       diagram_type: 'workflow',
       project: projectId,
@@ -294,7 +319,9 @@ export class DiagramService {
     return new Observable(observer => {
       const filename = this.generateFilename(diagramType, format, projectName);
       
-      this.generateDiagram({
+      // CRITICAL FIX: Use exportDiagram instead of generateDiagram
+      // Export endpoint returns optimized full-quality exports
+      this.exportDiagram({
         diagram_type: diagramType,
         project: projectId,
         format

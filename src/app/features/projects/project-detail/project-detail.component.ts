@@ -7,6 +7,7 @@ import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enu
 import { SprintCreateComponent } from '../project-sprints/sprint-create/sprint-create.component';
 import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.component';
 import { AiService, ProjectReportResponse } from '../../../core/services/ai.service';
+import { ProjectMembersModalComponent } from '../components/project-members-modal/project-members-modal.component';
 
 interface Tab {
   id: string;
@@ -25,6 +26,7 @@ interface Tab {
     RouterOutlet,
     SprintCreateComponent,
     SprintListComponent,
+    ProjectMembersModalComponent,
   ],
   templateUrl: './project-detail.component.html',
 })
@@ -51,6 +53,10 @@ export class ProjectDetailComponent implements OnInit {
   activeTab = signal<string>('overview');
   codeDropdownOpen = signal<boolean>(false);
   diagramsDropdownOpen = signal<boolean>(false);
+
+  // Team members modal
+  showTeamModal = signal(false);
+  memberCount = signal(0);
 
   tabs: Tab[] = [
     { id: 'overview', label: 'Overview', icon: 'home' },
@@ -122,14 +128,84 @@ export class ProjectDetailComponent implements OnInit {
 
     try {
       const project = await this.projectService.getProject(id).toPromise();
+      console.log('[PROJECT-DETAIL] 📦 Project loaded from API:', project);
+      console.log('[PROJECT-DETAIL] 📦 Workspace in project:', project?.workspace);
+      console.log('[PROJECT-DETAIL] 📦 Workspace ID:', project?.workspace?.id);
+      
       if (project) {
         this.project.set(project);
         await this.loadConfigProject(id);
+        await this.loadMemberCount(id);
       }
     } catch (error: any) {
+      console.error('[PROJECT-DETAIL] ❌ Error loading project:', error);
       this.error.set(error.error?.message || 'Failed to load project');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async loadMemberCount(projectId: string): Promise<void> {
+    try {
+      const response = await this.projectService.getProjectMembers(projectId, { page: 1 }).toPromise();
+      if (response) {
+        this.memberCount.set(response.count || 0);
+        console.log('[PROJECT-DETAIL] Member count:', response.count);
+      }
+    } catch (error: any) {
+      console.error('[PROJECT-DETAIL] Error loading member count:', error);
+      // Non-critical error, don't show to user
+    }
+  }
+
+  /**
+   * Get workspace ID from project - handles both string UUID and Workspace object
+   */
+  getWorkspaceId(): string | null {
+    const workspace = this.project()?.workspace;
+    if (!workspace) return null;
+    
+    // Handle workspace as string UUID (actual API response)
+    if (typeof workspace === 'string') {
+      return workspace;
+    }
+    
+    // Handle workspace as Workspace object (TypeScript interface)
+    if (typeof workspace === 'object' && 'id' in workspace) {
+      return workspace.id;
+    }
+    
+    return null;
+  }
+
+  openTeamModal(): void {
+    console.log('[PROJECT-DETAIL] Opening team modal');
+    console.log('[PROJECT-DETAIL] Project:', this.project());
+    console.log('[PROJECT-DETAIL] Project ID:', this.project()?.id);
+    console.log('[PROJECT-DETAIL] Workspace:', this.project()?.workspace);
+    
+    if (!this.project()?.id) {
+      console.error('[PROJECT-DETAIL] ❌ Cannot open modal: Project ID missing');
+      return;
+    }
+    
+    const workspaceId = this.getWorkspaceId();
+    if (!workspaceId) {
+      console.error('[PROJECT-DETAIL] ❌ Cannot open modal: Workspace ID missing');
+      console.error('[PROJECT-DETAIL] Workspace value:', this.project()?.workspace);
+      return;
+    }
+    
+    console.log('[PROJECT-DETAIL] ✅ Opening modal with workspace ID:', workspaceId);
+    this.showTeamModal.set(true);
+  }
+
+  closeTeamModal(): void {
+    console.log('[PROJECT-DETAIL] Closing team modal');
+    this.showTeamModal.set(false);
+    // Refresh member count after modal closes
+    if (this.project()?.id) {
+      this.loadMemberCount(this.project()!.id);
     }
   }
 

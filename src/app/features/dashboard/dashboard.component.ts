@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 
 import { WorkspaceService } from '../../core/services/workspace.service';
 import { ProjectService } from '../../core/services/project.service';
+import { ActivityLogService } from '../../core/services/activity-log.service';
 import { Organization, Workspace, Project } from '../../core/models/interfaces';
 import { LoadingSkeletonComponent } from '../../shared/components/loading-skeleton/loading-skeleton.component';
 import { ErrorBoundaryComponent } from '../../shared/components/error-boundary/error-boundary.component';
@@ -51,6 +52,7 @@ export class DashboardComponent implements OnInit {
   private organizationService = inject(OrganizationService);
   private workspaceService = inject(WorkspaceService);
   private projectService = inject(ProjectService);
+  private activityLogService = inject(ActivityLogService);
   constructor(private authService: AuthService, private router: Router) {}
   
   // UI State
@@ -107,26 +109,42 @@ export class DashboardComponent implements OnInit {
     
     try {
       // Load organizations, workspaces, and projects
-      const [orgsResponse, /* workspacesResponse, */ projectsResponse] = await Promise.all([
+      const [orgsResponse, workspacesResponse, projectsResponse] = await Promise.all([
         this.organizationService.getOrganizations({ page: 1 }).toPromise(),
-        // TODO: Need to implement organization-specific workspace loading
-        // this.workspaceService.getWorkspaces({ page: 1 }).toPromise(),
+        this.workspaceService.getWorkspaces(undefined, 1).toPromise(),
         this.projectService.getProjects({ page: 1 }).toPromise()
       ]);
 
       // Update raw data
       this.organizations.set(orgsResponse?.results || []);
-      this.workspaces.set(/* workspacesResponse?.results || */ []);
+      // Cast workspaces to avoid type mismatch
+      this.workspaces.set((workspacesResponse?.results as any) || []);
       this.projects.set(projectsResponse?.results || []);
 
       // Calculate statistics
       const totalProjects = projectsResponse?.count || 0;
       const activeProjects = projectsResponse?.results?.filter(p => p.status === 'active').length || 0;
-      const totalWorkspaces = 0; // TODO: Calculate when workspace loading is implemented
+      const totalWorkspaces = workspacesResponse?.count || 0;
       const totalOrganizations = orgsResponse?.count || 0;
 
-      // Calculate team members (sum of all workspace member counts)
-      const totalMembers = 0; // TODO: Calculate when workspace loading is implemented
+      // Calculate team members - use organization members API for accurate count
+      let totalMembers = 0;
+      
+      // Get first organization's members if available
+      if (orgsResponse?.results && orgsResponse.results.length > 0) {
+        const firstOrg = orgsResponse.results[0];
+        try {
+          const membersResponse = await this.organizationService.getOrganizationMembers(
+            firstOrg.id,
+            { page: 1 }
+          ).toPromise();
+          totalMembers = membersResponse?.count || 0;
+          console.log('[DASHBOARD] 👥 Team members from org API:', totalMembers);
+        } catch (error) {
+          console.warn('[DASHBOARD] ⚠️ Could not load organization members, defaulting to 0');
+          totalMembers = 0;
+        }
+      }
 
       this.quickStats.set([
         {
@@ -209,29 +227,53 @@ export class DashboardComponent implements OnInit {
     this.activityError.set(null);
     
     try {
-      // For now, generate mock activity based on recent projects
-      // In the future, this would come from a real activity API endpoint
-      const projects = this.projects();
-      const activities: ActivityItem[] = [];
+      // Fetch real activity logs from API
+      const response = await this.activityLogService.getActivityLogs({
+        page: 1,
+        page_size: 5,  // DRF standard pagination parameter
+        ordering: '-created_at'
+      }).toPromise();
 
-      projects.slice(0, 5).forEach((project, index) => {
-        activities.push({
-          id: `activity-${index}`,
-          user: project.created_by?.full_name ?? 'Unknown',
-          action: index % 2 === 0 ? 'updated project' : 'created project',
-          target: project.name,
-          timestamp: this.formatDate(project.updated_at),
-          type: 'project'
-        });
-      });
+      if (response?.results) {
+        // Convert API activity logs to ActivityItem format
+        const activities: ActivityItem[] = response.results.map(log => ({
+          id: log.id,
+          user: log.user_detail?.full_name || log.user_name || `User ${log.user}`,
+          action: log.formatted_action || log.action_display,
+          target: log.object_repr || log.object_type,
+          timestamp: log.time_ago || this.formatDate(log.created_at),
+          type: this.mapObjectTypeToActivityType(log.object_type)
+        }));
 
-      this.activityFeed.set(activities);
+        this.activityFeed.set(activities);
+      } else {
+        this.activityFeed.set([]);
+      }
 
     } catch (error: any) {
       console.error('Activity feed loading failed:', error);
       this.activityError.set('Failed to load activity feed');
+      // Set empty array on error so UI shows "No recent activity"
+      this.activityFeed.set([]);
     } finally {
       this.activityLoading.set(false);
+    }
+  }
+
+  private mapObjectTypeToActivityType(objectType: string): ActivityItem['type'] {
+    switch (objectType) {
+      case 'project':
+        return 'project';
+      case 'issue':
+      case 'sprint':
+        return 'task';
+      case 'comment':
+        return 'comment';
+      case 'member':
+      case 'user':
+        return 'member';
+      default:
+        return 'project';
     }
   }
 
@@ -349,5 +391,42 @@ export class DashboardComponent implements OnInit {
     
     // Navigate to login page
     this.router.navigate(['/auth/login']);
+  }
+
+  // Navigation methods
+  navigateToProjects(): void {
+    this.router.navigate(['/projects']);
+  }
+
+  navigateToActiveProjects(): void {
+    this.router.navigate(['/projects'], { queryParams: { status: 'active' } });
+  }
+
+  navigateToTeamMembers(): void {
+    // TODO: Navigate to team members page when implemented
+    console.log('Navigate to team members');
+  }
+
+  navigateToWorkspaces(): void {
+    // TODO: Navigate to workspaces page when implemented
+    console.log('Navigate to workspaces');
+  }
+
+  navigateToOrganizations(): void {
+    this.router.navigate(['/organizations']);
+  }
+
+  navigateToProject(projectId: string): void {
+    this.router.navigate(['/projects', projectId]);
+  }
+
+  navigateToActivity(activity: ActivityItem): void {
+    // Use the actual object_url from the activity log
+    const activityLog = this.activityFeed().find(a => a.id === activity.id);
+    if (activityLog) {
+      // Navigate to the object URL if available
+      console.log('Navigate to activity:', activity);
+      // TODO: Parse and navigate to object_url
+    }
   }
 }

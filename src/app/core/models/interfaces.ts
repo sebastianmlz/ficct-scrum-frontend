@@ -6,6 +6,7 @@ import {
   OrganizationMemberRoleEnum,
   OrganizationMemberStatusEnum,
   WorkspaceMemberRoleEnum,
+  ProjectMemberRoleEnum,
   WorkspaceTypeEnum,
   VisibilityEnum,
   MethodologyEnum,
@@ -22,6 +23,31 @@ import {
   ProjectStatusEnum,
   IssueLinkTypeEnum,
 } from './enums';
+
+// Re-export enums for convenience
+export {
+  OrganizationTypeEnum,
+  SubscriptionPlanEnum,
+  OrganizationMemberRoleEnum,
+  OrganizationMemberStatusEnum,
+  WorkspaceMemberRoleEnum,
+  ProjectMemberRoleEnum,
+  WorkspaceTypeEnum,
+  VisibilityEnum,
+  MethodologyEnum,
+  Status0acEnum,
+  PriorityEnum,
+  SprintDurationEnum,
+  EstimationTypeEnum,
+  TimezoneEnum,
+  LanguageEnum,
+  ActionTypeEnum,
+  LevelEnum,
+  SeverityEnum,
+  ErrorLogStatusEnum,
+  ProjectStatusEnum,
+  IssueLinkTypeEnum,
+};
 
 // Base/Common Interfaces
 export interface User {
@@ -356,6 +382,34 @@ export interface ProjectConfigRequest {
   require_approval_for_changes?: boolean;
 }
 
+// Project Member-related Interfaces
+export interface ProjectMember {
+  id: string;
+  project: string;
+  user: UserBasic;
+  role: ProjectMemberRoleEnum;
+  permissions: object;
+  is_active: boolean;
+  joined_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectMemberRequest {
+  project: string;
+  user_id?: string;
+  email?: string;
+  role?: ProjectMemberRoleEnum;
+  permissions?: object;
+  is_active?: boolean;
+}
+
+export interface PatchedProjectMemberRequest {
+  role?: ProjectMemberRoleEnum;
+  permissions?: object;
+  is_active?: boolean;
+}
+
 // Logging-related Interfaces
 export interface SystemLog {
   id: string;
@@ -407,6 +461,7 @@ export interface PaginatedWorkspaceList extends PaginatedResponse<Workspace> { }
 export interface PaginatedProjectList extends PaginatedResponse<Project> { }
 export interface PaginatedOrganizationMemberList extends PaginatedResponse<OrganizationMember> { }
 export interface PaginatedWorkspaceMemberList extends PaginatedResponse<WorkspaceMember> { }
+export interface PaginatedProjectMemberList extends PaginatedResponse<ProjectMember> { }
 export interface PaginatedSystemLogList extends PaginatedResponse<SystemLog> { }
 export interface PaginatedErrorLogList extends PaginatedResponse<ErrorLog> { }
 
@@ -1057,6 +1112,7 @@ export interface DiagramRequestRequest {
   sprint?: string;   // UUID del sprint
   format?: DiagramFormat;
   options?: DiagramOptions;
+  parameters?: Record<string, any>;  // Filter parameters for diagrams
 }
 
 export interface DiagramOptions {
@@ -1077,6 +1133,8 @@ export interface DiagramOptions {
     theme?: 'light' | 'dark';
     color_scheme?: string;
   };
+  cache_buster?: number; // Timestamp to bust cache on refresh
+  force_refresh?: boolean; // Force backend to regenerate diagram (ignore cache)
 }
 
 export interface DiagramResponse {
@@ -1146,11 +1204,21 @@ export interface DependencyLink {
 
 // Roadmap Diagram Data
 export interface RoadmapDiagramData {
+  diagram_type: 'roadmap';
+  layout: {
+    type: string;
+    width: number;
+    height: number;
+  };
   sprints: RoadmapSprint[];
   milestones: RoadmapMilestone[];
-  timeline: {
+  metadata: {
+    project_id: string;
+    project_name: string;
     start_date: string;
     end_date: string;
+    today: string;
+    sprint_count: number;
   };
 }
 
@@ -1159,9 +1227,14 @@ export interface RoadmapSprint {
   name: string;
   start_date: string;
   end_date: string;
-  status: string;
+  status: 'planned' | 'active' | 'completed';
+  color: string;
   progress: number;
-  issues: RoadmapIssue[];
+  issue_count: number;
+  completed_count: number;
+  velocity: number | null;
+  // Legacy fields (kept for backward compatibility)
+  issues?: RoadmapIssue[];
   committed_points?: number;
   completed_points?: number;
 }
@@ -1178,12 +1251,15 @@ export interface RoadmapIssue {
 }
 
 export interface RoadmapMilestone {
-  id?: string;
+  id: string;
+  name: string;  // Backend uses 'name' not 'title'
   date: string;
-  title: string;
+  color: string;
   description?: string;
   type?: 'release' | 'demo' | 'deadline' | 'custom';
   achieved?: boolean;
+  // Legacy field (kept for backward compatibility)
+  title?: string;
 }
 
 // UML Diagram Data

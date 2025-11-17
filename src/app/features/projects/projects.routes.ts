@@ -18,10 +18,19 @@ export const projectsRoutes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./projects-dashboard/projects-dashboard.component').then(m => m.ProjectsDashboardComponent)
       },
-      // Issues route
+      // Issues routes
       {
         path: 'issues',
         loadComponent: () => import('./project-issues/issue-list/issue-list.component').then(m => m.IssueListComponent)
+      },
+      {
+        path: 'issues/:issueId',
+        loadComponent: () => import('./project-issues/issue-list/issue-list.component').then(m => m.IssueListComponent)
+      },
+      // Sprints route
+      {
+        path: 'sprints/:sprintId',
+        loadComponent: () => import('./projects-dashboard/projects-dashboard.component').then(m => m.ProjectsDashboardComponent)
       },
       // Activity route
       {

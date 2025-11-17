@@ -7,7 +7,11 @@ import {
   ProjectConfig,
   ProjectConfigRequest,
   PaginatedProjectList,
-  PaginationParams
+  PaginationParams,
+  ProjectMember,
+  ProjectMemberRequest,
+  PatchedProjectMemberRequest,
+  PaginatedProjectMemberList
 } from '../models/interfaces';
 import { environment } from '../../../environments/environment';
 
@@ -172,5 +176,46 @@ export class ProjectService {
 
   updateProjectConfig(projectId: string, configData: ProjectConfigRequest): Observable<ProjectConfig> {
     return this.http.put<ProjectConfig>(`${this.baseUrl}/configs/${projectId}/`, configData);
+  }
+
+  // Project Members Management
+  getProjectMembers(projectId: string, params?: PaginationParams): Observable<PaginatedProjectMemberList> {
+    let httpParams = new HttpParams();
+    
+    if (params?.page) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.ordering) {
+      httpParams = httpParams.set('ordering', params.ordering);
+    }
+    if (params?.role) {
+      httpParams = httpParams.set('role', params.role);
+    }
+
+    return this.http.get<PaginatedProjectMemberList>(
+      `${this.baseUrl}/projects/${projectId}/members/`, 
+      { params: httpParams }
+    );
+  }
+
+  addProjectMember(projectId: string, memberData: ProjectMemberRequest): Observable<ProjectMember> {
+    return this.http.post<ProjectMember>(
+      `${this.baseUrl}/projects/${projectId}/members/`, 
+      memberData
+    );
+  }
+
+  updateProjectMember(projectId: string, memberId: string, memberData: PatchedProjectMemberRequest): Observable<ProjectMember> {
+    return this.http.patch<ProjectMember>(
+      `${this.baseUrl}/projects/${projectId}/members/${memberId}/`, 
+      memberData
+    );
+  }
+
+  removeProjectMember(projectId: string, memberId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/projects/${projectId}/members/${memberId}/`);
   }
 }

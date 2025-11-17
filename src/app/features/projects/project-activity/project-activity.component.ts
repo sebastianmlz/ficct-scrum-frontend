@@ -1,12 +1,12 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ActivityLogService, ActivityLog } from '../../../core/services/activity-log.service';
 import { ProjectService } from '../../../core/services/project.service';
 
 @Component({
   selector: 'app-project-activity',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './project-activity.component.html',
   styleUrl: './project-activity.component.css'
 })
@@ -25,6 +25,12 @@ export class ProjectActivityComponent implements OnInit {
   // Filter states
   selectedActionType = signal<string>('');
   selectedObjectType = signal<string>('');
+  
+  // Pagination
+  currentPage = signal(1);
+  totalCount = signal(0);
+  hasMore = signal(false);
+  loadingMore = signal(false);
   
   // Expose Object for template
   Object = Object;
@@ -54,15 +60,24 @@ export class ProjectActivityComponent implements OnInit {
     }
   }
 
-  async loadActivities(): Promise<void> {
-    this.loading.set(true);
+  async loadActivities(page: number = 1): Promise<void> {
+    const isLoadingMore = page > 1;
+    
+    if (isLoadingMore) {
+      this.loadingMore.set(true);
+    } else {
+      this.loading.set(true);
+      this.currentPage.set(1);
+    }
+    
     this.error.set(null);
 
     try {
       const params: any = {
         project: this.projectId,  // Use project UUID instead of project_key
         ordering: '-created_at',
-        limit: 50
+        page: page,
+        limit: 20  // Changed to 20 per page for better pagination
       };
 
       // Add filters if selected
@@ -74,12 +89,53 @@ export class ProjectActivityComponent implements OnInit {
       }
 
       const response = await this.activityLogService.getActivityLogs(params).toPromise();
-      this.activities.set(response?.results || []);
+      
+      // Log API response for debugging
+      console.log('[ACTIVITY FEED] API Response:', {
+        count: response?.count,
+        hasNext: !!response?.next,
+        resultsLength: response?.results?.length,
+        page: page
+      });
+      
+      // Log first activity to verify structure
+      if (response?.results && response.results.length > 0) {
+        console.log('[ACTIVITY FEED] Sample activity:', response.results[0]);
+        console.log('[ACTIVITY FEED] 🔗 object_url:', response.results[0].object_url);
+        console.log('[ACTIVITY FEED] 🔗 object_type:', response.results[0].object_type);
+        console.log('[ACTIVITY FEED] 🔗 object_id:', response.results[0].object_id);
+      }
+      
+      // Log all object URLs for navigation debugging
+      response?.results?.forEach((activity, index) => {
+        if (activity.object_url) {
+          console.log(`[ACTIVITY FEED] Activity ${index}: ${activity.action_type} ${activity.object_type} → URL: ${activity.object_url}`);
+        }
+      });
+      
+      if (isLoadingMore) {
+        // Append to existing activities
+        this.activities.set([...this.activities(), ...(response?.results || [])]);
+      } else {
+        // Replace activities
+        this.activities.set(response?.results || []);
+      }
+      
+      this.currentPage.set(page);
+      this.totalCount.set(response?.count || 0);
+      this.hasMore.set(!!response?.next);
     } catch (error: any) {
       console.error('Error loading activities:', error);
       this.error.set('Failed to load activity history');
     } finally {
       this.loading.set(false);
+      this.loadingMore.set(false);
+    }
+  }
+
+  loadMore(): void {
+    if (!this.loadingMore() && this.hasMore()) {
+      this.loadActivities(this.currentPage() + 1);
     }
   }
 
@@ -125,6 +181,14 @@ export class ProjectActivityComponent implements OnInit {
       'linked': 'text-teal-600 bg-teal-100'
     };
     return colors[actionType] || 'text-gray-600 bg-gray-100';
+  }
+
+  logNavigation(activity: ActivityLog): void {
+    console.log('[ACTIVITY FEED] 🔗 View link clicked');
+    console.log('[ACTIVITY FEED] 🔗 Navigating to:', activity.object_url);
+    console.log('[ACTIVITY FEED] 🔗 Object type:', activity.object_type);
+    console.log('[ACTIVITY FEED] 🔗 Object ID:', activity.object_id);
+    console.log('[ACTIVITY FEED] 🔗 Action type:', activity.action_type);
   }
 }
 

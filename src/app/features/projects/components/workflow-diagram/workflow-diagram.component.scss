@@ -1,5 +1,121 @@
 // Workflow Diagram Component Styles
 
+// Fullscreen mode
+.fullscreen-mode {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999;
+  background: #f9fafb;
+  overflow: auto;
+}
+
+// Container sizing
+.diagram-page-container {
+  transition: all 0.3s ease;
+}
+
+.container-fullscreen {
+  max-width: none !important;
+  width: 100% !important;
+  height: 100vh;
+  padding: 16px;
+  margin: 0;
+}
+
+.container-normal {
+  max-width: 96rem; // 1536px - expanded from 80rem
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+// Diagram viewport
+.diagram-viewport {
+  width: 100%;
+  min-height: 600px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  position: relative;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.diagram-viewport-fullscreen {
+  min-height: calc(100vh - 140px);
+  height: calc(100vh - 140px);
+}
+
+// Zoom wrapper
+.diagram-zoom-wrapper {
+  transition: transform 0.2s ease;
+  transform-origin: top left;
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+// Floating zoom controls
+.floating-zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 
+              0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  
+  button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #6b7280;
+    
+    &:hover:not(:disabled) {
+      background: #f3f4f6;
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  .zoom-level {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 4px 0;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 4px;
+    padding-top: 8px;
+  }
+}
+
 .diagram-container {
   width: 100%;
   min-height: 400px;
@@ -11,13 +127,98 @@
 
 .diagram-svg-container {
   position: relative;
+  min-height: 400px; // Ensure container has minimum height
+  width: 100%; // Full width
   overflow: visible; // Ensure SVG content is not clipped on desktop
+  background: #ffffff; // White background for contrast
+  border-radius: 8px;
+  padding: 16px;
   
   svg {
-    max-width: 100%;
-    height: auto;
-    display: block;
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    display: block !important;
   }
+  
+  // CRITICAL: Override backend SVG text styling for visibility
+  :deep(svg) {
+    // Ensure SVG is responsive
+    width: 100% !important;
+    height: auto !important;
+    
+    // Force all text elements to be highly visible
+    text {
+      // Backend now uses #172B4D for primary text - ensure it's visible
+      fill: #172B4D !important; // Dark blue-gray for text (backend color)
+      font-weight: 600 !important; // Bold for readability
+      font-family: system-ui, -apple-system, sans-serif !important;
+      font-size: 12px !important; // Minimum font size
+      paint-order: stroke fill !important; // Stroke behind fill
+      
+      // Add text stroke for contrast against any background
+      stroke: #ffffff !important; // White stroke/outline
+      stroke-width: 2px !important; // Slightly thinner for backend's improved contrast
+      stroke-linecap: round !important;
+      stroke-linejoin: round !important;
+      
+      // Add text shadow for additional visibility
+      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+    }
+    
+    // Ensure text is never transparent or same color as background
+    tspan {
+      fill: #172B4D !important; // Backend primary text color
+      stroke: #ffffff !important;
+      stroke-width: 2px !important;
+      font-size: 12px !important;
+    }
+    
+    // Text inside dark rectangles needs white fill
+    rect[fill*="#00"],
+    rect[fill*="#5E"],
+    rect[fill*="#00875A"],
+    rect[fill*="#0052CC"],
+    rect[fill*="#DE350B"] {
+      ~ text, ~ g text {
+        fill: #ffffff !important; // White text on dark backgrounds
+        stroke: rgba(0, 0, 0, 0.3) !important; // Dark stroke for contrast
+        stroke-width: 1px !important;
+      }
+    }
+    
+    // Make sure shapes have proper fill and stroke
+    rect, circle, ellipse, polygon {
+      &[fill="none"], &:not([fill]) {
+        fill: #ffffff !important; // White background for shapes
+      }
+      
+      stroke-width: 2px !important;
+      
+      // Ensure status boxes have visible borders
+      &[fill*="#"] {
+        stroke: rgba(0, 0, 0, 0.15) !important;
+      }
+    }
+    
+    // Lines and connectors
+    line, polyline, path[stroke] {
+      stroke: #6b7280 !important; // Medium gray
+      stroke-width: 2px !important;
+    }
+    
+    // Ensure title and desc are not displayed
+    title, desc {
+      display: none !important;
+    }
+    
+    // Enhance contrast for all elements
+    filter: contrast(1.05) brightness(1.02);
+  }
+  
+  // Zoom transform applied to container
+  transition: transform 0.3s ease;
+  transform-origin: center center;
   
   // Horizontal scroll on mobile with visible scrollbar
   @media (max-width: 768px) {

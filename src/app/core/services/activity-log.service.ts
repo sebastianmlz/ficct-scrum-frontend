@@ -3,47 +3,71 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export interface ActivityLogUser {
-  id: string;
+export interface UserDetail {
+  id: number;
   email: string;
+  username: string;
   first_name: string;
   last_name: string;
-  full_name?: string;
-  avatar_url?: string;
+  full_name: string;
 }
 
-export interface ActivityLogOrganization {
+export interface ProjectDetail {
+  id: string;
+  name: string;
+  key: string;
+  methodology: string;
+  status: string;
+}
+
+export interface WorkspaceDetail {
   id: string;
   name: string;
   slug: string;
+  workspace_type: string;
 }
 
-export interface ActivityLogWorkspace {
+export interface OrganizationDetail {
   id: string;
   name: string;
-  key: string;
-}
-
-export interface ActivityLogProject {
-  id: string;
-  name: string;
-  key: string;
+  slug: string;
+  organization_type: string;
 }
 
 export interface ActivityLog {
+  // Core IDs
   id: string;
-  user_detail: ActivityLogUser;
-  organization_detail?: ActivityLogOrganization;
-  workspace_detail?: ActivityLogWorkspace;
-  project_detail?: ActivityLogProject;
+  user: number;
+  project: string;
+  workspace: string;
+  organization: string;
+
+  // Nested detail objects (from API)
+  user_detail: UserDetail;
+  project_detail: ProjectDetail;
+  workspace_detail: WorkspaceDetail;
+  organization_detail: OrganizationDetail;
+
+  // Redundant fields (kept for backward compatibility)
+  user_email: string;
+  user_name: string;
+
+  // Action information
   action_type: string;
   action_display: string;
   formatted_action: string;
+
+  // Object information
   object_repr: string;
-  object_type: string;
+  object_type: 'project' | 'issue' | 'sprint' | 'member';
   object_url: string;
   object_id: string;
-  changes?: Record<string, { old: any; new: any }>;
+
+  // Dynamic changes object (structure varies by action)
+  changes: Record<string, any>;
+
+  // Metadata
+  ip_address: string | null;
   time_ago: string;
   created_at: string;
 }
@@ -77,7 +101,7 @@ export interface ActivityLogParams {
   
   // Pagination
   page?: number;
-  limit?: number;
+  page_size?: number;  // DRF standard pagination parameter
   offset?: number;
   ordering?: string;
 }
@@ -116,7 +140,7 @@ export class ActivityLogService {
       
       // Pagination
       if (params.page) query += `&page=${params.page}`;
-      if (params.limit) query += `&limit=${params.limit}`;
+      if (params.page_size) query += `&page_size=${params.page_size}`;
       if (params.offset) query += `&offset=${params.offset}`;
       if (params.ordering) query += `&ordering=${params.ordering}`;
     }
