@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DiagramService } from '../../../../core/services/diagram.service';
@@ -9,6 +9,10 @@ import { MermaidViewerComponent } from '../../../../shared/components/mermaid-vi
 import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
 
 // Import Mermaid dynamically
+
+import { ElementRef, ViewChild, Inject } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
+import { effect } from '@angular/core';
 declare const mermaid: any;
 
 @Component({
@@ -21,6 +25,8 @@ declare const mermaid: any;
 export class UMLDiagramMermaidComponent implements OnInit {
   @Input() projectId!: string;
   @ViewChild(MermaidViewerComponent) mermaidViewer?: MermaidViewerComponent;
+
+  @ViewChild('mermaidContainer') mermaidContainer?: ElementRef<HTMLDivElement>;
 
   // Data
   umlData: any | null = null;
@@ -49,7 +55,7 @@ export class UMLDiagramMermaidComponent implements OnInit {
     private diagramService: DiagramService,
     private mermaidGenerator: MermaidGeneratorService,
     private githubService: GitHubIntegrationService,
-    private sanitizer: DomSanitizer
+    @Inject(DomSanitizer) private sanitizer: DomSanitizer
   ) {
     // Get projectId from route if not provided as Input
     if (!this.projectId) {
