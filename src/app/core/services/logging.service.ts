@@ -1,20 +1,20 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
 import {
   SystemLog,
   ErrorLog,
   PaginatedSystemLogList,
   PaginatedErrorLogList,
   SystemLogQueryParams,
-  ErrorLogQueryParams
+  ErrorLogQueryParams,
 } from '../models/interfaces';
 // import { environment } from '../../../environments/environment';
-import { environment } from '../../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoggingService {
   private http = inject(HttpClient);
@@ -22,7 +22,7 @@ export class LoggingService {
 
   getSystemLogs(params?: SystemLogQueryParams): Observable<PaginatedSystemLogList> {
     let httpParams = new HttpParams();
-    
+
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
     }
@@ -45,7 +45,7 @@ export class LoggingService {
       httpParams = httpParams.set('user', params.user.toString());
     }
 
-    return this.http.get<PaginatedSystemLogList>(`${this.baseUrl}/system-logs/`, { params: httpParams });
+    return this.http.get<PaginatedSystemLogList>(`${this.baseUrl}/system-logs/`, {params: httpParams});
   }
 
   getSystemLog(id: string): Observable<SystemLog> {
@@ -54,7 +54,7 @@ export class LoggingService {
 
   getErrorLogs(params?: ErrorLogQueryParams): Observable<PaginatedErrorLogList> {
     let httpParams = new HttpParams();
-    
+
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
     }
@@ -74,7 +74,7 @@ export class LoggingService {
       httpParams = httpParams.set('status', params.status);
     }
 
-    return this.http.get<PaginatedErrorLogList>(`${this.baseUrl}/error-logs/`, { params: httpParams });
+    return this.http.get<PaginatedErrorLogList>(`${this.baseUrl}/error-logs/`, {params: httpParams});
   }
 
   getErrorLog(id: string): Observable<ErrorLog> {
@@ -82,11 +82,11 @@ export class LoggingService {
   }
 
   updateErrorLogStatus(id: string, status: string, notes?: string): Observable<ErrorLog> {
-    const data: any = { status };
+    const data: any = {status};
     if (notes) {
       data.notes = notes;
     }
-    
+
     return this.http.patch<ErrorLog>(`${this.baseUrl}/error-logs/${id}/`, data);
   }
 }

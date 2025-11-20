@@ -1,15 +1,15 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { WorkspacesService } from '../../../core/services/workspaces.service';
-import { Workspace } from '../../../core/models/interfaces';
-import { NotificationService } from '../../../core/services/notification.service';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {WorkspacesService} from '../../../core/services/workspaces.service';
+import {Workspace} from '../../../core/models/interfaces';
+import {NotificationService} from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-workspace-detail',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './workspace-detail.component.html'
+  templateUrl: './workspace-detail.component.html',
 })
 export class WorkspaceDetailComponent implements OnInit {
   workspace = signal<Workspace | null>(null);
@@ -23,11 +23,11 @@ export class WorkspaceDetailComponent implements OnInit {
     private workspacesService: WorkspacesService,
     private route: ActivatedRoute,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.workspaceId.set(params['id']);
       if (this.workspaceId()) {
         this.loadWorkspace();
@@ -47,14 +47,14 @@ export class WorkspaceDetailComponent implements OnInit {
       error: (err: Error) => {
         this.error.set(err.message || 'Failed to load workspace');
         this.loading.set(false);
-      }
+      },
     });
   }
 
   goBack(): void {
     const orgId = this.workspace()?.organization_details?.id;
     if (orgId) {
-      this.router.navigate(['/workspaces'], { queryParams: { organization: orgId } });
+      this.router.navigate(['/workspaces'], {queryParams: {organization: orgId}});
     } else {
       this.router.navigate(['/organizations']);
     }
@@ -65,7 +65,7 @@ export class WorkspaceDetailComponent implements OnInit {
   }
 
   viewProjects(): void {
-    this.router.navigate(['/projects'], { queryParams: { workspace: this.workspaceId() } });
+    this.router.navigate(['/projects'], {queryParams: {workspace: this.workspaceId()}});
   }
 
   viewMembers(): void {
@@ -82,7 +82,7 @@ export class WorkspaceDetailComponent implements OnInit {
 
   deleteWorkspace(): void {
     this.deleting.set(true);
-    
+
     this.workspacesService.deleteWorkspace(this.workspaceId()).subscribe({
       next: () => {
         this.notificationService.success('Workspace deleted successfully');
@@ -92,7 +92,7 @@ export class WorkspaceDetailComponent implements OnInit {
         this.notificationService.error(err.message || 'Failed to delete workspace');
         this.deleting.set(false);
         this.showDeleteConfirm.set(false);
-      }
+      },
     });
   }
 
@@ -109,7 +109,7 @@ export class WorkspaceDetailComponent implements OnInit {
       'team': 'Team',
       'project': 'Project',
       'department': 'Department',
-      'other': 'Other'
+      'other': 'Other',
     };
     return labels[type] || type;
   }
@@ -118,7 +118,7 @@ export class WorkspaceDetailComponent implements OnInit {
     const classes: Record<string, string> = {
       'public': 'bg-green-100 text-green-800',
       'private': 'bg-gray-100 text-gray-800',
-      'restricted': 'bg-yellow-100 text-yellow-800'
+      'restricted': 'bg-yellow-100 text-yellow-800',
     };
     return classes[visibility] || 'bg-gray-100 text-gray-800';
   }
@@ -136,7 +136,7 @@ export class WorkspaceDetailComponent implements OnInit {
       'team': 'TM',
       'project': 'PRJ',
       'department': 'DEPT',
-      'other': 'OTH'
+      'other': 'OTH',
     };
     return initials[type] || 'WSP';
   }
@@ -154,7 +154,7 @@ export class WorkspaceDetailComponent implements OnInit {
       'team': 'bg-teal-100 text-teal-800',
       'project': 'bg-cyan-100 text-cyan-800',
       'department': 'bg-red-100 text-red-800',
-      'other': 'bg-gray-100 text-gray-800'
+      'other': 'bg-gray-100 text-gray-800',
     };
     return classes[type] || 'bg-gray-100 text-gray-800';
   }

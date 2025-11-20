@@ -1,13 +1,13 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MlService, EstimateSprintDurationResponse } from '../../../../core/services/ml.service';
+import {Component, Input, Output, EventEmitter, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {MlService, EstimateSprintDurationResponse} from '../../../../core/services/ml.service';
 
 @Component({
   selector: 'app-ml-estimate-sprint',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './ml-estimate-sprint.component.html'
+  templateUrl: './ml-estimate-sprint.component.html',
 })
 export class MlEstimateSprintComponent {
   @Input() sprintId!: string;
@@ -33,7 +33,7 @@ export class MlEstimateSprintComponent {
 
     try {
       const request: any = {
-        sprint_id: this.sprintId
+        sprint_id: this.sprintId,
       };
 
       if (this.scopeChangePercentage !== null && this.scopeChangePercentage > 0) {
@@ -57,7 +57,7 @@ export class MlEstimateSprintComponent {
       }
     } catch (error: any) {
       console.error('[ML Frontend] Error estimating sprint duration:', error);
-      
+
       // Mejorar manejo de errores según respuestas del backend
       const errorMsg = error?.error?.error || error?.error?.detail || error?.error?.message || error?.message || 'Failed to estimate sprint duration';
       this.error.set(errorMsg);
@@ -77,7 +77,7 @@ export class MlEstimateSprintComponent {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 

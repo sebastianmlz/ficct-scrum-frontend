@@ -1,14 +1,14 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { OrganizationService } from '../../../core/services/organization.service';
-import { Organization } from '../../../core/models/interfaces';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {OrganizationService} from '../../../core/services/organization.service';
+import {Organization} from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-organization-detail',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './organization-detail.component.html'
+  templateUrl: './organization-detail.component.html',
 })
 export class OrganizationDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -20,7 +20,7 @@ export class OrganizationDetailComponent implements OnInit {
   error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.loadOrganization(id);
@@ -45,8 +45,8 @@ export class OrganizationDetailComponent implements OnInit {
   }
 
   getStatusBadgeClass(isActive: boolean): string {
-    return isActive 
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
+    return isActive ?
+      'bg-green-100 text-green-800' :
+      'bg-red-100 text-red-800';
   }
 }

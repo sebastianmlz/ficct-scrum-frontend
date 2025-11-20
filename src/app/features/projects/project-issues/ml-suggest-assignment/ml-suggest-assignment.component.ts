@@ -1,15 +1,15 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MlService, SuggestAssignmentResponse, AssignmentSuggestion } from '../../../../core/services/ml.service';
-import { IssueService } from '../../../../core/services/issue.service';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MlService, SuggestAssignmentResponse, AssignmentSuggestion} from '../../../../core/services/ml.service';
+import {IssueService} from '../../../../core/services/issue.service';
 
 @Component({
   selector: 'app-ml-suggest-assignment',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './ml-suggest-assignment.component.html'
+  templateUrl: './ml-suggest-assignment.component.html',
 })
-export class MlSuggestAssignmentComponent {
+export class MlSuggestAssignmentComponent implements OnInit {
   @Input() issueId!: string;
   @Input() projectId!: string;
   @Output() close = new EventEmitter<void>();
@@ -40,12 +40,12 @@ export class MlSuggestAssignmentComponent {
     try {
       console.log('[ML] Requesting assignment suggestion with:', {
         issue_id: this.issueId,
-        project_id: this.projectId
+        project_id: this.projectId,
       });
 
       const result = await this.mlService.suggestAssignment({
         issue_id: this.issueId,
-        project_id: this.projectId
+        project_id: this.projectId,
       }).toPromise();
 
       console.log('[ML] Assignment suggestion response:', result);
@@ -61,15 +61,15 @@ export class MlSuggestAssignmentComponent {
       }
     } catch (error: any) {
       console.error('[ML Suggest Assignment] Error:', error);
-      
+
       // Handle different error types
       if (error.message === 'Session expired') {
         // Auth interceptor already handled this
         return;
       }
-      
+
       let errorMsg = 'Failed to get assignment suggestions';
-      
+
       if (error.status === 0) {
         errorMsg = 'Connection lost. Please check your internet and try again.';
       } else if (error.status === 400) {
@@ -81,7 +81,7 @@ export class MlSuggestAssignmentComponent {
       } else {
         errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
       }
-      
+
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);
@@ -97,7 +97,7 @@ export class MlSuggestAssignmentComponent {
     if (!selected) return;
 
     this.assigning.set(true);
-    
+
     try {
       // Usar el endpoint de asignación del IssueService
       await this.issueService.assignIssue(this.issueId).toPromise();

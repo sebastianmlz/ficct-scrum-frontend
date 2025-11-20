@@ -1,12 +1,12 @@
-import { Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
-import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { GitHubMetrics } from '../../../../core/models/interfaces';
-import { Chart, registerables } from 'chart.js';
-import { GitHubConnectPromptComponent } from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
+import {Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
+import {GitHubIntegrationStateService} from '../../../../core/services/github-integration-state.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {GitHubMetrics} from '../../../../core/models/interfaces';
+import {Chart, registerables} from 'chart.js';
+import {GitHubConnectPromptComponent} from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -16,7 +16,7 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CommonModule, GitHubConnectPromptComponent],
   templateUrl: './metrics-dashboard.component.html',
-  styleUrls: ['./metrics-dashboard.component.scss']
+  styleUrls: ['./metrics-dashboard.component.scss'],
 })
 export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('commitTrendCanvas') commitTrendCanvas!: ElementRef<HTMLCanvasElement>;
@@ -33,12 +33,12 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
   metrics = signal<GitHubMetrics | null>(null);
   loading = signal(false);
   noIntegration = signal(false);
-  
+
   private commitTrendChart: Chart | null = null;
   private prStatusChart: Chart | null = null;
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -54,9 +54,9 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
   loadIntegrationAndMetrics(): void {
     this.loading.set(true);
     this.noIntegration.set(false);
-    
+
     console.log('[METRICS] Using centralized state service for integration check');
-    
+
     // Use centralized state service
     this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
@@ -74,7 +74,7 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
         console.error('[METRICS] Error from state service:', error);
         this.noIntegration.set(true);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -92,7 +92,7 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
         this.notificationService.error('Failed to load metrics');
         console.error('[METRICS] Error loading metrics:', error);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -118,17 +118,17 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
 
     // Parse commit_frequency (dict format from backend)
     let commitData: { date: string; count: number }[] = [];
-    
+
     if (metrics.commit_frequency) {
       // Backend sends: { "2025-10-04": 5, "2025-10-05": 3, ... }
       commitData = Object.entries(metrics.commit_frequency)
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      
+          .map(([date, count]) => ({date, count}))
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
       console.log('[METRICS] Parsed commit_frequency:', commitData.length, 'data points');
     } else if (metrics.commit_activity) {
       // Fallback to legacy format
-      commitData = metrics.commit_activity.map(a => ({ date: a.date, count: a.commits }));
+      commitData = metrics.commit_activity.map((a) => ({date: a.date, count: a.commits}));
     }
 
     if (commitData.length === 0) {
@@ -136,9 +136,9 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
       return;
     }
 
-    const labels = commitData.map(item => {
+    const labels = commitData.map((item) => {
       const date = new Date(item.date);
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
     });
 
     this.commitTrendChart = new Chart(ctx, {
@@ -148,13 +148,13 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
         datasets: [
           {
             label: 'Commits',
-            data: commitData.map(item => item.count),
+            data: commitData.map((item) => item.count),
             borderColor: '#3B82F6',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,
-            fill: true
-          }
-        ]
+            fill: true,
+          },
+        ],
       },
       options: {
         responsive: true,
@@ -162,22 +162,22 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
         plugins: {
           legend: {
             display: true,
-            position: 'top'
+            position: 'top',
           },
           tooltip: {
             mode: 'index',
-            intersect: false
-          }
+            intersect: false,
+          },
         },
         scales: {
           y: {
             beginAtZero: true,
             ticks: {
-              precision: 0
-            }
-          }
-        }
-      }
+              precision: 0,
+            },
+          },
+        },
+      },
     });
   }
 
@@ -204,7 +204,7 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
       return;
     }
 
-    console.log('[METRICS] PR status:', { open: openPRs, merged: mergedPRs, closed: closedPRs });
+    console.log('[METRICS] PR status:', {open: openPRs, merged: mergedPRs, closed: closedPRs});
 
     this.prStatusChart = new Chart(ctx, {
       type: 'doughnut',
@@ -215,9 +215,9 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
           backgroundColor: [
             '#10B981', // green for open
             '#8B5CF6', // purple for merged
-            '#EF4444'  // red for closed
-          ]
-        }]
+            '#EF4444', // red for closed
+          ],
+        }],
       },
       options: {
         responsive: true,
@@ -225,10 +225,10 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
         plugins: {
           legend: {
             display: true,
-            position: 'bottom'
-          }
-        }
-      }
+            position: 'bottom',
+          },
+        },
+      },
     });
   }
 

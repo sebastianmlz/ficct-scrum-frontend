@@ -1,17 +1,18 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FileUploadComponent, FileUploadEvent } from '../file-upload/file-upload.component';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FileUploadEvent}
+  from '../file-upload/file-upload.component';
 
 @Component({
   selector: 'app-avatar-upload',
   standalone: true,
-  imports: [CommonModule, FileUploadComponent],
+  imports: [CommonModule],
   template: 'avatar-upload.component.html',
 })
 export class AvatarUploadComponent {
   @Input() currentAvatarUrl?: string;
-  @Input() altText: string = 'Avatar';
-  
+  @Input() altText = 'Avatar';
+
   @Output() avatarSelected = new EventEmitter<File>();
   @Output() avatarRemoved = new EventEmitter<void>();
   @Output() uploadError = new EventEmitter<string>();

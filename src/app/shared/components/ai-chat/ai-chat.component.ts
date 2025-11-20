@@ -1,14 +1,16 @@
-import { Component, Input, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AiService, AIChatResponse, AISource } from '../../../core/services/ai.service';
-import { IssueDetailModalComponent } from '../issue-detail-modal/issue-detail-modal.component';
+import {Component, Input, signal, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {AiService, AISource} from '../../../core/services/ai.service';
+import {IssueDetailModalComponent}
+  from '../issue-detail-modal/issue-detail-modal.component';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  sources?: AISource[];  // Backend returns source objects with issue_id, title, similarity
+  sources?: AISource[]; // Backend returns source objects with issue_id,
+                        // title, similarity
   confidence?: number;
   tokens_used?: number;
   suggested_actions?: string[];
@@ -19,13 +21,13 @@ interface ChatMessage {
   standalone: true,
   imports: [CommonModule, FormsModule, IssueDetailModalComponent],
   templateUrl: './ai-chat.component.html',
-  styleUrl: './ai-chat.component.css'
+  styleUrl: './ai-chat.component.css',
 })
 export class AiChatComponent implements OnInit {
   @Input() projectId!: string;
-  
+
   private aiService = inject(AiService);
-  
+
   // Issue detail modal
   showIssueDetailModal = signal(false);
   selectedIssueId = signal<string | null>(null);
@@ -37,7 +39,7 @@ export class AiChatComponent implements OnInit {
   error = signal<string | null>(null);
   messages = signal<ChatMessage[]>([]);
   conversationId = signal<string | null>(null);
-  
+
   // Form
   messageInput = signal('');
 
@@ -45,20 +47,22 @@ export class AiChatComponent implements OnInit {
     // Mensaje de bienvenida
     this.messages.set([{
       role: 'assistant',
-      content: '¡Hola! Soy tu asistente AI. Puedo ayudarte con información del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ayudarte?',
-      timestamp: new Date()
+      content: '¡Hola! Soy tu asistente AI. Puedo ayudarte con información ' +
+      'del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ' +
+      'ayudarte?',
+      timestamp: new Date(),
     }]);
   }
 
   toggleChat(): void {
-    this.isOpen.update(v => !v);
+    this.isOpen.update((v) => !v);
     if (this.isOpen()) {
       this.isMinimized.set(false);
     }
   }
 
   toggleMinimize(): void {
-    this.isMinimized.update(v => !v);
+    this.isMinimized.update((v) => !v);
   }
 
   closeChat(): void {
@@ -68,7 +72,7 @@ export class AiChatComponent implements OnInit {
 
   async sendMessage(): Promise<void> {
     const question = this.messageInput().trim();
-    
+
     if (!question || this.loading()) return;
 
     // Validar que tengamos projectId
@@ -81,10 +85,10 @@ export class AiChatComponent implements OnInit {
     const userMessage: ChatMessage = {
       role: 'user',
       content: question,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    this.messages.update(msgs => [...msgs, userMessage]);
-    
+    this.messages.update((msgs) => [...msgs, userMessage]);
+
     // Limpiar input
     this.messageInput.set('');
     this.loading.set(true);
@@ -94,7 +98,7 @@ export class AiChatComponent implements OnInit {
       const request: any = {
         question: question,
         project_id: this.projectId,
-        conversation_id: this.conversationId() || undefined
+        conversation_id: this.conversationId() || undefined,
       };
       const response = await this.aiService.chat(request).toPromise();
 
@@ -110,19 +114,21 @@ export class AiChatComponent implements OnInit {
           sources: response.sources,
           confidence: response.confidence,
           tokens_used: response.tokens_used,
-          suggested_actions: response.suggested_actions
+          suggested_actions: response.suggested_actions,
         };
-        this.messages.update(msgs => [...msgs, assistantMessage]);
+        this.messages.update((msgs) => [...msgs, assistantMessage]);
       }
     } catch (err: any) {
-      this.error.set(err.error?.error || 'Failed to send message. Please try again.');
-      
+      this.error.set(err.error?.error ||
+        'Failed to send message. Please try again.');
+
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: 'Lo siento, ocurrió un error al procesar tu mensaje. Por favor intenta de nuevo.',
-        timestamp: new Date()
+        content: 'Lo siento, ocurrió un error al procesar tu mensaje. Por' +
+        ' favor intenta de nuevo.',
+        timestamp: new Date(),
       };
-      this.messages.update(msgs => [...msgs, errorMessage]);
+      this.messages.update((msgs) => [...msgs, errorMessage]);
     } finally {
       this.loading.set(false);
     }
@@ -131,8 +137,10 @@ export class AiChatComponent implements OnInit {
   clearConversation(): void {
     this.messages.set([{
       role: 'assistant',
-      content: '¡Hola! Soy tu asistente AI. Puedo ayudarte con información del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ayudarte?',
-      timestamp: new Date()
+      content: '¡Hola! Soy tu asistente AI. Puedo ayudarte con información' +
+      ' del proyecto, buscar issues, generar resúmenes y más. ¿En qué puedo ' +
+      'ayudarte?',
+      timestamp: new Date(),
     }]);
     this.conversationId.set(null);
     this.messageInput.set('');
@@ -151,8 +159,12 @@ export class AiChatComponent implements OnInit {
   }
 
   getScoreClass(score: number): string {
-    if (score >= 0.8) return 'bg-green-100 text-green-800 border border-green-200';
-    if (score >= 0.6) return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    if (score >= 0.8) {
+      return 'bg-green-100 text-green-800 border border-green-200';
+    }
+    if (score >= 0.6) {
+      return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    }
     return 'bg-gray-100 text-gray-800 border border-gray-200';
   }
 

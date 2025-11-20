@@ -1,20 +1,20 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
-import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { GitHubCommit, PaginatedGitHubCommitList } from '../../../../core/models/interfaces';
-import { GitHubConnectPromptComponent } from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
-import { Subscription } from 'rxjs';
+import {Component, inject, OnInit, OnDestroy, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
+import {GitHubIntegrationStateService} from '../../../../core/services/github-integration-state.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {GitHubCommit, PaginatedGitHubCommitList} from '../../../../core/models/interfaces';
+import {GitHubConnectPromptComponent} from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-commits-list',
   standalone: true,
   imports: [CommonModule, FormsModule, GitHubConnectPromptComponent],
   templateUrl: './commits-list.component.html',
-  styleUrls: ['./commits-list.component.scss']
+  styleUrls: ['./commits-list.component.scss'],
 })
 export class CommitsListComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -28,25 +28,25 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   loading = signal(false);
   syncing = signal(false);
   noIntegration = signal(false);
-  
+
   // Sync status
-  syncCount = signal(0);              // How many NEW commits were synced
-  lastSyncAt = signal<string | null>(null);  // Last sync timestamp
-  
+  syncCount = signal(0); // How many NEW commits were synced
+  lastSyncAt = signal<string | null>(null); // Last sync timestamp
+
   // Pagination
   page = signal(1);
   pageSize = 50;
   totalCommits = signal(0);
   hasMore = signal(true);
-  
+
   // Filters
   searchTerm = signal('');
   selectedAuthor = signal<string | null>(null);
-  
+
   private subscriptions: Subscription[] = [];
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -58,7 +58,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   checkIntegrationAndLoadCommits(): void {
     this.loading.set(true);
     this.noIntegration.set(false);
-    
+
     // Use centralized state service
     this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
@@ -74,7 +74,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
         console.error('[COMMITS] Error checking integration status:', error);
         this.noIntegration.set(true);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -82,7 +82,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
     console.log('[COMMITS] Auto-syncing commits on component load...');
     this.syncing.set(true);
     this.loading.set(false); // Hide initial loading, show sync state
-    
+
     this.githubService.syncCommits(integrationId).subscribe({
       next: (syncResponse) => {
         console.log('[COMMITS] Auto-sync completed:', syncResponse);
@@ -92,10 +92,10 @@ export class CommitsListComponent implements OnInit, OnDestroy {
           this.totalCommits.set(syncResponse.total_commits);
           this.syncCount.set(syncResponse.synced_count);
           this.lastSyncAt.set(syncResponse.last_sync_at);
-          
+
           if (syncResponse.synced_count > 0) {
             this.notificationService.success(
-              `Auto-synced ${syncResponse.synced_count} new commits`
+                `Auto-synced ${syncResponse.synced_count} new commits`,
             );
           } else {
             this.notificationService.info('Already up to date');
@@ -110,28 +110,28 @@ export class CommitsListComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('[COMMITS] Auto-sync failed:', error);
         this.syncing.set(false);
-        
+
         // Fallback: Load existing commits from DB if sync fails
         this.notificationService.error('Sync failed, loading existing commits');
         this.loadCommits();
-      }
+      },
     });
   }
 
   loadCommits(append = false): void {
     if (this.loading()) return;
-    
+
     this.loading.set(true);
-    
+
     const params: any = {
-      project: this.projectId(),  // CRITICAL: Filter by project
+      project: this.projectId(), // CRITICAL: Filter by project
       page: this.page(),
-      page_size: this.pageSize
+      page_size: this.pageSize,
     };
-    
+
     if (this.searchTerm()) params.search = this.searchTerm();
     if (this.selectedAuthor()) params.author = this.selectedAuthor();
-    
+
     this.githubService.getAllCommits(params).subscribe({
       next: (response: PaginatedGitHubCommitList) => {
         if (append) {
@@ -147,7 +147,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
         this.notificationService.error('Failed to load commits');
         console.error('Error loading commits:', error);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -167,8 +167,8 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   syncCommits(): void {
     // Find active integration for this project
     this.syncing.set(true);
-    
-    this.githubService.getIntegrations({ project: this.projectId() }).subscribe({
+
+    this.githubService.getIntegrations({project: this.projectId()}).subscribe({
       next: (response) => {
         if (response.results.length > 0) {
           const integration = response.results[0];
@@ -177,12 +177,12 @@ export class CommitsListComponent implements OnInit, OnDestroy {
               // Backend returns commits directly in response (up to 50)
               if (syncResponse.commits && syncResponse.commits.length > 0) {
                 this.commits.set(syncResponse.commits);
-                this.totalCommits.set(syncResponse.total_commits);  // Total in database
-                this.syncCount.set(syncResponse.synced_count);      // New commits synced
-                this.lastSyncAt.set(syncResponse.last_sync_at);     // Timestamp
-                
+                this.totalCommits.set(syncResponse.total_commits); // Total in database
+                this.syncCount.set(syncResponse.synced_count); // New commits synced
+                this.lastSyncAt.set(syncResponse.last_sync_at); // Timestamp
+
                 this.notificationService.success(
-                  `Successfully synced ${syncResponse.synced_count} new commits`
+                    `Successfully synced ${syncResponse.synced_count} new commits`,
                 );
               } else {
                 this.notificationService.info('No new commits to sync');
@@ -202,7 +202,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
                 this.notificationService.error('Failed to sync commits');
               }
               this.syncing.set(false);
-            }
+            },
           });
         } else {
           this.notificationService.error('No GitHub integration found for this project');
@@ -212,7 +212,7 @@ export class CommitsListComponent implements OnInit, OnDestroy {
       error: () => {
         this.notificationService.error('Failed to find GitHub integration');
         this.syncing.set(false);
-      }
+      },
     });
   }
 
@@ -224,19 +224,19 @@ export class CommitsListComponent implements OnInit, OnDestroy {
 
   openIssue(issueKey: string): void {
     // Navigate to issue detail by key
-    this.router.navigate(['/projects', this.projectId(), 'issues'], { 
-      queryParams: { search: issueKey } 
+    this.router.navigate(['/projects', this.projectId(), 'issues'], {
+      queryParams: {search: issueKey},
     });
   }
 
   getTimeAgo(date: string | null | undefined): string {
     if (!date) return '';
-    
+
 
     const now = new Date();
     const commitDate = new Date(date);
     const seconds = Math.floor((now.getTime() - commitDate.getTime()) / 1000);
-    
+
     if (seconds < 60) return `${seconds}s ago`;
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
@@ -257,6 +257,6 @@ export class CommitsListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

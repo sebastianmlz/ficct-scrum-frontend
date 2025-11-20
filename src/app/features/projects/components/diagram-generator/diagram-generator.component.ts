@@ -1,13 +1,14 @@
-import { Component, OnInit, signal, inject, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { 
-  GitHubDiagramService, 
-  DiagramErrorResponse, 
-  ParsedDiagramResponse 
+import {Component, OnInit, signal, inject, computed} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {
+  GitHubDiagramService,
+  DiagramErrorResponse,
+  ParsedDiagramResponse,
 } from '../../../../core/services/github-diagram.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { GitHubIntegration } from '../../../../core/models/interfaces';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
+import {GitHubIntegration} from '../../../../core/models/interfaces';
 
 type DiagramType = 'uml' | 'architecture' | null;
 
@@ -24,7 +25,7 @@ interface ErrorMessageConfig {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './diagram-generator.component.html',
-  styleUrls: ['./diagram-generator.component.scss']
+  styleUrls: ['./diagram-generator.component.scss'],
 })
 export class DiagramGeneratorComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -34,7 +35,7 @@ export class DiagramGeneratorComponent implements OnInit {
 
   // State signals
   projectId = signal<string>('');
-  hasGitHubIntegration = signal<boolean | null>(null); // null = checking, true/false = determined
+  hasGitHubIntegration = signal<boolean | null>(null);
   integration = signal<GitHubIntegration | null>(null);
   isLoading = signal<boolean>(false);
   selectedDiagramType = signal<DiagramType>(null);
@@ -44,7 +45,8 @@ export class DiagramGeneratorComponent implements OnInit {
 
   // Computed signals
   isCheckingIntegration = computed(() => this.hasGitHubIntegration() === null);
-  canGenerate = computed(() => this.hasGitHubIntegration() === true && !this.isLoading());
+  canGenerate = computed(() => this.hasGitHubIntegration() === true &&
+    !this.isLoading());
   elapsedTime = signal<number>(0);
   errorConfig = signal<ErrorMessageConfig | null>(null);
 
@@ -52,44 +54,46 @@ export class DiagramGeneratorComponent implements OnInit {
   private readonly ERROR_MESSAGES: Record<string, ErrorMessageConfig> = {
     'INVALID_OPTIONS': {
       title: 'Invalid Diagram Options',
-      message: 'Only class diagrams are supported in v1. Sequence diagrams coming soon.',
+      message: 'Only class diagrams are supported in v1. Sequence ' +
+      'diagrams coming soon.',
       action: 'dismiss',
       buttonText: 'Dismiss',
-      severity: 'warning'
+      severity: 'warning',
     },
     'CONFIGURATION_ERROR': {
       title: 'GitHub Not Connected',
       message: 'Your GitHub integration needs to be set up or reconnected.',
       action: 'navigate_to_settings',
       buttonText: 'Go to Settings',
-      severity: 'error'
+      severity: 'error',
     },
     'QUERY_ERROR': {
       title: 'Database Error',
       message: 'Could not retrieve diagram data. Please try again.',
       action: 'retry',
       buttonText: 'Retry',
-      severity: 'error'
+      severity: 'error',
     },
     'INTERNAL_ERROR': {
       title: 'Unexpected Error',
-      message: 'An unexpected error occurred. Please try again or contact support.',
+      message: 'An unexpected error occurred. Please try again ' +
+      'or contact support.',
       action: 'retry_and_report',
       buttonText: 'Retry',
-      severity: 'critical'
+      severity: 'critical',
     },
     'TIMEOUT_ERROR': {
       title: 'Request Timeout',
       message: 'The diagram generation is taking too long. Please try again.',
       action: 'retry',
       buttonText: 'Retry',
-      severity: 'error'
-    }
+      severity: 'error',
+    },
   };
 
   ngOnInit(): void {
     // Get project ID from route
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -121,7 +125,7 @@ export class DiagramGeneratorComponent implements OnInit {
         console.error('[DIAGRAM GENERATOR] Error checking integration:', error);
         this.hasGitHubIntegration.set(false);
         this.notificationService.error('Failed to check GitHub integration');
-      }
+      },
     });
   }
 
@@ -130,7 +134,8 @@ export class DiagramGeneratorComponent implements OnInit {
    */
   selectDiagramType(type: 'uml' | 'architecture'): void {
     if (!this.canGenerate()) {
-      console.warn('[DIAGRAM GENERATOR] Cannot generate - no GitHub integration');
+      console.warn('[DIAGRAM GENERATOR] Cannot generate - ' +
+          'no GitHub integration');
       return;
     }
 
@@ -144,7 +149,7 @@ export class DiagramGeneratorComponent implements OnInit {
    */
   generateDiagram(type: 'uml' | 'architecture'): void {
     console.log('[DIAGRAM GENERATOR] Generating', type, 'diagram...');
-    
+
     // Reset state
     this.isLoading.set(true);
     this.error.set(null);
@@ -152,9 +157,9 @@ export class DiagramGeneratorComponent implements OnInit {
     this.loadingStartTime.set(Date.now());
     this.startElapsedTimeTracking();
 
-    const generateObservable = type === 'uml' 
-      ? this.diagramService.generateUMLDiagram(this.projectId())
-      : this.diagramService.generateArchitectureDiagram(this.projectId());
+    const generateObservable = type === 'uml' ?
+      this.diagramService.generateUMLDiagram(this.projectId()) :
+      this.diagramService.generateArchitectureDiagram(this.projectId());
 
     generateObservable.subscribe({
       next: (response) => {
@@ -164,7 +169,7 @@ export class DiagramGeneratorComponent implements OnInit {
       error: (error: DiagramErrorResponse) => {
         console.error('[DIAGRAM GENERATOR] ❌ Error generating diagram:', error);
         this.handleError(error);
-      }
+      },
     });
   }
 
@@ -173,12 +178,13 @@ export class DiagramGeneratorComponent implements OnInit {
    */
   handleSuccess(response: ParsedDiagramResponse): void {
     const elapsed = ((Date.now() - this.loadingStartTime()) / 1000).toFixed(1);
-    console.log('[DIAGRAM GENERATOR] Generation completed in', elapsed, 'seconds');
-    
+    console.log('[DIAGRAM GENERATOR] Generation completed in',
+        elapsed, 'seconds');
+
     this.isLoading.set(false);
     this.diagramData.set(response);
     this.error.set(null);
-    
+
     this.notificationService.success(`Diagram generated successfully`);
   }
 
@@ -187,7 +193,7 @@ export class DiagramGeneratorComponent implements OnInit {
    */
   handleError(error: DiagramErrorResponse): void {
     console.log('[DIAGRAM GENERATOR] Handling error with code:', error.code);
-    
+
     this.isLoading.set(false);
     this.error.set(error);
     this.diagramData.set(null);
@@ -197,10 +203,10 @@ export class DiagramGeneratorComponent implements OnInit {
     if (config) {
       console.log('[DIAGRAM GENERATOR] Mapped error to config:', config.title);
       this.errorConfig.set(config);
-      
+
       // Show appropriate notification
       if (config.severity === 'warning') {
-        this.notificationService.error(config.title); // No warn method, use error
+        this.notificationService.error(config.title); // No warn method
       } else {
         this.notificationService.error(config.title);
       }
@@ -212,7 +218,7 @@ export class DiagramGeneratorComponent implements OnInit {
         message: error.error || 'An error occurred',
         action: 'retry',
         buttonText: 'Retry',
-        severity: 'error'
+        severity: 'error',
       });
       this.notificationService.error('Failed to generate diagram');
     }
@@ -232,7 +238,7 @@ export class DiagramGeneratorComponent implements OnInit {
    */
   goToGitHubSettings(): void {
     this.router.navigate(['/projects', this.projectId(), 'config'], {
-      fragment: 'integrations'
+      fragment: 'integrations',
     });
   }
 
@@ -291,13 +297,14 @@ export class DiagramGeneratorComponent implements OnInit {
         clearInterval(interval);
         return;
       }
-      
+
       const elapsed = Math.floor((Date.now() - this.loadingStartTime()) / 1000);
       this.elapsedTime.set(elapsed);
-      
+
       // Warning if taking too long (>30 seconds)
       if (elapsed === 30) {
-        this.notificationService.error('Diagram generation is taking longer than expected...');
+        this.notificationService.error('Diagram generation is taking longer ' +
+          'than expected...');
       }
     }, 1000);
   }
@@ -308,7 +315,7 @@ export class DiagramGeneratorComponent implements OnInit {
   getRepositoryInfo(): string {
     const integration = this.integration();
     if (!integration) return '';
-    
+
     return integration.repository_full_name || 'Unknown repository';
   }
 }

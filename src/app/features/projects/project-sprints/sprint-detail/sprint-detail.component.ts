@@ -1,20 +1,20 @@
-import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Sprint, SprintBurdown } from '../../../../core/models/interfaces';
-import { SprintsService } from '../../../../core/services/sprints.service';
-import { firstValueFrom } from 'rxjs';
-import { ChartModule } from 'primeng/chart';
-import { AiSprintSummaryComponent } from '../ai-sprint-summary/ai-sprint-summary.component';
+import {Component, EventEmitter, inject, Input, Output, signal, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Sprint, SprintBurdown} from '../../../../core/models/interfaces';
+import {SprintsService} from '../../../../core/services/sprints.service';
+import {firstValueFrom} from 'rxjs';
+import {ChartModule} from 'primeng/chart';
+import {AiSprintSummaryComponent} from '../ai-sprint-summary/ai-sprint-summary.component';
 
 @Component({
   selector: 'app-sprint-detail',
   standalone: true,
   imports: [CommonModule, ChartModule, AiSprintSummaryComponent],
   templateUrl: './sprint-detail.component.html',
-  styleUrls: ['./sprint-detail.component.css']
+  styleUrls: ['./sprint-detail.component.css'],
 })
 
-export class SprintDetailComponent {
+export class SprintDetailComponent implements OnInit {
   @Input() sprintId!: string;
   @Output() close = new EventEmitter<void>();
 
@@ -30,18 +30,18 @@ export class SprintDetailComponent {
     plugins: {
       legend: {
         display: true,
-        labels: { color: '#374151', font: { size: 14 } }
+        labels: {color: '#374151', font: {size: 14}},
       },
-      tooltip: { enabled: true }
+      tooltip: {enabled: true},
     },
     scales: {
-      x: { title: { display: true, text: 'Date', color: '#374151' }, ticks: { color: '#6b7280' } },
-      y: { title: { display: true, text: 'Points', color: '#374151' }, ticks: { color: '#6b7280' }, beginAtZero: true }
-    }
+      x: {title: {display: true, text: 'Date', color: '#374151'}, ticks: {color: '#6b7280'}},
+      y: {title: {display: true, text: 'Points', color: '#374151'}, ticks: {color: '#6b7280'}, beginAtZero: true},
+    },
   };
 
   ngOnInit(): void {
-    console.log("SprintDetailComponent initialized");
+    console.log('SprintDetailComponent initialized');
     this.loadSprintDetails();
     this.loadSprintBurndown();
   }
@@ -51,7 +51,7 @@ export class SprintDetailComponent {
     this.error.set(null);
     try {
       if (!this.sprintId) {
-        this.error.set("No sprint selected");
+        this.error.set('No sprint selected');
         return;
       }
       const sprintData = await firstValueFrom(this.sprintDetailService.getSprint(this.sprintId));
@@ -59,7 +59,7 @@ export class SprintDetailComponent {
         this.sprintInfo.set(sprintData);
       }
     } catch (error) {
-      this.error.set("Failed to load sprint details");
+      this.error.set('Failed to load sprint details');
     } finally {
       this.loading.set(false);
     }
@@ -69,7 +69,7 @@ export class SprintDetailComponent {
     this.loading.set(true);
     try {
       if (!this.sprintId) {
-        this.error.set("No sprint selected");
+        this.error.set('No sprint selected');
         return;
       }
       const burndownData: SprintBurdown = await firstValueFrom(this.sprintDetailService.getSprintBurdown(this.sprintId));
@@ -77,13 +77,13 @@ export class SprintDetailComponent {
         this.sprintBurdown.set(burndownData);
 
         // Ideal line
-        const labels = burndownData.ideal_line.map(d => d.date);
-        const idealPoints = burndownData.ideal_line.map(d => d.remaining_points);
+        const labels = burndownData.ideal_line.map((d) => d.date);
+        const idealPoints = burndownData.ideal_line.map((d) => d.remaining_points);
 
         // Actual line (si existe)
         let actualPoints: number[] = [];
         if (burndownData.actual_line) {
-          actualPoints = burndownData.actual_line.map(d => d.remaining_points);
+          actualPoints = burndownData.actual_line.map((d) => d.remaining_points);
         }
 
         this.burndownChartData = {
@@ -95,23 +95,23 @@ export class SprintDetailComponent {
               borderColor: '#6366f1',
               backgroundColor: '#6366f1',
               fill: false,
-              tension: 0.2
+              tension: 0.2,
             },
-            ...(actualPoints.length
-              ? [{
-                  label: 'Actual',
-                  data: actualPoints,
-                  borderColor: '#f59e42',
-                  backgroundColor: '#f59e42',
-                  fill: false,
-                  tension: 0.2
-                }]
-              : [])
-          ]
+            ...(actualPoints.length ?
+              [{
+                label: 'Actual',
+                data: actualPoints,
+                borderColor: '#f59e42',
+                backgroundColor: '#f59e42',
+                fill: false,
+                tension: 0.2,
+              }] :
+              []),
+          ],
         };
       }
     } catch (error) {
-      this.error.set("Failed to load sprint burndown data");
+      this.error.set('Failed to load sprint burndown data');
       console.error(error);
     } finally {
       this.loading.set(false);

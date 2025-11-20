@@ -1,12 +1,12 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { DiagramService } from '../../../../core/services/diagram.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { RoadmapDiagramData, DiagramFormat } from '../../../../core/models/interfaces';
-import { DiagramErrorStateComponent } from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
-import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DiagramService} from '../../../../core/services/diagram.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {RoadmapDiagramData, DiagramFormat} from '../../../../core/models/interfaces';
+import {DiagramErrorStateComponent} from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
+import {DiagramErrorState, analyzeDiagramError, logDiagramError} from '../../../../shared/utils/diagram-error.utils';
 
 @Component({
   selector: 'app-roadmap-timeline',
@@ -57,7 +57,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
           } @else if (diagramData()) {
             <!-- JSON Data Visualization -->
             <div class="p-6 space-y-6" style="position: relative;">
-              
+
               <!-- Floating Controls -->
               <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
                 <div style="display: flex; align-items: center; gap: 8px; background: white; border-radius: 8px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid #DFE1E6;">
@@ -71,15 +71,15 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
                   </button>
                 </div>
               </div>
-              
+
               @if (diagramData()?.metadata) {
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                   <div class="flex items-start justify-between">
                     <div>
                       <h3 class="text-sm font-semibold text-blue-900 mb-1">{{ diagramData()!.metadata.project_name }}</h3>
                       <p class="text-xs text-blue-700">
-                        <strong>Timeline:</strong> 
-                        {{ diagramData()!.metadata.start_date | date:'mediumDate' }} - 
+                        <strong>Timeline:</strong>
+                        {{ diagramData()!.metadata.start_date | date:'mediumDate' }} -
                         {{ diagramData()!.metadata.end_date | date:'mediumDate' }}
                       </p>
                     </div>
@@ -90,13 +90,13 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
                   </div>
                 </div>
               }
-              
+
               @for (sprint of getValidSprints(); track sprint.id) {
                 <div class="border-l-4 border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
                      [style.border-left-color]="sprint.color || '#6B7280'">
                   <div class="flex items-center justify-between mb-2">
                     <h3 class="font-semibold text-gray-900">{{ sprint.name }}</h3>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" 
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                           [class.bg-green-100]="sprint.status === 'completed'"
                           [class.text-green-800]="sprint.status === 'completed'"
                           [class.bg-blue-100]="sprint.status === 'active'"
@@ -106,27 +106,27 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
                       {{ sprint.status | uppercase }}
                     </span>
                   </div>
-                  
+
                   <div class="flex items-center text-xs text-gray-500 mb-3">
                     <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
                     {{ sprint.start_date | date:'shortDate' }} - {{ sprint.end_date | date:'shortDate' }}
                   </div>
-                  
+
                   <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
-                    <div class="h-3 rounded-full transition-all duration-300" 
+                    <div class="h-3 rounded-full transition-all duration-300"
                          [style.width.%]="sprint.progress"
                          [style.background-color]="sprint.color || '#3B82F6'"></div>
                   </div>
-                  
+
                   <div class="flex items-center justify-between text-xs">
                     <span class="text-gray-600 font-medium">{{ sprint.progress }}% complete</span>
                     <span class="text-gray-600">
                       <span class="font-semibold text-gray-900">{{ sprint.completed_count }}</span>/{{ sprint.issue_count }} issues
                     </span>
                   </div>
-                  
+
                   @if (sprint.velocity !== null && sprint.velocity !== undefined) {
                     <div class="mt-2 pt-2 border-t border-gray-100">
                       <div class="flex items-center text-xs text-gray-600">
@@ -203,7 +203,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    
+
     /* CRITICAL: Container sizing and horizontal scroll for roadmap */
     .diagram-svg-container {
       position: relative;
@@ -216,7 +216,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       padding: 16px;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     .diagram-svg-container svg {
       width: 100% !important;
       max-width: none !important; /* Allow SVG to be wider than container */
@@ -224,7 +224,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       height: auto !important;
       display: block !important;
     }
-    
+
     /* CRITICAL: Override backend SVG text styling for visibility */
     .diagram-svg-container svg text {
       fill: #172B4D !important; /* Backend primary text color */
@@ -238,14 +238,14 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       stroke-linejoin: round !important;
       filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
     }
-    
+
     .diagram-svg-container svg tspan {
       fill: #172B4D !important;
       stroke: #ffffff !important;
       stroke-width: 2px !important;
       font-size: 12px !important;
     }
-    
+
     /* Text inside dark sprint bars needs white fill */
     .diagram-svg-container svg rect[fill*="#00"] ~ text,
     .diagram-svg-container svg rect[fill*="#5E"] ~ text,
@@ -259,30 +259,30 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       stroke: rgba(0, 0, 0, 0.3) !important;
       stroke-width: 1px !important;
     }
-    
+
     .diagram-svg-container svg rect,
     .diagram-svg-container svg circle,
     .diagram-svg-container svg ellipse,
     .diagram-svg-container svg polygon {
       stroke-width: 2px !important;
     }
-    
+
     .diagram-svg-container svg rect[fill*="#"] {
       stroke: rgba(0, 0, 0, 0.15) !important;
     }
-    
+
     .diagram-svg-container svg line,
     .diagram-svg-container svg polyline,
     .diagram-svg-container svg path[stroke] {
       stroke: #6b7280 !important;
       stroke-width: 2px !important;
     }
-    
+
     /* Enhance contrast */
     .diagram-svg-container svg {
       filter: contrast(1.05) brightness(1.02);
     }
-    
+
     /* Sprint bars should have proper spacing */
     .diagram-svg-container svg rect[fill*="#00875A"],
     .diagram-svg-container svg rect[fill*="#0052CC"],
@@ -290,7 +290,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       rx: 4;
       ry: 4;
     }
-  `]
+  `],
 })
 export class RoadmapTimelineComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -307,7 +307,7 @@ export class RoadmapTimelineComponent implements OnInit {
   loading = signal(false);
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -321,16 +321,16 @@ export class RoadmapTimelineComponent implements OnInit {
     this.errorState.set(null);
     this.safeSvgContent.set(null);
     this.diagramData.set(null);
-    
+
     console.log('[ROADMAP-TIMELINE] 📥 Loading roadmap diagram for project:', this.projectId());
-    
+
     this.diagramService.generateRoadmapDiagram(this.projectId(), 'json').subscribe({
       next: (response) => {
         console.log('[ROADMAP-TIMELINE] 📦 Response received, format:', response.format, 'data type:', typeof response.data);
-        
+
         // Check the actual format returned by backend
         this.diagramFormat.set(response.format as 'svg' | 'json');
-        
+
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
@@ -345,30 +345,29 @@ export class RoadmapTimelineComponent implements OnInit {
             console.log('[ROADMAP-TIMELINE] 📊 Parsed data:', {
               type: parsedData.diagram_type,
               sprints: parsedData.sprints?.length || 0,
-              milestones: parsedData.milestones?.length || 0
+              milestones: parsedData.milestones?.length || 0,
             });
-            
+
             // Validate structure
             if (!parsedData.sprints || !Array.isArray(parsedData.sprints)) {
               console.error('[ROADMAP-TIMELINE] ❌ Invalid sprints:', parsedData.sprints);
               throw new Error('Invalid diagram data structure: missing or invalid sprints array');
             }
-            
+
             console.log('[ROADMAP-TIMELINE] ✅ Validation passed, setting data');
             this.diagramData.set(parsedData as RoadmapDiagramData);
             this.safeSvgContent.set(null);
-            
+
             // Log valid sprints for verification
             const validSprints = this.getValidSprints();
             console.log('[ROADMAP-TIMELINE] 📋 Valid sprints after filter:', validSprints.length);
-            
           } catch (parseError: any) {
             console.error('[ROADMAP-TIMELINE] ❌ Parse error:', parseError);
             console.error('[ROADMAP-TIMELINE] Raw data type:', typeof response.data);
             this.errorState.set(analyzeDiagramError(parseError, this.projectId()));
           }
         }
-        
+
         this.loading.set(false);
       },
       error: (error) => {
@@ -376,7 +375,7 @@ export class RoadmapTimelineComponent implements OnInit {
         const errorInfo = analyzeDiagramError(error, this.projectId());
         this.errorState.set(errorInfo);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -386,17 +385,17 @@ export class RoadmapTimelineComponent implements OnInit {
    */
   private parseDiagramData(data: any): any {
     console.log('[ROADMAP-TIMELINE] 🔍 Parsing data, type:', typeof data);
-    
+
     if (data === null || data === undefined) {
       throw new Error('Diagram data is null or undefined');
     }
-    
+
     // NEW: If data is already an object, return it directly (backend sends clean objects now)
     if (typeof data === 'object') {
       console.log('[ROADMAP-TIMELINE] ✅ Data is object (backend clean format)');
       return data;
     }
-    
+
     // BACKWARD COMPATIBLE: If data is a string, parse it as JSON (for transition period)
     if (typeof data === 'string') {
       console.log('[ROADMAP-TIMELINE] 📝 Data is string (legacy format), parsing with JSON.parse');
@@ -410,7 +409,7 @@ export class RoadmapTimelineComponent implements OnInit {
         throw new Error(`Failed to parse diagram JSON: ${error.message}`);
       }
     }
-    
+
     throw new Error(`Unsupported data type: ${typeof data}`);
   }
 
@@ -423,7 +422,7 @@ export class RoadmapTimelineComponent implements OnInit {
       return [];
     }
 
-    return data.sprints.filter(sprint => {
+    return data.sprints.filter((sprint) => {
       // Filter out null or undefined sprints
       if (!sprint) {
         console.warn('[ROADMAP-TIMELINE] ⚠️ Null sprint found, skipping');
@@ -445,7 +444,7 @@ export class RoadmapTimelineComponent implements OnInit {
       // Try to parse dates to ensure they're valid
       const startDate = new Date(sprint.start_date);
       const endDate = new Date(sprint.end_date);
-      
+
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         console.warn('[ROADMAP-TIMELINE] ⚠️ Sprint has invalid dates:', sprint.id, sprint.start_date, sprint.end_date);
         return false;
@@ -471,7 +470,7 @@ export class RoadmapTimelineComponent implements OnInit {
     // Clear current diagram
     this.safeSvgContent.set(null);
     this.diagramData.set(null);
-    
+
     // Reload roadmap
     this.loadDiagram();
   }

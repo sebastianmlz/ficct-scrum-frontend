@@ -1,19 +1,19 @@
-import { Component, inject, Input, signal } from '@angular/core';
-import { SprintsService } from '../../../../core/services/sprints.service';
-import { IssueService } from '../../../../core/services/issue.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { Sprint, PaginationParams, Project, Issue } from '../../../../core/models/interfaces';
-import { PaginatedSprintList } from '../../../../core/models/api-interfaces';
-import { ProjectStatusEnum } from '../../../../core/models/enums';
-import { CommonModule } from '@angular/common';
-import { SprintDetailComponent } from '../sprint-detail/sprint-detail.component';
-import { SprintEditComponent } from '../sprint-edit/sprint-edit.component';
-import { AddIssuesToSprintDialogComponent } from '../add-issues-to-sprint-dialog/add-issues-to-sprint-dialog.component';
-import { MlEstimateSprintComponent } from '../ml-estimate-sprint/ml-estimate-sprint.component';
-import { MlSprintRiskComponent } from '../ml-sprint-risk/ml-sprint-risk.component';
-import { Router } from '@angular/router';
-import { TableModule } from "primeng/table";
-import { forkJoin } from 'rxjs';
+import {Component, inject, Input, signal, OnInit} from '@angular/core';
+import {SprintsService} from '../../../../core/services/sprints.service';
+import {IssueService} from '../../../../core/services/issue.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {Sprint, PaginationParams, Project, Issue} from '../../../../core/models/interfaces';
+import {PaginatedSprintList} from '../../../../core/models/api-interfaces';
+import {ProjectStatusEnum} from '../../../../core/models/enums';
+import {CommonModule} from '@angular/common';
+import {SprintDetailComponent} from '../sprint-detail/sprint-detail.component';
+import {SprintEditComponent} from '../sprint-edit/sprint-edit.component';
+import {AddIssuesToSprintDialogComponent} from '../add-issues-to-sprint-dialog/add-issues-to-sprint-dialog.component';
+import {MlEstimateSprintComponent} from '../ml-estimate-sprint/ml-estimate-sprint.component';
+import {MlSprintRiskComponent} from '../ml-sprint-risk/ml-sprint-risk.component';
+import {Router} from '@angular/router';
+import {TableModule} from 'primeng/table';
+import {forkJoin} from 'rxjs';
 @Component({
   selector: 'app-sprint-list',
   imports: [
@@ -23,12 +23,12 @@ import { forkJoin } from 'rxjs';
     AddIssuesToSprintDialogComponent,
     MlEstimateSprintComponent,
     MlSprintRiskComponent,
-    TableModule
-],
+    TableModule,
+  ],
   templateUrl: './sprint-list.component.html',
-  styleUrl: './sprint-list.component.css'
+  styleUrl: './sprint-list.component.css',
 })
-export class SprintListComponent {
+export class SprintListComponent implements OnInit {
   async removeIssueFromSprint(sprintId: string, issueId: string): Promise<void> {
     try {
       await this.sprintService.removeIssueFromSprint(sprintId, issueId).toPromise();
@@ -80,32 +80,32 @@ export class SprintListComponent {
       if (result) {
         console.log('[SPRINT LIST] API Response:', result);
         console.log('[SPRINT LIST] Sprints count:', result.results.length);
-        
-        const filtered = result.results.filter(sprint => sprint.project.id === this.projectId);
-        
+
+        const filtered = result.results.filter((sprint) => sprint.project.id === this.projectId);
+
         // Load issues for each sprint (JIRA architecture: issues belong to sprints)
         const sprintsWithIssues = await Promise.all(
-          filtered.map(async (sprint) => {
-            try {
-              console.log(`[SPRINT LIST] Loading issues for sprint: ${sprint.name}`);
-              const issuesResult = await this.issueService.getIssues({ sprint: sprint.id }).toPromise();
-              const issues = issuesResult?.results || [];
-              console.log(`[SPRINT LIST] Sprint "${sprint.name}" has ${issues.length} issues (issue_count=${sprint.issue_count})`);
-              return { ...sprint, issues };
-            } catch (error) {
-              console.error(`[SPRINT LIST] Error loading issues for sprint ${sprint.id}:`, error);
-              return { ...sprint, issues: [] };
-            }
-          })
+            filtered.map(async (sprint) => {
+              try {
+                console.log(`[SPRINT LIST] Loading issues for sprint: ${sprint.name}`);
+                const issuesResult = await this.issueService.getIssues({sprint: sprint.id}).toPromise();
+                const issues = issuesResult?.results || [];
+                console.log(`[SPRINT LIST] Sprint "${sprint.name}" has ${issues.length} issues (issue_count=${sprint.issue_count})`);
+                return {...sprint, issues};
+              } catch (error) {
+                console.error(`[SPRINT LIST] Error loading issues for sprint ${sprint.id}:`, error);
+                return {...sprint, issues: []};
+              }
+            }),
         );
-        
+
         this.sprints.set(sprintsWithIssues);
         this.paginationData.set(result);
-        
-        console.log('[SPRINT LIST] All sprints loaded with issues:', sprintsWithIssues.map(s => ({
+
+        console.log('[SPRINT LIST] All sprints loaded with issues:', sprintsWithIssues.map((s) => ({
           name: s.name,
           issue_count: s.issue_count,
-          loaded_issues: s.issues?.length || 0
+          loaded_issues: s.issues?.length || 0,
         })));
       }
     } catch (error) {
@@ -117,33 +117,33 @@ export class SprintListComponent {
   }
 
   async deleteSprint(sprintId: string): Promise<void> {
-    const sprint = this.sprints().find(s => s.id === sprintId);
-    
+    const sprint = this.sprints().find((s) => s.id === sprintId);
+
     if (!sprint) {
       this.notificationService.error('Sprint not found');
       return;
     }
-    
+
     // Prevenir eliminación de sprint activo
     if (sprint.status === ProjectStatusEnum.ACTIVE) {
       this.notificationService.warning(
-        'Cannot Delete Active Sprint',
-        `Sprint "${sprint.name}" is currently active. Please close it before deleting.`,
-        6000
+          'Cannot Delete Active Sprint',
+          `Sprint "${sprint.name}" is currently active. Please close it before deleting.`,
+          6000,
       );
       return;
     }
-    
+
     // Confirmación de eliminación
     const confirmed = confirm(
-      `Are you sure you want to delete "${sprint.name}"?\n\n` +
-      `This action cannot be undone. All sprint data will be permanently removed.`
+        `Are you sure you want to delete "${sprint.name}"?\n\n` +
+      `This action cannot be undone. All sprint data will be permanently removed.`,
     );
-    
+
     if (!confirmed) {
       return;
     }
-    
+
     this.loading.set(true);
     try {
       await this.sprintService.deleteSprint(sprintId).toPromise();
@@ -191,31 +191,31 @@ export class SprintListComponent {
 
   async startSprint(sprintId: string): Promise<void> {
     // VALIDACIÓN CRÍTICA: Sprint debe tener al menos 1 issue
-    const sprint = this.sprints().find(s => s.id === sprintId);
-    
+    const sprint = this.sprints().find((s) => s.id === sprintId);
+
     if (!sprint) {
       this.notificationService.error('Sprint not found');
       return;
     }
-    
+
     const issueCount = parseInt(sprint.issue_count || '0', 10);
-    
+
     if (issueCount === 0) {
       this.showSprintEmptyWarning(sprint);
       return;
     }
-    
+
     // Validar que no haya otro sprint activo
-    const activeSprint = this.sprints().find(s => s.status === ProjectStatusEnum.ACTIVE);
+    const activeSprint = this.sprints().find((s) => s.status === ProjectStatusEnum.ACTIVE);
     if (activeSprint && activeSprint.id !== sprintId) {
       this.notificationService.warning(
-        'Sprint Already Active',
-        `Sprint "${activeSprint.name}" is already active. Close it before starting a new one.`,
-        6000
+          'Sprint Already Active',
+          `Sprint "${activeSprint.name}" is already active. Close it before starting a new one.`,
+          6000,
       );
       return;
     }
-    
+
     this.loading.set(true);
     try {
       await this.sprintService.starSprint(sprintId).toPromise();
@@ -230,18 +230,18 @@ export class SprintListComponent {
       this.loading.set(false);
     }
   }
-  
+
   private showSprintEmptyWarning(sprint: Sprint): void {
     this.notificationService.warning(
-      'Sprint Cannot Start',
-      `Sprint "${sprint.name}" has no issues. Please add at least one issue before starting the sprint.`,
-      6000
+        'Sprint Cannot Start',
+        `Sprint "${sprint.name}" has no issues. Please add at least one issue before starting the sprint.`,
+        6000,
     );
   }
 
   async completeSprint(sprintId: string): Promise<void> {
-    const sprint = this.sprints().find(s => s.id === sprintId);
-    
+    const sprint = this.sprints().find((s) => s.id === sprintId);
+
     if (!sprint) {
       this.notificationService.error('Sprint not found');
       return;
@@ -249,16 +249,16 @@ export class SprintListComponent {
 
     if (sprint.status !== ProjectStatusEnum.ACTIVE) {
       this.notificationService.warning(
-        'Invalid Operation',
-        'Only active sprints can be completed.',
-        6000
+          'Invalid Operation',
+          'Only active sprints can be completed.',
+          6000,
       );
       return;
     }
 
     const confirmed = confirm(
-      `Complete sprint "${sprint.name}"?\n\n` +
-      `This will move all incomplete issues to the backlog.`
+        `Complete sprint "${sprint.name}"?\n\n` +
+      `This will move all incomplete issues to the backlog.`,
     );
 
     if (!confirmed) {
@@ -326,10 +326,10 @@ export class SprintListComponent {
   formatDateRange(startDate: Date, endDate: Date): string {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
-    const formatOptions: Intl.DateTimeFormatOptions = { 
-      month: 'short', 
-      day: 'numeric'
+
+    const formatOptions: Intl.DateTimeFormatOptions = {
+      month: 'short',
+      day: 'numeric',
     };
 
     const startFormatted = start.toLocaleDateString('en-US', formatOptions);
@@ -340,8 +340,8 @@ export class SprintListComponent {
 
   navigateToIssues(sprint: Sprint): void {
     this.router.navigate(['/projects', this.projectId, 'issues'], {
-      queryParams: { sprint: sprint.id },
-      state: { projectName: this.projectName || 'Project' }
+      queryParams: {sprint: sprint.id},
+      state: {projectName: this.projectName || 'Project'},
     });
   }
 
@@ -405,7 +405,7 @@ export class SprintListComponent {
     this.selectedSprint.set(sprint);
     this.showAddIssuesDialog.set(true);
   }
-  
+
   /**
    * Handle issues added to sprint
    */
@@ -416,7 +416,7 @@ export class SprintListComponent {
     // Reload sprints to update counts and issue lists
     this.loadSprints();
   }
-  
+
   /**
    * Handle dialog canceled
    */
@@ -430,9 +430,9 @@ export class SprintListComponent {
    * Open AI Estimate Sprint Duration modal
    */
   openEstimateSprintModal(sprintId: string): void {
-  this.currentSprintId.set(sprintId);
-  this.showEstimateSprint.set(true);
-  this.showActionsMenu.set(null); // Cierra el menú al abrir el modal
+    this.currentSprintId.set(sprintId);
+    this.showEstimateSprint.set(true);
+    this.showActionsMenu.set(null); // Cierra el menú al abrir el modal
   }
 
   /**
@@ -447,9 +447,9 @@ export class SprintListComponent {
    * Open AI Sprint Risk Assessment modal
    */
   openSprintRiskModal(sprintId: string): void {
-  this.currentSprintId.set(sprintId);
-  this.showSprintRisk.set(true);
-  this.showActionsMenu.set(null); // Cierra el menú al abrir el modal
+    this.currentSprintId.set(sprintId);
+    this.showSprintRisk.set(true);
+    this.showActionsMenu.set(null); // Cierra el menú al abrir el modal
   }
 
   /**
@@ -459,5 +459,4 @@ export class SprintListComponent {
     this.showSprintRisk.set(false);
     this.currentSprintId.set(null);
   }
-
 }

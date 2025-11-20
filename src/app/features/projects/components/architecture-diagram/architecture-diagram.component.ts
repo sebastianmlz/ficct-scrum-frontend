@@ -1,13 +1,13 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { DiagramService } from '../../../../core/services/diagram.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { ArchitectureDiagramData, DiagramFormat } from '../../../../core/models/interfaces';
-import { DiagramExportDropdownComponent } from '../../../../shared/components/diagram-export-dropdown/diagram-export-dropdown.component';
-import { DiagramErrorStateComponent } from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
-import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DiagramService} from '../../../../core/services/diagram.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {ArchitectureDiagramData, DiagramFormat} from '../../../../core/models/interfaces';
+import {DiagramExportDropdownComponent} from '../../../../shared/components/diagram-export-dropdown/diagram-export-dropdown.component';
+import {DiagramErrorStateComponent} from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
+import {DiagramErrorState, analyzeDiagramError, logDiagramError} from '../../../../shared/utils/diagram-error.utils';
 
 @Component({
   selector: 'app-architecture-diagram',
@@ -240,7 +240,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       height: auto;
       display: block;
     }
-  `]
+  `],
 })
 export class ArchitectureDiagramComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -259,7 +259,7 @@ export class ArchitectureDiagramComponent implements OnInit {
   cacheStatus = signal<'HIT' | 'MISS' | null>(null);
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -274,21 +274,21 @@ export class ArchitectureDiagramComponent implements OnInit {
     this.safeSvgContent.set(null);
     this.diagramData.set(null);
     this.cacheStatus.set(null);
-    
+
     console.log('[ARCHITECTURE] Loading diagram for project:', this.projectId());
-    
+
     this.diagramService.generateArchitectureDiagram(this.projectId(), 'json').subscribe({
       next: (response) => {
         console.log('[ARCHITECTURE] Response received:', response);
-        
+
         // Parse cache status from response metadata
         if (response.cached !== undefined) {
           this.cacheStatus.set(response.cached ? 'HIT' : 'MISS');
         }
-        
+
         // Check the actual format returned by backend
         this.diagramFormat.set(response.format as 'svg' | 'json');
-        
+
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
@@ -304,17 +304,17 @@ export class ArchitectureDiagramComponent implements OnInit {
           } else {
             parsed = response.data as ArchitectureDiagramData;
           }
-          
+
           this.diagramData.set(parsed);
           this.safeSvgContent.set(null);
-          
+
           console.log('[ARCHITECTURE] JSON parsed:', {
             pattern: parsed.architecture_pattern,
             layers: parsed.layers?.length || 0,
-            connections: parsed.connections?.length || 0
+            connections: parsed.connections?.length || 0,
           });
         }
-        
+
         this.loading.set(false);
       },
       error: (error) => {
@@ -322,7 +322,7 @@ export class ArchitectureDiagramComponent implements OnInit {
         const errorInfo = analyzeDiagramError(error, this.projectId());
         this.errorState.set(errorInfo);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -332,33 +332,33 @@ export class ArchitectureDiagramComponent implements OnInit {
 
   onExportFormat(format: DiagramFormat): void {
     this.exporting.set(true);
-    
+
     this.diagramService.exportDiagramWithFormat(
-      'architecture',
-      this.projectId(),
-      format
+        'architecture',
+        this.projectId(),
+        format,
     ).subscribe({
       next: (result) => {
         this.exporting.set(false);
         if (result.success) {
           this.notificationService.success(
-            'Export Successful',
-            `Architecture diagram exported as ${format.toUpperCase()}: ${result.filename}`
+              'Export Successful',
+              `Architecture diagram exported as ${format.toUpperCase()}: ${result.filename}`,
           );
         } else {
           this.notificationService.error(
-            'Export Failed',
-            result.error || 'An unexpected error occurred'
+              'Export Failed',
+              result.error || 'An unexpected error occurred',
           );
         }
       },
       error: () => {
         this.exporting.set(false);
         this.notificationService.error(
-          'Export Failed',
-          'Unable to export diagram. Please try again.'
+            'Export Failed',
+            'Unable to export diagram. Please try again.',
         );
-      }
+      },
     });
   }
 
@@ -380,10 +380,10 @@ export class ArchitectureDiagramComponent implements OnInit {
 
   getComponentInitials(componentName: string): string {
     return componentName
-      .split(/[\s_-]/)
-      .map(word => word[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
+        .split(/[\s_-]/)
+        .map((word) => word[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
   }
 }

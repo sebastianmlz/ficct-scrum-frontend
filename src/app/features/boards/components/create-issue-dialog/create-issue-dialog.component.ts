@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, signal, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IssueService } from '../../../../core/services/issue.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { Issue, IssueType } from '../../../../core/models/interfaces';
+import {Component, inject, OnInit, signal, Input, Output, EventEmitter} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {IssueService} from '../../../../core/services/issue.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {Issue, IssueType} from '../../../../core/models/interfaces';
 
 @Component({
   selector: 'app-create-issue-dialog',
@@ -112,7 +112,7 @@ import { Issue, IssueType } from '../../../../core/models/interfaces';
       opacity: 0.5;
       cursor: not-allowed;
     }
-  `]
+  `],
 })
 export class CreateIssueDialogComponent implements OnInit {
   @Input() projectId!: string;
@@ -136,10 +136,10 @@ export class CreateIssueDialogComponent implements OnInit {
   });
 
   priorities = [
-    { value: 'P1', label: 'Critical' },
-    { value: 'P2', label: 'High' },
-    { value: 'P3', label: 'Medium' },
-    { value: 'P4', label: 'Low' }
+    {value: 'P1', label: 'Critical'},
+    {value: 'P2', label: 'High'},
+    {value: 'P3', label: 'Medium'},
+    {value: 'P4', label: 'Low'},
   ];
 
   ngOnInit(): void {
@@ -147,24 +147,24 @@ export class CreateIssueDialogComponent implements OnInit {
     console.log('[CREATE ISSUE] Project ID:', this.projectId);
     console.log('[CREATE ISSUE] Board ID:', this.boardId);
     console.log('[CREATE ISSUE] Default Status ID:', this.defaultStatusId);
-    
+
     this.loadIssueTypes();
   }
 
   loadIssueTypes(): void {
     console.log('[CREATE ISSUE] Loading issue types for project:', this.projectId);
-    
+
     // ✅ CRITICAL FIX: Filter issue types by project
     this.issueService.getIssueTypes(this.projectId).subscribe({
       next: (response) => {
         console.log('[CREATE ISSUE] ✅ Issue types loaded (filtered by project):', response.results);
         console.log('[CREATE ISSUE] Number of issue types:', response.results.length);
-        
+
         this.issueTypes.set(response.results);
-        
+
         // Pre-select first issue type if available
         if (response.results.length > 0 && !this.issueForm.get('issue_type')?.value) {
-          this.issueForm.patchValue({ issue_type: response.results[0].id });
+          this.issueForm.patchValue({issue_type: response.results[0].id});
           console.log('[CREATE ISSUE] Pre-selected issue type:', response.results[0].name);
         } else if (response.results.length === 0) {
           console.error('[CREATE ISSUE] ❌ No issue types found for project:', this.projectId);
@@ -176,16 +176,16 @@ export class CreateIssueDialogComponent implements OnInit {
         console.error('[CREATE ISSUE] Error status:', error.status);
         console.error('[CREATE ISSUE] Error body:', error.error);
         this.notificationService.error('Failed to load issue types');
-      }
+      },
     });
   }
 
   async onSubmit(): Promise<void> {
     console.log('[CREATE ISSUE] Form submitted');
-    
+
     if (this.issueForm.invalid) {
       console.error('[CREATE ISSUE] Form is invalid');
-      Object.keys(this.issueForm.controls).forEach(key => {
+      Object.keys(this.issueForm.controls).forEach((key) => {
         const control = this.issueForm.get(key);
         if (control?.invalid) {
           console.error(`[CREATE ISSUE] Field '${key}' is invalid:`, control.errors);
@@ -204,15 +204,15 @@ export class CreateIssueDialogComponent implements OnInit {
         title: formValue.title,
         description: formValue.description || '',
         issue_type: formValue.issue_type,
-        priority: formValue.priority
+        priority: formValue.priority,
       };
 
       console.log('[CREATE ISSUE] Sending request:', issueData);
 
       const issue = await this.issueService.createIssue(issueData).toPromise();
-      
+
       console.log('[CREATE ISSUE] ✅ Issue created successfully:', issue);
-      
+
       if (issue) {
         this.notificationService.success('Issue created successfully');
         this.issueCreated.emit(issue);
@@ -221,7 +221,7 @@ export class CreateIssueDialogComponent implements OnInit {
       console.error('[CREATE ISSUE] ❌ Error creating issue:', error);
       console.error('[CREATE ISSUE] Error status:', error.status);
       console.error('[CREATE ISSUE] Error body:', error.error);
-      
+
       const errorMessage = error.error?.detail || error.error?.message || error.message || 'Failed to create issue';
       this.notificationService.error(errorMessage);
     } finally {
@@ -250,7 +250,7 @@ export class CreateIssueDialogComponent implements OnInit {
       title: 'Title',
       description: 'Description',
       issue_type: 'Issue Type',
-      priority: 'Priority'
+      priority: 'Priority',
     };
     return labels[fieldName] || fieldName;
   }

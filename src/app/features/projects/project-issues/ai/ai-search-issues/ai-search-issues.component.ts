@@ -1,15 +1,15 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AiService, SearchResult } from '../../../../../core/services/ai.service';
+import {Component, Input, Output, EventEmitter, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
+import {AiService, SearchResult} from '../../../../../core/services/ai.service';
 
 @Component({
   selector: 'app-ai-search-issues',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ai-search-issues.component.html',
-  styleUrl: './ai-search-issues.component.css'
+  styleUrl: './ai-search-issues.component.css',
 })
 export class AiSearchIssuesComponent {
   @Input() projectId!: string;
@@ -28,7 +28,7 @@ export class AiSearchIssuesComponent {
 
   async search(): Promise<void> {
     const query = this.searchQuery().trim();
-    
+
     if (!query) {
       this.error.set('Please enter a search query');
       return;
@@ -45,12 +45,12 @@ export class AiSearchIssuesComponent {
 
     console.log('[AI SEARCH] Starting search for query:', query);
     console.log('[AI SEARCH] Project ID:', this.projectId);
-    
+
     try {
       const response = await this.aiService.searchIssues({
         query,
         project_id: this.projectId,
-        top_k: 10
+        top_k: 10,
       }).toPromise();
 
       if (response) {
@@ -104,7 +104,7 @@ export class AiSearchIssuesComponent {
   getScorePercentage(score: number): number {
     return Math.round(score * 100);
   }
-  
+
   /**
    * Get priority color class for badge
    */
@@ -126,7 +126,7 @@ export class AiSearchIssuesComponent {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   }
-  
+
   /**
    * Get status color class for badge
    */
@@ -146,14 +146,14 @@ export class AiSearchIssuesComponent {
         return 'bg-purple-100 text-purple-800 border-purple-200';
     }
   }
-  
+
   /**
    * Check if assignee is unassigned (sanitized value)
    */
   isUnassigned(assigneeName: string): boolean {
     return !assigneeName || assigneeName.toLowerCase() === 'unassigned';
   }
-  
+
   /**
    * Check if reporter is unknown (sanitized value)
    */

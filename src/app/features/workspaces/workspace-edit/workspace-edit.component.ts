@@ -1,17 +1,17 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { WorkspacesService } from '../../../core/services/workspaces.service';
-import { Workspace, WorkspaceRequest } from '../../../core/models/interfaces';
-import { WorkspaceTypeEnum, VisibilityEnum } from '../../../core/models/enums';
-import { NotificationService } from '../../../core/services/notification.service';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, Validators, ReactiveFormsModule} from '@angular/forms';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {WorkspacesService} from '../../../core/services/workspaces.service';
+import {Workspace, WorkspaceRequest} from '../../../core/models/interfaces';
+import {WorkspaceTypeEnum, VisibilityEnum} from '../../../core/models/enums';
+import {NotificationService} from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-workspace-edit',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './workspace-edit.component.html'
+  templateUrl: './workspace-edit.component.html',
 })
 export class WorkspaceEditComponent implements OnInit {
   workspaceForm: FormGroup;
@@ -20,10 +20,10 @@ export class WorkspaceEditComponent implements OnInit {
   loading = signal(false);
   submitting = signal(false);
   error = signal('');
-  
+
   selectedFile = signal<File | null>(null);
   imagePreview = signal<string | null>(null);
-  
+
   workspaceTypes = Object.values(WorkspaceTypeEnum);
   visibilityOptions = Object.values(VisibilityEnum);
 
@@ -32,7 +32,7 @@ export class WorkspaceEditComponent implements OnInit {
     private workspacesService: WorkspacesService,
     private route: ActivatedRoute,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
   ) {
     this.workspaceForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(255)]],
@@ -40,12 +40,12 @@ export class WorkspaceEditComponent implements OnInit {
       description: [''],
       workspace_type: ['', Validators.required],
       visibility: ['public', Validators.required],
-      is_active: [true]
+      is_active: [true],
     });
   }
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.workspaceId.set(params['id']);
       if (this.workspaceId()) {
         this.loadWorkspace();
@@ -66,19 +66,19 @@ export class WorkspaceEditComponent implements OnInit {
           description: workspace.description || '',
           workspace_type: workspace.workspace_type,
           visibility: workspace.visibility,
-          is_active: workspace.is_active
+          is_active: workspace.is_active,
         });
-        
+
         if (workspace.cover_image_url) {
           this.imagePreview.set(workspace.cover_image_url);
         }
-        
+
         this.loading.set(false);
       },
       error: (err: Error) => {
         this.error.set(err.message || 'Failed to load workspace');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -86,19 +86,19 @@ export class WorkspaceEditComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      
+
       if (!file.type.startsWith('image/')) {
         this.notificationService.error('Please select an image file');
         return;
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         this.notificationService.error('File size must be less than 5MB');
         return;
       }
-      
+
       this.selectedFile.set(file);
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         this.imagePreview.set(e.target?.result as string);
@@ -116,19 +116,19 @@ export class WorkspaceEditComponent implements OnInit {
     const name = this.workspaceForm.get('name')?.value;
     if (name) {
       const slug = name
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9-]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .replace(/--+/g, '-');
-      this.workspaceForm.patchValue({ slug });
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9-]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .replace(/--+/g, '-');
+      this.workspaceForm.patchValue({slug});
     }
   }
 
   onSubmit(): void {
     if (this.workspaceForm.invalid) {
-      Object.keys(this.workspaceForm.controls).forEach(key => {
+      Object.keys(this.workspaceForm.controls).forEach((key) => {
         this.workspaceForm.get(key)?.markAsTouched();
       });
       return;
@@ -138,7 +138,7 @@ export class WorkspaceEditComponent implements OnInit {
     this.error.set('');
 
     const formValue = this.workspaceForm.value;
-    
+
     if (this.selectedFile()) {
       const formData = new FormData();
       formData.append('name', formValue.name);
@@ -157,7 +157,7 @@ export class WorkspaceEditComponent implements OnInit {
         error: (err: Error) => {
           this.error.set(err.message || 'Failed to update workspace');
           this.submitting.set(false);
-        }
+        },
       });
     } else {
       const updateData: Partial<WorkspaceRequest> = {
@@ -166,7 +166,7 @@ export class WorkspaceEditComponent implements OnInit {
         description: formValue.description || '',
         workspace_type: formValue.workspace_type as any,
         visibility: formValue.visibility as any,
-        is_active: formValue.is_active
+        is_active: formValue.is_active,
       };
 
       this.workspacesService.updateWorkspace(this.workspaceId(), updateData).subscribe({
@@ -177,7 +177,7 @@ export class WorkspaceEditComponent implements OnInit {
         error: (err: Error) => {
           this.error.set(err.message || 'Failed to update workspace');
           this.submitting.set(false);
-        }
+        },
       });
     }
   }
@@ -199,7 +199,7 @@ export class WorkspaceEditComponent implements OnInit {
       'team': 'Team',
       'project': 'Project',
       'department': 'Department',
-      'other': 'Other'
+      'other': 'Other',
     };
     return labels[type] || type;
   }
@@ -216,7 +216,7 @@ export class WorkspaceEditComponent implements OnInit {
     if (control.hasError('required')) return `${field} is required`;
     if (control.hasError('maxLength')) return `${field} is too long`;
     if (control.hasError('pattern')) return `${field} contains invalid characters`;
-    
+
     return '';
   }
 }

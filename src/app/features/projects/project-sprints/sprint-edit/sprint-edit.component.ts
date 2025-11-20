@@ -1,22 +1,22 @@
-import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { SprintsService } from '../../../../core/services/sprints.service';
-import { Sprint, SprintRequest } from '../../../../core/models/interfaces';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import {Component, inject, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {SprintsService} from '../../../../core/services/sprints.service';
+import {Sprint, SprintRequest} from '../../../../core/models/interfaces';
+import {FormGroup, FormBuilder, Validators, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   standalone: true,
   selector: 'app-sprint-edit',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './sprint-edit.component.html',
-  styleUrl: './sprint-edit.component.css'
+  styleUrl: './sprint-edit.component.css',
 })
-export class SprintEditComponent {
+export class SprintEditComponent implements OnInit {
   @Input() sprintId!: string;
   @Output() close = new EventEmitter<void>();
 
-  sprintEditService = inject(SprintsService)
-  fb = inject(FormBuilder)
+  sprintEditService = inject(SprintsService);
+  fb = inject(FormBuilder);
   loading = false;
   error: string | null = null;
   sprint: Sprint | null = null;
@@ -24,7 +24,7 @@ export class SprintEditComponent {
     name: ['', Validators.required],
     goal: [''],
     start_date: ['', Validators.required],
-    end_date: ['', Validators.required]
+    end_date: ['', Validators.required],
   });
 
   ngOnInit(): void {
@@ -42,8 +42,8 @@ export class SprintEditComponent {
         this.form.patchValue({
           name: sprintData.name ?? '',
           goal: sprintData.goal ?? '',
-          start_date: sprintData.start_date ? sprintData.start_date.toString().slice(0,10) : '',
-          end_date: sprintData.end_date ? sprintData.end_date.toString().slice(0,10) : ''
+          start_date: sprintData.start_date ? sprintData.start_date.toString().slice(0, 10) : '',
+          end_date: sprintData.end_date ? sprintData.end_date.toString().slice(0, 10) : '',
         });
       } else {
         this.sprint = null;

@@ -1,19 +1,19 @@
-import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IssueService } from '../../../../core/services/issue.service';
-import { IssueType, IssueRequest } from '../../../../core/models/interfaces';
-import { PaginatedIssueTypeList } from '../../../../core/models/api-interfaces';
-import { MlPredictEffortComponent } from '../ml-predict-effort/ml-predict-effort.component';
-import { MlRecommendPointsComponent } from '../ml-recommend-points/ml-recommend-points.component';
+import {Component, EventEmitter, Input, Output, inject, signal, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {IssueService} from '../../../../core/services/issue.service';
+import {IssueType, IssueRequest} from '../../../../core/models/interfaces';
+import {PaginatedIssueTypeList} from '../../../../core/models/api-interfaces';
+import {MlPredictEffortComponent} from '../ml-predict-effort/ml-predict-effort.component';
+import {MlRecommendPointsComponent} from '../ml-recommend-points/ml-recommend-points.component';
 
 @Component({
   selector: 'app-issue-create',
   imports: [CommonModule, ReactiveFormsModule, MlPredictEffortComponent, MlRecommendPointsComponent],
   templateUrl: './issue-create.component.html',
-  styleUrl: './issue-create.component.css'
+  styleUrl: './issue-create.component.css',
 })
-export class IssueCreateComponent {
+export class IssueCreateComponent implements OnInit {
   @Input() projectId!: string;
   @Output() close = new EventEmitter<void>();
   @Output() issueCreated = new EventEmitter<void>();
@@ -39,7 +39,7 @@ export class IssueCreateComponent {
       issue_type: ['', Validators.required],
       priority: ['P3'],
       estimated_hours: [0],
-      story_points: [0]
+      story_points: [0],
     });
   }
 
@@ -50,15 +50,15 @@ export class IssueCreateComponent {
   async loadIssueTypes(): Promise<void> {
     try {
       console.log('[ISSUE CREATE] Loading issue types for project:', this.projectId);
-      
+
       // ✅ CRITICAL FIX: Filter issue types by project
       const types = await this.issueService.getIssueTypes(this.projectId).toPromise();
-      
+
       if (types) {
         console.log('[ISSUE CREATE] ✅ Issue types loaded:', types.results.length);
         this.issuesTypes.set(types);
         this.issueTypes.set(types.results || []);
-        
+
         if (types.results.length === 0) {
           console.warn('[ISSUE CREATE] ⚠️ No issue types found for project:', this.projectId);
           this.error.set('No issue types available for this project');
@@ -84,7 +84,7 @@ export class IssueCreateComponent {
           description: formData.description || '',
           priority: formData.priority,
           estimated_hours: formData.estimated_hours || 0,
-          story_points: formData.story_points || 0
+          story_points: formData.story_points || 0,
         };
 
         await this.issueService.createIssue(issueData).toPromise();
@@ -118,7 +118,7 @@ export class IssueCreateComponent {
 
   applyPrediction(hours: number): void {
     this.issueForm.patchValue({
-      estimated_hours: hours
+      estimated_hours: hours,
     });
     this.showPredictEffort.set(false);
   }
@@ -138,7 +138,7 @@ export class IssueCreateComponent {
 
   applyPoints(points: number): void {
     this.issueForm.patchValue({
-      story_points: points
+      story_points: points,
     });
     this.showRecommendPoints.set(false);
   }

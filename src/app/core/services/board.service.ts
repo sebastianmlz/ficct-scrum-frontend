@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {
   Board,
   BoardColumn,
@@ -14,12 +14,12 @@ import {
   CreateIssueQuickRequest,
   PaginationParams,
   PaginatedBoardList,
-  PaginatedIssueList
+  PaginatedIssueList,
 } from '../models/interfaces';
-import { environment } from '../../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BoardService {
   private http = inject(HttpClient);
@@ -42,10 +42,10 @@ export class BoardService {
       httpParams = httpParams.set('search', params.search);
     }
 
-    return this.http.get<PaginatedBoardList>(`${this.baseUrl}/boards/`, { params: httpParams })
-      .pipe(
-        map(response => response.results)
-      );
+    return this.http.get<PaginatedBoardList>(`${this.baseUrl}/boards/`, {params: httpParams})
+        .pipe(
+            map((response) => response.results),
+        );
   }
 
   getBoardById(boardId: string): Observable<Board> {
@@ -111,9 +111,9 @@ export class BoardService {
       httpParams = httpParams.set('search', filters.search);
     }
 
-    return this.http.get<PaginatedIssueList>(`${this.baseUrl}/issues/`, { params: httpParams })
-      .pipe(
-        map(response => response.results)
-      );
+    return this.http.get<PaginatedIssueList>(`${this.baseUrl}/issues/`, {params: httpParams})
+        .pipe(
+            map((response) => response.results),
+        );
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
 export interface CacheEntry<T> {
   data: T;
@@ -9,18 +9,18 @@ export interface CacheEntry<T> {
 /**
  * AI Cache Service
  * Previene llamadas redundantes usando localStorage
- * 
+ *
  * TTL Strategies:
  * - Embeddings/Index: Never expire (0) - solo invalidate manual
  * - Summaries: Invalidate when issue changes
  * - Search results: 1 hour TTL
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AiCacheService {
   private readonly CACHE_PREFIX = 'ai_cache_';
-  
+
   // TTL constants (milliseconds)
   readonly TTL_NEVER = 0;
   readonly TTL_1_HOUR = 3600000;
@@ -34,13 +34,13 @@ export class AiCacheService {
     try {
       const cacheKey = this.getCacheKey(key);
       const cachedStr = localStorage.getItem(cacheKey);
-      
+
       if (!cachedStr) {
         return null;
       }
 
       const cached: CacheEntry<T> = JSON.parse(cachedStr);
-      
+
       // Check if expired (TTL = 0 means never expire)
       if (cached.ttl !== 0) {
         const now = Date.now();
@@ -68,7 +68,7 @@ export class AiCacheService {
       const entry: CacheEntry<T> = {
         data,
         timestamp: Date.now(),
-        ttl
+        ttl,
       };
 
       localStorage.setItem(cacheKey, JSON.stringify(entry));
@@ -94,8 +94,8 @@ export class AiCacheService {
   invalidatePattern(pattern: string): void {
     const keys = this.getAllCacheKeys();
     let count = 0;
-    
-    keys.forEach(key => {
+
+    keys.forEach((key) => {
       if (key.includes(pattern)) {
         localStorage.removeItem(key);
         count++;
@@ -110,7 +110,7 @@ export class AiCacheService {
    */
   clearAll(): void {
     const keys = this.getAllCacheKeys();
-    keys.forEach(key => localStorage.removeItem(key));
+    keys.forEach((key) => localStorage.removeItem(key));
     console.log(`[AI-CACHE] 🗑️ CLEARED ${keys.length} entries`);
   }
 
@@ -121,7 +121,7 @@ export class AiCacheService {
     const keys = this.getAllCacheKeys();
     let totalSize = 0;
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       const value = localStorage.getItem(key);
       if (value) {
         totalSize += value.length;
@@ -130,7 +130,7 @@ export class AiCacheService {
 
     return {
       total: keys.length,
-      size: this.formatBytes(totalSize)
+      size: this.formatBytes(totalSize),
     };
   }
 

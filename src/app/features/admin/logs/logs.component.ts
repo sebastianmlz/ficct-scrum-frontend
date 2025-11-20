@@ -1,17 +1,17 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { SystemLog, PaginatedSystemLogList, SystemLogQueryParams } from '../../../core/models/interfaces';
-import { LevelEnum } from '../../../core/models/enums';
-import { LoggingService } from '../../../core/services/logging.service';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {SystemLog, PaginatedSystemLogList, SystemLogQueryParams} from '../../../core/models/interfaces';
+import {LevelEnum} from '../../../core/models/enums';
+import {LoggingService} from '../../../core/services/logging.service';
 
 @Component({
   selector: 'app-logs',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './logs.component.html',
-  styleUrl: './logs.component.css'
+  styleUrl: './logs.component.css',
 })
 export class LogsComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -30,7 +30,7 @@ export class LogsComponent implements OnInit {
     search: [''],
     action_type: [''],
     level: [''],
-    ip_address: ['']
+    ip_address: [''],
   });
 
   ngOnInit(): void {
@@ -44,10 +44,10 @@ export class LogsComponent implements OnInit {
     const formValues = this.searchForm.value;
     const params: SystemLogQueryParams = {
       page: this.currentPage(),
-      ...(formValues.search && { search: formValues.search }),
-      ...(formValues.action_type && { action_type: formValues.action_type }),
-      ...(formValues.level && { level: formValues.level }),
-      ...(formValues.ip_address && { ip_address: formValues.ip_address })
+      ...(formValues.search && {search: formValues.search}),
+      ...(formValues.action_type && {action_type: formValues.action_type}),
+      ...(formValues.level && {level: formValues.level}),
+      ...(formValues.ip_address && {ip_address: formValues.ip_address}),
     };
 
     this.loggingService.getSystemLogs(params).subscribe({
@@ -59,7 +59,7 @@ export class LogsComponent implements OnInit {
         console.error('Error loading system logs:', error);
         this.error.set(error.error?.message || 'Failed to load system logs');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -129,7 +129,7 @@ export class LogsComponent implements OnInit {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
     });
   }
 

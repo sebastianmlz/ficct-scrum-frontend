@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 
 export interface Notification {
   id: string;
@@ -10,7 +10,7 @@ export interface Notification {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationService {
   private notifications = signal<Notification[]>([]);
@@ -22,50 +22,50 @@ export class NotificationService {
     return Math.random().toString(36).substring(2) + Date.now().toString(36);
   }
 
-  success(title: string, message?: string, duration: number = 5000): void {
+  success(title: string, message?: string, duration = 5000): void {
     this.addNotification({
       type: 'success',
       title,
       message,
-      duration
+      duration,
     });
   }
 
-  error(title: string, message?: string, persistent: boolean = false): void {
+  error(title: string, message?: string, persistent = false): void {
     this.addNotification({
       type: 'error',
       title,
       message,
       persistent,
-      duration: persistent ? undefined : 8000
+      duration: persistent ? undefined : 8000,
     });
   }
 
-  warning(title: string, message?: string, duration: number = 6000): void {
+  warning(title: string, message?: string, duration = 6000): void {
     this.addNotification({
       type: 'warning',
       title,
       message,
-      duration
+      duration,
     });
   }
 
-  info(title: string, message?: string, duration: number = 5000): void {
+  info(title: string, message?: string, duration = 5000): void {
     this.addNotification({
       type: 'info',
       title,
       message,
-      duration
+      duration,
     });
   }
 
   private addNotification(notification: Omit<Notification, 'id'>): void {
     const newNotification: Notification = {
       ...notification,
-      id: this.generateId()
+      id: this.generateId(),
     };
 
-    this.notifications.update(notifications => [...notifications, newNotification]);
+    this.notifications.update((notifications) => [...notifications, newNotification]);
 
     // Auto-remove non-persistent notifications
     if (!notification.persistent && notification.duration) {
@@ -76,8 +76,8 @@ export class NotificationService {
   }
 
   remove(id: string): void {
-    this.notifications.update(notifications => 
-      notifications.filter(n => n.id !== id)
+    this.notifications.update((notifications) =>
+      notifications.filter((n) => n.id !== id),
     );
   }
 
@@ -95,7 +95,7 @@ export class NotificationService {
     this.error('Error', `Failed to ${action.toLowerCase()}: ${message}`, true);
   }
 
-  validationError(message: string = 'Please check the form and try again'): void {
+  validationError(message = 'Please check the form and try again'): void {
     this.warning('Validation Error', message);
   }
 

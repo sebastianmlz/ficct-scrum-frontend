@@ -503,8 +503,8 @@ export interface PaginationParams {
   role?: string;
   workspace_type?: string;
   email?: string;
-  workspace?: string;             // UUID - Filter by workspace
-  
+  workspace?: string; // UUID - Filter by workspace
+
   // Issue filters - UUID based
   status?: string;
   priority?: string;
@@ -514,16 +514,16 @@ export interface PaginationParams {
   reporter?: string;
   issue_type?: string;
   board?: string;
-  
+
   // Issue filters - User-friendly (NEW)
-  status_name?: string;           // "In Progress", "To Do", "Done"
-  status_category?: string;       // "to_do", "in_progress", "done"
-  assignee_email?: string;        // "user@example.com"
-  reporter_email?: string;        // "user@example.com"
-  issue_type_category?: string;   // "epic", "story", "task", "bug"
-  project_key?: string;           // "FICCT"
-  workspace_key?: string;         // "SCRUM"
-  organization?: string;          // UUID
+  status_name?: string; // "In Progress", "To Do", "Done"
+  status_category?: string; // "to_do", "in_progress", "done"
+  assignee_email?: string; // "user@example.com"
+  reporter_email?: string; // "user@example.com"
+  issue_type_category?: string; // "epic", "story", "task", "bug"
+  project_key?: string; // "FICCT"
+  workspace_key?: string; // "SCRUM"
+  organization?: string; // UUID
   is_active?: boolean;
 }
 
@@ -541,7 +541,7 @@ export interface ErrorLogQueryParams extends PaginationParams {
 }
 
 
-/*Sprints Interfaces*/
+/* Sprints Interfaces*/
 export interface Sprint {
   id: string;
   project: ProjectBasic;
@@ -926,18 +926,18 @@ export interface PatchedGitHubIntegrationRequest {
 export interface GitHubCommit {
   id: string;
   integration?: string;
-  sha: string;                        // Full commit hash
-  short_sha: string;                  // First 7 characters
-  message: string;                    // Full commit message (multi-line)
-  formatted_message: string;          // First line only
+  sha: string; // Full commit hash
+  short_sha: string; // First 7 characters
+  message: string; // Full commit message (multi-line)
+  formatted_message: string; // First line only
   author_name: string;
   author_email: string;
   author_avatar_url?: string;
-  commit_date: string;                // ISO 8601 timestamp
-  branch: string;                     // Branch name (e.g., "main")
-  url: string;                        // GitHub commit URL
-  issue_keys_mentioned: string[];     // Auto-detected issue keys (e.g., ["PROJ-123"])
-  synced_at: string;                  // When this commit was synced
+  commit_date: string; // ISO 8601 timestamp
+  branch: string; // Branch name (e.g., "main")
+  url: string; // GitHub commit URL
+  issue_keys_mentioned: string[]; // Auto-detected issue keys (e.g., ["PROJ-123"])
+  synced_at: string; // When this commit was synced
   // Legacy/optional fields
   committed_at?: string;
   commit_hash?: string;
@@ -1005,20 +1005,20 @@ export interface GitHubMetrics {
   total_commits: number;
   commits_last_30_days?: number;
   avg_commits_per_day?: number;
-  
+
   // Commit frequency (backend sends as dict)
-  commit_frequency?: { [date: string]: number };  // { "2025-10-04": 5, ... }
-  
+  commit_frequency?: Record<string, number>; // { "2025-10-04": 5, ... }
+
   // Contributors (backend sends as array)
   top_contributors?: GitHubContributor[];
-  
+
   // Pull requests
   total_pull_requests?: number;
   open_pull_requests?: number;
   merged_pull_requests?: number;
   closed_pull_requests?: number;
   avg_pr_size?: number;
-  
+
   // Legacy fields (for backward compatibility)
   contributors?: GitHubContributor[];
   commit_activity?: CommitActivity[];
@@ -1057,11 +1057,11 @@ export interface SmartCommitAction {
 }
 
 export interface SyncCommitsResponse {
-  message: string;                      // "Successfully synced 51 commits"
-  synced_count: number;                 // How many NEW commits were synced
-  last_sync_at: string;                 // ISO 8601 timestamp
-  total_commits: number;                // Total commits in database (historical)
-  commits: GitHubCommit[];              // Array of up to 50 commits
+  message: string; // "Successfully synced 51 commits"
+  synced_count: number; // How many NEW commits were synced
+  last_sync_at: string; // ISO 8601 timestamp
+  total_commits: number; // Total commits in database (historical)
+  commits: GitHubCommit[]; // Array of up to 50 commits
   // Legacy fields (optional)
   status?: string;
   sync_count?: number;
@@ -1107,12 +1107,12 @@ export type DiagramFormat = 'svg' | 'png' | 'pdf' | 'json';
 
 export interface DiagramRequestRequest {
   diagram_type: DiagramType;
-  project?: string;  // UUID del proyecto
-  board?: string;    // UUID del board
-  sprint?: string;   // UUID del sprint
+  project?: string; // UUID del proyecto
+  board?: string; // UUID del board
+  sprint?: string; // UUID del sprint
   format?: DiagramFormat;
   options?: DiagramOptions;
-  parameters?: Record<string, any>;  // Filter parameters for diagrams
+  parameters?: Record<string, any>; // Filter parameters for diagrams
 }
 
 export interface DiagramOptions {
@@ -1252,7 +1252,7 @@ export interface RoadmapIssue {
 
 export interface RoadmapMilestone {
   id: string;
-  name: string;  // Backend uses 'name' not 'title'
+  name: string; // Backend uses 'name' not 'title'
   date: string;
   color: string;
   description?: string;
@@ -1364,11 +1364,11 @@ export interface IssueCommentRequest {
 export interface PaginatedIssueCommentList extends PaginatedResponse<IssueComment> { }
 
 // Union type for all diagram data
-export type DiagramData = 
-  | WorkflowDiagramData 
-  | DependencyDiagramData 
-  | RoadmapDiagramData 
-  | UMLDiagramData 
+export type DiagramData =
+  | WorkflowDiagramData
+  | DependencyDiagramData
+  | RoadmapDiagramData
+  | UMLDiagramData
   | ArchitectureDiagramData
   | string;
 

@@ -1,15 +1,15 @@
-import { Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { DiagramService } from '../../../../core/services/diagram.service';
-import { DiagramRendererService } from '../../../../core/services/diagram-renderer.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { DiagramResponse, DiagramFormat } from '../../../../core/models/interfaces';
-import { WorkflowDiagramData } from '../../../../core/models/diagram.interfaces';
-import { DiagramErrorStateComponent } from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
-import { DiagramControlsComponent } from '../../../../shared/components/diagram-controls/diagram-controls.component';
-import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
+import {Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DiagramService} from '../../../../core/services/diagram.service';
+import {DiagramRendererService} from '../../../../core/services/diagram-renderer.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {DiagramResponse, DiagramFormat} from '../../../../core/models/interfaces';
+import {WorkflowDiagramData} from '../../../../core/models/diagram.interfaces';
+import {DiagramErrorStateComponent} from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
+import {DiagramControlsComponent} from '../../../../shared/components/diagram-controls/diagram-controls.component';
+import {DiagramErrorState, analyzeDiagramError, logDiagramError} from '../../../../shared/utils/diagram-error.utils';
 import * as d3 from 'd3';
 
 @Component({
@@ -17,7 +17,7 @@ import * as d3 from 'd3';
   standalone: true,
   imports: [CommonModule, DiagramErrorStateComponent, DiagramControlsComponent],
   templateUrl: './workflow-diagram.component.html',
-  styleUrls: ['./workflow-diagram.component.scss']
+  styleUrls: ['./workflow-diagram.component.scss'],
 })
 export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('svgContainer') svgContainer!: ElementRef<HTMLDivElement>;
@@ -35,35 +35,35 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
   diagramFormat = signal<'svg' | 'json'>('json');
   loading = signal(false);
   errorState = signal<DiagramErrorState | null>(null);
-  
+
   // Zoom and pan controls for SVG
   svgZoom = signal(1);
   svgPanX = signal(0);
   svgPanY = signal(0);
-  
+
   // Fullscreen mode
   isFullscreen = signal(false);
-  
+
   // Cache status from backend
   cacheStatus = signal<{cached: boolean, age?: number, generationTime?: number} | null>(null);
-  
+
   // Pan state
   private isPanning = false;
   private panStartX = 0;
   private panStartY = 0;
   private initialPanX = 0;
   private initialPanY = 0;
-  
+
   private svg: any;
   private simulation: any;
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
         this.loadDiagram();
-        
+
         // Listen for pan mouse events
         document.addEventListener('mousemove', this.onPanMove.bind(this));
         document.addEventListener('mouseup', this.onPanEnd.bind(this));
@@ -78,32 +78,32 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
   loadDiagram(): void {
     this.loading.set(true);
     this.errorState.set(null);
-    
+
     this.diagramService.generateWorkflowDiagram(this.projectId(), 'json').subscribe({
       next: (response: DiagramResponse) => {
         // Check the actual format returned by backend
         this.diagramFormat.set(response.format as 'svg' | 'json');
-        
+
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
             console.log('[WORKFLOW-DIAGRAM] 📝 Raw SVG length:', response.data.length);
-            
+
             // CRITICAL: Unescape the SVG string from JSON
             let svgString = response.data;
-            
+
             // Replace escaped newlines with actual newlines
             svgString = svgString.replace(/\\n/g, '\n');
-            
+
             // Replace escaped quotes with actual quotes
             svgString = svgString.replace(/\\"/g, '"');
-            
+
             // Replace escaped backslashes
             svgString = svgString.replace(/\\\\/g, '\\');
-            
+
             console.log('[WORKFLOW-DIAGRAM] 📝 Unescaped SVG length:', svgString.length);
             console.log('[WORKFLOW-DIAGRAM] 📝 First 200 chars:', svgString.substring(0, 200));
-            
+
             // Strip fixed width/height attributes to make SVG responsive
             const responsiveSvg = this.makeResponsive(svgString);
             this.safeSvgContent.set(this.sanitizer.bypassSecurityTrustHtml(responsiveSvg));
@@ -116,12 +116,12 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
           try {
             const parsedData = this.parseDiagramData(response.data);
             console.log('[WORKFLOW-DIAGRAM] 📊 Parsed data:', parsedData);
-            
+
             // Validate structure
             if (!parsedData.nodes || !parsedData.edges) {
               throw new Error('Invalid diagram data structure: missing nodes or edges');
             }
-            
+
             this.diagramData.set(parsedData as WorkflowDiagramData);
             this.safeSvgContent.set(null); // Clear SVG content
             setTimeout(() => this.renderDiagram(), 100);
@@ -131,14 +131,14 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
             this.errorState.set(analyzeDiagramError(parseError, this.projectId()));
           }
         }
-        
+
         this.loading.set(false);
       },
       error: (error) => {
         logDiagramError('WORKFLOW-DIAGRAM', error);
         this.errorState.set(analyzeDiagramError(error, this.projectId()));
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -155,7 +155,7 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
 
     console.log('[WORKFLOW-DIAGRAM] Rendering with DiagramRendererService');
     const containerId = this.svgContainer.nativeElement.id || 'workflow-diagram-container';
-    
+
     // Ensure container has an ID for D3 selection
     if (!this.svgContainer.nativeElement.id) {
       this.svgContainer.nativeElement.id = containerId;
@@ -212,20 +212,20 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
   makeResponsive(svgString: string): string {
     console.log('[WORKFLOW-DIAGRAM] 🔧 Making SVG responsive');
     console.log('[WORKFLOW-DIAGRAM] Original SVG length:', svgString.length);
-    
+
     // Parse SVG to extract viewBox if exists
     const viewBoxMatch = svgString.match(/viewBox="([^"]+)"/);
     const widthMatch = svgString.match(/width="([^"]+)"/);
     const heightMatch = svgString.match(/height="([^"]+)"/);
-    
+
     console.log('[WORKFLOW-DIAGRAM] Extracted attributes:', {
       viewBox: viewBoxMatch?.[1],
       width: widthMatch?.[1],
-      height: heightMatch?.[1]
+      height: heightMatch?.[1],
     });
-    
+
     let modifiedSvg = svgString;
-    
+
     // If viewBox doesn't exist but width/height do, create viewBox from them
     if (!viewBoxMatch && widthMatch && heightMatch) {
       const width = parseFloat(widthMatch[1]);
@@ -234,25 +234,25 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
       modifiedSvg = modifiedSvg.replace('<svg', `<svg viewBox="${viewBox}"`);
       console.log('[WORKFLOW-DIAGRAM] ✅ Added viewBox:', viewBox);
     }
-    
+
     // CRITICAL: Remove ALL fixed width and height attributes using multiple patterns
     modifiedSvg = modifiedSvg.replace(/\s*width="[\d.]+"/gi, '');
     modifiedSvg = modifiedSvg.replace(/\s*height="[\d.]+"/gi, '');
     modifiedSvg = modifiedSvg.replace(/\s*width='[\d.]+'/gi, '');
     modifiedSvg = modifiedSvg.replace(/\s*height='[\d.]+'/gi, '');
-    
+
     // Remove width/height from style attributes as well
     modifiedSvg = modifiedSvg.replace(/width:\s*[\d.]+px;?/gi, '');
     modifiedSvg = modifiedSvg.replace(/height:\s*[\d.]+px;?/gi, '');
-    
+
     // Add responsive CSS classes - FORCE width 100% and height auto
     if (!modifiedSvg.includes('class="responsive-svg"')) {
       modifiedSvg = modifiedSvg.replace(
-        '<svg',
-        '<svg class="responsive-svg" style="width: 100% !important; height: auto !important; display: block !important;"'
+          '<svg',
+          '<svg class="responsive-svg" style="width: 100% !important; height: auto !important; display: block !important;"',
       );
     }
-    
+
     console.log('[WORKFLOW-DIAGRAM] ✅ SVG made responsive');
     console.log('[WORKFLOW-DIAGRAM] ViewBox preserved:', viewBoxMatch?.[1] || 'created from dimensions');
     return modifiedSvg;
@@ -263,11 +263,11 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
    */
   private parseDiagramData(data: any): any {
     console.log('[WORKFLOW-DIAGRAM] 🔍 Parsing data, type:', typeof data);
-    
+
     if (data === null || data === undefined) {
       throw new Error('Diagram data is null or undefined');
     }
-    
+
     // If data is a string, parse it as JSON
     if (typeof data === 'string') {
       console.log('[WORKFLOW-DIAGRAM] 📝 Data is string, parsing with JSON.parse');
@@ -281,13 +281,13 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
         throw new Error(`Failed to parse diagram JSON: ${error.message}`);
       }
     }
-    
+
     // If data is already an object, return it directly
     if (typeof data === 'object') {
       console.log('[WORKFLOW-DIAGRAM] ✅ Data is already object');
       return data;
     }
-    
+
     throw new Error(`Unsupported data type: ${typeof data}`);
   }
 
@@ -295,12 +295,12 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
    * Zoom controls
    */
   zoomIn(): void {
-    this.svgZoom.update(z => Math.min(z + 0.25, 3));
+    this.svgZoom.update((z) => Math.min(z + 0.25, 3));
     console.log('[WORKFLOW-DIAGRAM] Zoom in:', this.svgZoom());
   }
 
   zoomOut(): void {
-    this.svgZoom.update(z => Math.max(z - 0.25, 0.5));
+    this.svgZoom.update((z) => Math.max(z - 0.25, 0.5));
     console.log('[WORKFLOW-DIAGRAM] Zoom out:', this.svgZoom());
   }
 
@@ -344,7 +344,7 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
    * Toggle fullscreen mode
    */
   toggleFullscreen(): void {
-    this.isFullscreen.update(fs => !fs);
+    this.isFullscreen.update((fs) => !fs);
     console.log('[WORKFLOW-DIAGRAM] Fullscreen:', this.isFullscreen());
   }
 
@@ -399,19 +399,19 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
   loadDiagramWithCacheBust(): void {
     this.loading.set(true);
     this.errorState.set(null);
-    
+
     console.log('[WORKFLOW-DIAGRAM] 📅 Force refresh: true');
-    
+
     // Pass forceRefresh=true to backend
     this.diagramService.generateWorkflowDiagram(this.projectId(), 'json', true).subscribe({
       next: (response: DiagramResponse) => {
         console.log('[WORKFLOW-DIAGRAM] ✅ Fresh diagram received (cache busted)');
         console.log('[WORKFLOW-DIAGRAM] Response format:', response.format);
         console.log('[WORKFLOW-DIAGRAM] Cached?:', (response as any).cached);
-        
+
         // Check the actual format returned by backend
         this.diagramFormat.set(response.format as 'svg' | 'json');
-        
+
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
@@ -420,7 +420,7 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
             svgString = svgString.replace(/\\n/g, '\n');
             svgString = svgString.replace(/\\"/g, '"');
             svgString = svgString.replace(/\\\\/g, '\\');
-            
+
             // Strip fixed width/height attributes to make SVG responsive
             const responsiveSvg = this.makeResponsive(svgString);
             this.safeSvgContent.set(this.sanitizer.bypassSecurityTrustHtml(responsiveSvg));
@@ -433,12 +433,12 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
           try {
             const parsedData = this.parseDiagramData(response.data);
             console.log('[WORKFLOW-DIAGRAM] 📊 Parsed refreshed data:', parsedData);
-            
+
             // Validate structure
             if (!parsedData.nodes || !parsedData.edges) {
               throw new Error('Invalid diagram data structure: missing nodes or edges');
             }
-            
+
             this.diagramData.set(parsedData as WorkflowDiagramData);
             this.safeSvgContent.set(null); // Clear SVG content
             setTimeout(() => this.renderDiagram(), 100);
@@ -448,14 +448,14 @@ export class WorkflowDiagramComponent implements OnInit, AfterViewInit, OnDestro
             this.errorState.set(analyzeDiagramError(parseError, this.projectId()));
           }
         }
-        
+
         this.loading.set(false);
       },
       error: (error) => {
         logDiagramError('WORKFLOW-DIAGRAM', error);
         this.errorState.set(analyzeDiagramError(error, this.projectId()));
         this.loading.set(false);
-      }
+      },
     });
   }
 

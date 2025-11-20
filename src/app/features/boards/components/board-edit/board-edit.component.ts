@@ -1,15 +1,15 @@
-import { Component, Input, Output, EventEmitter, inject, OnChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { BoardService } from '../../../../core/services/board.service';
-import { Board } from '../../../../core/models/interfaces';
+import {Component, Input, Output, EventEmitter, inject, OnChanges} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
+import {BoardService} from '../../../../core/services/board.service';
+import {Board} from '../../../../core/models/interfaces';
 
 @Component({
   selector: 'app-board-edit',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './board-edit.component.html',
-  styleUrl: './board-edit.component.css'
+  styleUrl: './board-edit.component.css',
 })
 export class BoardEditComponent implements OnChanges {
   @Input() board: Board | null = null;
@@ -22,7 +22,7 @@ export class BoardEditComponent implements OnChanges {
   editForm: FormGroup = this.fb.group({
     name: [''],
     description: [''],
-    board_type: ['kanban']
+    board_type: ['kanban'],
   });
 
   ngOnChanges() {
@@ -30,7 +30,7 @@ export class BoardEditComponent implements OnChanges {
       this.editForm.patchValue({
         name: this.board.name,
         description: this.board.description,
-        board_type: this.board.board_type
+        board_type: this.board.board_type,
       });
     }
   }
@@ -44,7 +44,7 @@ export class BoardEditComponent implements OnChanges {
     const updated = {
       name: this.editForm.value.name,
       description: this.editForm.value.description,
-      board_type: this.editForm.value.board_type
+      board_type: this.editForm.value.board_type,
     };
     try {
       const result = await this.boardService.updateBoard(this.board.id, updated).toPromise();

@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MlService, PredictEffortResponse } from '../../../../core/services/ml.service';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MlService, PredictEffortResponse} from '../../../../core/services/ml.service';
 
 @Component({
   selector: 'app-ml-predict-effort',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './ml-predict-effort.component.html'
+  templateUrl: './ml-predict-effort.component.html',
 })
-export class MlPredictEffortComponent {
+export class MlPredictEffortComponent implements OnInit {
   @Input() title!: string;
   @Input() description?: string;
   @Input() issueType!: string;
@@ -40,14 +40,14 @@ export class MlPredictEffortComponent {
         title: this.title,
         description: this.description,
         issue_type: this.issueType,
-        project_id: this.projectId
+        project_id: this.projectId,
       });
 
       const result = await this.mlService.predictEffort({
         title: this.title,
         description: this.description,
         issue_type: this.issueType,
-        project_id: this.projectId
+        project_id: this.projectId,
       }).toPromise();
 
       if (result) {
@@ -55,15 +55,15 @@ export class MlPredictEffortComponent {
       }
     } catch (error: any) {
       console.error('[ML Predict Effort] Error:', error);
-      
+
       // Handle different error types
       if (error.message === 'Session expired') {
         // Auth interceptor already handled this
         return;
       }
-      
+
       let errorMsg = 'Failed to predict effort';
-      
+
       if (error.status === 0) {
         errorMsg = 'Connection lost. Please check your internet and try again.';
       } else if (error.status === 400) {
@@ -75,7 +75,7 @@ export class MlPredictEffortComponent {
       } else {
         errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
       }
-      
+
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);

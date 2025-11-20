@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MlService, RecommendStoryPointsResponse } from '../../../../core/services/ml.service';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MlService, RecommendStoryPointsResponse} from '../../../../core/services/ml.service';
 
 @Component({
   selector: 'app-ml-recommend-points',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './ml-recommend-points.component.html'
+  templateUrl: './ml-recommend-points.component.html',
 })
-export class MlRecommendPointsComponent {
+export class MlRecommendPointsComponent implements OnInit {
   @Input() title!: string;
   @Input() description?: string;
   @Input() issueType!: string;
@@ -40,14 +40,14 @@ export class MlRecommendPointsComponent {
         title: this.title,
         description: this.description,
         issue_type: this.issueType,
-        project_id: this.projectId
+        project_id: this.projectId,
       });
 
       const result = await this.mlService.recommendStoryPoints({
         title: this.title,
         description: this.description,
         issue_type: this.issueType,
-        project_id: this.projectId
+        project_id: this.projectId,
       }).toPromise();
 
       if (result) {
@@ -55,15 +55,15 @@ export class MlRecommendPointsComponent {
       }
     } catch (error: any) {
       console.error('[ML Recommend Points] Error:', error);
-      
+
       // Handle different error types
       if (error.message === 'Session expired') {
         // Auth interceptor already handled this
         return;
       }
-      
+
       let errorMsg = 'Failed to recommend story points';
-      
+
       if (error.status === 0) {
         errorMsg = 'Connection lost. Please check your internet and try again.';
       } else if (error.status === 400) {
@@ -75,7 +75,7 @@ export class MlRecommendPointsComponent {
       } else {
         errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
       }
-      
+
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);
@@ -93,9 +93,9 @@ export class MlRecommendPointsComponent {
     }
     // Sort by story points value (Fibonacci sequence)
     return Object.keys(rec.probability_distribution)
-      .map(k => parseInt(k))
-      .sort((a, b) => a - b)
-      .map(k => k.toString());
+        .map((k) => parseInt(k))
+        .sort((a, b) => a - b)
+        .map((k) => k.toString());
   }
 
   applyRecommendation(): void {

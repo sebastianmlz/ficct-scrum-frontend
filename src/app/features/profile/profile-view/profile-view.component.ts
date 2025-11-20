@@ -1,8 +1,8 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { AuthStore } from '../../../core/store/auth.store';
-import { User, UserProfile } from '../../../core/models/interfaces';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink} from '@angular/router';
+import {AuthStore} from '../../../core/store/auth.store';
+import {User, UserProfile} from '../../../core/models/interfaces';
 @Component({
   selector: 'app-profile-view',
   standalone: true,
@@ -35,9 +35,9 @@ export class ProfileViewComponent implements OnInit {
             first_name: currentUser.first_name,
             last_name: currentUser.last_name,
             full_name: currentUser.full_name,
-            avatar_url: currentUser.avatar_url
+            avatar_url: currentUser.avatar_url,
           },
-          ...currentUser.profile
+          ...currentUser.profile,
         });
       }
     }
@@ -45,6 +45,6 @@ export class ProfileViewComponent implements OnInit {
   }
 
   getInitials(fullName: string): string {
-    return fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return fullName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   }
 }

@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthStore } from '../../../core/store/auth.store';
-import { UserRegistrationRequest } from '../../../core/models/interfaces';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
+import {AuthStore} from '../../../core/store/auth.store';
+import {UserRegistrationRequest} from '../../../core/models/interfaces';
 
 
 @Component({
@@ -12,10 +12,10 @@ import { UserRegistrationRequest } from '../../../core/models/interfaces';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrl: './register.component.css',
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
@@ -25,7 +25,7 @@ export class RegisterComponent {
   showPass = false;
   showConfirm = false;
   passwordStrength = 0; // 0..100
-  strengthClass: string = 'bg-slate-300';
+  strengthClass = 'bg-slate-300';
 
 
   updateStrength(): void {
@@ -50,15 +50,15 @@ export class RegisterComponent {
     username: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    password_confirm: ['', [Validators.required]]
-  }, { validators: this.passwordMatchValidator });
+    password_confirm: ['', [Validators.required]],
+  }, {validators: this.passwordMatchValidator});
 
   passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const confirmPassword = form.get('password_confirm');
 
     if (password && confirmPassword && password.value !== confirmPassword.value) {
-      return { passwordMismatch: true };
+      return {passwordMismatch: true};
     }
     return null;
   }
@@ -75,13 +75,13 @@ export class RegisterComponent {
       first_name: this.registerForm.value.first_name,
       last_name: this.registerForm.value.last_name,
       password: this.registerForm.value.password,
-      password_confirm: this.registerForm.value.password_confirm
+      password_confirm: this.registerForm.value.password_confirm,
     };
 
     try {
       await this.authStore.register(userData);
       this.router.navigate(['/auth/login'], {
-        queryParams: { message: 'Registration successful! Please log in.' }
+        queryParams: {message: 'Registration successful! Please log in.'},
       });
     } catch (error) {
       // Error is handled by the store

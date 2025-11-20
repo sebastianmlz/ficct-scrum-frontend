@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { AiCacheService } from './ai-cache.service';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable, tap} from 'rxjs';
+import {environment} from '../../../environments/environment';
+import {AiCacheService} from './ai-cache.service';
 
 // ML Request Interfaces
 export interface PredictEffortRequest {
@@ -61,7 +61,7 @@ export interface EstimateSprintDurationResponse {
 export interface RecommendStoryPointsResponse {
   recommended_points: number; // Fibonacci: 1, 2, 3, 5, 8, 13, 21
   confidence: number; // 0.0-1.0
-  probability_distribution?: { [key: string]: number }; // e.g., {"3": 0.2, "5": 0.5, "8": 0.3}
+  probability_distribution?: Record<string, number>; // e.g., {"3": 0.2, "5": 0.5, "8": 0.3}
   reasoning: string;
   method: string;
   similar_issues_count?: number;
@@ -131,7 +131,7 @@ export interface ProjectAnomaly {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MlService {
   private http = inject(HttpClient);
@@ -152,10 +152,10 @@ export class MlService {
   predictEffort(request: PredictEffortRequest): Observable<PredictEffortResponse> {
     const cacheKey = `effort_${request.project_id}_${request.title}_${request.issue_type}`;
     const cached = this.cache.get<PredictEffortResponse>(cacheKey);
-    
+
     if (cached) {
       console.log('[ML Service] Returning cached effort prediction');
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(cached);
         observer.complete();
       });
@@ -163,10 +163,10 @@ export class MlService {
 
     console.log('[ML Service] Fetching effort prediction from API');
     return this.http.post<PredictEffortResponse>(
-      `${this.baseUrl}/predict-effort/`,
-      request
+        `${this.baseUrl}/predict-effort/`,
+        request,
     ).pipe(
-      tap(response => this.cache.set(cacheKey, response, this.EFFORT_CACHE_TTL))
+        tap((response) => this.cache.set(cacheKey, response, this.EFFORT_CACHE_TTL)),
     );
   }
 
@@ -176,8 +176,8 @@ export class MlService {
   estimateSprintDuration(request: EstimateSprintDurationRequest): Observable<EstimateSprintDurationResponse> {
     console.log('[ML Service] Estimating sprint duration');
     return this.http.post<EstimateSprintDurationResponse>(
-      `${this.baseUrl}/estimate-sprint-duration/`,
-      request
+        `${this.baseUrl}/estimate-sprint-duration/`,
+        request,
     );
   }
 
@@ -188,10 +188,10 @@ export class MlService {
   recommendStoryPoints(request: RecommendStoryPointsRequest): Observable<RecommendStoryPointsResponse> {
     const cacheKey = `points_${request.project_id}_${request.title}_${request.issue_type}`;
     const cached = this.cache.get<RecommendStoryPointsResponse>(cacheKey);
-    
+
     if (cached) {
       console.log('[ML Service] Returning cached story points recommendation');
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(cached);
         observer.complete();
       });
@@ -199,10 +199,10 @@ export class MlService {
 
     console.log('[ML Service] Fetching story points recommendation from API');
     return this.http.post<RecommendStoryPointsResponse>(
-      `${this.baseUrl}/recommend-story-points/`,
-      request
+        `${this.baseUrl}/recommend-story-points/`,
+        request,
     ).pipe(
-      tap(response => this.cache.set(cacheKey, response, this.POINTS_CACHE_TTL))
+        tap((response) => this.cache.set(cacheKey, response, this.POINTS_CACHE_TTL)),
     );
   }
 
@@ -214,10 +214,10 @@ export class MlService {
   suggestAssignment(request: SuggestAssignmentRequest): Observable<SuggestAssignmentResponse> {
     const cacheKey = `assignment_${request.project_id}_${request.issue_id}`;
     const cached = this.cache.get<SuggestAssignmentResponse>(cacheKey);
-    
+
     if (cached) {
       console.log('[ML Service] Returning cached assignment suggestions');
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(cached);
         observer.complete();
       });
@@ -225,10 +225,10 @@ export class MlService {
 
     console.log('[ML Service] Fetching assignment suggestions from API');
     return this.http.post<SuggestAssignmentResponse>(
-      `${this.baseUrl}/suggest-assignment/`,
-      request
+        `${this.baseUrl}/suggest-assignment/`,
+        request,
     ).pipe(
-      tap(response => this.cache.set(cacheKey, response, this.ASSIGNMENT_CACHE_TTL))
+        tap((response) => this.cache.set(cacheKey, response, this.ASSIGNMENT_CACHE_TTL)),
     );
   }
 
@@ -239,10 +239,10 @@ export class MlService {
   getSprintRisk(sprintId: string): Observable<SprintRiskResponse> {
     const cacheKey = `sprint_risk_${sprintId}`;
     const cached = this.cache.get<SprintRiskResponse>(cacheKey);
-    
+
     if (cached) {
       console.log('[ML Service] Returning cached sprint risks');
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(cached);
         observer.complete();
       });
@@ -250,9 +250,9 @@ export class MlService {
 
     console.log('[ML Service] Fetching sprint risks from API');
     return this.http.get<SprintRiskResponse>(
-      `${this.baseUrl}/${sprintId}/sprint-risk/`
+        `${this.baseUrl}/${sprintId}/sprint-risk/`,
     ).pipe(
-      tap(response => this.cache.set(cacheKey, response, this.RISK_CACHE_TTL))
+        tap((response) => this.cache.set(cacheKey, response, this.RISK_CACHE_TTL)),
     );
   }
 
@@ -263,10 +263,10 @@ export class MlService {
   getProjectSummary(projectId: string): Observable<ProjectSummaryResponse> {
     const cacheKey = `project_summary_${projectId}`;
     const cached = this.cache.get<ProjectSummaryResponse>(cacheKey);
-    
+
     if (cached) {
       console.log('[ML Service] Returning cached project summary');
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next(cached);
         observer.complete();
       });
@@ -274,10 +274,10 @@ export class MlService {
 
     console.log('[ML Service] Fetching project summary from API');
     return this.http.post<ProjectSummaryResponse>(
-      `${this.baseUrl}/${projectId}/project-summary/`,
-      {}
+        `${this.baseUrl}/${projectId}/project-summary/`,
+        {},
     ).pipe(
-      tap(response => this.cache.set(cacheKey, response, this.SUMMARY_CACHE_TTL))
+        tap((response) => this.cache.set(cacheKey, response, this.SUMMARY_CACHE_TTL)),
     );
   }
 

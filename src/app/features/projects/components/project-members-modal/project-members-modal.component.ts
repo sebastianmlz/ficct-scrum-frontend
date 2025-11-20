@@ -1,19 +1,19 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProjectService } from '../../../../core/services/project.service';
-import { WorkspaceService } from '../../../../core/services/workspace.service';
-import { 
-  ProjectMember, 
+import {Component, Input, Output, EventEmitter, OnInit, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ProjectService} from '../../../../core/services/project.service';
+import {WorkspaceService} from '../../../../core/services/workspace.service';
+import {
+  ProjectMember,
   ProjectMemberRoleEnum,
-  WorkspaceMember
+  WorkspaceMember,
 } from '../../../../core/models/interfaces';
 
 @Component({
   selector: 'app-project-members-modal',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './project-members-modal.component.html'
+  templateUrl: './project-members-modal.component.html',
 })
 export class ProjectMembersModalComponent implements OnInit {
   private projectService = inject(ProjectService);
@@ -28,13 +28,13 @@ export class ProjectMembersModalComponent implements OnInit {
   workspaceMembers = signal<WorkspaceMember[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
-  
+
   // Add member modal states
   showAddMember = signal(false);
   addMemberLoading = signal(false);
   addMemberError = signal<string | null>(null);
   addMemberForm: FormGroup;
-  
+
   // Edit role modal states
   showEditRole = signal(false);
   selectedMember = signal<ProjectMember | null>(null);
@@ -44,19 +44,19 @@ export class ProjectMembersModalComponent implements OnInit {
 
   // Role options
   roles = [
-    { value: ProjectMemberRoleEnum.ADMIN, label: 'Admin', description: 'Can manage project and members' },
-    { value: ProjectMemberRoleEnum.MEMBER, label: 'Member', description: 'Can view and edit project content' },
-    { value: ProjectMemberRoleEnum.VIEWER, label: 'Viewer', description: 'Can only view project content' }
+    {value: ProjectMemberRoleEnum.ADMIN, label: 'Admin', description: 'Can manage project and members'},
+    {value: ProjectMemberRoleEnum.MEMBER, label: 'Member', description: 'Can view and edit project content'},
+    {value: ProjectMemberRoleEnum.VIEWER, label: 'Viewer', description: 'Can only view project content'},
   ];
 
   constructor() {
     this.addMemberForm = this.fb.group({
       user_id: ['', Validators.required],
-      role: [ProjectMemberRoleEnum.MEMBER, Validators.required]
+      role: [ProjectMemberRoleEnum.MEMBER, Validators.required],
     });
 
     this.editRoleForm = this.fb.group({
-      role: ['', Validators.required]
+      role: ['', Validators.required],
     });
   }
 
@@ -78,7 +78,7 @@ export class ProjectMembersModalComponent implements OnInit {
         this.error.set('Failed to load project members');
         this.loading.set(false);
         console.error('[PROJECT MEMBERS] Error loading members:', err);
-      }
+      },
     });
   }
 
@@ -89,21 +89,21 @@ export class ProjectMembersModalComponent implements OnInit {
       },
       error: (err) => {
         console.error('[PROJECT MEMBERS] Error loading workspace members:', err);
-      }
+      },
     });
   }
 
   // Get available workspace members (not already in project)
   get availableWorkspaceMembers(): WorkspaceMember[] {
-    const projectMemberIds = this.members().map(m => m.user.user_uuid || m.user.id.toString());
-    return this.workspaceMembers().filter(wm => 
-      !projectMemberIds.includes(wm.user.user_uuid || wm.user.id.toString())
+    const projectMemberIds = this.members().map((m) => m.user.user_uuid || m.user.id.toString());
+    return this.workspaceMembers().filter((wm) =>
+      !projectMemberIds.includes(wm.user.user_uuid || wm.user.id.toString()),
     );
   }
 
   openAddMemberModal(): void {
     this.showAddMember.set(true);
-    this.addMemberForm.reset({ role: ProjectMemberRoleEnum.MEMBER });
+    this.addMemberForm.reset({role: ProjectMemberRoleEnum.MEMBER});
     this.addMemberError.set(null);
   }
 
@@ -126,7 +126,7 @@ export class ProjectMembersModalComponent implements OnInit {
     const memberData = {
       project: this.projectId,
       user_id: formValue.user_id,
-      role: formValue.role
+      role: formValue.role,
     };
 
     this.projectService.addProjectMember(this.projectId, memberData).subscribe({
@@ -139,13 +139,13 @@ export class ProjectMembersModalComponent implements OnInit {
         this.addMemberError.set(err.error?.message || 'Failed to add member');
         this.addMemberLoading.set(false);
         console.error('[PROJECT MEMBERS] Error adding member:', err);
-      }
+      },
     });
   }
 
   openEditRoleModal(member: ProjectMember): void {
     this.selectedMember.set(member);
-    this.editRoleForm.patchValue({ role: member.role });
+    this.editRoleForm.patchValue({role: member.role});
     this.showEditRole.set(true);
     this.editRoleError.set(null);
   }
@@ -169,7 +169,7 @@ export class ProjectMembersModalComponent implements OnInit {
 
     const newRole = this.editRoleForm.value.role;
 
-    this.projectService.updateProjectMember(this.projectId, member.id, { role: newRole }).subscribe({
+    this.projectService.updateProjectMember(this.projectId, member.id, {role: newRole}).subscribe({
       next: () => {
         this.editRoleLoading.set(false);
         this.closeEditRoleModal();
@@ -179,7 +179,7 @@ export class ProjectMembersModalComponent implements OnInit {
         this.editRoleError.set(err.error?.message || 'Failed to update role');
         this.editRoleLoading.set(false);
         console.error('[PROJECT MEMBERS] Error updating role:', err);
-      }
+      },
     });
   }
 
@@ -195,7 +195,7 @@ export class ProjectMembersModalComponent implements OnInit {
       error: (err) => {
         alert('Failed to remove member: ' + (err.error?.message || 'Unknown error'));
         console.error('[PROJECT MEMBERS] Error removing member:', err);
-      }
+      },
     });
   }
 
@@ -227,12 +227,12 @@ export class ProjectMembersModalComponent implements OnInit {
 
   getAvatarColor(fullName: string): string {
     if (!fullName) return 'bg-gray-400 text-white';
-    
+
     let hash = 0;
     for (let i = 0; i < fullName.length; i++) {
       hash = fullName.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     const colors = [
       'bg-blue-500 text-white',
       'bg-purple-500 text-white',
@@ -243,7 +243,7 @@ export class ProjectMembersModalComponent implements OnInit {
       'bg-emerald-500 text-white',
       'bg-amber-500 text-white',
     ];
-    
+
     return colors[Math.abs(hash) % colors.length];
   }
 

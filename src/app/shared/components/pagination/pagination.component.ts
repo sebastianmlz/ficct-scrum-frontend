@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, EventEmitter, Input, Output, computed} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 export interface PaginationData {
   currentPage: number;
@@ -17,15 +17,15 @@ export interface PaginationData {
   template: 'pagination.component.html',
 })
 export class PaginationComponent {
-  @Input() currentPage: number = 1;
-  @Input() totalPages: number = 1;
-  @Input() totalItems: number = 0;
-  @Input() pageSize: number = 10;
-  @Input() hasNext: boolean = false;
-  @Input() hasPrevious: boolean = false;
-  @Input() showPageSizeSelector: boolean = true;
+  @Input() currentPage = 1;
+  @Input() totalPages = 1;
+  @Input() totalItems = 0;
+  @Input() pageSize = 10;
+  @Input() hasNext = false;
+  @Input() hasPrevious = false;
+  @Input() showPageSizeSelector = true;
   @Input() pageSizeOptions: number[] = [10, 25, 50, 100];
-  @Input() maxVisiblePages: number = 7;
+  @Input() maxVisiblePages = 7;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() pageSizeChange = new EventEmitter<number>();
@@ -116,12 +116,16 @@ export class PaginationComponent {
   }
 
   getPageButtonClass(page: number): string {
-    const baseClass = 'relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0';
-    
+    const baseClass = 'relative inline-flex items-center px-4 py-2 text-sm ' +
+    'font-semibold focus:z-20 focus:outline-offset-0';
+
     if (page === this.currentPage) {
-      return `${baseClass} z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600`;
+      return `${baseClass} z-10 bg-blue-600 text-white focus-visible:outline ` +
+      'focus-visible:outline-2 focus-visible:outline-offset-2 ' +
+      'focus-visible:outline-blue-600';
     } else {
-      return `${baseClass} text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0`;
+      return `${baseClass} text-gray-900 ring-1 ring-inset ring-gray-300 ` +
+      'hover:bg-gray-50 focus:outline-offset-0';
     }
   }
 }

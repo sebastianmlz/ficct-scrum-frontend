@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { ProjectService } from '../../../core/services/project.service';
-import { Project, PaginatedProjectList, PaginationParams } from '../../../core/models/interfaces';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink, ActivatedRoute} from '@angular/router';
+import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
+import {ProjectService} from '../../../core/services/project.service';
+import {Project, PaginatedProjectList, PaginationParams} from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-projects-list',
@@ -27,14 +27,14 @@ export class ProjectsListComponent implements OnInit {
     search: [''],
     status: [''],
     priority: [''],
-    ordering: ['-created_at']
+    ordering: ['-created_at'],
   });
 
   Math = Math;
 
   ngOnInit(): void {
     // Read workspace ID from URL query params
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.workspaceId.set(params['workspace'] || null);
       this.loadProjects();
     });
@@ -47,16 +47,16 @@ export class ProjectsListComponent implements OnInit {
     // Always include workspace filter if present
     const filterParams: PaginationParams = {
       ...params,
-      workspace: this.workspaceId() || undefined
+      workspace: this.workspaceId() || undefined,
     };
 
     try {
       const response = await this.projectService.getProjects(filterParams).toPromise();
       if (response) {
-        const normalizeProjects = response.results.map(project => ({
+        const normalizeProjects = response.results.map((project) => ({
           ...project,
-          workspace: project.workspace || { name: 'Sin workspace' }
-        }))
+          workspace: project.workspace || {name: 'Sin workspace'},
+        }));
         this.projects.set(normalizeProjects);
         this.paginationData.set(response);
       }
@@ -73,24 +73,24 @@ export class ProjectsListComponent implements OnInit {
       search: this.searchForm.value.search || undefined,
       status: this.searchForm.value.status || undefined,
       priority: this.searchForm.value.priority || undefined,
-      ordering: this.searchForm.value.ordering || undefined
+      ordering: this.searchForm.value.ordering || undefined,
     };
-    
+
     this.currentPage.set(1);
     this.loadProjects(searchParams);
   }
 
   loadPage(page: number): void {
     if (page < 1) return;
-    
+
     const searchParams: PaginationParams = {
       page,
       search: this.searchForm.value.search || undefined,
       status: this.searchForm.value.status || undefined,
       priority: this.searchForm.value.priority || undefined,
-      ordering: this.searchForm.value.ordering || undefined
+      ordering: this.searchForm.value.ordering || undefined,
     };
-    
+
     this.currentPage.set(page);
     this.loadProjects(searchParams);
   }

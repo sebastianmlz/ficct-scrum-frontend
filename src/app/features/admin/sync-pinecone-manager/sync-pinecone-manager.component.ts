@@ -1,14 +1,14 @@
-import { Component, signal, inject, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AiService, SyncAllResponse, SyncError } from '../../../core/services/ai.service';
-import { interval, Subject, takeUntil } from 'rxjs';
+import {Component, signal, inject, OnDestroy} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {AiService, SyncAllResponse, SyncError} from '../../../core/services/ai.service';
+import {interval, Subject, takeUntil} from 'rxjs';
 
 @Component({
   selector: 'app-sync-pinecone-manager',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './sync-pinecone-manager.component.html',
-  styleUrl: './sync-pinecone-manager.component.css'
+  styleUrl: './sync-pinecone-manager.component.css',
 })
 export class SyncPineconeManagerComponent implements OnDestroy {
   private aiService = inject(AiService);
@@ -30,7 +30,7 @@ export class SyncPineconeManagerComponent implements OnDestroy {
     'Generating embeddings...',
     'Syncing metadata...',
     'Almost done, this may take up to 10 minutes...',
-    'Still processing, please wait...'
+    'Still processing, please wait...',
   ];
   private currentMessageIndex = 0;
 
@@ -57,7 +57,7 @@ export class SyncPineconeManagerComponent implements OnDestroy {
   async startFullSync(): Promise<void> {
     console.log('[SYNC MANAGER] 🚨 Starting FULL SYNC operation');
     console.log('[SYNC MANAGER] Expected duration: 5-10 minutes');
-    
+
     this.showConfirmDialog.set(false);
     this.syncing.set(true);
     this.syncResult.set(null);
@@ -68,23 +68,23 @@ export class SyncPineconeManagerComponent implements OnDestroy {
 
     // Start elapsed time counter
     this.startElapsedTimer();
-    
+
     // Start rotating loading messages
     this.startLoadingMessageRotation();
 
     try {
       const startTime = Date.now();
       console.log('[SYNC MANAGER] Calling syncAllPinecone(true)...');
-      
+
       const result = await this.aiService.syncAllPinecone(true).toPromise();
-      
+
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       console.log('[SYNC MANAGER] ✅ Sync completed in', elapsed, 'seconds');
       console.log('[SYNC MANAGER] Result:', result);
 
       if (result) {
         this.syncResult.set(result);
-        
+
         if (result.status === 'success' && result.success_rate === 100) {
           console.log('[SYNC MANAGER] 🎉 Perfect sync! 100% success rate');
         } else if (result.status === 'partial' || result.success_rate < 100) {
@@ -95,9 +95,9 @@ export class SyncPineconeManagerComponent implements OnDestroy {
     } catch (err: any) {
       const elapsed = this.elapsedSeconds();
       console.error('[SYNC MANAGER] ❌ Sync failed after', elapsed, 'seconds:', err);
-      
+
       let errorMessage = 'Failed to sync Pinecone. Please try again.';
-      
+
       if (err.name === 'TimeoutError' || err.status === 408) {
         errorMessage = 'Sync operation took longer than 10 minutes. Check backend logs for status.';
         console.error('[SYNC MANAGER] ⏱️ TIMEOUT - Operation exceeded 600 seconds');
@@ -110,7 +110,7 @@ export class SyncPineconeManagerComponent implements OnDestroy {
       } else if (err.error?.detail) {
         errorMessage = err.error.detail;
       }
-      
+
       this.error.set(errorMessage);
     } finally {
       this.syncing.set(false);
@@ -122,12 +122,12 @@ export class SyncPineconeManagerComponent implements OnDestroy {
    */
   private startElapsedTimer(): void {
     interval(1000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (this.syncing()) {
-          this.elapsedSeconds.update(s => s + 1);
-        }
-      });
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          if (this.syncing()) {
+            this.elapsedSeconds.update((s) => s + 1);
+          }
+        });
   }
 
   /**
@@ -135,14 +135,14 @@ export class SyncPineconeManagerComponent implements OnDestroy {
    */
   private startLoadingMessageRotation(): void {
     interval(5000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (this.syncing()) {
-          this.currentMessageIndex = (this.currentMessageIndex + 1) % this.loadingMessages.length;
-          this.loadingMessage.set(this.loadingMessages[this.currentMessageIndex]);
-          console.log('[SYNC MANAGER] 🔄 Loading message updated:', this.loadingMessages[this.currentMessageIndex]);
-        }
-      });
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          if (this.syncing()) {
+            this.currentMessageIndex = (this.currentMessageIndex + 1) % this.loadingMessages.length;
+            this.loadingMessage.set(this.loadingMessages[this.currentMessageIndex]);
+            console.log('[SYNC MANAGER] 🔄 Loading message updated:', this.loadingMessages[this.currentMessageIndex]);
+          }
+        });
   }
 
   /**

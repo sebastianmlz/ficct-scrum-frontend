@@ -1,16 +1,16 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 
 export const profileRoutes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./profile-view/profile-view.component').then(m => m.ProfileViewComponent)
+    loadComponent: () => import('./profile-view/profile-view.component').then((m) => m.ProfileViewComponent),
   },
   {
     path: 'edit',
-    loadComponent: () => import('./profile-edit/profile-edit.component').then(m => m.ProfileEditComponent)
+    loadComponent: () => import('./profile-edit/profile-edit.component').then((m) => m.ProfileEditComponent),
   },
   {
     path: 'settings',
-    loadComponent: () => import('./profile-settings/profile-settings.component').then(m => m.ProfileSettingsComponent)
-  }
+    loadComponent: () => import('./profile-settings/profile-settings.component').then((m) => m.ProfileSettingsComponent),
+  },
 ];

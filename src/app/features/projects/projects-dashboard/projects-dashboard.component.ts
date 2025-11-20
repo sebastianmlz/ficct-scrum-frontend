@@ -1,13 +1,13 @@
-import { Component, inject, OnInit, signal, AfterViewInit, AfterViewChecked, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { DashboardService } from '../../../core/services/dashboard.service';
-import { SprintsService } from '../../../core/services/sprints.service';
-import { SprintReport, Sprint } from '../../../core/models/interfaces';
-import { TeamMetricsResponse } from '../../../core/models/interfaces';
-import { VelocityChartResponse } from '../../../core/models/interfaces';
-import { CumulativeFlowResponse } from '../../../core/models/interfaces';
-import { ExportRequest } from '../../../core/models/interfaces';
+import {Component, inject, OnInit, signal, AfterViewInit, AfterViewChecked, ViewChild, ElementRef} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute} from '@angular/router';
+import {DashboardService} from '../../../core/services/dashboard.service';
+import {SprintsService} from '../../../core/services/sprints.service';
+import {SprintReport, Sprint} from '../../../core/models/interfaces';
+import {TeamMetricsResponse} from '../../../core/models/interfaces';
+import {VelocityChartResponse} from '../../../core/models/interfaces';
+import {CumulativeFlowResponse} from '../../../core/models/interfaces';
+import {ExportRequest} from '../../../core/models/interfaces';
 import Chart from 'chart.js/auto';
 
 @Component({
@@ -15,16 +15,16 @@ import Chart from 'chart.js/auto';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './projects-dashboard.component.html',
-  styleUrl: './projects-dashboard.component.css'
+  styleUrl: './projects-dashboard.component.css',
 })
 export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterViewChecked {
   private route = inject(ActivatedRoute);
   private dashboardService = inject(DashboardService);
   private sprintsService = inject(SprintsService);
-  
+
   projectId = signal<string>('');
   loading = signal(false);
-  
+
   // Sprint Report Modal
   showSprintReportModal = signal(false);
   sprintReport = signal<SprintReport | null>(null);
@@ -42,7 +42,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
   loadingVelocityChart = signal(false);
   velocityNumSprints = signal<number>(5);
 
-  @ViewChild('velocityChartCanvas', { static: false }) velocityChartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('velocityChartCanvas', {static: false}) velocityChartCanvas!: ElementRef<HTMLCanvasElement>;
   velocityChartInstance: Chart | null = null;
   private chartRendered = false;
 
@@ -51,12 +51,12 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
   loadingCumulativeFlow = signal(false);
   cumulativeFlowDays = signal<number>(30);
 
-  @ViewChild('cumulativeFlowCanvas', { static: false }) cumulativeFlowCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('cumulativeFlowCanvas', {static: false}) cumulativeFlowCanvas!: ElementRef<HTMLCanvasElement>;
   cumulativeFlowInstance: Chart | null = null;
   private cfdChartRendered = false;
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -98,13 +98,13 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
         this.sprints.set(response.results);
         // Seleccionar el primer sprint activo o el más reciente
         if (response.results.length > 0) {
-          const activeSprint = response.results.find(s => s.status === 'active') || response.results[0];
+          const activeSprint = response.results.find((s) => s.status === 'active') || response.results[0];
           this.selectedSprintId.set(activeSprint.id);
         }
       },
       error: (error) => {
         console.error('[DASHBOARD] Error loading sprints:', error);
-      }
+      },
     });
   }
 
@@ -118,7 +118,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       error: (error) => {
         console.error('[DASHBOARD] Error loading team metrics:', error);
         this.loadingTeamMetrics.set(false);
-      }
+      },
     });
   }
 
@@ -146,7 +146,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       error: (error) => {
         console.error('[DASHBOARD] Error loading sprint report:', error);
         this.loadingSprintReport.set(false);
-      }
+      },
     });
   }
 
@@ -175,7 +175,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       error: (error) => {
         console.error('[DASHBOARD] Error loading velocity chart:', error);
         this.loadingVelocityChart.set(false);
-      }
+      },
     });
   }
 
@@ -184,33 +184,33 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       console.log('[DASHBOARD] Velocity chart data not ready');
       return;
     }
-    
+
     // Usar setTimeout para asegurar que el ViewChild esté disponible
     setTimeout(() => {
       if (!this.velocityChartCanvas) {
         console.log('[DASHBOARD] Canvas element not found');
         return;
       }
-      
+
       const ctx = this.velocityChartCanvas.nativeElement.getContext('2d');
       if (!ctx) {
         console.log('[DASHBOARD] Canvas context not available');
         return;
       }
-      
+
       // Destruir instancia previa si existe
       if (this.velocityChartInstance) {
         this.velocityChartInstance.destroy();
       }
-      
+
       const chartData = this.velocityChart()!;
       console.log('[DASHBOARD] Rendering velocity chart with data:', chartData);
-      
+
       // Si no hay labels, mostrar un mensaje genérico
       const labels = chartData.labels.length > 0 ? chartData.labels : ['No sprints'];
       const velocities = chartData.velocities.length > 0 ? chartData.velocities : [0];
       const plannedPoints = chartData.planned_points.length > 0 ? chartData.planned_points : [0];
-      
+
       this.velocityChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -221,38 +221,38 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
               data: velocities,
               backgroundColor: 'rgba(37, 99, 235, 0.7)',
               borderColor: 'rgba(37, 99, 235, 1)',
-              borderWidth: 1
+              borderWidth: 1,
             },
             {
               label: 'Planned Points',
               data: plannedPoints,
               backgroundColor: 'rgba(16, 185, 129, 0.5)',
               borderColor: 'rgba(16, 185, 129, 1)',
-              borderWidth: 1
-            }
-          ]
+              borderWidth: 1,
+            },
+          ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'top' },
+            legend: {position: 'top'},
             title: {
               display: true,
-              text: 'Velocity Chart'
-            }
+              text: 'Velocity Chart',
+            },
           },
           scales: {
             y: {
               beginAtZero: true,
               ticks: {
-                stepSize: 1
-              }
-            }
-          }
-        }
+                stepSize: 1,
+              },
+            },
+          },
+        },
       });
-      
+
       console.log('[DASHBOARD] Velocity chart rendered successfully');
     }, 0);
   }
@@ -268,7 +268,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       error: (error) => {
         console.error('[DASHBOARD] Error loading cumulative flow:', error);
         this.loadingCumulativeFlow.set(false);
-      }
+      },
     });
   }
 
@@ -304,71 +304,71 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
 
       // Preparar datasets para cada estado
       const colors = {
-        'To Do': { bg: 'rgba(239, 68, 68, 0.5)', border: 'rgba(239, 68, 68, 1)' },
-        'In Progress': { bg: 'rgba(59, 130, 246, 0.5)', border: 'rgba(59, 130, 246, 1)' },
-        'Done': { bg: 'rgba(34, 197, 94, 0.5)', border: 'rgba(34, 197, 94, 1)' }
+        'To Do': {bg: 'rgba(239, 68, 68, 0.5)', border: 'rgba(239, 68, 68, 1)'},
+        'In Progress': {bg: 'rgba(59, 130, 246, 0.5)', border: 'rgba(59, 130, 246, 1)'},
+        'Done': {bg: 'rgba(34, 197, 94, 0.5)', border: 'rgba(34, 197, 94, 1)'},
       };
 
-      const datasets = Object.keys(flowData.status_counts).map(status => ({
+      const datasets = Object.keys(flowData.status_counts).map((status) => ({
         label: status,
         data: flowData.status_counts[status],
         backgroundColor: colors[status as keyof typeof colors]?.bg || 'rgba(156, 163, 175, 0.1)',
         borderColor: colors[status as keyof typeof colors]?.border || 'rgba(156, 163, 175, 1)',
         borderWidth: 2,
-        fill: false,  // ✅ No fill - show lines only, not area
-        tension: 0.4  // ✅ Smooth curves
+        fill: false, // ✅ No fill - show lines only, not area
+        tension: 0.4, // ✅ Smooth curves
       }));
 
       this.cumulativeFlowInstance = new Chart(ctx, {
         type: 'line',
         data: {
           labels: flowData.dates,
-          datasets: datasets
+          datasets: datasets,
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'top' },
+            legend: {position: 'top'},
             title: {
               display: true,
-              text: 'Cumulative Flow Diagram'
+              text: 'Cumulative Flow Diagram',
             },
             tooltip: {
               mode: 'index',
-              intersect: false
-            }
+              intersect: false,
+            },
           },
           scales: {
             x: {
-              stacked: false,  // ✅ No stacking on x-axis
+              stacked: false, // ✅ No stacking on x-axis
               ticks: {
                 maxRotation: 45,
-                minRotation: 45
+                minRotation: 45,
               },
               title: {
                 display: true,
-                text: 'Date'
-              }
+                text: 'Date',
+              },
             },
             y: {
-              stacked: false,  // ✅ No stacking on y-axis - separate lines
+              stacked: false, // ✅ No stacking on y-axis - separate lines
               beginAtZero: true,
               title: {
                 display: true,
-                text: 'Number of Issues'
+                text: 'Number of Issues',
               },
               ticks: {
-                stepSize: 1  // ✅ Integer steps only
-              }
-            }
+                stepSize: 1, // ✅ Integer steps only
+              },
+            },
           },
           interaction: {
             mode: 'nearest',
             axis: 'x',
-            intersect: false
-          }
-        }
+            intersect: false,
+          },
+        },
       });
 
       console.log('[DASHBOARD] Cumulative flow rendered successfully');
@@ -383,7 +383,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
 
     const exportRequest: ExportRequest = {
       data_type: 'issues',
-      project: this.projectId()
+      project: this.projectId(),
     };
 
     this.loading.set(true);
@@ -401,7 +401,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
         console.error('[DASHBOARD] Error exporting data:', error);
         this.loading.set(false);
         alert('Error exporting data. Please try again.');
-      }
+      },
     });
   }
 
@@ -413,7 +413,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
 
     const exportRequest: ExportRequest = {
       data_type: 'activity',
-      project: this.projectId()
+      project: this.projectId(),
     };
 
     this.loading.set(true);
@@ -430,7 +430,7 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
         console.error('[DASHBOARD] Error exporting activity log:', error);
         this.loading.set(false);
         alert('Error exporting activity log. Please try again.');
-      }
+      },
     });
   }
 

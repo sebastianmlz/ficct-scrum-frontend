@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 
 export interface FileUploadEvent {
   file: File;
@@ -13,12 +13,12 @@ export interface FileUploadEvent {
   template: 'file-upload.component.html',
 })
 export class FileUploadComponent {
-  @Input() accept: string = 'image/*';
+  @Input() accept = 'image/*';
   @Input() maxSize: number = 5 * 1024 * 1024; // 5MB default
-  @Input() maxSizeDisplay: string = '5MB';
-  @Input() acceptedFormats: string = 'PNG, JPG, GIF up to 5MB';
-  @Input() multiple: boolean = false;
-  
+  @Input() maxSizeDisplay = '5MB';
+  @Input() acceptedFormats = 'PNG, JPG, GIF up to 5MB';
+  @Input() multiple = false;
+
   @Output() fileSelected = new EventEmitter<FileUploadEvent>();
   @Output() fileRemoved = new EventEmitter<void>();
   @Output() uploadError = new EventEmitter<string>();
@@ -94,26 +94,27 @@ export class FileUploadComponent {
     // Emit file selected event
     this.fileSelected.emit({
       file,
-      preview: this.preview()
+      preview: this.preview(),
     });
   }
 
   removeFile(event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     this.preview.set(null);
     this.fileName.set(null);
     this.error.set(null);
     this.isUploading.set(false);
     this.uploadProgress.set(0);
-    
+
     // Clear the input
-    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    const fileInput =
+      document.getElementById('file-upload') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
-    
+
     this.fileRemoved.emit();
   }
 

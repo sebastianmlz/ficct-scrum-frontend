@@ -1,10 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ProjectService } from '../../../core/services/project.service';
-import { Project, ProjectConfigRequest } from '../../../core/models/interfaces';
-import { GitHubIntegrationComponent } from '../components/github-integration/github-integration.component';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ProjectService} from '../../../core/services/project.service';
+import {Project, ProjectConfigRequest} from '../../../core/models/interfaces';
+import {GitHubIntegrationComponent} from '../components/github-integration/github-integration.component';
 
 @Component({
   selector: 'app-project-config',
@@ -19,7 +19,7 @@ export class ProjectConfigComponent implements OnInit {
   private router = inject(Router);
   private projectService = inject(ProjectService);
 
-  projectId: string = '';
+  projectId = '';
   project = signal<Project | null>(null);
   loading = signal(true);
   saving = signal(false);
@@ -33,11 +33,11 @@ export class ProjectConfigComponent implements OnInit {
     allow_comments: [true],
     allow_attachments: [true],
     enable_time_tracking: [true],
-    auto_archive_completed: [false]
+    auto_archive_completed: [false],
   });
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.projectId = params['id'];
       if (this.projectId) {
         this.loadProject();
@@ -45,7 +45,7 @@ export class ProjectConfigComponent implements OnInit {
     });
 
     // Check for fragment to auto-activate integrations tab
-    this.route.fragment.subscribe(fragment => {
+    this.route.fragment.subscribe((fragment) => {
       if (fragment === 'integrations') {
         this.activeTab.set('integrations');
       }
@@ -78,9 +78,9 @@ export class ProjectConfigComponent implements OnInit {
 
   getTabClass(tab: string): string {
     const isActive = this.activeTab() === tab;
-    return isActive
-      ? 'bg-primary text-white hover:bg-primary/90'
-      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
+    return isActive ?
+      'bg-primary text-white hover:bg-primary/90' :
+      'text-gray-600 hover:bg-gray-50 hover:text-gray-900';
   }
 
   async onSaveConfig(): Promise<void> {
@@ -91,10 +91,10 @@ export class ProjectConfigComponent implements OnInit {
     try {
       // In a real app, you would call the project configuration API endpoint
       // For now, we'll simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       this.successMessage.set('Project settings saved successfully!');
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => this.successMessage.set(null), 3000);
     } catch (error: any) {
@@ -111,8 +111,8 @@ export class ProjectConfigComponent implements OnInit {
 
     try {
       // In a real app, you would call the archive API endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       this.router.navigate(['/projects']);
     } catch (error: any) {
       this.saveError.set(error.error?.message || 'Failed to archive project');
@@ -122,7 +122,7 @@ export class ProjectConfigComponent implements OnInit {
   confirmDeleteProject(): void {
     const projectName = this.project()?.name || 'this project';
     const confirmation = prompt(
-      `This action cannot be undone. Type "${projectName}" to confirm deletion:`
+        `This action cannot be undone. Type "${projectName}" to confirm deletion:`,
     );
 
     if (confirmation === projectName) {

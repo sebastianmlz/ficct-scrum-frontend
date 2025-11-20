@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MlService, SprintRisk } from '../../../../core/services/ml.service';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {MlService, SprintRisk} from '../../../../core/services/ml.service';
 
 @Component({
   selector: 'app-ml-sprint-risk',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './ml-sprint-risk.component.html'
+  templateUrl: './ml-sprint-risk.component.html',
 })
-export class MlSprintRiskComponent {
+export class MlSprintRiskComponent implements OnInit {
   @Input() sprintId!: string;
   @Output() close = new EventEmitter<void>();
 
@@ -45,7 +45,7 @@ export class MlSprintRiskComponent {
       }
     } catch (error: any) {
       console.error('[ML Frontend] Error loading sprint risks:', error);
-      
+
       // Mejorar manejo de errores según respuestas del backend
       const errorMsg = error?.error?.error || error?.error?.detail || error?.error?.message || error?.message || 'Failed to load sprint risk assessment';
       this.error.set(errorMsg);
@@ -62,10 +62,10 @@ export class MlSprintRiskComponent {
       'resource': 'Resource Constraints',
       'timeline': 'Timeline Pressure',
       'dependency': 'External Dependencies',
-      'technical_debt': 'Technical Debt'
+      'technical_debt': 'Technical Debt',
     };
-    return typeMap[riskType] || riskType.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
+    return typeMap[riskType] || riskType.split('_').map((word) =>
+      word.charAt(0).toUpperCase() + word.slice(1),
     ).join(' ');
   }
 

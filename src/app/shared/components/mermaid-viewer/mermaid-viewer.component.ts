@@ -1,6 +1,17 @@
-import { Component, OnInit, AfterViewInit, Input, Output, EventEmitter, ViewChild, ElementRef, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DomSanitizer } from '@angular/platform-browser';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  Input,
+  Output,
+  EventEmitter,
+  ViewChild,
+  ElementRef,
+  signal,
+  inject,
+} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {DomSanitizer} from '@angular/platform-browser';
 
 declare const mermaid: any;
 declare const html2canvas: any;
@@ -10,27 +21,27 @@ declare const html2canvas: any;
   standalone: true,
   imports: [CommonModule],
   templateUrl: './mermaid-viewer.component.html',
-  styleUrls: ['./mermaid-viewer.component.scss']
+  styleUrls: ['./mermaid-viewer.component.scss'],
 })
 export class MermaidViewerComponent implements OnInit, AfterViewInit {
-  @Input() mermaidCode: string = '';
-  @Input() title: string = 'Diagram';
+  @Input() mermaidCode = '';
+  @Input() title = 'Diagram';
   @Output() classSelected = new EventEmitter<string>();
-  
-  @ViewChild('mermaidContainer', { static: false }) containerRef?: ElementRef;
+
+  @ViewChild('mermaidContainer', {static: false}) containerRef?: ElementRef;
 
   // State
   isFullscreen = signal(false);
   zoomLevel = signal(100);
   isPanning = false;
-  panStart = { x: 0, y: 0 };
-  pan = { x: 0, y: 0 };
+  panStart = {x: 0, y: 0};
+  pan = {x: 0, y: 0};
   isExporting = signal(false);
-  
+
   // Mermaid ready flag
   private mermaidReady = false;
 
-  constructor(private sanitizer: DomSanitizer) {}
+  private sanitizer = inject(DomSanitizer);
 
   ngOnInit(): void {
     this.loadMermaidLibrary();
@@ -77,8 +88,8 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
         fontSize: 14,
         flowchart: {
           useMaxWidth: false,
-          htmlLabels: true
-        }
+          htmlLabels: true,
+        },
       });
       this.mermaidReady = true;
       console.log('[MERMAID-VIEWER] Initialized');
@@ -99,14 +110,13 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
 
       // Render
       await mermaid.run({
-        nodes: container.querySelectorAll('.mermaid')
+        nodes: container.querySelectorAll('.mermaid'),
       });
 
       console.log('[MERMAID-VIEWER] Diagram rendered');
 
       // Setup interactions after render
       setTimeout(() => this.setupInteractions(), 300);
-
     } catch (e: any) {
       console.error('[MERMAID-VIEWER] Render error:', e);
     }
@@ -120,20 +130,27 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     if (!svg) return;
 
     // Zoom with mouse wheel
-    svg.addEventListener('wheel', (e: WheelEvent) => {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -10 : 10;
-      this.zoomLevel.set(Math.max(50, Math.min(300, this.zoomLevel() + delta)));
-      this.applyTransform();
-    }, { passive: false });
+    svg.addEventListener(
+        'wheel',
+        (e: WheelEvent) => {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? -10 : 10;
+          this.zoomLevel.set(
+              Math.max(50, Math.min(300, this.zoomLevel() + delta)),
+          );
+          this.applyTransform();
+        },
+        {passive: false},
+    );
 
     // Pan with drag (Ctrl + mouse drag or right mouse button)
     svg.addEventListener('mousedown', (e: MouseEvent) => {
-      if (e.button === 2 || e.ctrlKey) { // Right click or Ctrl
+      if (e.button === 2 || e.ctrlKey) {
+        // Right click or Ctrl
         this.isPanning = true;
-        this.panStart = { 
-          x: e.clientX - this.pan.x, 
-          y: e.clientY - this.pan.y 
+        this.panStart = {
+          x: e.clientX - this.pan.x,
+          y: e.clientY - this.pan.y,
         };
         e.preventDefault();
       }
@@ -143,7 +160,7 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
       if (this.isPanning) {
         this.pan = {
           x: e.clientX - this.panStart.x,
-          y: e.clientY - this.panStart.y
+          y: e.clientY - this.panStart.y,
         };
         this.applyTransform();
       }
@@ -163,13 +180,19 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     });
 
     // Click on nodes
-    const nodes = svg.querySelectorAll('.node, .classNode, g[id^="node"], g[class*="node"]');
+    const nodes = svg.querySelectorAll(
+        '.node, .classNode, g[id^="node"], g[class*="node"]',
+    );
     nodes.forEach((node: Element) => {
       (node as HTMLElement).style.cursor = 'pointer';
       node.addEventListener('click', (e: Event) => this.onNodeClick(e));
     });
 
-    console.log('[MERMAID-VIEWER] Interactions setup for', nodes.length, 'nodes');
+    console.log(
+        '[MERMAID-VIEWER] Interactions setup for',
+        nodes.length,
+        'nodes',
+    );
   }
 
   /**
@@ -180,7 +203,9 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     if (!svg) return;
 
     const scale = this.zoomLevel() / 100;
-    svg.style.transform = `scale(${scale}) translate(${this.pan.x / scale}px, ${this.pan.y / scale}px)`;
+    svg.style.transform = `scale(${scale}) translate(${this.pan.x / scale}px, ${
+      this.pan.y / scale
+    }px)`;
     svg.style.transformOrigin = '0 0';
     svg.style.transition = 'none';
   }
@@ -190,7 +215,7 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
    */
   onNodeClick(event: Event): void {
     event.stopPropagation();
-    
+
     const target = (event.target as SVGElement).closest('g');
     if (target) {
       // Extract class name from node
@@ -217,14 +242,14 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
 
   resetView(): void {
     this.zoomLevel.set(100);
-    this.pan = { x: 0, y: 0 };
+    this.pan = {x: 0, y: 0};
     this.applyTransform();
   }
 
   fitToScreen(): void {
     const svg = this.containerRef?.nativeElement?.querySelector('svg');
     const container = this.containerRef?.nativeElement;
-    
+
     if (!svg || !container) return;
 
     // Get dimensions
@@ -234,10 +259,10 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     // Calculate scale to fit
     const scaleX = containerRect.width / svgBox.width;
     const scaleY = containerRect.height / svgBox.height;
-    
+
     const scale = Math.min(scaleX, scaleY) * 0.9; // 90% for margin
     this.zoomLevel.set(Math.round(scale * 100));
-    this.pan = { x: 0, y: 0 };
+    this.pan = {x: 0, y: 0};
     this.applyTransform();
   }
 
@@ -270,7 +295,9 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
 
   private async exportSVG(svg: SVGElement): Promise<void> {
     const svgData = new XMLSerializer().serializeToString(svg);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const svgBlob = new Blob([svgData], {
+      type: 'image/svg+xml;charset=utf-8',
+    });
     this.downloadFile(svgBlob, `${this.title}-diagram.svg`);
   }
 
@@ -285,7 +312,7 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     const canvas = await html2canvas(svg, {
       backgroundColor: '#ffffff',
       scale: 2,
-      logging: false
+      logging: false,
     });
 
     // Convert to blob
@@ -300,16 +327,19 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     const data = {
       title: this.title,
       mermaidCode: this.mermaidCode,
-      exportedAt: new Date().toISOString()
+      exportedAt: new Date().toISOString(),
     };
-    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const jsonBlob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json',
+    });
     this.downloadFile(jsonBlob, `${this.title}-diagram.json`);
   }
 
   private loadHtml2Canvas(): Promise<void> {
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+      script.src =
+        'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
       script.onload = () => {
         console.log('[MERMAID-VIEWER] html2canvas loaded');
         resolve();
@@ -328,7 +358,7 @@ export class MermaidViewerComponent implements OnInit, AfterViewInit {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-    
+
     console.log('[MERMAID-VIEWER] Downloaded:', filename);
   }
 }

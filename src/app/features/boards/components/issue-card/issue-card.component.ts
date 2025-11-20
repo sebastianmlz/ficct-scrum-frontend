@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Issue } from '../../../../core/models/interfaces';
-import { getPriorityLabel, getPriorityTailwindClasses } from '../../../../shared/utils/priority.utils';
-import { QuickAssigneePopoverComponent } from '../../../../shared/components/quick-assignee-popover/quick-assignee-popover.component';
+import {Component, Input, Output, EventEmitter, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Issue} from '../../../../core/models/interfaces';
+import {getPriorityLabel, getPriorityTailwindClasses} from '../../../../shared/utils/priority.utils';
+import {QuickAssigneePopoverComponent} from '../../../../shared/components/quick-assignee-popover/quick-assignee-popover.component';
 
 @Component({
   selector: 'app-issue-card',
@@ -13,7 +13,7 @@ import { QuickAssigneePopoverComponent } from '../../../../shared/components/qui
 export class IssueCardComponent {
   @Input() issue!: Issue;
   @Input() projectId!: string;
-  @Input() draggable: boolean = true;
+  @Input() draggable = true;
   @Output() clicked = new EventEmitter<Issue>();
   @Output() assigneeChanged = new EventEmitter<{ issueId: string, assigneeId: string | null }>();
 
@@ -36,7 +36,7 @@ export class IssueCardComponent {
   }
 
   onAssigneeChanged(assigneeId: string | null): void {
-    this.assigneeChanged.emit({ issueId: this.issue.id, assigneeId });
+    this.assigneeChanged.emit({issueId: this.issue.id, assigneeId});
     this.closeAssigneePopover();
   }
 
@@ -78,14 +78,14 @@ export class IssueCardComponent {
    */
   getInitials(fullName: string): string {
     if (!fullName || fullName.trim().length === 0) return '?';
-    
-    const names = fullName.trim().split(' ').filter(n => n.length > 0);
-    
+
+    const names = fullName.trim().split(' ').filter((n) => n.length > 0);
+
     if (names.length >= 2) {
       // First letter of first name + first letter of last name
       return (names[0][0] + names[names.length - 1][0]).toUpperCase();
     }
-    
+
     // Just first letter of single name
     return names[0][0].toUpperCase();
   }
@@ -96,13 +96,13 @@ export class IssueCardComponent {
    */
   getAvatarColor(fullName: string): string {
     if (!fullName) return 'bg-gray-400 text-white';
-    
+
     // Simple hash function
     let hash = 0;
     for (let i = 0; i < fullName.length; i++) {
       hash = fullName.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     // Color palette (professional, high contrast with white text)
     const colors = [
       'bg-blue-500 text-white',
@@ -114,7 +114,7 @@ export class IssueCardComponent {
       'bg-emerald-500 text-white',
       'bg-amber-500 text-white',
     ];
-    
+
     const index = Math.abs(hash) % colors.length;
     return colors[index];
   }

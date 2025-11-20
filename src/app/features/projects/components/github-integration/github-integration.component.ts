@@ -1,13 +1,17 @@
-import { Component, Input, OnInit, OnChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
-import { GitHubIntegrationStateService } from '../../../../core/services/github-integration-state.service';
-import { NotificationService } from '../../../../core/services/notification.service';
+import {Component, Input, OnInit, OnChanges, signal, inject}
+  from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators}
+  from '@angular/forms';
+import {GitHubIntegrationService}
+  from '../../../../core/services/github-integration.service';
+import {GitHubIntegrationStateService}
+  from '../../../../core/services/github-integration-state.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {
-  GitHubIntegration,
   GitHubIntegrationDetail,
-  GitHubIntegrationRequest
+  GitHubIntegrationRequest,
 } from '../../../../core/models/interfaces';
 
 @Component({
@@ -15,7 +19,7 @@ import {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './github-integration.component.html',
-  styleUrl: './github-integration.component.scss'
+  styleUrl: './github-integration.component.scss',
 })
 export class GitHubIntegrationComponent implements OnInit, OnChanges {
   @Input() projectId!: string;
@@ -35,19 +39,22 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
 
   // Forms
   connectForm: FormGroup = this.fb.group({
-    repository_url: ['', [Validators.required, Validators.pattern(/^https:\/\/github\.com\/[\w-]+\/[\w-]+$/)]],
+    repository_url: ['', [Validators.required,
+      Validators.pattern(/^https:\/\/github\.com\/[\w-]+\/[\w-]+$/)]],
     sync_commits: [true],
     sync_pull_requests: [true],
-    auto_link_issues: [true]
+    auto_link_issues: [true],
   });
 
   ngOnInit(): void {
     // CRITICAL: Validate project ID on init
     if (!this.projectId) {
-      console.warn('[GITHUB] ⚠️ Project ID not provided on init, waiting for input binding...');
+      console.warn('[GITHUB] ⚠️ Project ID not provided on init, ' +
+        'waiting for input binding...');
       return;
     }
-    console.log('[GITHUB] Component initialized with project ID:', this.projectId);
+    console.log('[GITHUB] Component initialized with project ID:',
+        this.projectId);
     this.loadIntegration();
   }
 
@@ -66,8 +73,8 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
    */
   loadIntegration(): void {
     this.loading.set(true);
-    
-    this.githubService.getIntegrations({ project: this.projectId }).subscribe({
+
+    this.githubService.getIntegrations({project: this.projectId}).subscribe({
       next: (response) => {
         if (response.results && response.results.length > 0) {
           // Project already has integration, load details
@@ -75,7 +82,8 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
             next: (detail) => {
               if (detail) {
                 this.integration.set(detail);
-                console.log('[GITHUB] Integration loaded:', detail.repository_full_name);
+                console.log('[GITHUB] Integration loaded:',
+                    detail.repository_full_name);
               } else {
                 console.info('[GITHUB] Integration not found (404)');
                 this.integration.set(null);
@@ -83,10 +91,11 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
               this.loading.set(false);
             },
             error: (error) => {
-              console.error('[GITHUB] Error loading integration details:', error);
+              console.error('[GITHUB] Error loading integration details:',
+                  error);
               this.integration.set(null);
               this.loading.set(false);
-            }
+            },
           });
         } else {
           // No integration found
@@ -99,7 +108,7 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
         console.error('[GITHUB] Error checking integration:', error);
         this.integration.set(null);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -118,7 +127,7 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
     this.connectForm.reset({
       sync_commits: true,
       sync_pull_requests: true,
-      auto_link_issues: true
+      auto_link_issues: true,
     });
   }
 
@@ -130,7 +139,8 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
     // CRITICAL: Validate project ID before proceeding
     if (!this.projectId || this.projectId.trim() === '') {
       console.error('[GITHUB] ❌ CRITICAL: Project ID is empty or undefined!');
-      this.notificationService.error('Project ID is missing. Please refresh the page.');
+      this.notificationService.error('Project ID is missing. Please ' +
+        'refresh the page.');
       return;
     }
 
@@ -144,27 +154,28 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
 
     this.githubService.initiateOAuth(this.projectId).subscribe({
       next: (response) => {
-        console.log('[GITHUB] OAuth initiation successful, authorization URL:', response.authorization_url);
+        console.log('[GITHUB] OAuth initiation successful, authorization URL:',
+            response.authorization_url);
         console.log('[GITHUB] OAuth state:', response.state);
-        
+
         // Redirect to GitHub authorization page
         window.location.href = response.authorization_url;
       },
       error: (error) => {
         console.error('[GITHUB] Error initiating OAuth:', error);
         this.connectingOAuth.set(false);
-        
+
         // Handle specific error cases
         if (error.status === 403) {
           this.notificationService.error(
-            'You need project admin permissions to connect GitHub'
+              'You need project admin permissions to connect GitHub',
           );
         } else {
           this.notificationService.error(
-            error.error?.detail || 'Failed to initiate GitHub connection'
+              error.error?.detail || 'Failed to initiate GitHub connection',
           );
         }
-      }
+      },
     });
   }
 
@@ -174,7 +185,8 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
    */
   onConnectRepository(): void {
     if (this.connectForm.invalid) {
-      this.notificationService.error('Please enter a valid GitHub repository URL');
+      this.notificationService.error('Please enter a valid GitHub ' +
+        'repository URL');
       return;
     }
 
@@ -185,26 +197,27 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
       repository_url: this.connectForm.value.repository_url,
       sync_commits: this.connectForm.value.sync_commits,
       sync_pull_requests: this.connectForm.value.sync_pull_requests,
-      auto_link_issues: this.connectForm.value.auto_link_issues
+      auto_link_issues: this.connectForm.value.auto_link_issues,
     };
 
     this.githubService.connectRepository(requestData).subscribe({
       next: (integration) => {
         console.log('[GITHUB] Repository connected:', integration);
-        this.notificationService.success('GitHub repository connected successfully');
+        this.notificationService.success('GitHub repository connected ' +
+          'successfully');
         this.showConnectForm.set(false);
         this.loading.set(false);
-        
+
         // Load full integration details
         this.loadIntegration();
       },
       error: (error) => {
         console.error('[GITHUB] Error connecting repository:', error);
         this.notificationService.error(
-          error.error?.detail || 'Failed to connect GitHub repository'
+            error.error?.detail || 'Failed to connect GitHub repository',
         );
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -218,17 +231,18 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
     const updateData: any = {};
     updateData[field] = value;
 
-    this.githubService.updateIntegration(currentIntegration.id, updateData).subscribe({
-      next: (updated) => {
-        console.log('[GITHUB] Settings updated:', updated);
-        this.integration.set({ ...currentIntegration, ...updated });
-        this.notificationService.success('Settings updated');
-      },
-      error: (error) => {
-        console.error('[GITHUB] Error updating settings:', error);
-        this.notificationService.error('Failed to update settings');
-      }
-    });
+    this.githubService.updateIntegration(currentIntegration.id, updateData)
+        .subscribe({
+          next: (updated) => {
+            console.log('[GITHUB] Settings updated:', updated);
+            this.integration.set({...currentIntegration, ...updated});
+            this.notificationService.success('Settings updated');
+          },
+          error: (error) => {
+            console.error('[GITHUB] Error updating settings:', error);
+            this.notificationService.error('Failed to update settings');
+          },
+        });
   }
 
   /**
@@ -244,7 +258,8 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
       next: (response) => {
         console.log('[GITHUB] Sync complete:', response);
         this.notificationService.success(
-          `Synced ${response.commits_synced} commits, linked ${response.issues_linked} issues`
+            `Synced ${response.commits_synced} commits, linked ` +
+            `${response.issues_linked} issues`,
         );
         this.syncing.set(false);
         this.loadIntegration(); // Refresh integration data
@@ -253,7 +268,7 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
         console.error('[GITHUB] Error syncing commits:', error);
         this.notificationService.error('Failed to sync commits');
         this.syncing.set(false);
-      }
+      },
     });
   }
 
@@ -287,7 +302,7 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
         this.integration.set(null);
         this.showDisconnectConfirm.set(false);
         this.loading.set(false);
-        
+
         // Clear and refresh state service cache
         console.log('[GITHUB] Clearing state service cache after disconnect');
         this.integrationState.clearCache(this.projectId);
@@ -297,7 +312,7 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
         console.error('[GITHUB] Error disconnecting:', error);
         this.notificationService.error('Failed to disconnect repository');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -314,11 +329,13 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
     const diffMins = Math.floor(diffMs / 60000);
 
     if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-    
+    if (diffMins < 60) {
+      return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+    }
     const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-    
+    if (diffHours < 24) {
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    }
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
   }
@@ -328,8 +345,10 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
    */
   getRepoName(): string {
     const integration = this.integration();
-    if (!integration) return '';
-    return integration.repository_full_name || integration.repository_url.split('/').slice(-2).join('/');
+    if (!integration) return ''; {
+      return integration.repository_full_name ||
+      integration.repository_url.split('/').slice(-2).join('/');
+    }
   }
 
   /**
@@ -338,7 +357,7 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
   getStatusColor(): string {
     const integration = this.integration();
     if (!integration) return 'gray';
-    
+
     switch (integration.status) {
       case 'active': return 'green';
       case 'error': return 'red';

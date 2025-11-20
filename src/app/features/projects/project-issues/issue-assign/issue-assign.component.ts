@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { IssueService } from '../../../../core/services/issue.service';
-import { CommonModule } from '@angular/common';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {IssueService} from '../../../../core/services/issue.service';
+import {CommonModule} from '@angular/common';
 @Component({
   selector: 'app-issue-assign',
   standalone: true,
   imports: [
-    CommonModule
+    CommonModule,
   ],
   templateUrl: './issue-assign.component.html',
-  styleUrls: ['./issue-assign.component.css']
+  styleUrls: ['./issue-assign.component.css'],
 })
 export class IssueAssignComponent {
   @Input() issueId!: string;
@@ -35,7 +35,7 @@ export class IssueAssignComponent {
       error: (err) => {
         this.error = 'Error assigning issue';
         this.loading = false;
-      }
+      },
     });
   }
 

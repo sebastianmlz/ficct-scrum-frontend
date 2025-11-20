@@ -1,8 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CdkDragDrop, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
-import { BoardColumn, Issue } from '../../../../core/models/interfaces';
-import { IssueCardComponent } from '../issue-card/issue-card.component';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {CdkDragDrop, CdkDropList, CdkDrag} from '@angular/cdk/drag-drop';
+import {BoardColumn, Issue} from '../../../../core/models/interfaces';
+import {IssueCardComponent} from '../issue-card/issue-card.component';
 
 @Component({
   selector: 'app-board-column',
@@ -13,10 +13,10 @@ import { IssueCardComponent } from '../issue-card/issue-card.component';
 export class BoardColumnComponent {
   @Input() column!: BoardColumn;
   @Input() issues: Issue[] = [];
-  @Input() loading: boolean = false;
+  @Input() loading = false;
   @Input() connectedDropLists: string[] = [];
   @Input() projectId!: string;
-  
+
   @Output() issueDropped = new EventEmitter<{ issueId: string; targetColumnId: string; targetStatusId: string }>();
   @Output() createIssueClicked = new EventEmitter<string>();
   @Output() issueClicked = new EventEmitter<Issue>();
@@ -30,7 +30,7 @@ export class BoardColumnComponent {
     console.log('[COLUMN DROP] Same container?:', event.previousContainer === event.container);
     console.log('[COLUMN DROP] Previous index:', event.previousIndex);
     console.log('[COLUMN DROP] Current index:', event.currentIndex);
-    
+
     if (event.previousContainer === event.container) {
       // Reordenamiento dentro de la misma columna
       console.log('[COLUMN DROP] Reordenando dentro de misma columna');
@@ -42,19 +42,19 @@ export class BoardColumnComponent {
       console.log('[COLUMN DROP] Moviendo issue entre columnas:', issue.id, issue.title);
       console.log('[COLUMN DROP] From:', event.previousContainer.id, 'To:', event.container.id);
       console.log('[COLUMN DROP] Target column workflow_status:', this.column.workflow_status);
-      
+
       // ✅ SOLO EMITIR EVENTO - NO modificar arrays directamente
       // El board-detail se encargará de actualizar el signal inmutablemente
       const dropEvent = {
         issueId: issue.id,
         targetColumnId: this.column.id,
         targetStatusId: this.column.workflow_status.id,
-        previousStatusId: event.previousContainer.id
+        previousStatusId: event.previousContainer.id,
       };
       console.log('[COLUMN DROP] Emitiendo issueDropped event:', dropEvent);
       console.log('[COLUMN DROP] Board-detail actualizará el signal inmutablemente');
       this.issueDropped.emit(dropEvent);
-      
+
       // ❌ NO USAR transferArrayItem - causa que signal no detecte cambios
       // La actualización se hace en board-detail con signal.update()
     }
@@ -75,12 +75,12 @@ export class BoardColumnComponent {
 
   getWipStatus(): 'normal' | 'warning' | 'exceeded' {
     const count = this.issues.length;
-    
+
     if (this.column.max_wip) {
       if (count > this.column.max_wip) return 'exceeded';
       if (count >= this.column.max_wip * 0.8) return 'warning';
     }
-    
+
     return 'normal';
   }
 

@@ -1,9 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { AuthStore } from '../../../core/store/auth.store';
-import { PasswordResetRequestRequest } from '../../../core/models/interfaces';
+import {Component, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {AuthStore} from '../../../core/store/auth.store';
+import {PasswordResetRequestRequest} from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-forgot-password',
@@ -11,10 +11,10 @@ import { PasswordResetRequestRequest } from '../../../core/models/interfaces';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.css'
+  styleUrl: './forgot-password.component.css',
 })
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
@@ -23,7 +23,7 @@ export class ForgotPasswordComponent {
   requestSent = false;
 
   forgotPasswordForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]]
+    email: ['', [Validators.required, Validators.email]],
   });
 
   async onSubmit(): Promise<void> {
@@ -33,7 +33,7 @@ export class ForgotPasswordComponent {
     }
 
     const request: PasswordResetRequestRequest = {
-      email: this.forgotPasswordForm.value.email
+      email: this.forgotPasswordForm.value.email,
     };
 
     try {

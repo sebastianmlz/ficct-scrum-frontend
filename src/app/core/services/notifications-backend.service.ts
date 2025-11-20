@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
 
 export interface BackendNotification {
   id: string;
@@ -54,7 +54,7 @@ export interface ProjectNotificationSettings {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationsBackendService {
   private http = inject(HttpClient);
@@ -75,7 +75,7 @@ export class NotificationsBackendService {
     created_before?: string;
   }): Observable<NotificationListResponse> {
     let httpParams = new HttpParams();
-    
+
     if (params?.is_read !== undefined) {
       httpParams = httpParams.set('is_read', params.is_read.toString());
     }
@@ -101,7 +101,7 @@ export class NotificationsBackendService {
       httpParams = httpParams.set('created_before', params.created_before);
     }
 
-  return this.http.get<NotificationListResponse>(`${this.apiUrl}/notifications/`, { params: httpParams });
+    return this.http.get<NotificationListResponse>(`${this.apiUrl}/notifications/`, {params: httpParams});
   }
 
   /**
@@ -110,8 +110,8 @@ export class NotificationsBackendService {
    */
   markAsRead(notificationId: string): Observable<BackendNotification> {
     return this.http.patch<BackendNotification>(
-      `${this.apiUrl}/${notificationId}/`,
-      { is_read: true }
+        `${this.apiUrl}/${notificationId}/`,
+        {is_read: true},
     );
   }
 
@@ -121,8 +121,8 @@ export class NotificationsBackendService {
    */
   markAllAsRead(): Observable<{ message: string; updated_count: number }> {
     return this.http.post<{ message: string; updated_count: number }>(
-      `${this.apiUrl}/notifications/mark-all-read/`,
-      {}
+        `${this.apiUrl}/notifications/mark-all-read/`,
+        {},
     );
   }
 
@@ -132,7 +132,7 @@ export class NotificationsBackendService {
    */
   getUnreadCount(): Observable<{ unread_count: number }> {
     return this.http.get<{ unread_count: number }>(
-      `${this.apiUrl}/notifications/unread-count/`
+        `${this.apiUrl}/notifications/unread-count/`,
     );
   }
 
@@ -141,7 +141,7 @@ export class NotificationsBackendService {
    * DELETE /api/v1/notifications/{id}/
    */
   deleteNotification(notificationId: string): Observable<void> {
-  return this.http.delete<void>(`${this.apiUrl}/${notificationId}/`);
+    return this.http.delete<void>(`${this.apiUrl}/${notificationId}/`);
   }
 
   /**
@@ -150,7 +150,7 @@ export class NotificationsBackendService {
    */
   deleteReadNotifications(): Observable<{ message: string; deleted_count: number }> {
     return this.http.delete<{ message: string; deleted_count: number }>(
-      `${this.apiUrl}/delete-read/`
+        `${this.apiUrl}/delete-read/`,
     );
   }
 
@@ -170,10 +170,10 @@ export class NotificationsBackendService {
   updatePreferences(preferences: Partial<NotificationPreferences>): Observable<NotificationPreferencesResponse> {
     console.log('[NOTIFICATION SERVICE] Updating preferences with PATCH');
     console.log('[NOTIFICATION SERVICE] Payload:', JSON.stringify(preferences));
-    
+
     return this.http.patch<NotificationPreferencesResponse>(
-      `${this.apiUrl}/preferences/`,
-      preferences
+        `${this.apiUrl}/preferences/`,
+        preferences,
     );
   }
 
@@ -183,8 +183,8 @@ export class NotificationsBackendService {
    */
   testSlackWebhook(webhookUrl: string, message?: string): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
-      `${this.apiUrl}/test-slack/`,
-      { webhook_url: webhookUrl, message }
+        `${this.apiUrl}/test-slack/`,
+        {webhook_url: webhookUrl, message},
     );
   }
 
@@ -195,8 +195,8 @@ export class NotificationsBackendService {
   getProjectSettings(projectId: string): Observable<ProjectNotificationSettings> {
     const params = new HttpParams().set('project', projectId);
     return this.http.get<ProjectNotificationSettings>(
-      `${this.apiUrl}/project-settings/`,
-      { params }
+        `${this.apiUrl}/project-settings/`,
+        {params},
     );
   }
 
@@ -206,8 +206,8 @@ export class NotificationsBackendService {
    */
   updateProjectSettings(settings: Partial<ProjectNotificationSettings>): Observable<{ success: boolean; message: string }> {
     return this.http.patch<{ success: boolean; message: string }>(
-      `${this.apiUrl}/project-settings/`,
-      settings
+        `${this.apiUrl}/project-settings/`,
+        settings,
     );
   }
 }

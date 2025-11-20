@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry, tap } from 'rxjs/operators';
-import { Router } from '@angular/router';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {catchError, retry, tap} from 'rxjs/operators';
+import {Router} from '@angular/router';
 
 import {
   User,
@@ -16,12 +16,12 @@ import {
   PasswordResetRequestResponse,
   PasswordResetConfirmRequest,
   PasswordResetConfirmResponse,
-  UserProfile
+  UserProfile,
 } from '../models/interfaces';
-import { environment } from '../../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly baseUrl = `${environment.apiUrl}/api/v1/auth`;
@@ -31,7 +31,7 @@ export class AuthService {
   login(credentials: { email: string, password: string }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/login/`, {
       email: credentials.email,
-      password: credentials.password
+      password: credentials.password,
     });
   }
 
@@ -68,7 +68,7 @@ export class AuthService {
   getCurrentUser(): UserBasic | null {
     const user = this.getUser();
     if (!user) return null;
-    
+
     return {
       id: user.id,
       user_uuid: user.user_uuid,
@@ -77,15 +77,14 @@ export class AuthService {
       first_name: user.first_name,
       last_name: user.last_name,
       full_name: user.full_name || `${user.first_name} ${user.last_name}`.trim(),
-      avatar_url: user.avatar_url
+      avatar_url: user.avatar_url,
     };
   }
 
 
-
   register(userData: UserRegistrationRequest): Observable<User> {
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    return this.http.post<User>(`${this.baseUrl}/register/`, userData, { headers });
+    return this.http.post<User>(`${this.baseUrl}/register/`, userData, {headers});
   }
 
   logoutt(request: LogoutRequestRequest): Observable<LogoutResponse> {
@@ -94,12 +93,12 @@ export class AuthService {
 
   getCurrentUserFromAPI(): Observable<User> {
     return this.http.get<User>(`${this.baseUrl}/me/`).pipe(
-      retry(2),
-      catchError((error: HttpErrorResponse) => {
-        console.error('getCurrentUser failed:', error);
-        // Don't auto-logout here - let AuthStore handle it
-        return throwError(() => error);
-      })
+        retry(2),
+        catchError((error: HttpErrorResponse) => {
+          console.error('getCurrentUser failed:', error);
+          // Don't auto-logout here - let AuthStore handle it
+          return throwError(() => error);
+        }),
     );
   }
 
@@ -121,12 +120,12 @@ export class AuthService {
 
   updateProfile(userId: number, profileData: any): Observable<User> {
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    return this.http.patch<User>(`${this.baseUrl}/users/${userId}/`, profileData, { headers }).pipe(
-      retry(1),
-      catchError((error: HttpErrorResponse) => {
-        console.error('updateProfile failed:', error);
-        return throwError(() => error);
-      })
+    return this.http.patch<User>(`${this.baseUrl}/users/${userId}/`, profileData, {headers}).pipe(
+        retry(1),
+        catchError((error: HttpErrorResponse) => {
+          console.error('updateProfile failed:', error);
+          return throwError(() => error);
+        }),
     );
   }
 
@@ -139,7 +138,7 @@ export class AuthService {
 
   refreshToken(refreshToken: string): Observable<{ access: string; refresh?: string }> {
     return this.http.post<{ access: string; refresh?: string }>(`${this.baseUrl}/token/refresh/`, {
-      refresh: refreshToken
+      refresh: refreshToken,
     });
   }
 }

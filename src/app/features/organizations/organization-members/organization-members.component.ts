@@ -1,19 +1,19 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { OrganizationService } from '../../../core/services/organization.service';
-import { OrganizationMember, PaginatedOrganizationMemberList, OrganizationInvitation } from '../../../core/models/interfaces';
-import { CommonModule } from '@angular/common';
-import { TableModule } from 'primeng/table';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthStore } from '../../../core/store/auth.store';
-    
+import {Component, OnInit, inject} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {OrganizationService} from '../../../core/services/organization.service';
+import {OrganizationMember, PaginatedOrganizationMemberList, OrganizationInvitation} from '../../../core/models/interfaces';
+import {CommonModule} from '@angular/common';
+import {TableModule} from 'primeng/table';
+import {ProgressSpinnerModule} from 'primeng/progressspinner';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {AuthStore} from '../../../core/store/auth.store';
+
 @Component({
   selector: 'app-organization-members',
   standalone: true,
   imports: [CommonModule, TableModule, ProgressSpinnerModule, ReactiveFormsModule],
   templateUrl: './organization-members.component.html',
-  styleUrl: './organization-members.component.css'
+  styleUrl: './organization-members.component.css',
 })
 export class OrganizationMembersComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -23,7 +23,7 @@ export class OrganizationMembersComponent implements OnInit {
     this.invitationsLoading = true;
     this.organizationService.resendInvitation(this.organizationId, invitationId).subscribe({
       next: () => this.loadInvitations(),
-      error: () => this.loadInvitations()
+      error: () => this.loadInvitations(),
     });
   }
 
@@ -31,7 +31,7 @@ export class OrganizationMembersComponent implements OnInit {
     this.invitationsLoading = true;
     this.organizationService.cancelInvitation(this.organizationId, invitationId).subscribe({
       next: () => this.loadInvitations(),
-      error: () => this.loadInvitations()
+      error: () => this.loadInvitations(),
     });
   }
 
@@ -67,15 +67,15 @@ export class OrganizationMembersComponent implements OnInit {
     const fb = inject(FormBuilder);
     this.inviteForm = fb.group({
       email: ['', [Validators.required, Validators.email]],
-      role: ['member', Validators.required]
+      role: ['member', Validators.required],
     });
     this.roleForm = fb.group({
-      role: ['', Validators.required]
+      role: ['', Validators.required],
     });
   }
   openEditRoleModal(member: OrganizationMember): void {
     this.selectedMember = member;
-    this.roleForm.reset({ role: member.role });
+    this.roleForm.reset({role: member.role});
     this.roleError = '';
     this.roleSuccess = '';
     this.editRoleModalOpen = true;
@@ -100,8 +100,8 @@ export class OrganizationMembersComponent implements OnInit {
     const newRole = this.roleForm.value.role;
     // PATCH /api/v1/orgs/members/{id}/update-role/
     this.organizationService.updateOrganizationMemberRoleById(
-      this.selectedMember.id,
-      { role: newRole }
+        this.selectedMember.id,
+        {role: newRole},
     ).subscribe({
       next: () => {
         this.roleSuccess = 'Rol actualizado correctamente.';
@@ -112,7 +112,7 @@ export class OrganizationMembersComponent implements OnInit {
       error: (err: any) => {
         this.roleError = err.message || 'Error al actualizar el rol';
         this.roleLoading = false;
-      }
+      },
     });
   }
 
@@ -127,14 +127,14 @@ export class OrganizationMembersComponent implements OnInit {
 
   openInviteModal(): void {
     this.inviteModalOpen = true;
-    this.inviteForm.reset({ role: 'member' });
+    this.inviteForm.reset({role: 'member'});
     this.inviteError = '';
     this.inviteSuccess = '';
   }
 
   closeInviteModal(): void {
     this.inviteModalOpen = false;
-    this.inviteForm.reset({ role: 'member' });
+    this.inviteForm.reset({role: 'member'});
     this.inviteError = '';
     this.inviteSuccess = '';
   }
@@ -149,7 +149,7 @@ export class OrganizationMembersComponent implements OnInit {
     this.inviteSuccess = '';
     const data = {
       email: this.inviteForm.value.email,
-      role: this.inviteForm.value.role
+      role: this.inviteForm.value.role,
     };
     this.organizationService.sendInvitation(this.organizationId, data).subscribe({
       next: (res) => {
@@ -161,14 +161,14 @@ export class OrganizationMembersComponent implements OnInit {
       error: (err) => {
         this.inviteError = err.message || 'Error al invitar miembro';
         this.inviteLoading = false;
-      }
+      },
     });
   }
 
-  loadInvitations(page: number = 1): void {
+  loadInvitations(page = 1): void {
     this.invitationsLoading = true;
     this.invitationsError = '';
-    this.organizationService.getInvitations(this.organizationId, { page }).subscribe({
+    this.organizationService.getInvitations(this.organizationId, {page}).subscribe({
       next: (res: any) => {
         if (Array.isArray(res)) {
           this.invitations = res;
@@ -182,14 +182,14 @@ export class OrganizationMembersComponent implements OnInit {
       error: (err) => {
         this.invitationsError = err.message || 'Error al cargar invitaciones';
         this.invitationsLoading = false;
-      }
+      },
     });
   }
 
-  loadMembers(page: number = 1): void {
+  loadMembers(page = 1): void {
     this.loading = true;
     this.error = '';
-    this.organizationService.getOrganizationMembers(this.organizationId, { page }).subscribe({
+    this.organizationService.getOrganizationMembers(this.organizationId, {page}).subscribe({
       next: (res: any) => {
         if (Array.isArray(res)) {
           this.members = res;
@@ -202,7 +202,7 @@ export class OrganizationMembersComponent implements OnInit {
           this.total = 0;
         }
         // Obtener el rol del usuario actual
-        const currentMember = this.members.find(m => m.user.email === this.currentUserEmail);
+        const currentMember = this.members.find((m) => m.user.email === this.currentUserEmail);
         this.currentUserRole = currentMember?.role || '';
         console.log('🔐 Usuario actual:', this.currentUserEmail, 'Rol:', this.currentUserRole);
         this.loading = false;
@@ -210,7 +210,7 @@ export class OrganizationMembersComponent implements OnInit {
       error: (err) => {
         this.error = err.message || 'Error al cargar miembros';
         this.loading = false;
-      }
+      },
     });
   }
 

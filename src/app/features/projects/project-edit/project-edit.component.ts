@@ -1,11 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ProjectService } from '../../../core/services/project.service';
-import { WorkspaceService } from '../../../core/services/workspace.service';
-import { Project, ProjectRequest, Workspace } from '../../../core/models/interfaces';
-import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ProjectService} from '../../../core/services/project.service';
+import {WorkspaceService} from '../../../core/services/workspace.service';
+import {Project, ProjectRequest, Workspace} from '../../../core/models/interfaces';
+import {ProjectStatusEnum, ProjectPriorityEnum} from '../../../core/models/enums';
 
 @Component({
   selector: 'app-project-edit',
@@ -20,7 +20,7 @@ export class ProjectEditComponent implements OnInit {
   private projectService = inject(ProjectService);
   private workspaceService = inject(WorkspaceService);
 
-  projectId: string = '';
+  projectId = '';
   loading = signal(true);
   saving = signal(false);
   loadError = signal<string | null>(null);
@@ -32,18 +32,18 @@ export class ProjectEditComponent implements OnInit {
   currentCoverUrl = signal<string | null>(null);
 
   projectStatuses = [
-    { value: ProjectStatusEnum.PLANNING, label: 'Planning' },
-    { value: ProjectStatusEnum.ACTIVE, label: 'Active' },
-    { value: ProjectStatusEnum.ON_HOLD, label: 'On Hold' },
-    { value: ProjectStatusEnum.COMPLETED, label: 'Completed' },
-    { value: ProjectStatusEnum.CANCELLED, label: 'Cancelled' }
+    {value: ProjectStatusEnum.PLANNING, label: 'Planning'},
+    {value: ProjectStatusEnum.ACTIVE, label: 'Active'},
+    {value: ProjectStatusEnum.ON_HOLD, label: 'On Hold'},
+    {value: ProjectStatusEnum.COMPLETED, label: 'Completed'},
+    {value: ProjectStatusEnum.CANCELLED, label: 'Cancelled'},
   ];
 
   projectPriorities = [
-    { value: ProjectPriorityEnum.LOW, label: 'Low' },
-    { value: ProjectPriorityEnum.MEDIUM, label: 'Medium' },
-    { value: ProjectPriorityEnum.HIGH, label: 'High' },
-    { value: ProjectPriorityEnum.CRITICAL, label: 'Critical' }
+    {value: ProjectPriorityEnum.LOW, label: 'Low'},
+    {value: ProjectPriorityEnum.MEDIUM, label: 'Medium'},
+    {value: ProjectPriorityEnum.HIGH, label: 'High'},
+    {value: ProjectPriorityEnum.CRITICAL, label: 'Critical'},
   ];
 
   projectForm: FormGroup = this.fb.group({
@@ -57,11 +57,11 @@ export class ProjectEditComponent implements OnInit {
     due_date: [''],
     budget: [''],
     estimated_hours: [''],
-    is_active: [true]
+    is_active: [true],
   });
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.projectId = params['id'];
       if (this.projectId) {
         this.loadWorkSpaces();
@@ -83,14 +83,14 @@ export class ProjectEditComponent implements OnInit {
             logo_url: ws.organization?.logo_url || '',
             organization_type: ws.organization?.organization_type || '',
             subscription_plan: ws.organization?.subscription_plan || '',
-            is_active: ws.organization?.is_active ?? true
-          }
+            is_active: ws.organization?.is_active ?? true,
+          },
         }));
         this.workspaces.set(normalizedWorkspaces);
       },
       error: () => {
         this.workspaces.set([]);
-      }
+      },
     });
   }
 
@@ -99,8 +99,8 @@ export class ProjectEditComponent implements OnInit {
     try {
       const project = await this.projectService.getProject(this.projectId).toPromise();
       if (project) {
-        let workspaceId = typeof project.workspace === 'string' ? project.workspace : project.workspace?.id;
-        let workspaceObj = this.workspaces().find(ws => ws.id === workspaceId);
+        const workspaceId = typeof project.workspace === 'string' ? project.workspace : project.workspace?.id;
+        const workspaceObj = this.workspaces().find((ws) => ws.id === workspaceId);
         this.projectForm.patchValue({
           name: project.name,
           slug: project.slug,
@@ -112,7 +112,7 @@ export class ProjectEditComponent implements OnInit {
           due_date: project.due_date ? project.due_date.split('T')[0] : '',
           budget: project.budget,
           estimated_hours: project.estimated_hours,
-          is_active: project.is_active
+          is_active: project.is_active,
         });
       }
     } catch (error) {
@@ -141,7 +141,7 @@ export class ProjectEditComponent implements OnInit {
       due_date: formatDate(project.due_date),
       budget: project.budget,
       estimated_hours: project.estimated_hours,
-      is_active: project.is_active
+      is_active: project.is_active,
     });
   }
 
@@ -187,7 +187,7 @@ export class ProjectEditComponent implements OnInit {
         budget: this.projectForm.value.budget || undefined,
         estimated_hours: this.projectForm.value.estimated_hours || undefined,
         is_active: this.projectForm.value.is_active,
-        cover_image: this.selectedFile || undefined
+        cover_image: this.selectedFile || undefined,
       };
 
       const project = await this.projectService.updateProject(this.projectId, formData).toPromise();

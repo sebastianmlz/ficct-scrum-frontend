@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpParams, HttpErrorResponse} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {catchError, retry} from 'rxjs/operators';
 import {
   Organization,
   OrganizationRequest,
@@ -14,12 +14,12 @@ import {
   OrganizationInvitation,
   OrganizationInvitationRequest,
   OrganizationInvitationResponse,
-  PaginatedOrganizationInvitationList
+  PaginatedOrganizationInvitationList,
 } from '../models/interfaces';
-import { environment } from '../../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrganizationService {
   private http = inject(HttpClient);
@@ -27,7 +27,7 @@ export class OrganizationService {
 
   getOrganizations(params?: PaginationParams): Observable<PaginatedOrganizationList> {
     let httpParams = new HttpParams();
-    
+
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
     }
@@ -38,22 +38,22 @@ export class OrganizationService {
       httpParams = httpParams.set('ordering', params.ordering);
     }
 
-    return this.http.get<PaginatedOrganizationList>(`${this.baseUrl}/organizations/`, { params: httpParams }).pipe(
-      retry(1),
-      catchError(this.handleError)
+    return this.http.get<PaginatedOrganizationList>(`${this.baseUrl}/organizations/`, {params: httpParams}).pipe(
+        retry(1),
+        catchError(this.handleError),
     );
   }
 
   getOrganization(id: string): Observable<Organization> {
     return this.http.get<Organization>(`${this.baseUrl}/organizations/${id}/`).pipe(
-      retry(1),
-      catchError(this.handleError)
+        retry(1),
+        catchError(this.handleError),
     );
   }
 
   createOrganization(organizationData: OrganizationRequest): Observable<Organization> {
     console.log('🔧 OrganizationService - Datos recibidos:', organizationData);
-    
+
     // Si NO hay logo, enviar como JSON normal
     if (!organizationData.logo) {
       const jsonData = {
@@ -63,24 +63,24 @@ export class OrganizationService {
         organization_type: organizationData.organization_type || '',
         subscription_plan: organizationData.subscription_plan || '',
         website_url: organizationData.website_url || '',
-        is_active: organizationData.is_active ?? true
+        is_active: organizationData.is_active ?? true,
       };
 
       console.log('📤 Enviando como JSON (sin logo):', jsonData);
 
       return this.http.post<Organization>(`${this.baseUrl}/organizations/`, jsonData, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: {'Content-Type': 'application/json'},
       }).pipe(
-        catchError(this.handleError)
+          catchError(this.handleError),
       );
     }
 
     // Si HAY logo, enviar como FormData
     const formData = new FormData();
-    
+
     formData.append('name', organizationData.name);
     formData.append('slug', organizationData.slug);
-    
+
     if (organizationData.description) {
       formData.append('description', organizationData.description);
     }
@@ -96,11 +96,11 @@ export class OrganizationService {
     if (organizationData.is_active !== undefined) {
       formData.append('is_active', organizationData.is_active.toString());
     }
-    
+
     // Agregar logo al final y con validación
     if (organizationData.logo && organizationData.logo instanceof File) {
       console.log('📸 Agregando logo - Nombre:', organizationData.logo.name, 'Tamaño:', organizationData.logo.size, 'Tipo:', organizationData.logo.type);
-      
+
       // Validar que el archivo sea una imagen
       if (organizationData.logo.type.startsWith('image/')) {
         formData.append('logo', organizationData.logo, organizationData.logo.name);
@@ -112,7 +112,7 @@ export class OrganizationService {
 
     // Log FormData contents (excluyendo el archivo para evitar problemas)
     console.log('📋 FormData contents:');
-    for (let pair of formData.entries()) {
+    for (const pair of formData.entries()) {
       if (pair[1] instanceof File) {
         console.log(`${pair[0]}:`, `[File: ${pair[1].name}, ${pair[1].size} bytes, ${pair[1].type}]`);
       } else {
@@ -125,13 +125,13 @@ export class OrganizationService {
 
     // Enviar FormData SIN headers explícitos (dejar que el navegador los configure)
     return this.http.post<Organization>(url, formData).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
   updateOrganization(id: string, organizationData: Partial<OrganizationRequest>): Observable<Organization> {
     const formData = new FormData();
-    
+
     if (organizationData.name) {
       formData.append('name', organizationData.name);
     }
@@ -161,20 +161,20 @@ export class OrganizationService {
     }
 
     return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, formData).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
   deleteOrganization(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/organizations/${id}/`).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
   // Organization Members
   getOrganizationMembers(organizationId: string, params?: PaginationParams): Observable<PaginatedOrganizationMemberList> {
     let httpParams = new HttpParams();
-    
+
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
     }
@@ -188,9 +188,9 @@ export class OrganizationService {
       httpParams = httpParams.set('role', params.role);
     }
 
-    return this.http.get<PaginatedOrganizationMemberList>(`${this.baseUrl}/organizations/${organizationId}/members/`, { params: httpParams }).pipe(
-      retry(1),
-      catchError(this.handleError)
+    return this.http.get<PaginatedOrganizationMemberList>(`${this.baseUrl}/organizations/${organizationId}/members/`, {params: httpParams}).pipe(
+        retry(1),
+        catchError(this.handleError),
     );
   }
 
@@ -198,19 +198,19 @@ export class OrganizationService {
     // El backend espera POST a /api/v1/orgs/members/ con email, role, status, is_active
     const url = `${this.baseUrl}/members/`;
     return this.http.post<OrganizationMember>(url, memberData).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
   updateOrganizationMemberRole(organizationId: string, memberId: string, roleData: PatchedOrganizationMemberRequest): Observable<OrganizationMember> {
     return this.http.patch<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`, roleData).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
   removeOrganizationMember(organizationId: string, memberId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -220,7 +220,7 @@ export class OrganizationService {
   updateOrganizationMemberRoleById(memberId: string, roleData: { role: string }): Observable<OrganizationMember> {
     const url = `${this.baseUrl}/members/${memberId}/update-role/`;
     return this.http.patch<OrganizationMember>(url, roleData).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -231,11 +231,11 @@ export class OrganizationService {
     const body = {
       organization: organizationId,
       email: invitationData.email,
-      role: invitationData.role
+      role: invitationData.role,
     };
     console.log('📤 Enviando invitación:', body);
     return this.http.post<OrganizationInvitationResponse>(url, body).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -250,9 +250,9 @@ export class OrganizationService {
     const url = `${this.baseUrl}/invitations/`;
     console.log('🔍 getInvitations URL:', url);
     console.log('🔍 getInvitations params:', httpParams.toString());
-    return this.http.get<PaginatedOrganizationInvitationList>(url, { params: httpParams }).pipe(
-      retry(1),
-      catchError(this.handleError)
+    return this.http.get<PaginatedOrganizationInvitationList>(url, {params: httpParams}).pipe(
+        retry(1),
+        catchError(this.handleError),
     );
   }
 
@@ -261,7 +261,7 @@ export class OrganizationService {
     const url = `${this.baseUrl}/invitations/${invitationId}/`;
     console.log('🗑️ Cancelando invitación:', url);
     return this.http.delete<void>(url).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -270,7 +270,7 @@ export class OrganizationService {
     const url = `${this.baseUrl}/invitations/${invitationId}/resend/`;
     console.log('📧 Reenviando invitación:', url);
     return this.http.post<OrganizationInvitationResponse>(url, {}).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -279,7 +279,7 @@ export class OrganizationService {
     // GET /api/v1/orgs/invitations/:token/
     const url = `${this.baseUrl}/invitations/${token}/`;
     return this.http.get<OrganizationInvitation>(url).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -287,7 +287,7 @@ export class OrganizationService {
     // POST /api/v1/orgs/invitations/:token/accept/
     const url = `${this.baseUrl}/invitations/${token}/accept/`;
     return this.http.post(url, {}).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -295,7 +295,7 @@ export class OrganizationService {
     // POST /api/v1/orgs/invitations/:token/reject/
     const url = `${this.baseUrl}/invitations/${token}/reject/`;
     return this.http.post(url, {}).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError),
     );
   }
 
@@ -306,11 +306,11 @@ export class OrganizationService {
       statusText: error.statusText,
       url: error.url,
       message: error.message,
-      error: error.error
+      error: error.error,
     });
-    
+
     let errorMessage = 'An unexpected error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -321,8 +321,8 @@ export class OrganizationService {
           const validationErrors = error.error?.errors || error.error;
           if (typeof validationErrors === 'object') {
             const errorMessages = Object.entries(validationErrors)
-              .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-              .join('; ');
+                .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                .join('; ');
             errorMessage = `Validation errors: ${errorMessages}`;
           } else {
             errorMessage = 'Invalid request. Please check your input.';
@@ -344,7 +344,7 @@ export class OrganizationService {
           errorMessage = `Error ${error.status}: ${error.error?.message || error.message}`;
       }
     }
-    
+
     return throwError(() => new Error(errorMessage));
   }
 }

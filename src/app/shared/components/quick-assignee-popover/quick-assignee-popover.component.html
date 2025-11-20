@@ -1,0 +1,128 @@
+<div
+  class="absolute z-50 w-64 bg-white rounded-lg shadow-lg border border-gray-200"
+  [style.top.px]="position().top"
+  [style.left.px]="position().left"
+  (click)="$event.stopPropagation()"
+>
+  <!-- Header -->
+  <div class="px-4 py-3 border-b border-gray-200">
+    <h4 class="text-sm font-medium text-gray-900">Assign to</h4>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+  <div class="flex items-center justify-center py-8">
+    <div
+      class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"
+    ></div>
+  </div>
+  }
+
+  <!-- Members List -->
+  @if (!loading()) {
+  <div class="max-h-64 overflow-y-auto">
+    <!-- Search Input (if many members) -->
+    @if (members().length > 8) {
+    <div class="px-3 py-2 border-b border-gray-100">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+        placeholder="Search members..."
+        class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+    }
+
+    <!-- Unassigned Option -->
+    <button
+      (click)="selectAssignee(null)"
+      class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+      [class.bg-blue-50]="!currentAssignee()"
+    >
+      <div
+        class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+      >
+        <svg
+          class="w-4 h-4 text-gray-400"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+      <span class="text-sm font-medium text-gray-700">Unassigned</span>
+    </button>
+
+    <!-- Member Options -->
+    @for (member of filteredMembers(); track member.id) {
+    <button
+      (click)="selectAssignee(member.user.user_uuid || null)"
+      [disabled]="!member.user.user_uuid"
+      class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+      [class.bg-blue-50]="currentAssignee() === member.user.user_uuid"
+    >
+      <div
+        [class]="
+          'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ' +
+          getAvatarColor(member.user.full_name)
+        "
+      >
+        {{ getInitials(member.user.full_name) }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-900 truncate">
+          {{ member.user.full_name }}
+        </p>
+        <p class="text-xs text-gray-500 truncate">
+          {{ member.user.email }}
+        </p>
+        @if (!member.user.user_uuid) {
+        <p class="text-xs text-red-600">⚠️ Missing UUID</p>
+        }
+      </div>
+      @if (currentAssignee() === member.user.user_uuid) {
+      <svg
+        class="w-5 h-5 text-blue-600"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      }
+    </button>
+    } @if (filteredMembers().length === 0 && searchQuery) {
+    <div class="px-4 py-6 text-center text-sm text-gray-500">
+      No members found
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Error Message -->
+  @if (error()) {
+  <div class="px-4 py-3 bg-red-50 border-t border-red-100">
+    <p class="text-xs text-red-800">{{ error() }}</p>
+  </div>
+  }
+
+  <!-- Saving Indicator -->
+  @if (saving()) {
+  <div
+    class="px-4 py-2 bg-blue-50 border-t border-blue-100 flex items-center gap-2"
+  >
+    <div
+      class="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"
+    ></div>
+    <span class="text-xs text-blue-800">Updating...</span>
+  </div>
+  }
+</div>

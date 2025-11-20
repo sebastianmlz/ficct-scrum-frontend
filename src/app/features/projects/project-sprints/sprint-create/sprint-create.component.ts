@@ -1,16 +1,16 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { SprintRequest } from '../../../../core/models/interfaces';
-import { SprintsService } from '../../../../core/services/sprints.service';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {Component, Input, Output, EventEmitter, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router} from '@angular/router';
+import {SprintRequest} from '../../../../core/models/interfaces';
+import {SprintsService} from '../../../../core/services/sprints.service';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
 
 @Component({
   standalone: true,
   selector: 'app-sprint-create',
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './sprint-create.component.html',
-  styleUrl: './sprint-create.component.css'
+  styleUrl: './sprint-create.component.css',
 })
 export class SprintCreateComponent {
   @Input() projectId!: string;
@@ -30,7 +30,7 @@ export class SprintCreateComponent {
       name: ['', Validators.required],
       start_date: ['', Validators.required],
       end_date: ['', Validators.required],
-      goal: ['']
+      goal: [''],
     });
   }
 
@@ -48,9 +48,9 @@ export class SprintCreateComponent {
       name: this.form.get('name')?.value,
       start_date: this.form.get('start_date')?.value,
       end_date: this.form.get('end_date')?.value,
-      goal: this.form.get('goal')?.value
+      goal: this.form.get('goal')?.value,
     };
-    console.log("Creating sprint:", sprint);
+    console.log('Creating sprint:', sprint);
     try {
       const createdSprint = await this.sprintRequestService.createSprints(sprint).toPromise();
       this.sprintCreated.emit(createdSprint);

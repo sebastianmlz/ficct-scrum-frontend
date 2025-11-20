@@ -1,15 +1,15 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { NotificationsBackendService, BackendNotification } from '../../../core/services/notifications-backend.service';
-import { NotificationService } from '../../../core/services/notification.service';
+import {Component, OnInit, inject, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink} from '@angular/router';
+import {NotificationsBackendService, BackendNotification} from '../../../core/services/notifications-backend.service';
+import {NotificationService} from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-notification-list',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './notification-list.component.html',
-  styleUrl: './notification-list.component.css'
+  styleUrl: './notification-list.component.css',
 })
 export class NotificationListComponent implements OnInit {
   private notificationsBackendService = inject(NotificationsBackendService);
@@ -22,13 +22,13 @@ export class NotificationListComponent implements OnInit {
   selectedType = signal<string>('all');
 
   notificationTypes = [
-    { value: 'all', label: 'All Notifications' },
-    { value: 'issue_created', label: 'Issue Created' },
-    { value: 'issue_updated', label: 'Issue Updated' },
-    { value: 'sprint_started', label: 'Sprint Started' },
-    { value: 'sprint_completed', label: 'Sprint Completed' },
-    { value: 'deadline_approaching', label: 'Deadline Approaching' },
-    { value: 'assignment', label: 'Assignment' }
+    {value: 'all', label: 'All Notifications'},
+    {value: 'issue_created', label: 'Issue Created'},
+    {value: 'issue_updated', label: 'Issue Updated'},
+    {value: 'sprint_started', label: 'Sprint Started'},
+    {value: 'sprint_completed', label: 'Sprint Completed'},
+    {value: 'deadline_approaching', label: 'Deadline Approaching'},
+    {value: 'assignment', label: 'Assignment'},
   ];
 
   ngOnInit(): void {
@@ -41,9 +41,9 @@ export class NotificationListComponent implements OnInit {
 
     const params: any = {
       page_size: 20,
-      ordering: '-created_at'
+      ordering: '-created_at',
     };
-    
+
     if (this.filterUnreadOnly()) {
       params.is_read = false;
     }
@@ -68,12 +68,12 @@ export class NotificationListComponent implements OnInit {
         this.error.set('Failed to load notifications. Please try again.');
         this.loading.set(false);
         this.notificationService.error('Error', 'Failed to load notifications');
-      }
+      },
     });
   }
 
   toggleUnreadFilter(): void {
-    this.filterUnreadOnly.update(value => !value);
+    this.filterUnreadOnly.update((value) => !value);
     this.loadNotifications();
   }
 
@@ -88,15 +88,15 @@ export class NotificationListComponent implements OnInit {
     this.notificationsBackendService.markAsRead(notification.id).subscribe({
       next: (updatedNotification) => {
         // Update local state with the updated notification from backend
-        this.notifications.update(notifications =>
-          notifications.map(n => n.id === notification.id ? updatedNotification : n)
+        this.notifications.update((notifications) =>
+          notifications.map((n) => n.id === notification.id ? updatedNotification : n),
         );
         this.notificationService.success('Marked as read');
       },
       error: (err) => {
         console.error('Error marking notification as read:', err);
         this.notificationService.error('Error', 'Failed to mark as read');
-      }
+      },
     });
   }
 
@@ -110,7 +110,7 @@ export class NotificationListComponent implements OnInit {
       error: (err) => {
         console.error('Error marking all as read:', err);
         this.notificationService.error('Error', 'Failed to mark all as read');
-      }
+      },
     });
   }
 
@@ -122,7 +122,7 @@ export class NotificationListComponent implements OnInit {
       'sprint_completed': '✅',
       'deadline_approaching': '⏰',
       'assignment': '👤',
-      'default': '🔔'
+      'default': '🔔',
     };
     return icons[type] || icons['default'];
   }

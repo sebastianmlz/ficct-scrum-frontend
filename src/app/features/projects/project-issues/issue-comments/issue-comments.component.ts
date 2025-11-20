@@ -1,16 +1,16 @@
-import { Component, Input, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IssueService } from '../../../../core/services/issue.service';
-import { IssueComment, PaginatedIssueCommentList, UserBasic } from '../../../../core/models/interfaces';
-import { AuthService } from '../../../../core/services/auth.service';
+import {Component, Input, OnInit, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {IssueService} from '../../../../core/services/issue.service';
+import {IssueComment, PaginatedIssueCommentList, UserBasic} from '../../../../core/models/interfaces';
+import {AuthService} from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-issue-comments',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './issue-comments.component.html',
-  styleUrl: './issue-comments.component.css'
+  styleUrl: './issue-comments.component.css',
 })
 export class IssueCommentsComponent implements OnInit {
   @Input() issueId!: string;
@@ -36,11 +36,11 @@ export class IssueCommentsComponent implements OnInit {
 
   constructor() {
     this.commentForm = this.fb.group({
-      content: ['', [Validators.required, Validators.minLength(1)]]
+      content: ['', [Validators.required, Validators.minLength(1)]],
     });
 
     this.editForm = this.fb.group({
-      content: ['', [Validators.required, Validators.minLength(1)]]
+      content: ['', [Validators.required, Validators.minLength(1)]],
     });
   }
 
@@ -49,7 +49,7 @@ export class IssueCommentsComponent implements OnInit {
       this.error.set('Issue ID is required');
       return;
     }
-    
+
     this.loadCurrentUser();
     this.loadComments();
   }
@@ -60,13 +60,13 @@ export class IssueCommentsComponent implements OnInit {
     this.currentUser.set(user);
   }
 
-  loadComments(page: number = 1) {
+  loadComments(page = 1) {
     this.loading.set(true);
     this.error.set(null);
 
-    this.issueService.getIssueComments(this.issueId, { 
-      page, 
-      ordering: '-created_at' 
+    this.issueService.getIssueComments(this.issueId, {
+      page,
+      ordering: '-created_at',
     }).subscribe({
       next: (response: PaginatedIssueCommentList) => {
         this.comments.set(response.results);
@@ -79,7 +79,7 @@ export class IssueCommentsComponent implements OnInit {
         this.error.set('Error al cargar los comentarios');
         this.loading.set(false);
         console.error('Error loading comments:', err);
-      }
+      },
     });
   }
 
@@ -91,8 +91,8 @@ export class IssueCommentsComponent implements OnInit {
       this.issueService.createIssueComment(this.issueId, content).subscribe({
         next: (newComment) => {
           // Agregar el nuevo comentario al inicio de la lista
-          this.comments.update(comments => [newComment, ...comments]);
-          this.totalComments.update(count => count + 1);
+          this.comments.update((comments) => [newComment, ...comments]);
+          this.totalComments.update((count) => count + 1);
           this.commentForm.reset();
           this.submitting.set(false);
         },
@@ -100,14 +100,14 @@ export class IssueCommentsComponent implements OnInit {
           this.error.set('Error al crear el comentario');
           this.submitting.set(false);
           console.error('Error creating comment:', err);
-        }
+        },
       });
     }
   }
 
   startEdit(comment: IssueComment) {
     this.editingCommentId.set(comment.id);
-    this.editForm.patchValue({ content: comment.content });
+    this.editForm.patchValue({content: comment.content});
   }
 
   cancelEdit() {
@@ -121,8 +121,8 @@ export class IssueCommentsComponent implements OnInit {
 
       this.issueService.updateIssueComment(this.issueId, commentId, content).subscribe({
         next: (updatedComment) => {
-          this.comments.update(comments => 
-            comments.map(c => c.id === commentId ? updatedComment : c)
+          this.comments.update((comments) =>
+            comments.map((c) => c.id === commentId ? updatedComment : c),
           );
           this.editingCommentId.set(null);
           this.editForm.reset();
@@ -130,7 +130,7 @@ export class IssueCommentsComponent implements OnInit {
         error: (err) => {
           this.error.set('Error al actualizar el comentario');
           console.error('Error updating comment:', err);
-        }
+        },
       });
     }
   }
@@ -139,15 +139,15 @@ export class IssueCommentsComponent implements OnInit {
     if (confirm('¿Estás seguro de que quieres eliminar este comentario?')) {
       this.issueService.deleteIssueComment(this.issueId, commentId).subscribe({
         next: () => {
-          this.comments.update(comments => 
-            comments.filter(c => c.id !== commentId)
+          this.comments.update((comments) =>
+            comments.filter((c) => c.id !== commentId),
           );
-          this.totalComments.update(count => count - 1);
+          this.totalComments.update((count) => count - 1);
         },
         error: (err) => {
           this.error.set('Error al eliminar el comentario');
           console.error('Error deleting comment:', err);
-        }
+        },
       });
     }
   }
@@ -175,11 +175,11 @@ export class IssueCommentsComponent implements OnInit {
     if (diffInSeconds < 3600) return `hace ${Math.floor(diffInSeconds / 60)} min`;
     if (diffInSeconds < 86400) return `hace ${Math.floor(diffInSeconds / 3600)} h`;
     if (diffInSeconds < 604800) return `hace ${Math.floor(diffInSeconds / 86400)} días`;
-    
-    return date.toLocaleDateString('es-ES', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   }
 }

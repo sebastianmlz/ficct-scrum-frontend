@@ -1,16 +1,16 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { OrganizationService } from '../../../core/services/organization.service';
-import { OrganizationRequest } from '../../../core/models/interfaces';
-import { OrganizationTypeEnum, SubscriptionPlanEnum } from '../../../core/models/enums';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
+import {OrganizationService} from '../../../core/services/organization.service';
+import {OrganizationRequest} from '../../../core/models/interfaces';
+import {OrganizationTypeEnum, SubscriptionPlanEnum} from '../../../core/models/enums';
 
 @Component({
   selector: 'app-organization-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './organization-create.component.html'
+  templateUrl: './organization-create.component.html',
 })
 export class OrganizationCreateComponent {
   private fb = inject(FormBuilder);
@@ -23,19 +23,19 @@ export class OrganizationCreateComponent {
   previewUrl: string | null = null;
 
   organizationTypes = [
-    { value: OrganizationTypeEnum.STARTUP, label: 'Startup' },
-    { value: OrganizationTypeEnum.CORPORATION, label: 'Corporation' },
-    { value: OrganizationTypeEnum.NON_PROFIT, label: 'Non-Profit' },
-    { value: OrganizationTypeEnum.GOVERNMENT, label: 'Government' },
-    { value: OrganizationTypeEnum.EDUCATIONAL, label: 'Educational' },
-    { value: OrganizationTypeEnum.OTHER, label: 'Other' }
+    {value: OrganizationTypeEnum.STARTUP, label: 'Startup'},
+    {value: OrganizationTypeEnum.CORPORATION, label: 'Corporation'},
+    {value: OrganizationTypeEnum.NON_PROFIT, label: 'Non-Profit'},
+    {value: OrganizationTypeEnum.GOVERNMENT, label: 'Government'},
+    {value: OrganizationTypeEnum.EDUCATIONAL, label: 'Educational'},
+    {value: OrganizationTypeEnum.OTHER, label: 'Other'},
   ];
 
   subscriptionPlans = [
-    { value: SubscriptionPlanEnum.FREE, label: 'Free' },
-    { value: SubscriptionPlanEnum.BASIC, label: 'Basic' },
-    { value: SubscriptionPlanEnum.PREMIUM, label: 'Premium' },
-    { value: SubscriptionPlanEnum.ENTERPRISE, label: 'Enterprise' }
+    {value: SubscriptionPlanEnum.FREE, label: 'Free'},
+    {value: SubscriptionPlanEnum.BASIC, label: 'Basic'},
+    {value: SubscriptionPlanEnum.PREMIUM, label: 'Premium'},
+    {value: SubscriptionPlanEnum.ENTERPRISE, label: 'Enterprise'},
   ];
 
   organizationForm: FormGroup = this.fb.group({
@@ -45,19 +45,19 @@ export class OrganizationCreateComponent {
     organization_type: [''],
     subscription_plan: [''],
     website_url: ['', [Validators.pattern(/^https?:\/\/.+/)]],
-    is_active: [true]
+    is_active: [true],
   });
 
   constructor() {
     // Auto-generate slug from name
-    this.organizationForm.get('name')?.valueChanges.subscribe(name => {
+    this.organizationForm.get('name')?.valueChanges.subscribe((name) => {
       if (name && !this.organizationForm.get('slug')?.touched) {
         const slug = name.toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .trim();
-        this.organizationForm.patchValue({ slug });
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+        this.organizationForm.patchValue({slug});
       }
     });
   }
@@ -69,7 +69,7 @@ export class OrganizationCreateComponent {
         name: file.name,
         size: file.size,
         type: file.type,
-        lastModified: file.lastModified
+        lastModified: file.lastModified,
       });
 
       // Validar tipo de archivo
@@ -87,7 +87,7 @@ export class OrganizationCreateComponent {
 
       this.selectedFile = file;
       this.error = null; // Limpiar errores previos
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -124,7 +124,7 @@ export class OrganizationCreateComponent {
         subscription_plan: this.organizationForm.value.subscription_plan || undefined,
         website_url: this.organizationForm.value.website_url || undefined,
         is_active: this.organizationForm.value.is_active,
-        logo: this.selectedFile || undefined
+        logo: this.selectedFile || undefined,
       };
 
       console.log('🚀 Datos del formulario:', formData);
@@ -133,7 +133,7 @@ export class OrganizationCreateComponent {
 
       const organization = await this.organizationService.createOrganization(formData).toPromise();
       console.log('✅ Organización creada:', organization);
-      
+
       if (organization) {
         this.router.navigate(['/organizations', organization.id]);
       }
@@ -143,9 +143,9 @@ export class OrganizationCreateComponent {
         status: error.status,
         statusText: error.statusText,
         message: error.message,
-        error: error.error
+        error: error.error,
       });
-      
+
       this.error = error.error?.message || error.message || 'Failed to create organization';
     } finally {
       this.loading = false;
@@ -154,7 +154,7 @@ export class OrganizationCreateComponent {
 
   async testSimplePost(): Promise<void> {
     console.log('🧪 Iniciando prueba POST simple...');
-    
+
     this.loading = true;
     this.error = null;
 
@@ -165,7 +165,7 @@ export class OrganizationCreateComponent {
         description: 'Organización de prueba creada desde el frontend',
         organization_type: OrganizationTypeEnum.STARTUP,
         subscription_plan: SubscriptionPlanEnum.FREE,
-        is_active: true
+        is_active: true,
         // NO incluir logo para evitar problemas de FormData
       };
 
@@ -173,7 +173,7 @@ export class OrganizationCreateComponent {
 
       const organization = await this.organizationService.createOrganization(testData).toPromise();
       console.log('✅ Organización de prueba creada:', organization);
-      
+
       if (organization) {
         alert('✅ ¡Prueba exitosa! Organización creada: ' + organization.name);
         this.router.navigate(['/organizations', organization.id]);
@@ -194,7 +194,7 @@ export class OrganizationCreateComponent {
     }
 
     console.log('🧪 Iniciando prueba POST con archivo...');
-    
+
     this.loading = true;
     this.error = null;
 
@@ -206,14 +206,14 @@ export class OrganizationCreateComponent {
         organization_type: OrganizationTypeEnum.STARTUP,
         subscription_plan: SubscriptionPlanEnum.FREE,
         is_active: true,
-        logo: this.selectedFile
+        logo: this.selectedFile,
       };
 
       console.log('🧪 Datos de prueba (con archivo):', testData);
 
       const organization = await this.organizationService.createOrganization(testData).toPromise();
       console.log('✅ Organización con imagen creada:', organization);
-      
+
       if (organization) {
         alert('✅ ¡Prueba con imagen exitosa! Organización creada: ' + organization.name);
         this.router.navigate(['/organizations', organization.id]);
@@ -230,7 +230,7 @@ export class OrganizationCreateComponent {
   scrollToBottom(): void {
     window.scrollTo({
       top: document.body.scrollHeight,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }
 }

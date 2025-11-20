@@ -1,34 +1,34 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { WorkspacesService } from '../../../core/services/workspaces.service';
-import { Workspace, PaginatedWorkspaceList, ApiQueryParams } from '../../../core/models/interfaces';
-import { WorkspaceTypeEnum, VisibilityEnum } from '../../../core/models/enums';
+import {Component, OnInit, signal, computed} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router, RouterModule, ActivatedRoute} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {WorkspacesService} from '../../../core/services/workspaces.service';
+import {Workspace, PaginatedWorkspaceList, ApiQueryParams} from '../../../core/models/interfaces';
+import {WorkspaceTypeEnum, VisibilityEnum} from '../../../core/models/enums';
 
 @Component({
   selector: 'app-workspace-list',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
-  templateUrl: './workspace-list.component.html'
+  templateUrl: './workspace-list.component.html',
 })
 export class WorkspaceListComponent implements OnInit {
   workspaces = signal<Workspace[]>([]);
   loading = signal(false);
   error = signal('');
-  
+
   organizationId = signal('');
   organizationName = signal('');
-  
+
   totalRecords = signal(0);
   currentPage = signal(1);
   pageSize = 12;
-  
+
   searchTerm = signal('');
   selectedType = signal<string>('');
   selectedVisibility = signal<string>('');
   sortBy = signal('created_at');
-  
+
   workspaceTypes = Object.values(WorkspaceTypeEnum);
   visibilityOptions = Object.values(VisibilityEnum);
 
@@ -40,12 +40,12 @@ export class WorkspaceListComponent implements OnInit {
   constructor(
     private workspacesService: WorkspacesService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
     console.log('[WORKSPACE-LIST] ngOnInit() called');
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       console.log('[WORKSPACE-LIST] Query params received:', params);
       this.organizationId.set(params['organization'] || '');
       console.log('[WORKSPACE-LIST] Organization ID set to:', this.organizationId());
@@ -60,9 +60,9 @@ export class WorkspaceListComponent implements OnInit {
       search: this.searchTerm(),
       type: this.selectedType(),
       ordering: this.sortBy(),
-      organizationId: this.organizationId()
+      organizationId: this.organizationId(),
     });
-    
+
     this.loading.set(true);
     this.error.set('');
 
@@ -70,17 +70,17 @@ export class WorkspaceListComponent implements OnInit {
       page: this.currentPage(),
       search: this.searchTerm() || undefined,
       workspace_type: this.selectedType() || undefined,
-      ordering: this.sortBy()
+      ordering: this.sortBy(),
     };
 
     console.log('[WORKSPACE-LIST] Calling workspacesService.getWorkspaces()');
-    
+
     this.workspacesService.getWorkspaces(params).subscribe({
       next: (response: PaginatedWorkspaceList) => {
         console.log('[WORKSPACE-LIST] Response received:', response);
         console.log('[WORKSPACE-LIST] Count:', response.count);
         console.log('[WORKSPACE-LIST] Results length:', response.results?.length || 0);
-        
+
         this.workspaces.set(response.results || []);
         this.totalRecords.set(response.count);
         this.loading.set(false);
@@ -94,7 +94,7 @@ export class WorkspaceListComponent implements OnInit {
         console.error('[WORKSPACE-LIST] Error message:', err.message);
         this.error.set(err.message || 'Failed to load workspaces');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -123,14 +123,14 @@ export class WorkspaceListComponent implements OnInit {
 
   nextPage(): void {
     if (this.currentPage() < this.totalPages()) {
-      this.currentPage.update(page => page + 1);
+      this.currentPage.update((page) => page + 1);
       this.loadWorkspaces();
     }
   }
 
   previousPage(): void {
     if (this.currentPage() > 1) {
-      this.currentPage.update(page => page - 1);
+      this.currentPage.update((page) => page - 1);
       this.loadWorkspaces();
     }
   }
@@ -142,7 +142,7 @@ export class WorkspaceListComponent implements OnInit {
 
   createWorkspace(): void {
     this.router.navigate(['/workspaces/create'], {
-      queryParams: { organization: this.organizationId() }
+      queryParams: {organization: this.organizationId()},
     });
   }
 
@@ -167,7 +167,7 @@ export class WorkspaceListComponent implements OnInit {
       'team': 'Team',
       'project': 'Project',
       'department': 'Department',
-      'other': 'Other'
+      'other': 'Other',
     };
     return labels[type] || type;
   }
@@ -176,7 +176,7 @@ export class WorkspaceListComponent implements OnInit {
     const classes: Record<string, string> = {
       'public': 'bg-green-100 text-green-800',
       'private': 'bg-gray-100 text-gray-800',
-      'restricted': 'bg-yellow-100 text-yellow-800'
+      'restricted': 'bg-yellow-100 text-yellow-800',
     };
     return classes[visibility] || 'bg-gray-100 text-gray-800';
   }
@@ -194,7 +194,7 @@ export class WorkspaceListComponent implements OnInit {
       'team': 'TM',
       'project': 'PRJ',
       'department': 'DEPT',
-      'other': 'OTH'
+      'other': 'OTH',
     };
     return initials[type] || 'WSP';
   }
@@ -212,7 +212,7 @@ export class WorkspaceListComponent implements OnInit {
       'team': 'bg-teal-100 text-teal-800',
       'project': 'bg-cyan-100 text-cyan-800',
       'department': 'bg-red-100 text-red-800',
-      'other': 'bg-gray-100 text-gray-800'
+      'other': 'bg-gray-100 text-gray-800',
     };
     return classes[type] || 'bg-gray-100 text-gray-800';
   }

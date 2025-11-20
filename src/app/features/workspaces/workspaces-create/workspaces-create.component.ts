@@ -1,18 +1,18 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { WorkspaceService } from '../../../core/services/workspace.service';
-import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { ButtonModule } from 'primeng/button';
+import {Component} from '@angular/core';
+import {FormBuilder, FormGroup, Validators, ReactiveFormsModule} from '@angular/forms';
+import {WorkspaceService} from '../../../core/services/workspace.service';
+import {ActivatedRoute} from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {InputTextModule} from 'primeng/inputtext';
+import {TextareaModule} from 'primeng/textarea';
+import {ButtonModule} from 'primeng/button';
 
 @Component({
   selector: 'app-workspaces-create',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, InputTextModule, TextareaModule, ButtonModule],
   templateUrl: './workspaces-create.component.html',
-  styleUrl: './workspaces-create.component.css'
+  styleUrl: './workspaces-create.component.css',
 })
 export class WorkspacesCreateComponent {
   form: FormGroup;
@@ -24,7 +24,7 @@ export class WorkspacesCreateComponent {
   constructor(
     private fb: FormBuilder,
     private workspaceService: WorkspaceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -32,7 +32,7 @@ export class WorkspacesCreateComponent {
       description: [''],
       workspace_type: ['', Validators.required],
       visibility: ['public', Validators.required],
-      is_active: [true, Validators.required]
+      is_active: [true, Validators.required],
     });
   }
 
@@ -48,12 +48,12 @@ export class WorkspacesCreateComponent {
   normalizeSlug(name: string): string {
     // Normaliza el slug: minúsculas, guiones, sin acentos
     return name
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9-]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .replace(/--+/g, '-');
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/--+/g, '-');
   }
 
   onSubmit() {
@@ -65,7 +65,7 @@ export class WorkspacesCreateComponent {
     // Normalizar slug antes de enviar
     const name = this.form.value.name;
     const slug = this.normalizeSlug(this.form.value.slug || name);
-    this.form.patchValue({ slug });
+    this.form.patchValue({slug});
 
     // Obtener el UUID de la organización desde la query param
     const organization = this.route.snapshot.queryParamMap.get('organization') || '';
@@ -80,19 +80,19 @@ export class WorkspacesCreateComponent {
       formData.append('visibility', this.form.value.visibility);
       formData.append('is_active', this.form.value.is_active ? 'true' : 'false');
       formData.append('organization', organization);
-  formData.append('cover_image', this.selectedFile, this.selectedFile.name);
-      
+      formData.append('cover_image', this.selectedFile, this.selectedFile.name);
+
       this.workspaceService.createWorkspace(formData).subscribe({
         next: () => {
           this.success = 'Workspace creado correctamente';
-          this.form.reset({ is_active: true, visibility: 'public' });
+          this.form.reset({is_active: true, visibility: 'public'});
           this.selectedFile = null;
           this.loading = false;
         },
         error: (err) => {
           this.error = err.error?.message || 'Error al crear workspace';
           this.loading = false;
-        }
+        },
       });
     } else {
       // Sin archivo, usar JSON
@@ -103,20 +103,20 @@ export class WorkspacesCreateComponent {
         workspace_type: this.form.value.workspace_type,
         visibility: this.form.value.visibility,
         is_active: this.form.value.is_active,
-        organization: organization
+        organization: organization,
       };
-      
+
       this.workspaceService.createWorkspace(payload).subscribe({
         next: () => {
           this.success = 'Workspace creado correctamente';
-          this.form.reset({ is_active: true, visibility: 'public' });
+          this.form.reset({is_active: true, visibility: 'public'});
           this.selectedFile = null;
           this.loading = false;
         },
         error: (err) => {
           this.error = err.error?.message || 'Error al crear workspace';
           this.loading = false;
-        }
+        },
       });
     }
   }

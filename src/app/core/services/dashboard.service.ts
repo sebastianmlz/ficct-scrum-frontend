@@ -1,15 +1,15 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { SprintReport } from '../models/interfaces';
-import { TeamMetricsResponse } from '../models/interfaces';
-import { VelocityChartResponse } from '../models/interfaces';
-import { CumulativeFlowResponse } from '../models/interfaces';
-import { ExportRequest, ExportResponse } from '../models/interfaces';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
+import {SprintReport} from '../models/interfaces';
+import {TeamMetricsResponse} from '../models/interfaces';
+import {VelocityChartResponse} from '../models/interfaces';
+import {CumulativeFlowResponse} from '../models/interfaces';
+import {ExportRequest, ExportResponse} from '../models/interfaces';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DashboardService {
   private http = inject(HttpClient);
@@ -21,7 +21,7 @@ export class DashboardService {
    */
   getSprintReport(sprintId: string): Observable<SprintReport> {
     const params = new HttpParams().set('sprint', sprintId);
-    return this.http.get<SprintReport>(`${this.baseUrl}/sprint-report/`, { params });
+    return this.http.get<SprintReport>(`${this.baseUrl}/sprint-report/`, {params});
   }
 
   /**
@@ -34,7 +34,7 @@ export class DashboardService {
     if (period) {
       params = params.set('period', period.toString());
     }
-    return this.http.get<TeamMetricsResponse>(`${this.baseUrl}/team-metrics/`, { params });
+    return this.http.get<TeamMetricsResponse>(`${this.baseUrl}/team-metrics/`, {params});
   }
 
   /**
@@ -47,7 +47,7 @@ export class DashboardService {
     if (numSprints) {
       params = params.set('num_sprints', numSprints.toString());
     }
-    return this.http.get<VelocityChartResponse>(`${this.baseUrl}/velocity/`, { params });
+    return this.http.get<VelocityChartResponse>(`${this.baseUrl}/velocity/`, {params});
   }
 
   /**
@@ -60,7 +60,7 @@ export class DashboardService {
     if (days) {
       params = params.set('days', days.toString());
     }
-    return this.http.get<CumulativeFlowResponse>(`${this.baseUrl}/cumulative-flow/`, { params });
+    return this.http.get<CumulativeFlowResponse>(`${this.baseUrl}/cumulative-flow/`, {params});
   }
 
   /**

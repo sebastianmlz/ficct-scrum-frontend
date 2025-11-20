@@ -1,15 +1,9 @@
 /**
  * Diagram Data Validation Utilities
- * 
+ *
  * Provides comprehensive validation for all diagram data types
  * to prevent runtime errors from malformed or missing data.
  */
-
-import { 
-  WorkflowDiagramData, 
-  DependencyDiagramData, 
-  RoadmapDiagramData 
-} from '../../core/models/interfaces';
 
 export interface ValidationResult {
   valid: boolean;
@@ -26,7 +20,7 @@ export function validateWorkflowData(data: any): ValidationResult {
 
   if (!data) {
     errors.push('Workflow data is null or undefined');
-    return { valid: false, errors, warnings };
+    return {valid: false, errors, warnings};
   }
 
   // Check nodes array
@@ -41,7 +35,9 @@ export function validateWorkflowData(data: any): ValidationResult {
         errors.push(`Node at index ${index} is null`);
       } else {
         if (!node.id) errors.push(`Node at index ${index} missing id`);
-        if (!node.label && !node.name) warnings.push(`Node ${node.id || index} missing label/name`);
+        if (!node.label && !node.name) {
+          warnings.push(`Node ${node.id || index} missing label/name`);
+        }
       }
     });
   }
@@ -55,8 +51,12 @@ export function validateWorkflowData(data: any): ValidationResult {
       if (!edge) {
         errors.push(`Edge at index ${index} is null`);
       } else {
-        if (!edge.from && !edge.source) errors.push(`Edge at index ${index} missing from/source`);
-        if (!edge.to && !edge.target) errors.push(`Edge at index ${index} missing to/target`);
+        if (!edge.from && !edge.source) {
+          errors.push(`Edge at index ${index} missing from/source`);
+        }
+        if (!edge.to && !edge.target) {
+          errors.push(`Edge at index ${index} missing to/target`);
+        }
       }
     });
   }
@@ -64,7 +64,7 @@ export function validateWorkflowData(data: any): ValidationResult {
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
@@ -77,7 +77,7 @@ export function validateDependencyData(data: any): ValidationResult {
 
   if (!data) {
     errors.push('Dependency data is null or undefined');
-    return { valid: false, errors, warnings };
+    return {valid: false, errors, warnings};
   }
 
   // Check nodes array
@@ -92,7 +92,9 @@ export function validateDependencyData(data: any): ValidationResult {
         errors.push(`Node at index ${index} is null`);
       } else {
         if (!node.id) errors.push(`Node at index ${index} missing id`);
-        if (!node.issue_key && !node.key) warnings.push(`Node ${node.id || index} missing issue key`);
+        if (!node.issue_key && !node.key) {
+          warnings.push(`Node ${node.id || index} missing issue key`);
+        }
       }
     });
   }
@@ -100,15 +102,21 @@ export function validateDependencyData(data: any): ValidationResult {
   // Check links/edges array
   const linksArray = data.links || data.edges;
   if (!linksArray || !Array.isArray(linksArray)) {
-    warnings.push('Missing or invalid links/edges array (may have no dependencies)');
+    warnings.push(
+        'Missing or invalid links/edges array (may have no dependencies)',
+    );
   } else {
     // Validate each link
     linksArray.forEach((link: any, index: number) => {
       if (!link) {
         warnings.push(`Link at index ${index} is null`);
       } else {
-        if (!link.source && !link.from) warnings.push(`Link at index ${index} missing source`);
-        if (!link.target && !link.to) warnings.push(`Link at index ${index} missing target`);
+        if (!link.source && !link.from) {
+          warnings.push(`Link at index ${index} missing source`);
+        }
+        if (!link.target && !link.to) {
+          warnings.push(`Link at index ${index} missing target`);
+        }
       }
     });
   }
@@ -116,7 +124,7 @@ export function validateDependencyData(data: any): ValidationResult {
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
@@ -129,7 +137,7 @@ export function validateRoadmapData(data: any): ValidationResult {
 
   if (!data) {
     errors.push('Roadmap data is null or undefined');
-    return { valid: false, errors, warnings };
+    return {valid: false, errors, warnings};
   }
 
   // Check sprints array
@@ -159,7 +167,11 @@ export function validateRoadmapData(data: any): ValidationResult {
       } else {
         const startDate = new Date(sprint.start_date);
         if (isNaN(startDate.getTime())) {
-          errors.push(`Sprint ${sprint.id || index} has invalid start_date: ${sprint.start_date}`);
+          errors.push(
+              `Sprint ${sprint.id || index} has invalid start_date: ${
+                sprint.start_date
+              }`,
+          );
         }
       }
 
@@ -168,7 +180,11 @@ export function validateRoadmapData(data: any): ValidationResult {
       } else {
         const endDate = new Date(sprint.end_date);
         if (isNaN(endDate.getTime())) {
-          errors.push(`Sprint ${sprint.id || index} has invalid end_date: ${sprint.end_date}`);
+          errors.push(
+              `Sprint ${sprint.id || index} has invalid end_date: ${
+                sprint.end_date
+              }`,
+          );
         }
       }
 
@@ -178,7 +194,9 @@ export function validateRoadmapData(data: any): ValidationResult {
         const end = new Date(sprint.end_date);
         if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
           if (end < start) {
-            errors.push(`Sprint ${sprint.id || index} has end_date before start_date`);
+            errors.push(
+                `Sprint ${sprint.id || index} has end_date before start_date`,
+            );
           }
         }
       }
@@ -198,14 +216,17 @@ export function validateRoadmapData(data: any): ValidationResult {
   return {
     valid: errors.length === 0,
     errors,
-    warnings
+    warnings,
   };
 }
 
 /**
  * Log validation result to console
  */
-export function logValidationResult(componentName: string, result: ValidationResult): void {
+export function logValidationResult(
+    componentName: string,
+    result: ValidationResult,
+): void {
   if (result.valid) {
     console.log(`[${componentName}] ✅ Validation passed`);
   } else {
@@ -232,7 +253,7 @@ export function validateDiagramData(type: string, data: any): ValidationResult {
       return {
         valid: false,
         errors: [`Unknown diagram type: ${type}`],
-        warnings: []
+        warnings: [],
       };
   }
 }

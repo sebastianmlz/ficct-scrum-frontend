@@ -1,11 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { BoardService } from '../../../../core/services/board.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { Board } from '../../../../core/models/interfaces';
-import { BoardEditComponent } from '../board-edit/board-edit.component';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink, ActivatedRoute} from '@angular/router';
+import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
+import {BoardService} from '../../../../core/services/board.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {Board} from '../../../../core/models/interfaces';
+import {BoardEditComponent} from '../board-edit/board-edit.component';
 
 @Component({
   selector: 'app-board-list',
@@ -41,11 +41,11 @@ export class BoardListComponent implements OnInit {
 
   searchForm: FormGroup = this.fb.group({
     search: [''],
-    board_type: ['']
+    board_type: [''],
   });
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       if (params['id']) {
         this.projectId.set(params['id']);
         this.loadBoards();
@@ -61,11 +61,11 @@ export class BoardListComponent implements OnInit {
       const filters = {
         project: this.projectId(),
         search: this.searchForm.value.search || undefined,
-        board_type: this.searchForm.value.board_type || undefined
+        board_type: this.searchForm.value.board_type || undefined,
       };
 
       const response = await this.boardService.getBoards(filters).toPromise();
-      
+
       if (response) {
         this.boards.set(response);
       }
@@ -98,25 +98,24 @@ export class BoardListComponent implements OnInit {
 
     // Confirmar eliminación
     const confirmed = confirm(`Are you sure you want to delete "${board.name}"? This action cannot be undone.`);
-    
+
     if (!confirmed) {
       return;
     }
 
     try {
       console.log('[BOARD-LIST] Deleting board:', board.id);
-      
+
       await this.boardService.deleteBoard(board.id).toPromise();
-      
+
       console.log('[BOARD-LIST] ✅ Board deleted successfully');
       this.notificationService.success(`Board "${board.name}" deleted successfully`);
-      
+
       // Recargar la lista de boards
       await this.loadBoards();
-      
     } catch (error: any) {
       console.error('[BOARD-LIST] ❌ Error deleting board:', error);
-      
+
       const errorMessage = error.error?.detail || error.error?.message || 'Failed to delete board';
       this.notificationService.error(errorMessage);
     }

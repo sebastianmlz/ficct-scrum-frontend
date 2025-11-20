@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
 
 export interface UserDetail {
   id: number;
@@ -86,28 +86,28 @@ export interface ActivityLogParams {
   workspace_key?: string;
   project?: string;
   project_key?: string;
-  
+
   // Action filters
   action_type?: string;
   object_type?: string;
-  
+
   // User filters
   user?: string;
   user_email?: string;
-  
+
   // Date filters
   created_after?: string;
   created_before?: string;
-  
+
   // Pagination
   page?: number;
-  page_size?: number;  // DRF standard pagination parameter
+  page_size?: number; // DRF standard pagination parameter
   offset?: number;
   ordering?: string;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ActivityLogService {
   private http = inject(HttpClient);
@@ -116,7 +116,7 @@ export class ActivityLogService {
   getActivityLogs(params?: ActivityLogParams): Observable<PaginatedActivityLogList> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    
+
     let query = '';
     if (params) {
       // Scope filters
@@ -125,26 +125,26 @@ export class ActivityLogService {
       if (params.workspace_key) query += `&workspace_key=${params.workspace_key}`;
       if (params.project) query += `&project=${params.project}`;
       if (params.project_key) query += `&project_key=${params.project_key}`;
-      
+
       // Action filters
       if (params.action_type) query += `&action_type=${params.action_type}`;
       if (params.object_type) query += `&object_type=${params.object_type}`;
-      
+
       // User filters
       if (params.user) query += `&user=${params.user}`;
       if (params.user_email) query += `&user_email=${params.user_email}`;
-      
+
       // Date filters
       if (params.created_after) query += `&created_after=${params.created_after}`;
       if (params.created_before) query += `&created_before=${params.created_before}`;
-      
+
       // Pagination
       if (params.page) query += `&page=${params.page}`;
       if (params.page_size) query += `&page_size=${params.page_size}`;
       if (params.offset) query += `&offset=${params.offset}`;
       if (params.ordering) query += `&ordering=${params.ordering}`;
     }
-    
-    return this.http.get<PaginatedActivityLogList>(`${this.baseUrl}?${query}`, { headers });
+
+    return this.http.get<PaginatedActivityLogList>(`${this.baseUrl}?${query}`, {headers});
   }
 }

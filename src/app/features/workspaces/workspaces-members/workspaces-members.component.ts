@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { WorkspacesService } from '../../../core/services/workspaces.service';
-import { OrganizationService } from '../../../core/services/organization.service';
-import { WorkspaceMember, Workspace, OrganizationMember, WorkspaceMemberRequest } from '../../../core/models/interfaces';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {WorkspacesService} from '../../../core/services/workspaces.service';
+import {OrganizationService} from '../../../core/services/organization.service';
+import {WorkspaceMember, Workspace, OrganizationMember, WorkspaceMemberRequest} from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-workspaces-members',
@@ -12,10 +12,10 @@ import { WorkspaceMember, Workspace, OrganizationMember, WorkspaceMemberRequest 
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule
+    FormsModule,
   ],
   templateUrl: './workspaces-members.component.html',
-  styleUrl: './workspaces-members.component.css'
+  styleUrl: './workspaces-members.component.css',
 })
 export class WorkspacesMembersComponent implements OnInit {
   // Estado para el modal de agregar miembro
@@ -27,27 +27,27 @@ export class WorkspacesMembersComponent implements OnInit {
   addingMember = signal(false);
   addMemberError = signal('');
   addMemberSuccess = signal('');
-  
+
   // Estado para el modal de confirmación de eliminación
   showDeleteConfirm = signal(false);
   memberToDelete = signal<WorkspaceMember | null>(null);
-  
+
   // Buscar usuarios para agregar al workspace (filtrar miembros de la organización)
   searchUsers() {
     // Filtrar miembros que NO están en el workspace
-    const currentMemberIds = this.members().map(m => m.user.id);
-    
-    let availableMembers = this.organizationMembers().filter(
-      orgMember => !currentMemberIds.includes(orgMember.user.id)
+    const currentMemberIds = this.members().map((m) => m.user.id);
+
+    const availableMembers = this.organizationMembers().filter(
+        (orgMember) => !currentMemberIds.includes(orgMember.user.id),
     );
 
     if (!this.searchUserTerm.trim()) {
       this.filteredOrgMembers.set(availableMembers);
       return;
     }
-    
+
     const searchLower = this.searchUserTerm.toLowerCase();
-    const filtered = availableMembers.filter(orgMember => {
+    const filtered = availableMembers.filter((orgMember) => {
       const user = orgMember.user;
       return (
         user.full_name.toLowerCase().includes(searchLower) ||
@@ -55,13 +55,13 @@ export class WorkspacesMembersComponent implements OnInit {
         user.username.toLowerCase().includes(searchLower)
       );
     });
-    
+
     this.filteredOrgMembers.set(filtered);
   }
 
   // Verificar si un usuario ya es miembro del workspace
   isAlreadyMember(userId: number): boolean {
-    return this.members().some(m => m.user.id === userId);
+    return this.members().some((m) => m.user.id === userId);
   }
 
   // Agregar usuario al workspace
@@ -69,15 +69,15 @@ export class WorkspacesMembersComponent implements OnInit {
     this.addingMember.set(true);
     this.addMemberError.set('');
     this.addMemberSuccess.set('');
-    
+
     const data: WorkspaceMemberRequest = {
       workspace: this.workspaceId(),
       user_id: orgMember.user.id.toString(),
       role: selectedRole as any,
       permissions: {},
-      is_active: true
+      is_active: true,
     };
-    
+
     this.workspacesService.addWorkspaceMember(data).subscribe({
       next: () => {
         this.addMemberSuccess.set('Member added successfully');
@@ -92,7 +92,7 @@ export class WorkspacesMembersComponent implements OnInit {
       error: (err: Error) => {
         this.addMemberError.set(err.message || 'Failed to add member');
         this.addingMember.set(false);
-      }
+      },
     });
   }
   members = signal<WorkspaceMember[]>([]);
@@ -115,11 +115,11 @@ export class WorkspacesMembersComponent implements OnInit {
     private workspacesService: WorkspacesService,
     private organizationService: OrganizationService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
   ) { }
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.workspaceId.set(params['id']);
       if (this.workspaceId()) {
         this.loadWorkspaceInfo();
@@ -138,7 +138,7 @@ export class WorkspacesMembersComponent implements OnInit {
       },
       error: (err: Error) => {
         console.error('[WorkspaceMembers] Error loading workspace info:', err);
-      }
+      },
     });
   }
 
@@ -153,19 +153,19 @@ export class WorkspacesMembersComponent implements OnInit {
       error: (err: Error) => {
         console.error('[WorkspaceMembers] Error loading organization members:', err);
         this.loadingOrgMembers.set(false);
-      }
+      },
     });
   }
 
   loadMembers() {
     this.loading.set(true);
     this.error.set('');
-    
+
     const params = {
       page: this.currentPage(),
-      search: this.searchTerm || undefined
+      search: this.searchTerm || undefined,
     };
-    
+
     this.workspacesService.getWorkspaceMembers(this.workspaceId(), params).subscribe({
       next: (response) => {
         this.members.set(response.results || []);
@@ -178,7 +178,7 @@ export class WorkspacesMembersComponent implements OnInit {
         this.members.set([]);
         this.error.set(err.message || 'Failed to load members');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -207,21 +207,21 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   getRoleLabel(role: string): string {
-    const roles: { [key: string]: string } = {
+    const roles: Record<string, string> = {
       'admin': 'Administrador',
       'member': 'Miembro',
       'guest': 'Invitado',
-      'owner': 'Propietario'
+      'owner': 'Propietario',
     };
     return roles[role] || role;
   }
 
   getRoleSeverity(role: string): string {
-    const severities: { [key: string]: string } = {
+    const severities: Record<string, string> = {
       'owner': 'danger',
       'admin': 'warning',
       'member': 'success',
-      'guest': 'info'
+      'guest': 'info',
     };
     return severities[role] || 'info';
   }
@@ -242,8 +242,8 @@ export class WorkspacesMembersComponent implements OnInit {
   onRoleChange(member: WorkspaceMember, newRole: string) {
     this.workspacesService.updateWorkspaceMemberRole(member.id, newRole).subscribe({
       next: (updatedMember) => {
-        const updatedMembers = this.members().map(m => 
-          m.id === member.id ? updatedMember : m
+        const updatedMembers = this.members().map((m) =>
+          m.id === member.id ? updatedMember : m,
         );
         this.members.set(updatedMembers);
       },
@@ -251,7 +251,7 @@ export class WorkspacesMembersComponent implements OnInit {
         console.error('[WorkspaceMembers] Error updating member role:', err);
         this.error.set(err.message || 'Failed to update member role');
         this.loadMembers();
-      }
+      },
     });
   }
 
@@ -271,7 +271,7 @@ export class WorkspacesMembersComponent implements OnInit {
 
     this.workspacesService.removeWorkspaceMember(member.id).subscribe({
       next: () => {
-        const updatedMembers = this.members().filter(m => m.id !== member.id);
+        const updatedMembers = this.members().filter((m) => m.id !== member.id);
         this.members.set(updatedMembers);
         this.totalRecords.set(this.totalRecords() - 1);
         this.showDeleteConfirm.set(false);
@@ -282,7 +282,7 @@ export class WorkspacesMembersComponent implements OnInit {
         this.error.set(err.message || 'Failed to remove member');
         this.showDeleteConfirm.set(false);
         this.memberToDelete.set(null);
-      }
+      },
     });
   }
 }

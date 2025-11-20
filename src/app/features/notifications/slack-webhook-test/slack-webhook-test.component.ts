@@ -1,15 +1,15 @@
-import { Component, inject, signal, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NotificationsBackendService } from '../../../core/services/notifications-backend.service';
-import { NotificationService } from '../../../core/services/notification.service';
+import {Component, inject, signal, input, output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {NotificationsBackendService} from '../../../core/services/notifications-backend.service';
+import {NotificationService} from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-slack-webhook-test',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './slack-webhook-test.component.html',
-  styleUrl: './slack-webhook-test.component.css'
+  styleUrl: './slack-webhook-test.component.css',
 })
 export class SlackWebhookTestComponent {
   private notificationsBackendService = inject(NotificationsBackendService);
@@ -36,8 +36,8 @@ export class SlackWebhookTestComponent {
     this.testResult.set(null);
 
     this.notificationsBackendService.testSlackWebhook(
-      this.webhookUrl(),
-      this.testMessage()
+        this.webhookUrl(),
+        this.testMessage(),
     ).subscribe({
       next: (result) => {
         this.testing.set(false);
@@ -52,9 +52,9 @@ export class SlackWebhookTestComponent {
         console.error('Error testing webhook:', err);
         this.testing.set(false);
         const errorMessage = err?.error?.message || err?.message || 'Failed to send test message';
-        this.testResult.set({ success: false, message: errorMessage });
+        this.testResult.set({success: false, message: errorMessage});
         this.notificationService.error('Test Failed', errorMessage);
-      }
+      },
     });
   }
 }

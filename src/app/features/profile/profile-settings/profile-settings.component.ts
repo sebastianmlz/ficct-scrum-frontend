@@ -1,14 +1,14 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { AuthStore } from '../../../core/store/auth.store';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {AuthStore} from '../../../core/store/auth.store';
 
 @Component({
   selector: 'app-profile-settings',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl:'./profile-settings.component.html', 
+  templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.css'],
 })
 export class ProfileSettingsComponent implements OnInit {
@@ -25,15 +25,15 @@ export class ProfileSettingsComponent implements OnInit {
   passwordForm: FormGroup = this.fb.group({
     current_password: ['', [Validators.required]],
     new_password: ['', [Validators.required, Validators.minLength(8)]],
-    confirm_password: ['', [Validators.required]]
-  }, { validators: this.passwordMatchValidator });
+    confirm_password: ['', [Validators.required]],
+  }, {validators: this.passwordMatchValidator});
 
   notificationForm: FormGroup = this.fb.group({
     email_project_updates: [true],
     email_team_invitations: [true],
     email_system_announcements: [true],
     browser_notifications: [true],
-    sound_alerts: [false]
+    sound_alerts: [false],
   });
 
   ngOnInit(): void {
@@ -52,12 +52,12 @@ export class ProfileSettingsComponent implements OnInit {
   private passwordMatchValidator(group: FormGroup) {
     const newPassword = group.get('new_password');
     const confirmPassword = group.get('confirm_password');
-    
+
     if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ mismatch: true });
-      return { mismatch: true };
+      confirmPassword.setErrors({mismatch: true});
+      return {mismatch: true};
     }
-    
+
     return null;
   }
 
@@ -73,11 +73,11 @@ export class ProfileSettingsComponent implements OnInit {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       this.success.set('Password changed successfully!');
       this.passwordForm.reset();
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => this.success.set(null), 3000);
     } catch (error: any) {
@@ -94,10 +94,10 @@ export class ProfileSettingsComponent implements OnInit {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       this.success.set('Notification preferences saved!');
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => this.success.set(null), 3000);
     } catch (error: any) {
@@ -114,12 +114,12 @@ export class ProfileSettingsComponent implements OnInit {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const newStatus = !this.twoFactorEnabled();
       this.twoFactorEnabled.set(newStatus);
       this.success.set(`Two-factor authentication ${newStatus ? 'enabled' : 'disabled'}!`);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => this.success.set(null), 3000);
     } catch (error: any) {
@@ -139,8 +139,8 @@ export class ProfileSettingsComponent implements OnInit {
   private async deleteAccount(): Promise<void> {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In a real app, this would delete the account and redirect to login
       alert('Account deletion would be processed here');
     } catch (error: any) {

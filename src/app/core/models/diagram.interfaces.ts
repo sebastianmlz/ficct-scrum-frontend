@@ -33,11 +33,11 @@ export interface WorkflowEdge {
 
 export interface WorkflowLegend {
   title: string;
-  items: Array<{
+  items: {
     label: string;
     color: string;
     description?: string;
-  }>;
+  }[];
 }
 
 export interface WorkflowDiagramData {
@@ -107,12 +107,12 @@ export interface DependencyGraphData {
   metadata: DependencyGraphMetadata;
   nodes: IssueNode[];
   edges: DependencyEdge[];
-  clusters?: Array<{
+  clusters?: {
     id: string;
     name: string;
     issue_ids: string[];
     color: string;
-  }>;
+  }[];
   layout: {
     type: 'force-directed' | 'hierarchical' | 'circular';
     width: number;
@@ -206,11 +206,11 @@ export interface ArchitectureDiagramData {
   };
   nodes: ArchitectureNode[];
   edges: ArchitectureEdge[];
-  layers?: Array<{
+  layers?: {
     name: string;
     node_ids: string[];
     y_position: number;
-  }>;
+  }[];
   layout: {
     width: number;
     height: number;

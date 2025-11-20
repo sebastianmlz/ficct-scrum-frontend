@@ -1,15 +1,15 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { ProjectConfigRequest } from '../../../core/models/interfaces';
-import { ProjectsService } from '../../../core/services/projects.service';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {ProjectConfigRequest} from '../../../core/models/interfaces';
+import {ProjectsService} from '../../../core/services/projects.service';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, Validators, ReactiveFormsModule} from '@angular/forms';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-project-config-create',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './project-config-create.component.html',
-  styleUrl: './project-config-create.component.css'
+  styleUrl: './project-config-create.component.css',
 })
 export class ProjectConfigCreateComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -35,11 +35,11 @@ export class ProjectConfigCreateComponent implements OnInit {
     slack_notifications: [false],
     slack_webhook_url: [''],
     restrict_issue_visibility: [false],
-    require_approval_for_changes: [false]
+    require_approval_for_changes: [false],
   });
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.projectId = params['id'];
     });
   }
@@ -61,7 +61,7 @@ export class ProjectConfigCreateComponent implements OnInit {
       story_point_scale: {
         additionalProp1: this.configForm.value.story_point_scale_additionalProp1,
         additionalProp2: this.configForm.value.story_point_scale_additionalProp2,
-        additionalProp3: this.configForm.value.story_point_scale_additionalProp3
+        additionalProp3: this.configForm.value.story_point_scale_additionalProp3,
       },
       enable_time_tracking: this.configForm.value.enable_time_tracking,
       require_time_logging: this.configForm.value.require_time_logging,
@@ -70,7 +70,7 @@ export class ProjectConfigCreateComponent implements OnInit {
       slack_notifications: this.configForm.value.slack_notifications,
       slack_webhook_url: this.configForm.value.slack_webhook_url,
       restrict_issue_visibility: this.configForm.value.restrict_issue_visibility,
-      require_approval_for_changes: this.configForm.value.require_approval_for_changes
+      require_approval_for_changes: this.configForm.value.require_approval_for_changes,
     };
 
     this.projectsService.createProjectConfig(config).subscribe({
@@ -82,7 +82,7 @@ export class ProjectConfigCreateComponent implements OnInit {
       error: (error) => {
         this.loading.set(false);
         this.error.set(error.error?.message || 'Error creating project configuration');
-      }
+      },
     });
   }
 }

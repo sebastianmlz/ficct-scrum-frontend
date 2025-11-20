@@ -1,8 +1,8 @@
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { CanActivateFn } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-import { AuthStore } from '../store/auth.store';
+import {inject} from '@angular/core';
+import {Router} from '@angular/router';
+import {CanActivateFn} from '@angular/router';
+import {AuthService} from '../services/auth.service';
+import {AuthStore} from '../store/auth.store';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -12,8 +12,8 @@ export const authGuard: CanActivateFn = (route, state) => {
   // Check both AuthService (for token in localStorage) and AuthStore (for app state)
   const hasToken = authService.isLoggedIn();
   const isAuthenticated = authStore.isAuthenticated();
-  
-  console.log('AuthGuard check:', { hasToken, isAuthenticated });
+
+  console.log('AuthGuard check:', {hasToken, isAuthenticated});
 
   if (hasToken) {
     // If user has token but AuthStore is not initialized, initialize it
@@ -24,7 +24,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   } else {
     console.log('AuthGuard: User not authenticated, redirecting to login');
-    router.navigate(['/auth/login'], { queryParams: { returnUrl: state.url } });
+    router.navigate(['/auth/login'], {queryParams: {returnUrl: state.url}});
     return false;
   }
 };

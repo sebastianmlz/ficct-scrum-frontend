@@ -1,24 +1,23 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
 /**
  * Service to generate Mermaid.js class diagram syntax from UML data
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MermaidGeneratorService {
-
   /**
    * Generate Mermaid class diagram syntax from classes and relationships
    */
   generateClassDiagram(classes: any[], relationships: any[]): string {
     let mermaid = 'classDiagram\n';
-    
+
     // Generate class definitions
     for (const cls of classes) {
       mermaid += this.generateClassDefinition(cls);
     }
-    
+
     // Generate relationships
     if (relationships && relationships.length > 0) {
       mermaid += '\n';
@@ -26,7 +25,7 @@ export class MermaidGeneratorService {
         mermaid += this.generateRelationship(rel);
       }
     }
-    
+
     return mermaid;
   }
 
@@ -35,7 +34,7 @@ export class MermaidGeneratorService {
    */
   private generateClassDefinition(cls: any): string {
     let definition = `    class ${this.sanitizeClassName(cls.name)} {\n`;
-    
+
     // Add attributes (NO emojis, clean format)
     if (cls.attributes && cls.attributes.length > 0) {
       for (const attr of cls.attributes) {
@@ -44,7 +43,7 @@ export class MermaidGeneratorService {
         definition += `        ${visibility}${attr.name} ${attr.type}${pkMarker}\n`;
       }
     }
-    
+
     // Add methods (NO emojis, clean format)
     if (cls.methods && cls.methods.length > 0) {
       for (const method of cls.methods) {
@@ -52,9 +51,9 @@ export class MermaidGeneratorService {
         definition += `        ${visibility}${method.name}()\n`;
       }
     }
-    
+
     definition += `    }\n\n`;
-    
+
     return definition;
   }
 
@@ -65,7 +64,7 @@ export class MermaidGeneratorService {
     const arrow = this.getArrowType(rel.type);
     const fromClass = this.sanitizeClassName(rel.from);
     const toClass = this.sanitizeClassName(rel.to);
-    
+
     return `    ${fromClass} ${arrow} ${toClass}\n`;
   }
 
@@ -73,7 +72,7 @@ export class MermaidGeneratorService {
    * Get Mermaid arrow type based on relationship type
    */
   private getArrowType(type: string): string {
-    const arrowMap: { [key: string]: string } = {
+    const arrowMap: Record<string, string> = {
       'many_to_one': '-->',
       'one_to_many': '<--',
       'many_to_many': 'o--o',
@@ -83,9 +82,9 @@ export class MermaidGeneratorService {
       'extends': '--|>',
       'implements': '..|>',
       'aggregation': 'o--',
-      'composition': '*--'
+      'composition': '*--',
     };
-    
+
     return arrowMap[type] || '-->';
   }
 

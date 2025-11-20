@@ -1,19 +1,19 @@
-import { Component, Input, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { AiService, SimilarIssue } from '../../../../../core/services/ai.service';
+import {Component, Input, OnInit, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Router} from '@angular/router';
+import {AiService, SimilarIssue} from '../../../../../core/services/ai.service';
 
 @Component({
   selector: 'app-ai-similar-issues',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ai-similar-issues.component.html',
-  styleUrl: './ai-similar-issues.component.css'
+  styleUrl: './ai-similar-issues.component.css',
 })
 export class AiSimilarIssuesComponent implements OnInit {
   @Input() issueId!: string;
   @Input() projectId!: string;
-  @Input() limit: number = 5;
+  @Input() limit = 5;
 
   private aiService = inject(AiService);
   private router = inject(Router);
@@ -57,7 +57,7 @@ export class AiSimilarIssuesComponent implements OnInit {
       this.loading.set(false);
     }
   }
-  
+
   /**
    * User action: Find similar issues
    */

@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Observable} from 'rxjs';
 import {
   DiagramRequestRequest,
   DiagramResponse,
@@ -10,12 +10,12 @@ import {
   DependencyDiagramData,
   RoadmapDiagramData,
   UMLDiagramData,
-  ArchitectureDiagramData
+  ArchitectureDiagramData,
 } from '../models/interfaces';
-import { environment } from '../../../environments/environment';
+import {environment} from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DiagramService {
   private http = inject(HttpClient);
@@ -34,7 +34,7 @@ export class DiagramService {
       project: request.project,
       format: request.format,
       parameters: request.parameters,
-      parametersCount: request.parameters ? Object.keys(request.parameters).length : 0
+      parametersCount: request.parameters ? Object.keys(request.parameters).length : 0,
     });
     console.log('[DIAGRAM SERVICE] 🔍 Full request object:', JSON.stringify(request, null, 2));
     return this.http.post<DiagramResponse>(`${this.baseUrl}/generate/`, request);
@@ -48,7 +48,7 @@ export class DiagramService {
     console.log('[DIAGRAM SERVICE] 📦 Exporting diagram:', {
       type: request.diagram_type,
       project: request.project,
-      format: request.format
+      format: request.format,
     });
     return this.http.post<DiagramResponse>(`${this.baseUrl}/export/`, request);
   }
@@ -71,16 +71,16 @@ export class DiagramService {
    * @param forceRefresh - Force backend to regenerate (ignore cache)
    */
   generateWorkflowDiagram(
-    projectId: string, 
-    format: DiagramFormat = 'json',
-    forceRefresh: boolean = false
+      projectId: string,
+      format: DiagramFormat = 'json',
+      forceRefresh = false,
   ): Observable<DiagramResponse> {
-    const options = forceRefresh ? { force_refresh: true } : undefined;
+    const options = forceRefresh ? {force_refresh: true} : undefined;
     return this.generateDiagram({
       diagram_type: 'workflow',
       project: projectId,
       format,
-      options
+      options,
     });
   }
 
@@ -92,15 +92,15 @@ export class DiagramService {
    * Generate dependency diagram for a project
    */
   generateDependencyDiagram(
-    projectId: string,
-    format: DiagramFormat = 'json',
-    options?: any
+      projectId: string,
+      format: DiagramFormat = 'json',
+      options?: any,
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'dependency',
       project: projectId,
       format,
-      options
+      options,
     });
   }
 
@@ -112,15 +112,15 @@ export class DiagramService {
    * Generate roadmap timeline for a project
    */
   generateRoadmapDiagram(
-    projectId: string,
-    format: DiagramFormat = 'json',
-    options?: any
+      projectId: string,
+      format: DiagramFormat = 'json',
+      options?: any,
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'roadmap',
       project: projectId,
       format,
-      options
+      options,
     });
   }
 
@@ -132,15 +132,15 @@ export class DiagramService {
    * Generate UML diagram from code
    */
   generateUMLDiagram(
-    projectId: string,
-    format: DiagramFormat = 'json',
-    options?: any
+      projectId: string,
+      format: DiagramFormat = 'json',
+      options?: any,
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'uml',
       project: projectId,
       format,
-      options
+      options,
     });
   }
 
@@ -152,15 +152,15 @@ export class DiagramService {
    * Generate architecture diagram
    */
   generateArchitectureDiagram(
-    projectId: string,
-    format: DiagramFormat = 'json',
-    options?: any
+      projectId: string,
+      format: DiagramFormat = 'json',
+      options?: any,
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'architecture',
       project: projectId,
       format,
-      options
+      options,
     });
   }
 
@@ -172,15 +172,15 @@ export class DiagramService {
    * Generate burndown chart for sprint
    */
   generateBurndownChart(
-    sprintId: string,
-    format: DiagramFormat = 'json',
-    options?: any
+      sprintId: string,
+      format: DiagramFormat = 'json',
+      options?: any,
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'burndown',
       sprint: sprintId,
       format,
-      options
+      options,
     });
   }
 
@@ -192,15 +192,15 @@ export class DiagramService {
    * Generate velocity chart for project
    */
   generateVelocityChart(
-    projectId: string,
-    format: DiagramFormat = 'json',
-    options?: any
+      projectId: string,
+      format: DiagramFormat = 'json',
+      options?: any,
   ): Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: 'velocity',
       project: projectId,
       format,
-      options
+      options,
     });
   }
 
@@ -216,7 +216,7 @@ export class DiagramService {
       diagram_type: diagramType,
       project: projectId,
       format: 'png',
-      options
+      options,
     });
   }
 
@@ -228,7 +228,7 @@ export class DiagramService {
       diagram_type: diagramType,
       project: projectId,
       format: 'pdf',
-      options
+      options,
     });
   }
 
@@ -240,7 +240,7 @@ export class DiagramService {
       diagram_type: diagramType,
       project: projectId,
       format: 'svg',
-      options
+      options,
     });
   }
 
@@ -253,9 +253,9 @@ export class DiagramService {
    */
   generateFilename(diagramType: DiagramType, format: DiagramFormat, projectName?: string): string {
     const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    const sanitizedProjectName = projectName 
-      ? this.sanitizeFilename(projectName) + '-'
-      : '';
+    const sanitizedProjectName = projectName ?
+      this.sanitizeFilename(projectName) + '-' :
+      '';
     return `${sanitizedProjectName}${diagramType}-diagram-${timestamp}.${format}`;
   }
 
@@ -264,18 +264,18 @@ export class DiagramService {
    */
   private sanitizeFilename(name: string): string {
     return name
-      .replace(/[^a-zA-Z0-9-_]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .toLowerCase()
-      .slice(0, 50); // Limit length
+        .replace(/[^a-zA-Z0-9-_]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase()
+        .slice(0, 50); // Limit length
   }
 
   /**
    * Download diagram data as file
    */
   downloadDiagram(data: string, filename: string, mimeType: string): void {
-    const blob = new Blob([data], { type: mimeType });
+    const blob = new Blob([data], {type: mimeType});
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -298,7 +298,7 @@ export class DiagramService {
       const mimeType = filename.endsWith('.png') ? 'image/png' : 'image/jpeg';
       dataUrl = `data:${mimeType};base64,${base64Data}`;
     }
-    
+
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = filename;
@@ -311,25 +311,25 @@ export class DiagramService {
    * Export diagram with automatic filename generation and format handling
    */
   exportDiagramWithFormat(
-    diagramType: DiagramType, 
-    projectId: string, 
-    format: DiagramFormat,
-    projectName?: string
+      diagramType: DiagramType,
+      projectId: string,
+      format: DiagramFormat,
+      projectName?: string,
   ): Observable<{success: boolean; filename: string; error?: string}> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       const filename = this.generateFilename(diagramType, format, projectName);
-      
+
       // CRITICAL FIX: Use exportDiagram instead of generateDiagram
       // Export endpoint returns optimized full-quality exports
       this.exportDiagram({
         diagram_type: diagramType,
         project: projectId,
-        format
+        format,
       }).subscribe({
         next: (response) => {
           try {
             const mimeType = this.getMimeType(format);
-            
+
             if (format === 'png') {
               // PNG format returned as base64
               if (typeof response.data === 'string') {
@@ -339,31 +339,31 @@ export class DiagramService {
               }
             } else {
               // Text formats (SVG, JSON)
-              const dataString = typeof response.data === 'string' 
-                ? response.data 
-                : JSON.stringify(response.data, null, 2);
+              const dataString = typeof response.data === 'string' ?
+                response.data :
+                JSON.stringify(response.data, null, 2);
               this.downloadDiagram(dataString, filename, mimeType);
             }
-            
-            observer.next({ success: true, filename });
+
+            observer.next({success: true, filename});
             observer.complete();
           } catch (error) {
-            observer.next({ 
-              success: false, 
+            observer.next({
+              success: false,
               filename,
-              error: error instanceof Error ? error.message : 'Export failed'
+              error: error instanceof Error ? error.message : 'Export failed',
             });
             observer.complete();
           }
         },
         error: (error) => {
-          observer.next({ 
-            success: false, 
+          observer.next({
+            success: false,
             filename,
-            error: error.error?.message || error.message || 'Failed to generate diagram'
+            error: error.error?.message || error.message || 'Failed to generate diagram',
           });
           observer.complete();
-        }
+        },
       });
     });
   }
@@ -376,7 +376,7 @@ export class DiagramService {
       svg: 'image/svg+xml',
       png: 'image/png',
       pdf: 'application/pdf',
-      json: 'application/json'
+      json: 'application/json',
     };
     return mimeTypes[format] || 'application/octet-stream';
   }

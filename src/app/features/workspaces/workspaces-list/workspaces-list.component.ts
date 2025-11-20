@@ -1,13 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { WorkspaceService, Workspace, WorkspaceListResponse } from '../../../core/services/workspace.service';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { CardModule } from 'primeng/card';
-import { TagModule } from 'primeng/tag';
-import { PaginatorModule } from 'primeng/paginator';
-import { FormsModule } from '@angular/forms';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {WorkspaceService, Workspace, WorkspaceListResponse} from '../../../core/services/workspace.service';
+import {ButtonModule} from 'primeng/button';
+import {InputTextModule} from 'primeng/inputtext';
+import {CardModule} from 'primeng/card';
+import {TagModule} from 'primeng/tag';
+import {PaginatorModule} from 'primeng/paginator';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-workspaces-list',
@@ -20,10 +20,10 @@ import { FormsModule } from '@angular/forms';
     CardModule,
     TagModule,
     PaginatorModule,
-    FormsModule
+    FormsModule,
   ],
   templateUrl: './workspaces-list.component.html',
-  styleUrl: './workspaces-list.component.css'
+  styleUrl: './workspaces-list.component.css',
 })
 export class WorkspacesListComponent implements OnInit {
   workspaces = signal<Workspace[]>([]);
@@ -45,11 +45,11 @@ export class WorkspacesListComponent implements OnInit {
   constructor(
     private workspaceService: WorkspaceService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
   ) { }
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       this.organizationId.set(params['organization'] || '');
       if (this.organizationId()) {
         this.loadWorkspaces();
@@ -63,12 +63,12 @@ export class WorkspacesListComponent implements OnInit {
 
     // Simulación de filtros, deberías adaptar esto a tu API si soporta filtros
     this.workspaceService.getWorkspaces(
-      this.organizationId(),
-      this.currentPage(),
-      this.searchTerm || undefined
-      // Si tu API soporta type y sort, pásalos aquí
-      // this.typeFilter || undefined,
-      // this.sortBy || undefined
+        this.organizationId(),
+        this.currentPage(),
+        this.searchTerm || undefined,
+        // Si tu API soporta type y sort, pásalos aquí
+        // this.typeFilter || undefined,
+        // this.sortBy || undefined
     ).subscribe({
       next: (response: WorkspaceListResponse) => {
         let normalizedWorkspaces = (response.results || []).map((ws: any) => ({
@@ -80,12 +80,12 @@ export class WorkspacesListComponent implements OnInit {
             logo_url: ws.organization?.logo_url || '',
             organization_type: ws.organization?.organization_type || '',
             subscription_plan: ws.organization?.subscription_plan || '',
-            is_active: ws.organization?.is_active ?? true
-          }
+            is_active: ws.organization?.is_active ?? true,
+          },
         }));
         // Filtro local por tipo
         if (this.typeFilter) {
-          normalizedWorkspaces = normalizedWorkspaces.filter(ws => ws.workspace_type === this.typeFilter);
+          normalizedWorkspaces = normalizedWorkspaces.filter((ws) => ws.workspace_type === this.typeFilter);
         }
         // Orden local
         if (this.sortBy === 'created_at') {
@@ -108,7 +108,7 @@ export class WorkspacesListComponent implements OnInit {
       error: (err) => {
         this.error.set('Error loading workspaces: ' + (err.error?.message || err.message));
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -135,7 +135,7 @@ export class WorkspacesListComponent implements OnInit {
 
   createWorkspace() {
     this.router.navigate(['/workspaces/create'], {
-      queryParams: { organization: this.organizationId() }
+      queryParams: {organization: this.organizationId()},
     });
   }
 
@@ -148,7 +148,7 @@ export class WorkspacesListComponent implements OnInit {
   }
 
   getTypeLabel(type: string): string {
-    const types: { [key: string]: string } = {
+    const types: Record<string, string> = {
       'development': 'Desarrollo',
       'design': 'Diseño',
       'marketing': 'Marketing',
@@ -156,7 +156,7 @@ export class WorkspacesListComponent implements OnInit {
       'support': 'Soporte',
       'hr': 'Recursos Humanos',
       'finance': 'Finanzas',
-      'general': 'General'
+      'general': 'General',
     };
     return types[type] || type;
   }

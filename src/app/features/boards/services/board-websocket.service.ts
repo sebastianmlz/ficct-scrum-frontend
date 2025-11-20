@@ -1,7 +1,7 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { WebSocketService } from '../../../core/services/websocket.service';
+import {Injectable, OnDestroy} from '@angular/core';
+import {Observable, BehaviorSubject} from 'rxjs';
+import {filter, map} from 'rxjs/operators';
+import {WebSocketService} from '../../../core/services/websocket.service';
 import {
   WebSocketMessage,
   UserJoinedData,
@@ -11,15 +11,15 @@ import {
   IssueDeletedData,
   ColumnCreatedData,
   ColumnUpdatedData,
-  ColumnDeletedData
+  ColumnDeletedData,
 } from '../../../core/models/interfaces';
-import { environment } from '../../../../environments/environment';
+import {environment} from '../../../../environments/environment';
 
 @Injectable()
 export class BoardWebSocketService implements OnDestroy {
   private currentBoardId: string | null = null;
   private connectedSubject$ = new BehaviorSubject<boolean>(false);
-  
+
   public connected$ = this.connectedSubject$.asObservable();
 
   constructor(private wsService: WebSocketService) {}
@@ -42,13 +42,13 @@ export class BoardWebSocketService implements OnDestroy {
 
     this.currentBoardId = boardId;
     const wsUrl = `${environment.wsUrl}/ws/boards/${boardId}/?token=${token}`;
-    
+
     console.log('[BOARD-WS] Connecting to board:', boardId);
     console.log('[BOARD-WS] Environment wsUrl:', environment.wsUrl);
     console.log('[BOARD-WS] Token received - Length:', token.length, '| First 30 chars:', token.substring(0, 30) + '...');
     console.log('[BOARD-WS] Token format valid (starts with eyJ):', token.startsWith('eyJ'));
     console.log('[BOARD-WS] Full WebSocket URL:', wsUrl.replace(token, token.substring(0, 20) + '...[CENSORED]'));
-    
+
     this.wsService.connect(wsUrl);
     this.connectedSubject$.next(true);
   }
@@ -67,14 +67,14 @@ export class BoardWebSocketService implements OnDestroy {
    */
   private onEvent<T>(eventType: string): Observable<T> {
     return this.wsService.messages$.pipe(
-      filter((msg: WebSocketMessage) => {
-        const matches = msg.type === eventType;
-        if (matches) {
-          console.log(`[BOARD-WS] Event matched: ${eventType}`, msg.data);
-        }
-        return matches;
-      }),
-      map((msg: WebSocketMessage) => msg.data as T)
+        filter((msg: WebSocketMessage) => {
+          const matches = msg.type === eventType;
+          if (matches) {
+            console.log(`[BOARD-WS] Event matched: ${eventType}`, msg.data);
+          }
+          return matches;
+        }),
+        map((msg: WebSocketMessage) => msg.data as T),
     );
   }
 

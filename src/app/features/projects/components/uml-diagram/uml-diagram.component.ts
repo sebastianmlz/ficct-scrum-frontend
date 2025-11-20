@@ -1,20 +1,20 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { DiagramService } from '../../../../core/services/diagram.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
-import { UMLDiagramData, GitHubIntegration } from '../../../../core/models/interfaces';
+import {Component, inject, OnInit, signal, computed} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DiagramService} from '../../../../core/services/diagram.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
+import {UMLDiagramData, GitHubIntegration} from '../../../../core/models/interfaces';
 
 // Interface para los datos REALES del backend
 interface ClassInfo {
   name: string;
   file_path?: string;
   module?: string;
-  attributes?: Array<{ name: string; type?: string; visibility?: string }>;
-  methods?: Array<{ name: string; visibility?: string; parameters?: any[]; return_type?: string }>;
+  attributes?: { name: string; type?: string; visibility?: string }[];
+  methods?: { name: string; visibility?: string; parameters?: any[]; return_type?: string }[];
   parent_classes?: string[];
 }
 
@@ -25,7 +25,7 @@ interface ClassInfo {
   template: `
     <div class="uml-diagram-container min-h-screen bg-gray-50">
       <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        
+
         <!-- HEADER -->
         <div class="mb-6">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -68,7 +68,7 @@ interface ClassInfo {
                   </svg>
                 </div>
               </div>
-              
+
               <!-- Module Filter -->
               <select
                 [(ngModel)]="selectedModule"
@@ -193,15 +193,15 @@ interface ClassInfo {
 
                     <!-- Action Buttons -->
                     <div class="card-actions">
-                      <button 
-                        class="btn-small btn-primary" 
+                      <button
+                        class="btn-small btn-primary"
                         (click)="viewDetails(cls); $event.stopPropagation()"
                         [disabled]="loadingGitHub()">
                         View Details
                       </button>
                       @if (cls.file_path) {
-                        <button 
-                          class="btn-small btn-secondary" 
+                        <button
+                          class="btn-small btn-secondary"
                           (click)="goToRepo(cls); $event.stopPropagation()"
                           [disabled]="!gitHubIntegration() || loadingGitHub()"
                           [title]="gitHubIntegration() ? 'Open in GitHub' : 'GitHub not connected'">
@@ -537,7 +537,7 @@ interface ClassInfo {
       color: #9ca3af;
       transform: none;
     }
-  `]
+  `],
 })
 export class UMLDiagramComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -560,28 +560,28 @@ export class UMLDiagramComponent implements OnInit {
   filteredClasses = signal<ClassInfo[]>([]);
   totalClasses = signal(0);
   totalRelationships = signal(0);
-  
+
   // GitHub Integration (dinámico)
   gitHubIntegration = signal<GitHubIntegration | null>(null);
   loadingGitHub = signal(false);
-  
+
   // Filtros y búsqueda
   searchQuery = '';
   selectedModule = '';
-  
+
   // Paginación
   currentPage = signal(1);
   itemsPerPage = 9; // Grid 3x3
-  
+
   // Computed signals
   uniqueModules = computed(() => {
-    return [...new Set(this.allClasses().map(c => c.module).filter(m => m))].sort();
+    return [...new Set(this.allClasses().map((c) => c.module).filter((m) => m))].sort();
   });
-  
+
   totalPages = computed(() => {
     return Math.ceil(this.filteredClasses().length / this.itemsPerPage);
   });
-  
+
   paginatedClasses = computed(() => {
     const start = (this.currentPage() - 1) * this.itemsPerPage;
     const end = start + this.itemsPerPage;
@@ -589,7 +589,7 @@ export class UMLDiagramComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -601,19 +601,19 @@ export class UMLDiagramComponent implements OnInit {
 
   loadGitHubIntegration(): void {
     if (!this.projectId()) return;
-    
+
     this.loadingGitHub.set(true);
     console.log('[UML-DIAGRAM] Loading GitHub integration for project:', this.projectId());
-    
+
     this.githubService.checkIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
         this.gitHubIntegration.set(integration);
         this.loadingGitHub.set(false);
-        
+
         if (integration) {
           console.log('[UML-DIAGRAM] ✅ GitHub integration found:', {
             fullName: integration.repository_full_name,
-            url: integration.repository_url
+            url: integration.repository_url,
           });
         } else {
           console.log('[UML-DIAGRAM] ⚠️ No GitHub integration found for project');
@@ -623,7 +623,7 @@ export class UMLDiagramComponent implements OnInit {
         console.warn('[UML-DIAGRAM] GitHub integration error:', err);
         this.gitHubIntegration.set(null);
         this.loadingGitHub.set(false);
-      }
+      },
     });
   }
 
@@ -631,14 +631,14 @@ export class UMLDiagramComponent implements OnInit {
     this.loading.set(true);
     this.safeSvgContent.set(null);
     this.allClasses.set([]);
-    
+
     console.log('[UML-DIAGRAM] Loading diagram for project:', this.projectId());
-    
-    this.diagramService.generateUMLDiagram(this.projectId(), 'json', { diagram_type: this.diagramType }).subscribe({
+
+    this.diagramService.generateUMLDiagram(this.projectId(), 'json', {diagram_type: this.diagramType}).subscribe({
       next: (response) => {
         console.log('[UML-DIAGRAM] Response received:', response);
         this.diagramFormat.set(response.format as 'svg' | 'json');
-        
+
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
@@ -655,13 +655,13 @@ export class UMLDiagramComponent implements OnInit {
         console.error('[UML-DIAGRAM] Error loading diagram:', error);
         this.notificationService.error('Failed to generate UML diagram');
         this.loading.set(false);
-      }
+      },
     });
   }
 
   parseAndRenderDiagram(data: any): void {
     console.log('[UML-DIAGRAM] Parsing diagram data...');
-    
+
     // Parse JSON si es string
     let jsonData;
     try {
@@ -699,7 +699,7 @@ export class UMLDiagramComponent implements OnInit {
           this.notificationService.success('Diagram exported');
         }
       },
-      error: () => this.notificationService.error('Export failed')
+      error: () => this.notificationService.error('Export failed'),
     });
   }
 
@@ -714,15 +714,15 @@ export class UMLDiagramComponent implements OnInit {
     // Filtrar por búsqueda
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase();
-      filtered = filtered.filter(cls =>
+      filtered = filtered.filter((cls) =>
         cls.name.toLowerCase().includes(query) ||
-        cls.module?.toLowerCase().includes(query)
+        cls.module?.toLowerCase().includes(query),
       );
     }
 
     // Filtrar por módulo
     if (this.selectedModule) {
-      filtered = filtered.filter(cls => cls.module === this.selectedModule);
+      filtered = filtered.filter((cls) => cls.module === this.selectedModule);
     }
 
     this.filteredClasses.set(filtered);
@@ -740,14 +740,14 @@ export class UMLDiagramComponent implements OnInit {
   // Paginación
   nextPage(): void {
     if (this.currentPage() < this.totalPages()) {
-      this.currentPage.update(p => p + 1);
+      this.currentPage.update((p) => p + 1);
       console.log('[UML-DIAGRAM] Next page:', this.currentPage());
     }
   }
 
   previousPage(): void {
     if (this.currentPage() > 1) {
-      this.currentPage.update(p => p - 1);
+      this.currentPage.update((p) => p - 1);
       console.log('[UML-DIAGRAM] Previous page:', this.currentPage());
     }
   }
@@ -770,8 +770,8 @@ export class UMLDiagramComponent implements OnInit {
     if (!integration) {
       console.warn('[UML-DIAGRAM] ⚠️ GitHub repository not connected');
       this.notificationService.error(
-        'GitHub not connected',
-        'Please configure GitHub integration in project settings'
+          'GitHub not connected',
+          'Please configure GitHub integration in project settings',
       );
       return;
     }
@@ -784,13 +784,13 @@ export class UMLDiagramComponent implements OnInit {
     // Construir URL DINÁMICAMENTE usando repository_full_name
     // Formato: https://github.com/{owner}/{repo}/blob/main/{file_path}
     const url = `https://github.com/${integration.repository_full_name}/blob/main/${cls.file_path}`;
-    
+
     console.log('[UML-DIAGRAM] Opening file from GitHub:', {
       repository: integration.repository_full_name,
       file: cls.file_path,
-      fullUrl: url
+      fullUrl: url,
     });
-    
+
     window.open(url, '_blank');
   }
 
@@ -798,12 +798,12 @@ export class UMLDiagramComponent implements OnInit {
   getInitials(className: string): string {
     if (!className) return '??';
     return className
-      .split(/[\s_-]|(?=[A-Z])/)
-      .filter(word => word.length > 0)
-      .map(word => word[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
+        .split(/[\s_-]|(?=[A-Z])/)
+        .filter((word) => word.length > 0)
+        .map((word) => word[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
   }
 
   getVisibilityIcon(visibility?: string): string {
@@ -824,7 +824,7 @@ export class UMLDiagramComponent implements OnInit {
   getParametersString(parameters: any[]): string {
     if (!parameters || parameters.length === 0) return '';
     return parameters
-      .map(p => `${p.name || '?'}: ${p.type || 'any'}`)
-      .join(', ');
+        .map((p) => `${p.name || '?'}: ${p.type || 'any'}`)
+        .join(', ');
   }
 }

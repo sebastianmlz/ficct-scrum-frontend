@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { NotificationService, Notification } from '../../../core/services/notification.service';
+import {Component, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {NotificationService, Notification}
+  from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-notification',
@@ -16,8 +17,9 @@ export class NotificationComponent {
   }
 
   getNotificationClasses(type: Notification['type']): string {
-    const baseClasses = 'max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden';
-    
+    const baseClasses = 'max-w-sm w-full bg-white shadow-lg rounded-lg ' +
+    'pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden';
+
     switch (type) {
       case 'success':
         return `${baseClasses} border-l-4 border-green-400`;
@@ -81,15 +83,20 @@ export class NotificationComponent {
     const baseClasses = 'focus:ring-offset-2';
     switch (type) {
       case 'success':
-        return `${baseClasses} text-green-400 hover:text-green-500 focus:ring-green-500`;
+        return `${baseClasses} text-green-400 hover:text-green-500 ` +
+        `focus:ring-green-500`;
       case 'error':
-        return `${baseClasses} text-red-400 hover:text-red-500 focus:ring-red-500`;
+        return `${baseClasses} text-red-400 hover:text-red-500 ` +
+        `focus:ring-red-500`;
       case 'warning':
-        return `${baseClasses} text-yellow-400 hover:text-yellow-500 focus:ring-yellow-500`;
+        return `${baseClasses} text-yellow-400 hover:text-yellow-500 ` +
+        `focus:ring-yellow-500`;
       case 'info':
-        return `${baseClasses} text-blue-400 hover:text-blue-500 focus:ring-blue-500`;
+        return `${baseClasses} text-blue-400 hover:text-blue-500 ` +
+        `focus:ring-blue-500`;
       default:
-        return `${baseClasses} text-gray-400 hover:text-gray-500 focus:ring-gray-500`;
+        return `${baseClasses} text-gray-400 hover:text-gray-500 ` +
+        `focus:ring-gray-500`;
     }
   }
 }

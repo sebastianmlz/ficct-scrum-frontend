@@ -1,21 +1,21 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
-import { 
-  DiagramRequestRequest, 
+import {Injectable, inject} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {map, catchError} from 'rxjs/operators';
+import {environment} from '../../../environments/environment';
+import {
+  DiagramRequestRequest,
   DiagramResponse,
   UMLDiagramData,
   ArchitectureDiagramData,
-  GitHubIntegration
+  GitHubIntegration,
 } from '../models/interfaces';
 
 export interface DiagramErrorResponse {
   status: 'error';
   error: string;
   code: 'CONFIGURATION_ERROR' | 'INVALID_OPTIONS' | 'QUERY_ERROR' | 'GITHUB_API_ERROR' | 'INTERNAL_ERROR' | 'TIMEOUT_ERROR' | 'UNKNOWN_ERROR';
-  valid_options?: string[];  // For INVALID_OPTIONS errors
+  valid_options?: string[]; // For INVALID_OPTIONS errors
 }
 
 export interface ParsedDiagramResponse {
@@ -26,7 +26,7 @@ export interface ParsedDiagramResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GitHubDiagramService {
   private http = inject(HttpClient);
@@ -38,29 +38,29 @@ export class GitHubDiagramService {
    */
   checkGitHubIntegration(projectId: string): Observable<GitHubIntegration | null> {
     console.log('[DIAGRAM SERVICE] Checking GitHub integration for project:', projectId);
-    
+
     const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
 
     return this.http.get<{ count: number; results: GitHubIntegration[] }>(
-      `${this.baseUrl}/integrations/github/`,
-      { headers, params: { project: projectId } }
+        `${this.baseUrl}/integrations/github/`,
+        {headers, params: {project: projectId}},
     ).pipe(
-      map(response => {
-        console.log('[DIAGRAM SERVICE] Integration check response:', response);
-        if (response.results && response.results.length > 0) {
-          const integration = response.results[0];
-          console.log('[DIAGRAM SERVICE] ✅ GitHub integration found:', integration.id);
-          return integration;
-        }
-        console.log('[DIAGRAM SERVICE] ⚠️ No GitHub integration found');
-        return null;
-      }),
-      catchError(error => {
-        console.error('[DIAGRAM SERVICE] Error checking integration:', error);
-        return throwError(() => error);
-      })
+        map((response) => {
+          console.log('[DIAGRAM SERVICE] Integration check response:', response);
+          if (response.results && response.results.length > 0) {
+            const integration = response.results[0];
+            console.log('[DIAGRAM SERVICE] ✅ GitHub integration found:', integration.id);
+            return integration;
+          }
+          console.log('[DIAGRAM SERVICE] ⚠️ No GitHub integration found');
+          return null;
+        }),
+        catchError((error) => {
+          console.error('[DIAGRAM SERVICE] Error checking integration:', error);
+          return throwError(() => error);
+        }),
     );
   }
 
@@ -71,15 +71,15 @@ export class GitHubDiagramService {
    */
   generateUMLDiagram(projectId: string): Observable<ParsedDiagramResponse> {
     console.log('[DIAGRAM SERVICE] Generating UML diagram for project:', projectId);
-    
+
     const request: DiagramRequestRequest = {
       diagram_type: 'uml',
       project: projectId,
       format: 'json',
       options: {
         // CRITICAL: Only "class" is valid in v1, backend will reject "sequence" with 400
-        layout: 'hierarchical'
-      }
+        layout: 'hierarchical',
+      },
     };
 
     console.log('[DIAGRAM SERVICE] ✅ Request validated - UML class diagram only (v1 restriction)');
@@ -93,14 +93,14 @@ export class GitHubDiagramService {
    */
   generateArchitectureDiagram(projectId: string): Observable<ParsedDiagramResponse> {
     console.log('[DIAGRAM SERVICE] Generating Architecture diagram for project:', projectId);
-    
+
     const request: DiagramRequestRequest = {
       diagram_type: 'architecture',
       project: projectId,
       format: 'json',
       options: {
-        layout: 'hierarchical'
-      }
+        layout: 'hierarchical',
+      },
     };
 
     return this.generateDiagram(request);
@@ -111,109 +111,109 @@ export class GitHubDiagramService {
    */
   private generateDiagram(request: DiagramRequestRequest): Observable<ParsedDiagramResponse> {
     const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
 
     console.log('[DIAGRAM SERVICE] Request payload:', JSON.stringify(request));
     console.log('[DIAGRAM SERVICE] Endpoint:', `${this.baseUrl}/diagrams/generate/`);
 
     return this.http.post<DiagramResponse>(
-      `${this.baseUrl}/diagrams/generate/`,
-      request,
-      { headers }
+        `${this.baseUrl}/diagrams/generate/`,
+        request,
+        {headers},
     ).pipe(
-      map(response => {
-        console.log('[DIAGRAM SERVICE] Raw response received:', response);
-        
-        // Parse the stringified data field
-        const parsedData = this.parseData(response);
-        
-        console.log('[DIAGRAM SERVICE] ✅ Diagram generated successfully');
-        console.log('[DIAGRAM SERVICE] Diagram type:', response.diagram_type);
-        console.log('[DIAGRAM SERVICE] Cached:', response.cached);
-        
-        return {
-          diagram_type: response.diagram_type as 'uml' | 'architecture',
-          format: response.format,
-          cached: response.cached || false,
-          data: parsedData
-        };
-      }),
-      catchError(error => {
-        console.error('[DIAGRAM SERVICE] Error generating diagram:', error);
-        
-        // Handle 400 errors with specific codes
-        if (error.status === 400) {
-          const errorCode = error.error?.code;
-          
-          // INVALID_OPTIONS - Backend rejected options (e.g., "sequence" instead of "class")
-          if (errorCode === 'INVALID_OPTIONS') {
-            console.error('[DIAGRAM SERVICE] ❌ INVALID_OPTIONS:', error.error.error);
+        map((response) => {
+          console.log('[DIAGRAM SERVICE] Raw response received:', response);
+
+          // Parse the stringified data field
+          const parsedData = this.parseData(response);
+
+          console.log('[DIAGRAM SERVICE] ✅ Diagram generated successfully');
+          console.log('[DIAGRAM SERVICE] Diagram type:', response.diagram_type);
+          console.log('[DIAGRAM SERVICE] Cached:', response.cached);
+
+          return {
+            diagram_type: response.diagram_type as 'uml' | 'architecture',
+            format: response.format,
+            cached: response.cached || false,
+            data: parsedData,
+          };
+        }),
+        catchError((error) => {
+          console.error('[DIAGRAM SERVICE] Error generating diagram:', error);
+
+          // Handle 400 errors with specific codes
+          if (error.status === 400) {
+            const errorCode = error.error?.code;
+
+            // INVALID_OPTIONS - Backend rejected options (e.g., "sequence" instead of "class")
+            if (errorCode === 'INVALID_OPTIONS') {
+              console.error('[DIAGRAM SERVICE] ❌ INVALID_OPTIONS:', error.error.error);
+              return throwError(() => ({
+                status: 'error',
+                error: error.error.error || 'Invalid diagram options provided',
+                code: 'INVALID_OPTIONS',
+                valid_options: error.error.valid_options,
+              } as DiagramErrorResponse));
+            }
+
+            // CONFIGURATION_ERROR - No GitHub integration or token missing
+            if (errorCode === 'CONFIGURATION_ERROR') {
+              console.error('[DIAGRAM SERVICE] ❌ CONFIGURATION_ERROR: GitHub integration issue');
+              return throwError(() => ({
+                status: 'error',
+                error: error.error.error || 'GitHub integration not properly configured',
+                code: 'CONFIGURATION_ERROR',
+              } as DiagramErrorResponse));
+            }
+
+            // QUERY_ERROR - Database error
+            if (errorCode === 'QUERY_ERROR') {
+              console.error('[DIAGRAM SERVICE] ❌ QUERY_ERROR: Database issue');
+              return throwError(() => ({
+                status: 'error',
+                error: error.error.error || 'Could not retrieve diagram data',
+                code: 'QUERY_ERROR',
+              } as DiagramErrorResponse));
+            }
+
+            // Generic 400 error
+            console.error('[DIAGRAM SERVICE] ❌ Bad request (400):', error.error);
             return throwError(() => ({
               status: 'error',
-              error: error.error.error || 'Invalid diagram options provided',
-              code: 'INVALID_OPTIONS',
-              valid_options: error.error.valid_options
+              error: error.error?.error || 'Bad request',
+              code: 'UNKNOWN_ERROR',
             } as DiagramErrorResponse));
           }
-          
-          // CONFIGURATION_ERROR - No GitHub integration or token missing
-          if (errorCode === 'CONFIGURATION_ERROR') {
-            console.error('[DIAGRAM SERVICE] ❌ CONFIGURATION_ERROR: GitHub integration issue');
+
+          // Handle 500 errors - INTERNAL_ERROR
+          if (error.status === 500) {
+            console.error('[DIAGRAM SERVICE] ❌ INTERNAL_ERROR (500):', error.error);
             return throwError(() => ({
               status: 'error',
-              error: error.error.error || 'GitHub integration not properly configured',
-              code: 'CONFIGURATION_ERROR'
+              error: error.error?.error || 'An unexpected server error occurred',
+              code: 'INTERNAL_ERROR',
             } as DiagramErrorResponse));
           }
-          
-          // QUERY_ERROR - Database error
-          if (errorCode === 'QUERY_ERROR') {
-            console.error('[DIAGRAM SERVICE] ❌ QUERY_ERROR: Database issue');
+
+          // Timeout or network error
+          if (error.status === 0 || error.status === 504) {
+            console.error('[DIAGRAM SERVICE] ❌ Timeout or network error');
             return throwError(() => ({
               status: 'error',
-              error: error.error.error || 'Could not retrieve diagram data',
-              code: 'QUERY_ERROR'
+              error: 'Request timeout - diagram generation taking too long',
+              code: 'TIMEOUT_ERROR',
             } as DiagramErrorResponse));
           }
-          
-          // Generic 400 error
-          console.error('[DIAGRAM SERVICE] ❌ Bad request (400):', error.error);
+
+          // Unknown error
+          console.error('[DIAGRAM SERVICE] ❌ Unknown error:', error);
           return throwError(() => ({
             status: 'error',
-            error: error.error?.error || 'Bad request',
-            code: 'UNKNOWN_ERROR'
+            error: error.error?.error || 'Unknown error occurred',
+            code: 'UNKNOWN_ERROR',
           } as DiagramErrorResponse));
-        }
-        
-        // Handle 500 errors - INTERNAL_ERROR
-        if (error.status === 500) {
-          console.error('[DIAGRAM SERVICE] ❌ INTERNAL_ERROR (500):', error.error);
-          return throwError(() => ({
-            status: 'error',
-            error: error.error?.error || 'An unexpected server error occurred',
-            code: 'INTERNAL_ERROR'
-          } as DiagramErrorResponse));
-        }
-        
-        // Timeout or network error
-        if (error.status === 0 || error.status === 504) {
-          console.error('[DIAGRAM SERVICE] ❌ Timeout or network error');
-          return throwError(() => ({
-            status: 'error',
-            error: 'Request timeout - diagram generation taking too long',
-            code: 'TIMEOUT_ERROR'
-          } as DiagramErrorResponse));
-        }
-        
-        // Unknown error
-        console.error('[DIAGRAM SERVICE] ❌ Unknown error:', error);
-        return throwError(() => ({
-          status: 'error',
-          error: error.error?.error || 'Unknown error occurred',
-          code: 'UNKNOWN_ERROR'
-        } as DiagramErrorResponse));
-      })
+        }),
     );
   }
 
@@ -244,14 +244,14 @@ export class GitHubDiagramService {
    * Validate diagram data structure
    */
   validateUMLData(data: any): data is UMLDiagramData {
-    return data && 
+    return data &&
            data.diagram_type === 'class' &&
            Array.isArray(data.classes) &&
            Array.isArray(data.relationships);
   }
 
   validateArchitectureData(data: any): data is ArchitectureDiagramData {
-    return data && 
+    return data &&
            Array.isArray(data.layers) &&
            Array.isArray(data.connections);
   }

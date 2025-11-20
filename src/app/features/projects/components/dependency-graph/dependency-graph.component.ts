@@ -1,14 +1,14 @@
-import { Component, inject, OnInit, signal, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { DiagramService } from '../../../../core/services/diagram.service';
-import { DiagramRendererService } from '../../../../core/services/diagram-renderer.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { DependencyDiagramData, DiagramFormat } from '../../../../core/models/interfaces';
-import { DiagramErrorStateComponent } from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
-import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
-import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-panel/diagram-filter-panel.component';
+import {Component, inject, OnInit, signal, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DiagramService} from '../../../../core/services/diagram.service';
+import {DiagramRendererService} from '../../../../core/services/diagram-renderer.service';
+import {NotificationService} from '../../../../core/services/notification.service';
+import {DependencyDiagramData, DiagramFormat} from '../../../../core/models/interfaces';
+import {DiagramErrorStateComponent} from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
+import {DiagramErrorState, analyzeDiagramError, logDiagramError} from '../../../../shared/utils/diagram-error.utils';
+import {DiagramFilterPanelComponent, DiagramFilters} from '../diagram-filter-panel/diagram-filter-panel.component';
 
 @Component({
   selector: 'app-dependency-graph',
@@ -93,11 +93,11 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
                     </div>
                   </div>
                 }
-                
+
                 <!-- Floating Controls -->
                 <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
                   <div style="display: flex; align-items: center; gap: 8px; background: white; border-radius: 8px; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid #DFE1E6;">
-                    
+
                     <!-- Export Menu -->
                     <div style="position: relative;">
                       <button (click)="toggleExportMenu()" [disabled]="loading() || exporting()" title="Export"
@@ -108,7 +108,7 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
                         </svg>
                         <span style="font-size: 14px;">Export</span>
                       </button>
-                      
+
                       @if (showExportMenu()) {
                         <div style="position: absolute; top: calc(100% + 8px); right: 0; background: white; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #DFE1E6; min-width: 180px; overflow: hidden; z-index: 20;">
                           <button (click)="viewDiagram()" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; background: transparent; border: none; cursor: pointer; color: #172B4D; text-align: left;"
@@ -135,9 +135,9 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
                         </div>
                       }
                     </div>
-                    
+
                     <div style="width: 1px; height: 24px; background: #DFE1E6;"></div>
-                    
+
                     <!-- Refresh -->
                     <button (click)="refreshDiagram()" [disabled]="loading()" title="Refresh"
                             style="display: flex; align-items: center; padding: 8px; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: #42526E;"
@@ -171,7 +171,7 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    
+
     /* CRITICAL: Container sizing and overflow for dependency cards */
     .diagram-svg-container {
       position: relative;
@@ -184,7 +184,7 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
       padding: 16px;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     .diagram-svg-container svg {
       width: 100% !important;
       max-width: none !important; /* Allow wider than container */
@@ -192,7 +192,7 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
       height: auto !important;
       display: block !important;
     }
-    
+
     /* CRITICAL: Override backend SVG text styling for visibility */
     .diagram-svg-container svg text {
       fill: #172B4D !important; /* Backend primary text color */
@@ -206,14 +206,14 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
       stroke-linejoin: round !important;
       filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
     }
-    
+
     .diagram-svg-container svg tspan {
       fill: #172B4D !important;
       stroke: #ffffff !important;
       stroke-width: 2px !important;
       font-size: 12px !important;
     }
-    
+
     /* Text inside dark backgrounds needs white fill */
     .diagram-svg-container svg rect[fill*="#00"] ~ text,
     .diagram-svg-container svg rect[fill*="#5E"] ~ text,
@@ -226,30 +226,30 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
       stroke: rgba(0, 0, 0, 0.3) !important;
       stroke-width: 1px !important;
     }
-    
+
     .diagram-svg-container svg rect,
     .diagram-svg-container svg circle,
     .diagram-svg-container svg ellipse,
     .diagram-svg-container svg polygon {
       stroke-width: 2px !important;
     }
-    
+
     .diagram-svg-container svg rect[fill*="#"] {
       stroke: rgba(0, 0, 0, 0.15) !important;
     }
-    
+
     .diagram-svg-container svg line,
     .diagram-svg-container svg polyline,
     .diagram-svg-container svg path[stroke] {
       stroke: #6b7280 !important;
       stroke-width: 2px !important;
     }
-    
+
     /* Enhance contrast */
     .diagram-svg-container svg {
       filter: contrast(1.05) brightness(1.02);
     }
-    
+
     /* Card layout for JSON data visualization */
     .dependency-visualization {
       display: flex;
@@ -257,7 +257,7 @@ import { DiagramFilterPanelComponent, DiagramFilters } from '../diagram-filter-p
       gap: 16px;
       justify-content: flex-start;
     }
-  `]
+  `],
 })
 export class DependencyGraphComponent implements OnInit, AfterViewInit {
   private route = inject(ActivatedRoute);
@@ -285,7 +285,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
   currentFilters = signal<DiagramFilters | null>(null);
 
   ngOnInit(): void {
-    this.route.parent?.params.subscribe(params => {
+    this.route.parent?.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.projectId.set(id);
@@ -310,24 +310,24 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
     this.diagramData.set(null);
     this.hasRendered.set(false);
     this.renderError.set(null);
-    
+
     console.log('[DEPENDENCY-GRAPH] 📥 Loading diagram with filters:', this.currentFilters());
-    
+
     // Build parameters object with filters
     const parameters = this.currentFilters() || {};
-    
+
     this.diagramService.generateDiagram({
       diagram_type: 'dependency',
       project: this.projectId(),
       format: 'json',
-      parameters: parameters
+      parameters: parameters,
     }).subscribe({
       next: (response) => {
         console.log('[DEPENDENCY-GRAPH] 📦 Response received, format:', response.format, 'data type:', typeof response.data);
-        
+
         // Check the actual format returned by backend
         this.diagramFormat.set(response.format as 'svg' | 'json');
-        
+
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
@@ -342,41 +342,40 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
             console.log('[DEPENDENCY-GRAPH] 📊 Parsed data:', {
               type: parsedData.diagram_type,
               nodes: parsedData.nodes?.length || 0,
-              links: parsedData.links?.length || 0
+              links: parsedData.links?.length || 0,
             });
-            
+
             // Comprehensive structure validation
             if (!parsedData.nodes || !Array.isArray(parsedData.nodes)) {
               console.error('[DEPENDENCY-GRAPH] ❌ Invalid nodes:', parsedData.nodes);
               throw new Error('Invalid diagram data structure: missing or invalid nodes array');
             }
-            
+
             if (!parsedData.links || !Array.isArray(parsedData.links)) {
               console.warn('[DEPENDENCY-GRAPH] ⚠️ Missing or invalid links array, defaulting to empty');
               parsedData.links = [];
             }
-            
+
             console.log('[DEPENDENCY-GRAPH] ✅ Validation passed:', {
               nodes: parsedData.nodes.length,
               links: parsedData.links.length,
               hasCriticalPath: !!parsedData.critical_path,
-              hasLayout: !!parsedData.layout
+              hasLayout: !!parsedData.layout,
             });
-            
+
             this.diagramData.set(parsedData as DependencyDiagramData);
             this.safeSvgContent.set(null);
-            
+
             // CRITICAL: Trigger rendering after data is set
             console.log('[DEPENDENCY-GRAPH] 🎨 Data ready, scheduling render');
             setTimeout(() => this.renderDiagram(), 100);
-            
           } catch (parseError: any) {
             console.error('[DEPENDENCY-GRAPH] ❌ Parse error:', parseError);
             console.error('[DEPENDENCY-GRAPH] Raw data type:', typeof response.data);
             this.errorState.set(analyzeDiagramError(parseError, this.projectId()));
           }
         }
-        
+
         this.loading.set(false);
       },
       error: (error) => {
@@ -384,7 +383,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
         const errorInfo = analyzeDiagramError(error, this.projectId());
         this.errorState.set(errorInfo);
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -394,17 +393,17 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
    */
   private parseDiagramData(data: any): any {
     console.log('[DEPENDENCY-GRAPH] 🔍 Parsing data, type:', typeof data);
-    
+
     if (data === null || data === undefined) {
       throw new Error('Diagram data is null or undefined');
     }
-    
+
     // NEW: If data is already an object, return it directly (backend sends clean objects now)
     if (typeof data === 'object') {
       console.log('[DEPENDENCY-GRAPH] ✅ Data is object (backend clean format)');
       return data;
     }
-    
+
     // BACKWARD COMPATIBLE: If data is a string, parse it as JSON (for transition period)
     if (typeof data === 'string') {
       console.log('[DEPENDENCY-GRAPH] 📝 Data is string (legacy format), parsing with JSON.parse');
@@ -418,7 +417,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
         throw new Error(`Failed to parse diagram JSON: ${error.message}`);
       }
     }
-    
+
     throw new Error(`Unsupported data type: ${typeof data}`);
   }
 
@@ -428,47 +427,46 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
    */
   private renderDiagram(): void {
     const data = this.diagramData();
-    
+
     if (!data) {
       console.warn('[DEPENDENCY-GRAPH] ⚠️ Cannot render: no data available');
       return;
     }
-    
+
     // Verify container exists
     if (!this.diagramContainer) {
       console.error('[DEPENDENCY-GRAPH] ❌ Cannot render: container element not found');
       this.renderError.set('Diagram container not available');
       return;
     }
-    
+
     const containerElement = this.diagramContainer.nativeElement;
     if (!containerElement) {
       console.error('[DEPENDENCY-GRAPH] ❌ Cannot render: container nativeElement is null');
       this.renderError.set('Diagram container element is null');
       return;
     }
-    
+
     console.log('[DEPENDENCY-GRAPH] 🎭 Starting render:', {
       containerExists: !!containerElement,
       nodes: data.nodes?.length || 0,
       links: data.links?.length || 0,
-      hasCriticalPath: !!data.critical_path
+      hasCriticalPath: !!data.critical_path,
     });
-    
+
     try {
       this.isRendering.set(true);
       this.renderError.set(null);
-      
+
       // Call renderer service with container ID
       this.diagramRenderer.renderDependencyGraph('dependency-graph-container', data as any);
-      
+
       console.log('[DEPENDENCY-GRAPH] ✅ Rendering completed successfully');
       this.hasRendered.set(true);
       this.isRendering.set(false);
-      
+
       // Force change detection
       this.cdr.detectChanges();
-      
     } catch (error: any) {
       console.error('[DEPENDENCY-GRAPH] ❌ Rendering failed:', error);
       this.renderError.set(error.message || 'Rendering failed');
@@ -486,7 +484,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
   }
 
   toggleExportMenu(): void {
-    this.showExportMenu.update(show => !show);
+    this.showExportMenu.update((show) => !show);
   }
 
   viewDiagram(): void {
@@ -497,13 +495,13 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
     this.diagramService.exportDiagram({
       diagram_type: 'dependency',
       project: this.projectId(),
-      format: 'svg'
+      format: 'svg',
     }).subscribe({
       next: (response) => {
         this.exporting.set(false);
         // response.data contains the SVG content
         const svgContent = typeof response.data === 'string' ? response.data : '';
-        const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+        const blob = new Blob([svgContent], {type: 'image/svg+xml'});
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
         this.notificationService.success('Success', 'Diagram opened in new tab');
@@ -512,7 +510,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
         this.exporting.set(false);
         console.error('[DEPENDENCY-GRAPH] View error:', error);
         this.notificationService.error('View Failed', 'Could not open diagram');
-      }
+      },
     });
   }
 
@@ -521,9 +519,9 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
     this.exporting.set(true);
 
     this.diagramService.exportDiagramWithFormat(
-      'dependency',
-      this.projectId(),
-      format
+        'dependency',
+        this.projectId(),
+        format,
     ).subscribe({
       next: (response) => {
         this.exporting.set(false);
@@ -537,7 +535,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
         this.exporting.set(false);
         console.error('[DEPENDENCY-GRAPH] Export error:', error);
         this.notificationService.error('Export Failed', error.error?.detail || 'Could not export diagram');
-      }
+      },
     });
   }
 
@@ -549,7 +547,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
     this.diagramService.exportDiagram({
       diagram_type: 'dependency',
       project: this.projectId(),
-      format: 'svg'
+      format: 'svg',
     }).subscribe({
       next: (response) => {
         // response.data contains the SVG content
@@ -566,7 +564,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
         this.exporting.set(false);
         console.error('[DEPENDENCY-GRAPH] PNG export error:', error);
         this.notificationService.error('Export Failed', 'Could not generate diagram');
-      }
+      },
     });
   }
 
@@ -576,7 +574,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
       const svgElement = svgDoc.querySelector('svg');
-      
+
       if (!svgElement) {
         this.exporting.set(false);
         this.notificationService.error('Export Failed', 'Invalid SVG content');
@@ -587,7 +585,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
       const viewBox = svgElement.getAttribute('viewBox');
       let width = 1200;
       let height = 800;
-      
+
       if (viewBox) {
         const parts = viewBox.split(' ');
         width = parseFloat(parts[2]) || 1200;
@@ -603,14 +601,14 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
       height = height * scale;
 
       const img = new Image();
-      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const blob = new Blob([svgContent], {type: 'image/svg+xml;charset=utf-8'});
       const url = URL.createObjectURL(blob);
 
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-        
+
         const ctx = canvas.getContext('2d');
         if (!ctx) {
           this.exporting.set(false);
@@ -622,10 +620,10 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
         // Fill white background
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         // Draw SVG scaled
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Convert to PNG and download
         canvas.toBlob((pngBlob) => {
           if (pngBlob) {
@@ -636,7 +634,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             URL.revokeObjectURL(pngUrl);
             this.exporting.set(false);
             this.notificationService.success('Export Successful', 'Diagram exported as PNG');
@@ -645,7 +643,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
             this.notificationService.error('Export Failed', 'Could not convert to PNG');
           }
         }, 'image/png');
-        
+
         URL.revokeObjectURL(url);
       };
 
@@ -669,7 +667,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
     this.safeSvgContent.set(null);
     this.diagramData.set(null);
     this.hasRendered.set(false);
-    
+
     // Reload with current filters
     this.loadDiagram();
   }
@@ -679,7 +677,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
   // ===========================
 
   toggleFilters(): void {
-    this.showFilters.update(show => !show);
+    this.showFilters.update((show) => !show);
   }
 
   onFiltersChanged(filters: DiagramFilters): void {

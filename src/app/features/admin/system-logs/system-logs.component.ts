@@ -1,10 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { SystemLog, PaginatedSystemLogList, SystemLogQueryParams } from '../../../core/models/interfaces';
-import { ActionTypeEnum, LevelEnum } from '../../../core/models/enums';
-import { LoggingService } from '../../../core/services/logging.service';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {SystemLog, PaginatedSystemLogList, SystemLogQueryParams} from '../../../core/models/interfaces';
+import {ActionTypeEnum, LevelEnum} from '../../../core/models/enums';
+import {LoggingService} from '../../../core/services/logging.service';
 
 @Component({
   selector: 'app-system-logs',
@@ -43,7 +43,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Action Type</label>
                     <select formControlName="action_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -55,7 +55,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                       <option value="logout">Logout</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Level</label>
                     <select formControlName="level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -66,7 +66,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                       <option value="critical">Critical</option>
                     </select>
                   </div>
-                  
+
                   <div class="flex items-end">
                     <button
                       type="button"
@@ -101,7 +101,7 @@ import { LoggingService } from '../../../core/services/logging.service';
               <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">System Logs ({{ logsList()?.count || 0 }} total)</h3>
               </div>
-              
+
               @if (logsList()?.results && logsList()!.results.length > 0) {
                 <div class="overflow-x-auto">
                   <table class="min-w-full divide-y divide-gray-200">
@@ -165,7 +165,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                         Next
                       </button>
                     </div>
-                    
+
                     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                       <div>
                         <p class="text-sm text-gray-700">
@@ -208,7 +208,7 @@ import { LoggingService } from '../../../core/services/logging.service';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class SystemLogsComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -225,7 +225,7 @@ export class SystemLogsComponent implements OnInit {
     search: [''],
     action_type: [''],
     level: [''],
-    ip_address: ['']
+    ip_address: [''],
   });
 
   ngOnInit(): void {
@@ -239,10 +239,10 @@ export class SystemLogsComponent implements OnInit {
     const formValues = this.searchForm.value;
     const params: SystemLogQueryParams = {
       page: this.currentPage(),
-      ...(formValues.search && { search: formValues.search }),
-      ...(formValues.action_type && { action_type: formValues.action_type }),
-      ...(formValues.level && { level: formValues.level }),
-      ...(formValues.ip_address && { ip_address: formValues.ip_address })
+      ...(formValues.search && {search: formValues.search}),
+      ...(formValues.action_type && {action_type: formValues.action_type}),
+      ...(formValues.level && {level: formValues.level}),
+      ...(formValues.ip_address && {ip_address: formValues.ip_address}),
     };
 
     this.loggingService.getSystemLogs(params).subscribe({
@@ -254,7 +254,7 @@ export class SystemLogsComponent implements OnInit {
         console.error('Error loading system logs:', error);
         this.error.set(error.error?.message || 'Failed to load system logs');
         this.loading.set(false);
-      }
+      },
     });
   }
 

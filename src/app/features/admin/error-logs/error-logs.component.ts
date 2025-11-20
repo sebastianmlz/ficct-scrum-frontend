@@ -1,10 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { ErrorLog, PaginatedErrorLogList, ErrorLogQueryParams } from '../../../core/models/interfaces';
-import { SeverityEnum, ErrorLogStatusEnum } from '../../../core/models/enums';
-import { LoggingService } from '../../../core/services/logging.service';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {ErrorLog, PaginatedErrorLogList, ErrorLogQueryParams} from '../../../core/models/interfaces';
+import {SeverityEnum, ErrorLogStatusEnum} from '../../../core/models/enums';
+import {LoggingService} from '../../../core/services/logging.service';
 
 @Component({
   selector: 'app-error-logs',
@@ -43,7 +43,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
-                  
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Severity</label>
                     <select formControlName="severity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -54,7 +54,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                       <option value="critical">Critical</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Status</label>
                     <select formControlName="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -65,7 +65,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                       <option value="ignored">Ignored</option>
                     </select>
                   </div>
-                  
+
                   <div class="flex items-end">
                     <button
                       type="button"
@@ -100,7 +100,7 @@ import { LoggingService } from '../../../core/services/logging.service';
               <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">Error Logs ({{ logsList()?.count || 0 }} total)</h3>
               </div>
-              
+
               @if (logsList()?.results && logsList()!.results.length > 0) {
                 <div class="overflow-x-auto">
                   <table class="min-w-full divide-y divide-gray-200">
@@ -181,7 +181,7 @@ import { LoggingService } from '../../../core/services/logging.service';
                         Next
                       </button>
                     </div>
-                    
+
                     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                       <div>
                         <p class="text-sm text-gray-700">
@@ -224,7 +224,7 @@ import { LoggingService } from '../../../core/services/logging.service';
       </div>
     </div>
   `,
-  styles: []
+  styles: [],
 })
 export class ErrorLogsComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -240,7 +240,7 @@ export class ErrorLogsComponent implements OnInit {
   searchForm: FormGroup = this.fb.group({
     search: [''],
     severity: [''],
-    status: ['']
+    status: [''],
   });
 
   ngOnInit(): void {
@@ -254,9 +254,9 @@ export class ErrorLogsComponent implements OnInit {
     const formValues = this.searchForm.value;
     const params: ErrorLogQueryParams = {
       page: this.currentPage(),
-      ...(formValues.search && { search: formValues.search }),
-      ...(formValues.severity && { severity: formValues.severity }),
-      ...(formValues.status && { status: formValues.status })
+      ...(formValues.search && {search: formValues.search}),
+      ...(formValues.severity && {severity: formValues.severity}),
+      ...(formValues.status && {status: formValues.status}),
     };
 
     this.loggingService.getErrorLogs(params).subscribe({
@@ -268,7 +268,7 @@ export class ErrorLogsComponent implements OnInit {
         console.error('Error loading error logs:', error);
         this.error.set(error.error?.message || 'Failed to load error logs');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -304,7 +304,7 @@ export class ErrorLogsComponent implements OnInit {
       error: (error) => {
         console.error('Error updating error status:', error);
         this.error.set(error.error?.message || 'Failed to update error status');
-      }
+      },
     });
   }
 

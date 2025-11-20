@@ -1,12 +1,12 @@
-import { HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { of, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import {HttpInterceptorFn, HttpRequest, HttpResponse} from '@angular/common/http';
+import {inject} from '@angular/core';
+import {of, throwError} from 'rxjs';
+import {tap, catchError} from 'rxjs/operators';
 
 /**
  * AI Deduplication Interceptor
  * Prevents duplicate AI requests within a time window
- * 
+ *
  * Strategy:
  * - Tracks requests by hash(url + params)
  * - If same request made within DEDUP_WINDOW, returns cached response
@@ -44,15 +44,15 @@ function isAIRequest(url: string): boolean {
 function cleanExpiredCache(): void {
   const now = Date.now();
   const expiredKeys: string[] = [];
-  
+
   requestCache.forEach((cache, key) => {
     if (now - cache.timestamp > DEDUP_WINDOW) {
       expiredKeys.push(key);
     }
   });
-  
-  expiredKeys.forEach(key => requestCache.delete(key));
-  
+
+  expiredKeys.forEach((key) => requestCache.delete(key));
+
   if (expiredKeys.length > 0) {
     console.log(`[AI-DEDUP] Cleaned ${expiredKeys.length} expired cache entries`);
   }
@@ -76,35 +76,35 @@ export const aiDeduplicationInterceptor: HttpInterceptorFn = (req, next) => {
     if (age < DEDUP_WINDOW) {
       console.log(`[AI-DEDUP] 🚫 BLOCKED duplicate request (${(age / 1000).toFixed(1)}s ago)`);
       console.log(`[AI-DEDUP] URL: ${req.url}`);
-      
+
       // Return cached response
       return of(new HttpResponse({
         body: cached.response,
         status: 200,
         statusText: 'OK (Cached by Deduplication)',
-        url: req.url
+        url: req.url,
       }));
     }
   }
 
   // Allow request to proceed and cache the response
   console.log(`[AI-DEDUP] ✅ ALLOWING request: ${req.url}`);
-  
+
   return next(req).pipe(
-    tap(event => {
-      if (event instanceof HttpResponse && event.status === 200) {
+      tap((event) => {
+        if (event instanceof HttpResponse && event.status === 200) {
         // Cache successful response
-        requestCache.set(requestKey, {
-          response: event.body,
-          timestamp: Date.now()
-        });
-        console.log(`[AI-DEDUP] 💾 Cached response for deduplication`);
-      }
-    }),
-    catchError(error => {
+          requestCache.set(requestKey, {
+            response: event.body,
+            timestamp: Date.now(),
+          });
+          console.log(`[AI-DEDUP] 💾 Cached response for deduplication`);
+        }
+      }),
+      catchError((error) => {
       // Don't cache errors
-      console.log(`[AI-DEDUP] ❌ Request failed, not caching`);
-      return throwError(() => error);
-    })
+        console.log(`[AI-DEDUP] ❌ Request failed, not caching`);
+        return throwError(() => error);
+      }),
   );
 };

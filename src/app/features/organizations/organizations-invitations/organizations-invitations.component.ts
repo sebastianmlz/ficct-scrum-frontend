@@ -1,16 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { OrganizationService } from '../../../core/services/organization.service';
-import { OrganizationInvitation } from '../../../core/models/interfaces';
-import { CommonModule } from '@angular/common';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import {Component, OnInit, inject} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {OrganizationService} from '../../../core/services/organization.service';
+import {OrganizationInvitation} from '../../../core/models/interfaces';
+import {CommonModule} from '@angular/common';
+import {ProgressSpinnerModule} from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-organizations-invitations',
   standalone: true,
   imports: [CommonModule, ProgressSpinnerModule],
   templateUrl: './organizations-invitations.component.html',
-  styleUrl: './organizations-invitations.component.css'
+  styleUrl: './organizations-invitations.component.css',
 })
 export class OrganizationsInvitationsComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -47,7 +47,7 @@ export class OrganizationsInvitationsComponent implements OnInit {
       error: (err) => {
         this.error = err.message || 'No se pudo cargar la invitación.';
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -64,7 +64,7 @@ export class OrganizationsInvitationsComponent implements OnInit {
       error: (err) => {
         this.actionError = err.message || 'No se pudo aceptar la invitación.';
         this.actionLoading = false;
-      }
+      },
     });
   }
 
@@ -81,7 +81,7 @@ export class OrganizationsInvitationsComponent implements OnInit {
       error: (err) => {
         this.actionError = err.message || 'No se pudo rechazar la invitación.';
         this.actionLoading = false;
-      }
+      },
     });
   }
 }

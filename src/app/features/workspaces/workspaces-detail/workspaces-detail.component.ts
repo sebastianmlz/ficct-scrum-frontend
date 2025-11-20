@@ -1,14 +1,14 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { WorkspaceService, Workspace } from '../../../core/services/workspace.service';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterModule} from '@angular/router';
+import {WorkspaceService, Workspace} from '../../../core/services/workspace.service';
 
 @Component({
   selector: 'app-workspaces-detail',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './workspaces-detail.component.html',
-  styleUrl: './workspaces-detail.component.css'
+  styleUrl: './workspaces-detail.component.css',
 })
 export class WorkspacesDetailComponent implements OnInit {
   workspace = signal<Workspace | null>(null);
@@ -20,11 +20,11 @@ export class WorkspacesDetailComponent implements OnInit {
   constructor(
     private workspaceService: WorkspaceService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.workspaceId.set(params['id']);
       if (this.workspaceId()) {
         this.loadWorkspace();
@@ -48,12 +48,12 @@ export class WorkspacesDetailComponent implements OnInit {
       error: (err) => {
         this.error.set('Error loading workspace: ' + (err.error?.message || err.message));
         this.loading.set(false);
-      }
+      },
     });
   }
 
   getTypeLabel(type: string): string {
-    const types: { [key: string]: string } = {
+    const types: Record<string, string> = {
       'development': 'Desarrollo',
       'design': 'Diseño',
       'marketing': 'Marketing',
@@ -61,15 +61,15 @@ export class WorkspacesDetailComponent implements OnInit {
       'support': 'Soporte',
       'hr': 'Recursos Humanos',
       'finance': 'Finanzas',
-      'general': 'General'
+      'general': 'General',
     };
     return types[type] || type;
   }
 
   getVisibilityLabel(visibility: string): string {
-    const vis: { [key: string]: string } = {
+    const vis: Record<string, string> = {
       'public': 'Público',
-      'private': 'Privado'
+      'private': 'Privado',
     };
     return vis[visibility] || visibility;
   }
@@ -77,7 +77,7 @@ export class WorkspacesDetailComponent implements OnInit {
   goBack() {
     const orgId = this.workspace()?.organization?.id;
     if (orgId) {
-      this.router.navigate(['/workspaces'], { queryParams: { organization: orgId } });
+      this.router.navigate(['/workspaces'], {queryParams: {organization: orgId}});
     } else {
       this.router.navigate(['/workspaces']);
     }
@@ -88,7 +88,7 @@ export class WorkspacesDetailComponent implements OnInit {
   }
 
   viewProjects() {
-    this.router.navigate(['/projects'], { queryParams: { workspace: this.workspaceId() } });
+    this.router.navigate(['/projects'], {queryParams: {workspace: this.workspaceId()}});
   }
 
   viewMembers() {

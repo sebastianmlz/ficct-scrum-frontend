@@ -1,13 +1,13 @@
-import { Component, Input, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AiService, IssueSummaryResponse } from '../../../../../core/services/ai.service';
+import {Component, Input, OnInit, signal, inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {AiService, IssueSummaryResponse} from '../../../../../core/services/ai.service';
 
 @Component({
   selector: 'app-ai-issue-summary',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ai-issue-summary.component.html',
-  styleUrl: './ai-issue-summary.component.css'
+  styleUrl: './ai-issue-summary.component.css',
 })
 export class AiIssueSummaryComponent implements OnInit {
   @Input() issueId!: string;
@@ -25,7 +25,7 @@ export class AiIssueSummaryComponent implements OnInit {
     console.log('[AI-SUMMARY] Component initialized - waiting for user action');
   }
 
-  async loadSummary(forceRefresh: boolean = false): Promise<void> {
+  async loadSummary(forceRefresh = false): Promise<void> {
     if (!this.issueId) {
       this.error.set('Issue ID is required');
       return;
@@ -51,14 +51,14 @@ export class AiIssueSummaryComponent implements OnInit {
       this.loading.set(false);
     }
   }
-  
+
   /**
    * User action: Generate AI summary
    */
   onGenerateSummary(): void {
     this.loadSummary(false);
   }
-  
+
   /**
    * User action: Refresh summary
    */

@@ -1,20 +1,20 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { ProjectService } from '../../../core/services/project.service';
-import { Project, ProjectConfig, Sprint } from '../../../core/models/interfaces';
-import { ProjectStatusEnum, ProjectPriorityEnum } from '../../../core/models/enums';
-import { SprintCreateComponent } from '../project-sprints/sprint-create/sprint-create.component';
-import { SprintListComponent } from '../project-sprints/sprint-list/sprint-list.component';
-import { AiService, ProjectReportResponse } from '../../../core/services/ai.service';
-import { ProjectMembersModalComponent } from '../components/project-members-modal/project-members-modal.component';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterLink, RouterOutlet} from '@angular/router';
+import {ProjectService} from '../../../core/services/project.service';
+import {Project, ProjectConfig, Sprint} from '../../../core/models/interfaces';
+import {ProjectStatusEnum, ProjectPriorityEnum} from '../../../core/models/enums';
+import {SprintCreateComponent} from '../project-sprints/sprint-create/sprint-create.component';
+import {SprintListComponent} from '../project-sprints/sprint-list/sprint-list.component';
+import {AiService, ProjectReportResponse} from '../../../core/services/ai.service';
+import {ProjectMembersModalComponent} from '../components/project-members-modal/project-members-modal.component';
 
 interface Tab {
   id: string;
   label: string;
   icon?: string;
   route?: string;
-  subTabs?: Array<{id: string; label: string; route: string; icon?: string}>;
+  subTabs?: {id: string; label: string; route: string; icon?: string}[];
 }
 
 @Component({
@@ -59,41 +59,41 @@ export class ProjectDetailComponent implements OnInit {
   memberCount = signal(0);
 
   tabs: Tab[] = [
-    { id: 'overview', label: 'Overview', icon: 'home' },
-    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
-    { id: 'board', label: 'Board', icon: 'view_column', route: 'boards' },
-    { id: 'issues', label: 'Issues', icon: 'list', route: 'issues' },
-    { id: 'activity', label: 'Activity', icon: 'history', route: 'activity' },
-    { id: 'sprints', label: 'Sprints', icon: 'schedule' },
-    { 
-      id: 'code', 
+    {id: 'overview', label: 'Overview', icon: 'home'},
+    {id: 'dashboard', label: 'Dashboard', icon: 'dashboard', route: 'dashboard'},
+    {id: 'board', label: 'Board', icon: 'view_column', route: 'boards'},
+    {id: 'issues', label: 'Issues', icon: 'list', route: 'issues'},
+    {id: 'activity', label: 'Activity', icon: 'history', route: 'activity'},
+    {id: 'sprints', label: 'Sprints', icon: 'schedule'},
+    {
+      id: 'code',
       label: 'Code',
       icon: 'code',
       subTabs: [
-        { id: 'commits', label: 'Commits', route: 'commits', icon: 'commit' },
-        { id: 'prs', label: 'Pull Requests', route: 'pull-requests', icon: 'git_pull_request' },
-        { id: 'metrics', label: 'Code Metrics', route: 'metrics', icon: 'bar_chart' },
-        { id: 'github', label: 'GitHub Settings', route: 'github', icon: 'settings' }
-      ]
+        {id: 'commits', label: 'Commits', route: 'commits', icon: 'commit'},
+        {id: 'prs', label: 'Pull Requests', route: 'pull-requests', icon: 'git_pull_request'},
+        {id: 'metrics', label: 'Code Metrics', route: 'metrics', icon: 'bar_chart'},
+        {id: 'github', label: 'GitHub Settings', route: 'github', icon: 'settings'},
+      ],
     },
-    { 
-      id: 'diagrams', 
+    {
+      id: 'diagrams',
       label: 'Diagrams',
       icon: 'account_tree',
       subTabs: [
-        { id: 'workflow', label: 'Workflow', route: 'diagrams/workflow', icon: 'workflow' },
-        { id: 'dependencies', label: 'Dependencies', route: 'diagrams/dependencies', icon: 'link' },
-        { id: 'roadmap', label: 'Roadmap', route: 'diagrams/roadmap', icon: 'calendar' },
-        { id: 'uml', label: 'UML', route: 'diagrams/uml', icon: 'diagram' },
-        { id: 'architecture', label: 'Architecture', route: 'diagrams/architecture', icon: 'architecture' }
-      ]
+        {id: 'workflow', label: 'Workflow', route: 'diagrams/workflow', icon: 'workflow'},
+        {id: 'dependencies', label: 'Dependencies', route: 'diagrams/dependencies', icon: 'link'},
+        {id: 'roadmap', label: 'Roadmap', route: 'diagrams/roadmap', icon: 'calendar'},
+        {id: 'uml', label: 'UML', route: 'diagrams/uml', icon: 'diagram'},
+        {id: 'architecture', label: 'Architecture', route: 'diagrams/architecture', icon: 'architecture'},
+      ],
     },
-    { id: 'settings', label: 'Settings', icon: 'settings', route: 'config' }
+    {id: 'settings', label: 'Settings', icon: 'settings', route: 'config'},
   ];
 
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.loadProject(id);
@@ -103,7 +103,7 @@ export class ProjectDetailComponent implements OnInit {
     // Detect child route navigation to update active tab
     this.router.events.subscribe(() => {
       const url = this.router.url;
-      if (url.includes('/commits') || url.includes('/pull-requests') || 
+      if (url.includes('/commits') || url.includes('/pull-requests') ||
           url.includes('/metrics') || url.includes('/github')) {
         this.activeTab.set('code');
       } else if (url.includes('/diagrams/')) {
@@ -131,7 +131,7 @@ export class ProjectDetailComponent implements OnInit {
       console.log('[PROJECT-DETAIL] 📦 Project loaded from API:', project);
       console.log('[PROJECT-DETAIL] 📦 Workspace in project:', project?.workspace);
       console.log('[PROJECT-DETAIL] 📦 Workspace ID:', project?.workspace?.id);
-      
+
       if (project) {
         this.project.set(project);
         await this.loadConfigProject(id);
@@ -147,7 +147,7 @@ export class ProjectDetailComponent implements OnInit {
 
   async loadMemberCount(projectId: string): Promise<void> {
     try {
-      const response = await this.projectService.getProjectMembers(projectId, { page: 1 }).toPromise();
+      const response = await this.projectService.getProjectMembers(projectId, {page: 1}).toPromise();
       if (response) {
         this.memberCount.set(response.count || 0);
         console.log('[PROJECT-DETAIL] Member count:', response.count);
@@ -164,17 +164,17 @@ export class ProjectDetailComponent implements OnInit {
   getWorkspaceId(): string | null {
     const workspace = this.project()?.workspace;
     if (!workspace) return null;
-    
+
     // Handle workspace as string UUID (actual API response)
     if (typeof workspace === 'string') {
       return workspace;
     }
-    
+
     // Handle workspace as Workspace object (TypeScript interface)
     if (typeof workspace === 'object' && 'id' in workspace) {
       return workspace.id;
     }
-    
+
     return null;
   }
 
@@ -183,19 +183,19 @@ export class ProjectDetailComponent implements OnInit {
     console.log('[PROJECT-DETAIL] Project:', this.project());
     console.log('[PROJECT-DETAIL] Project ID:', this.project()?.id);
     console.log('[PROJECT-DETAIL] Workspace:', this.project()?.workspace);
-    
+
     if (!this.project()?.id) {
       console.error('[PROJECT-DETAIL] ❌ Cannot open modal: Project ID missing');
       return;
     }
-    
+
     const workspaceId = this.getWorkspaceId();
     if (!workspaceId) {
       console.error('[PROJECT-DETAIL] ❌ Cannot open modal: Workspace ID missing');
       console.error('[PROJECT-DETAIL] Workspace value:', this.project()?.workspace);
       return;
     }
-    
+
     console.log('[PROJECT-DETAIL] ✅ Opening modal with workspace ID:', workspaceId);
     this.showTeamModal.set(true);
   }
@@ -210,7 +210,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   async loadConfigProject(id: string): Promise<void> {
-    /*En caso que tengan configuraciones iniciales*/
+    /* En caso que tengan configuraciones iniciales*/
     this.loading.set(true);
     this.error.set(null);
     try {
@@ -228,7 +228,6 @@ export class ProjectDetailComponent implements OnInit {
       this.loading.set(false);
     }
   }
-
 
 
   getStatusBadgeClass(status: string): string {
@@ -250,7 +249,7 @@ export class ProjectDetailComponent implements OnInit {
 
   showSprintModal(): void {
     this.openModal.set(true);
-  }  
+  }
 
   getPriorityBadgeClass(priority: string): string {
     switch (priority) {
@@ -270,9 +269,9 @@ export class ProjectDetailComponent implements OnInit {
   formatLabel(text: string): string {
     if (!text) return '';
     return text
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
   }
 
   goBack(): void {
@@ -280,7 +279,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   setActiveTab(tabId: string): void {
-    const tab = this.tabs.find(t => t.id === tabId);
+    const tab = this.tabs.find((t) => t.id === tabId);
     if (!tab) return;
 
     this.activeTab.set(tabId);
@@ -298,7 +297,7 @@ export class ProjectDetailComponent implements OnInit {
       console.log('[NAV] Navigating to sub-tab:', route);
       console.log('[NAV] Current route:', this.route);
       // Navigate to child route relative to current route
-      this.router.navigate([route], { relativeTo: this.route });
+      this.router.navigate([route], {relativeTo: this.route});
       this.codeDropdownOpen.set(false);
       this.diagramsDropdownOpen.set(false);
     }
@@ -308,7 +307,7 @@ export class ProjectDetailComponent implements OnInit {
     if (event) {
       event.stopPropagation();
     }
-    this.codeDropdownOpen.update(open => !open);
+    this.codeDropdownOpen.update((open) => !open);
     this.diagramsDropdownOpen.set(false);
   }
 
@@ -316,7 +315,7 @@ export class ProjectDetailComponent implements OnInit {
     if (event) {
       event.stopPropagation();
     }
-    this.diagramsDropdownOpen.update(open => !open);
+    this.diagramsDropdownOpen.update((open) => !open);
     this.codeDropdownOpen.set(false);
   }
 
@@ -326,7 +325,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   // AI Project Report Methods
-  async generateAiReport(forceRefresh: boolean = false): Promise<void> {
+  async generateAiReport(forceRefresh = false): Promise<void> {
     if (!this.project()) {
       this.aiReportError.set('Project not loaded');
       return;
@@ -346,14 +345,14 @@ export class ProjectDetailComponent implements OnInit {
       const response = await this.aiService.generateProjectReport({
         project_id: this.project()!.id,
         include_sprints: true,
-        include_issues: true
+        include_issues: true,
       }, forceRefresh).toPromise();
 
       console.log('[PROJECT-DETAIL] ✅ AI report received:', response);
 
       if (response) {
         this.aiReport.set(response);
-        
+
         // Warn if all metrics are zero (no data available)
         if (response.completion === 0 && response.velocity === 0 && response.risk_score === 0) {
           console.warn('[PROJECT-DETAIL] ⚠️ All metrics are zero - project may have no completed work');
@@ -365,12 +364,12 @@ export class ProjectDetailComponent implements OnInit {
         status: err.status,
         statusText: err.statusText,
         message: err.message,
-        error: err.error
+        error: err.error,
       });
 
       // Provide user-friendly error messages based on error type
       let errorMessage = 'Failed to generate AI report. Please try again.';
-      
+
       if (err.status === 401 || err.status === 403) {
         errorMessage = 'You do not have permission to generate reports for this project.';
       } else if (err.status === 404) {
@@ -386,7 +385,7 @@ export class ProjectDetailComponent implements OnInit {
       } else if (err.error?.detail) {
         errorMessage = err.error.detail;
       }
-      
+
       this.aiReportError.set(errorMessage);
     } finally {
       this.aiReportLoading.set(false);
@@ -394,7 +393,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   toggleAiReport(): void {
-    this.showAiReport.update(v => !v);
+    this.showAiReport.update((v) => !v);
     if (this.showAiReport() && !this.aiReport()) {
       this.generateAiReport();
     }
@@ -412,11 +411,11 @@ export class ProjectDetailComponent implements OnInit {
     if (!report || !report.generated_at) {
       return false;
     }
-    
+
     const generatedAt = new Date(report.generated_at).getTime();
     const now = Date.now();
     const ageMinutes = (now - generatedAt) / 1000 / 60;
-    
+
     return ageMinutes < 5;
   }
 
@@ -428,11 +427,11 @@ export class ProjectDetailComponent implements OnInit {
     if (!report || !report.generated_at) {
       return 'Unknown';
     }
-    
+
     const generatedAt = new Date(report.generated_at).getTime();
     const now = Date.now();
     const ageMinutes = Math.floor((now - generatedAt) / 1000 / 60);
-    
+
     if (ageMinutes < 1) {
       return 'Just now';
     } else if (ageMinutes === 1) {

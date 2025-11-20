@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import {Component} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-footer',
@@ -19,7 +19,7 @@ import { RouterLink } from '@angular/router';
               <span class="ml-2 text-xl font-bold text-gray-900">FICCT SCRUM</span>
             </div>
             <p class="text-gray-600 text-sm max-w-md">
-              Professional project management platform designed for agile teams. 
+              Professional project management platform designed for agile teams.
               Organize your work, collaborate effectively, and deliver results with confidence.
             </p>
             <div class="mt-6 flex space-x-4">
@@ -131,7 +131,7 @@ import { RouterLink } from '@angular/router';
         </div>
       </div>
     </footer>
-  `
+  `,
 })
 export class FooterComponent {
   currentYear = new Date().getFullYear();

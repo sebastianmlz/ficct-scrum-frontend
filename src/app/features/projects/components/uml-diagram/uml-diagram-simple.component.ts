@@ -1,12 +1,12 @@
-import { Component, OnInit, ViewChild, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DiagramService } from '../../../../core/services/diagram.service';
-import { MermaidGeneratorService } from '../../../../core/services/mermaid-generator.service';
-import { GitHubIntegrationService } from '../../../../core/services/github-integration.service';
-import { DiagramErrorStateComponent } from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
-import { MermaidViewerComponent } from '../../../../shared/components/mermaid-viewer/mermaid-viewer.component';
-import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../../../shared/utils/diagram-error.utils';
+import {Component, OnInit, ViewChild, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {DiagramService} from '../../../../core/services/diagram.service';
+import {MermaidGeneratorService} from '../../../../core/services/mermaid-generator.service';
+import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
+import {DiagramErrorStateComponent} from '../../../../shared/components/diagram-error-state/diagram-error-state.component';
+import {MermaidViewerComponent} from '../../../../shared/components/mermaid-viewer/mermaid-viewer.component';
+import {DiagramErrorState, analyzeDiagramError, logDiagramError} from '../../../../shared/utils/diagram-error.utils';
 
 @Component({
   selector: 'app-uml-diagram-simple',
@@ -14,7 +14,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
   imports: [CommonModule, DiagramErrorStateComponent, MermaidViewerComponent],
   template: `
     <div class="uml-diagram-page">
-      
+
       <!-- HEADER -->
       <div class="page-header">
         <button type="button" (click)="goBack()" class="back-btn">
@@ -64,7 +64,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       @if (showDetailPanel() && selectedClass()) {
         <div class="detail-panel-overlay" (click)="closeDetailPanel()"></div>
         <div class="detail-panel" (click)="$event.stopPropagation()">
-          
+
           <button class="close-btn" (click)="closeDetailPanel()">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -88,8 +88,8 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
                     <span class="visibility">{{ attr.required ? '+' : '-' }}</span>
                     <span class="name">{{ attr.name }}</span>
                     <span class="type">{{ attr.type }}</span>
-                    @if (attr.primary_key) { 
-                      <span class="badge pk">PK</span> 
+                    @if (attr.primary_key) {
+                      <span class="badge pk">PK</span>
                     }
                   </div>
                 }
@@ -424,7 +424,7 @@ import { DiagramErrorState, analyzeDiagramError, logDiagramError } from '../../.
       color: #9ca3af;
       font-style: italic;
     }
-  `]
+  `],
 })
 export class UMLDiagramSimpleComponent implements OnInit {
   @ViewChild(MermaidViewerComponent) mermaidViewer?: MermaidViewerComponent;
@@ -432,7 +432,7 @@ export class UMLDiagramSimpleComponent implements OnInit {
   // Data
   umlData: any | null = null;
   mermaidCode = signal<string>('');
-  projectId: string = '';
+  projectId = '';
 
   // State
   isLoading = signal(false);
@@ -452,7 +452,7 @@ export class UMLDiagramSimpleComponent implements OnInit {
     private router: Router,
     private diagramService: DiagramService,
     private mermaidGenerator: MermaidGeneratorService,
-    private githubService: GitHubIntegrationService
+    private githubService: GitHubIntegrationService,
   ) {
     this.projectId = this.route.parent?.snapshot.paramMap.get('id') || '';
   }
@@ -472,7 +472,7 @@ export class UMLDiagramSimpleComponent implements OnInit {
         try {
           console.log('[UML-SIMPLE] Response received');
           console.log('[UML-SIMPLE] Response type:', typeof response.data);
-          
+
           // Parse cache
           if (response.cached !== undefined) {
             this.cacheStatus.set(response.cached ? 'HIT' : 'MISS');
@@ -506,8 +506,8 @@ export class UMLDiagramSimpleComponent implements OnInit {
           // Generate Mermaid code
           console.log('[UML-SIMPLE] Generating Mermaid syntax...');
           const mermaidSyntax = this.mermaidGenerator.generateClassDiagram(
-            data.classes || [],
-            data.relationships || []
+              data.classes || [],
+              data.relationships || [],
           );
 
           console.log('[UML-SIMPLE] Mermaid code generated');
@@ -521,7 +521,7 @@ export class UMLDiagramSimpleComponent implements OnInit {
           console.log('[UML-SIMPLE] ✅ Diagram loaded successfully:', {
             classes: data.classes?.length || 0,
             relationships: data.relationships?.length || 0,
-            mermaidCodeLength: mermaidSyntax.length
+            mermaidCodeLength: mermaidSyntax.length,
           });
 
           // Trigger render after view init
@@ -533,7 +533,6 @@ export class UMLDiagramSimpleComponent implements OnInit {
               console.warn('[UML-SIMPLE] ⚠️ MermaidViewer not available yet');
             }
           }, 100);
-
         } catch (parseError: any) {
           console.error('[UML-SIMPLE] ❌ Parse error:', parseError);
           console.error('[UML-SIMPLE] Error message:', parseError.message);
@@ -542,7 +541,7 @@ export class UMLDiagramSimpleComponent implements OnInit {
             title: 'Failed to Parse Diagram',
             message: `The diagram data could not be parsed: ${parseError.message}`,
             icon: 'error',
-            canRetry: true
+            canRetry: true,
           });
           this.isLoading.set(false);
         }
@@ -552,13 +551,13 @@ export class UMLDiagramSimpleComponent implements OnInit {
         logDiagramError('UML-SIMPLE', err);
         this.errorState.set(analyzeDiagramError(err, this.projectId));
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
   loadGitHubIntegration(): void {
     console.log('[UML-SIMPLE] Loading GitHub integration for project:', this.projectId);
-    
+
     this.githubService.checkIntegrationStatus(this.projectId).subscribe({
       next: (integration) => {
         if (integration) {
@@ -572,13 +571,13 @@ export class UMLDiagramSimpleComponent implements OnInit {
       error: (err) => {
         console.error('[UML-SIMPLE] Error loading GitHub integration:', err);
         this.gitHubIntegration = null;
-      }
+      },
     });
   }
 
   onClassSelected(className: string): void {
     const cls = this.umlData?.classes?.find((c: any) =>
-      c.name === className || c.name.replace(/[^a-zA-Z0-9_]/g, '_') === className
+      c.name === className || c.name.replace(/[^a-zA-Z0-9_]/g, '_') === className,
     );
 
     if (cls) {
@@ -598,7 +597,7 @@ export class UMLDiagramSimpleComponent implements OnInit {
       return;
     }
 
-    const { repository_owner, repository_name } = this.gitHubIntegration;
+    const {repository_owner, repository_name} = this.gitHubIntegration;
     const url = `https://github.com/${repository_owner}/${repository_name}/blob/main/${cls.file_path}`;
     window.open(url, '_blank');
   }
@@ -608,6 +607,6 @@ export class UMLDiagramSimpleComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['../../'], { relativeTo: this.route });
+    this.router.navigate(['../../'], {relativeTo: this.route});
   }
 }

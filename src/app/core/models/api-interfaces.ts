@@ -1,6 +1,6 @@
 // OpenAPI Specification Interfaces
 
-import { Sprint, Issue, IssueType } from "./interfaces";
+import {Sprint, Issue, IssueType} from './interfaces';
 
 export type OrganizationTypeEnum = 'startup' | 'enterprise' | 'agency' | 'nonprofit' | 'education' | 'government' | 'other';
 export type SubscriptionPlanEnum = 'free' | 'basic' | 'professional' | 'enterprise';

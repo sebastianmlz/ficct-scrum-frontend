@@ -4,54 +4,54 @@
  */
 
 export interface PriorityConfig {
-  code: string;      // "P0", "P1", "P2", "P3", "P4"
-  label: string;     // "Critical", "High", "Medium", "Low", "Lowest"
-  color: string;     // Hex color for visual representation
-  bgColor: string;   // Background color for badges
+  code: string; // "P0", "P1", "P2", "P3", "P4"
+  label: string; // "Critical", "High", "Medium", "Low", "Lowest"
+  color: string; // Hex color for visual representation
+  bgColor: string; // Background color for badges
   textColor: string; // Text color for badges
-  order: number;     // For sorting (0 = highest priority)
+  order: number; // For sorting (0 = highest priority)
 }
 
 export const PRIORITY_MAP: Record<string, PriorityConfig> = {
-  'P0': {
+  P0: {
     code: 'P0',
     label: 'Critical',
     color: '#BF2600',
     bgColor: '#FFEBE6',
     textColor: '#BF2600',
-    order: 0
+    order: 0,
   },
-  'P1': {
+  P1: {
     code: 'P1',
     label: 'High',
     color: '#FF5630',
     bgColor: '#FFEBE6',
     textColor: '#FF5630',
-    order: 1
+    order: 1,
   },
-  'P2': {
+  P2: {
     code: 'P2',
     label: 'Medium',
     color: '#FF8B00',
     bgColor: '#FFF4E6',
     textColor: '#FF8B00',
-    order: 2
+    order: 2,
   },
-  'P3': {
+  P3: {
     code: 'P3',
     label: 'Low',
     color: '#36B37E',
     bgColor: '#E3FCEF',
     textColor: '#006644',
-    order: 3
+    order: 3,
   },
-  'P4': {
+  P4: {
     code: 'P4',
     label: 'Lowest',
     color: '#6B778C',
     bgColor: '#F4F5F7',
     textColor: '#42526E',
-    order: 4
+    order: 4,
   },
 };
 
@@ -100,7 +100,9 @@ export function getPriorityTextColor(code: string | null | undefined): string {
  * @param code Priority code (P0, P1, P2, P3, P4)
  * @returns Full priority configuration or null
  */
-export function getPriorityConfig(code: string | null | undefined): PriorityConfig | null {
+export function getPriorityConfig(
+    code: string | null | undefined,
+): PriorityConfig | null {
   if (!code) return null;
   return PRIORITY_MAP[code] || null;
 }
@@ -118,16 +120,18 @@ export function getAllPriorities(): PriorityConfig[] {
  * @param code Priority code (P0, P1, P2, P3, P4)
  * @returns Tailwind CSS classes string
  */
-export function getPriorityTailwindClasses(code: string | null | undefined): string {
+export function getPriorityTailwindClasses(
+    code: string | null | undefined,
+): string {
   if (!code) return 'bg-gray-100 text-gray-700';
-  
+
   const classMap: Record<string, string> = {
-    'P0': 'bg-red-100 text-red-700',
-    'P1': 'bg-red-100 text-red-700',
-    'P2': 'bg-orange-100 text-orange-700',
-    'P3': 'bg-green-100 text-green-700',
-    'P4': 'bg-gray-100 text-gray-700',
+    P0: 'bg-red-100 text-red-700',
+    P1: 'bg-red-100 text-red-700',
+    P2: 'bg-orange-100 text-orange-700',
+    P3: 'bg-green-100 text-green-700',
+    P4: 'bg-gray-100 text-gray-700',
   };
-  
+
   return classMap[code] || 'bg-gray-100 text-gray-700';
 }

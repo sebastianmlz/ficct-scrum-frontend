@@ -1,17 +1,17 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthStore } from '../../../core/store/auth.store';
-import { User } from '../../../core/models/interfaces';
-import { TimezoneEnum, LanguageEnum } from '../../../core/models/enums';
+import {Component, inject, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
+import {AuthStore} from '../../../core/store/auth.store';
+import {User} from '../../../core/models/interfaces';
+import {TimezoneEnum, LanguageEnum} from '../../../core/models/enums';
 
 @Component({
   selector: 'app-profile-edit',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './profile-edit.component.html',
-  styleUrls: ['./profile-edit.component.css']
+  styleUrls: ['./profile-edit.component.css'],
 })
 export class ProfileEditComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -33,7 +33,7 @@ export class ProfileEditComponent implements OnInit {
     github_username: [''],
     linkedin_url: [''],
     timezone: [''],
-    language: ['']
+    language: [''],
   });
 
   ngOnInit(): void {
@@ -53,7 +53,7 @@ export class ProfileEditComponent implements OnInit {
         github_username: user.profile?.github_username || '',
         linkedin_url: user.profile?.linkedin_url || '',
         timezone: user.profile?.timezone || '',
-        language: user.profile?.language || ''
+        language: user.profile?.language || '',
       });
     }
     this.loading.set(false);
