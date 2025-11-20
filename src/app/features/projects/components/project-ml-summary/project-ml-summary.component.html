@@ -1,0 +1,172 @@
+<div class="project-ml-summary">
+  @if (loading() && !summary()) {
+    <!-- Loading State -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      @for (i of [1,2,3]; track i) {
+        <div class="metric-card animate-pulse">
+          <div class="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+          <div class="h-8 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div class="h-3 bg-gray-200 rounded w-full"></div>
+        </div>
+      }
+    </div>
+  } @else if (error()) {
+    <!-- Error State -->
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-red-700 font-medium">{{ error() }}</p>
+      </div>
+      <button 
+        type="button"
+        (click)="retryLoad()"
+        class="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+        Retry
+      </button>
+    </div>
+  } @else if (summary()) {
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Completion Card -->
+      <div class="metric-card bg-white border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Completion</h3>
+          <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        
+        <!-- Circular Progress -->
+        <div class="relative w-32 h-32 mx-auto mb-4">
+          <svg class="transform -rotate-90 w-32 h-32">
+            <circle
+              cx="64"
+              cy="64"
+              r="56"
+              stroke="currentColor"
+              stroke-width="8"
+              fill="none"
+              class="text-gray-200"
+            />
+            <circle
+              cx="64"
+              cy="64"
+              r="56"
+              stroke="currentColor"
+              stroke-width="8"
+              fill="none"
+              [attr.stroke-dasharray]="352"
+              [attr.stroke-dashoffset]="352 - (352 * summary()!.completion / 100)"
+              [ngClass]="getCompletionClass()"
+              class="transition-all duration-1000"
+            />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-3xl font-bold" [ngClass]="getCompletionClass()">
+              {{ summary()!.completion.toFixed(0) }}%
+            </span>
+          </div>
+        </div>
+        
+        <div class="text-center text-sm text-gray-600">
+          {{ summary()!.metrics_breakdown.completed_issues }} of {{ summary()!.metrics_breakdown.total_issues }} issues
+        </div>
+      </div>
+
+      <!-- Velocity Card -->
+      <div class="metric-card bg-white border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Velocity</h3>
+          <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-5xl font-bold text-purple-600 mb-2">
+            {{ summary()!.velocity.toFixed(1) }}
+          </div>
+          <div class="text-sm text-gray-600">points/sprint</div>
+          
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <div class="text-xs text-gray-500 mb-1">Based on</div>
+            <div class="text-sm font-medium text-gray-700">
+              {{ summary()!.metrics_breakdown.sprints_analyzed }} sprints analyzed
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Score Card -->
+      <div class="metric-card bg-white border-2 rounded-lg p-6 hover:shadow-lg transition-shadow"
+           [ngClass]="getRiskScoreBgClass()">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-medium text-gray-600">Risk Score</h3>
+          <svg class="w-5 h-5" [ngClass]="getRiskScoreClass()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        
+        <div class="text-center">
+          <div class="text-5xl font-bold mb-2" [ngClass]="getRiskScoreClass()">
+            {{ summary()!.risk_score.toFixed(0) }}
+          </div>
+          <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4"
+               [ngClass]="getRiskScoreBgClass()">
+            {{ getRiskLabel() }}
+          </div>
+          
+          <!-- Risk Gauge -->
+          <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div 
+              class="h-2 rounded-full transition-all duration-1000"
+              [class.bg-green-500]="summary()!.risk_score < 40"
+              [class.bg-yellow-500]="summary()!.risk_score >= 40 && summary()!.risk_score < 70"
+              [class.bg-red-500]="summary()!.risk_score >= 70"
+              [style.width.%]="summary()!.risk_score">
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 text-xs text-gray-600">
+            <div class="text-left">
+              <div class="font-medium">{{ summary()!.metrics_breakdown.unassigned_issues }}</div>
+              <div>Unassigned</div>
+            </div>
+            <div class="text-right">
+              <div class="font-medium">{{ summary()!.metrics_breakdown.overdue_issues }}</div>
+              <div>Overdue</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Refresh Button -->
+    <div class="flex justify-end mt-4">
+      <button
+        type="button"
+        (click)="manualRefresh()"
+        [disabled]="loading()"
+        class="inline-flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50">
+        <svg 
+          class="w-4 h-4"
+          [class.animate-spin]="loading()"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Last Updated -->
+    @if (summary()!.generated_at) {
+      <div class="text-xs text-gray-500 text-right mt-2">
+        Last updated: {{ summary()!.generated_at | date:'short' }}
+      </div>
+    }
+  }
+</div>

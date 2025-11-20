@@ -59,9 +59,10 @@ import { ProjectMember, Issue } from '../../../core/models/interfaces';
           <!-- Member Options -->
           @for (member of filteredMembers(); track member.id) {
             <button
-              (click)="selectAssignee(member.user.user_uuid || member.user.id.toString())"
-              class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
-              [class.bg-blue-50]="currentAssignee() === (member.user.user_uuid || member.user.id.toString())">
+              (click)="selectAssignee(member.user.user_uuid || null)"
+              [disabled]="!member.user.user_uuid"
+              class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed"
+              [class.bg-blue-50]="currentAssignee() === member.user.user_uuid">
               <div 
                 [class]="'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ' + getAvatarColor(member.user.full_name)">
                 {{ getInitials(member.user.full_name) }}
@@ -69,8 +70,11 @@ import { ProjectMember, Issue } from '../../../core/models/interfaces';
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">{{ member.user.full_name }}</p>
                 <p class="text-xs text-gray-500 truncate">{{ member.user.email }}</p>
+                @if (!member.user.user_uuid) {
+                  <p class="text-xs text-red-600">⚠️ Missing UUID</p>
+                }
               </div>
-              @if (currentAssignee() === (member.user.user_uuid || member.user.id.toString())) {
+              @if (currentAssignee() === member.user.user_uuid) {
                 <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                 </svg>
@@ -129,7 +133,9 @@ export class QuickAssigneePopoverComponent implements OnInit {
   currentAssignee = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.currentAssignee.set(this.issue.assignee?.user_uuid || this.issue.assignee?.id.toString() || null);
+    // Only use user_uuid, not ID fallback
+    this.currentAssignee.set(this.issue.assignee?.user_uuid || null);
+    console.log('[QUICK ASSIGNEE] Current assignee UUID:', this.currentAssignee());
     this.calculatePosition();
     this.loadMembers();
   }
@@ -167,6 +173,21 @@ export class QuickAssigneePopoverComponent implements OnInit {
 
     this.projectService.getProjectMembers(this.projectId).subscribe({
       next: (response) => {
+        console.log('[QUICK ASSIGNEE] ✅ Members loaded:', response.results?.length);
+        console.log('[QUICK ASSIGNEE] Sample member data:', response.results?.[0]);
+        console.log('[QUICK ASSIGNEE] Sample user object:', response.results?.[0]?.user);
+        console.log('[QUICK ASSIGNEE] Has user_uuid?:', !!response.results?.[0]?.user?.user_uuid);
+        
+        // Check if backend is returning user_uuid
+        const hasUserUuid = response.results?.some(m => m.user?.user_uuid);
+        if (!hasUserUuid) {
+          console.error('[QUICK ASSIGNEE] ⚠️ BACKEND ISSUE: user_uuid not provided in members response');
+          console.error('[QUICK ASSIGNEE] Backend must include user_uuid in UserBasic serializer');
+          this.error.set('Backend configuration error: user_uuid missing. Contact administrator.');
+          this.loading.set(false);
+          return;
+        }
+        
         this.members.set(response.results || []);
         this.filteredMembers.set(response.results || []);
         this.loading.set(false);

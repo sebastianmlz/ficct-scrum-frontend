@@ -58,18 +58,58 @@
             </div>
           </div>
 
-          <!-- Similar Issues -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-              </svg>
-              <h3 class="text-sm font-semibold text-blue-900">Based on Similar Issues</h3>
+          <!-- Probability Distribution -->
+          @if (recommendation()!.probability_distribution && getDistributionKeys().length > 0) {
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-gray-900 mb-3">Probability Distribution</h3>
+              <div class="space-y-2">
+                @for (points of getDistributionKeys(); track points) {
+                  <div class="flex items-center gap-2">
+                    <div class="w-12 text-sm font-medium text-gray-700">{{ points }} pts</div>
+                    <div class="flex-1 bg-gray-200 rounded-full h-6 relative overflow-hidden">
+                      <div 
+                        class="h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-2"
+                        [class.bg-purple-600]="points === recommendation()!.recommended_points.toString()"
+                        [class.bg-purple-300]="points !== recommendation()!.recommended_points.toString()"
+                        [style.width.%]="(recommendation()!.probability_distribution![points] * 100)">
+                        <span class="text-xs font-semibold text-white">
+                          {{ (recommendation()!.probability_distribution![points] * 100).toFixed(0) }}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
             </div>
-            <p class="text-sm text-blue-800">
-              This recommendation is based on analysis of <span class="font-bold">{{ recommendation()!.similar_issues_count }}</span> similar issues in your project history.
-            </p>
-          </div>
+          }
+
+          <!-- AI Reasoning -->
+          @if (recommendation()!.reasoning) {
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <h3 class="text-sm font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                AI Reasoning
+              </h3>
+              <p class="text-sm text-purple-800 leading-relaxed">{{ recommendation()!.reasoning }}</p>
+            </div>
+          }
+
+          <!-- Similar Issues -->
+          @if (recommendation()!.similar_issues_count) {
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+                <h3 class="text-sm font-semibold text-blue-900">Based on Similar Issues</h3>
+              </div>
+              <p class="text-sm text-blue-800">
+                This recommendation is based on analysis of <span class="font-bold">{{ recommendation()!.similar_issues_count }}</span> similar issues in your project history.
+              </p>
+            </div>
+          }
         </div>
       }
     </div>

@@ -1,6 +1,7 @@
-<div class="bg-gray-50">
+<!-- Board Page Container - Full height -->
+<div class="h-full flex flex-col bg-gray-50 overflow-hidden">
   <!-- Loading State -->
-  <div *ngIf="loading()" class="flex items-center justify-center py-12">
+  <div *ngIf="loading()" class="flex items-center justify-center py-12 flex-1">
     <div class="text-center">
       <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
       <p class="mt-4 text-gray-600">Loading board...</p>
@@ -8,7 +9,7 @@
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error() && !loading()" class="flex items-center justify-center py-12 px-4">
+  <div *ngIf="error() && !loading()" class="flex items-center justify-center py-12 px-4 flex-1">
     <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md w-full">
       <div class="flex">
         <svg class="h-6 w-6 text-red-400" fill="currentColor" viewBox="0 0 20 20">
@@ -28,63 +29,74 @@
   </div>
 
   <!-- Board Content -->
-  <div *ngIf="board() && !loading()" class="flex flex-col">
-    <!-- ✅ Horizontal Filter Toolbar -->
-    <app-board-filter-toolbar
-      [availableMembers]="availableMembers()"
-      [availableIssueTypes]="availableIssueTypes()"
-      [availableStatuses]="[]"
-      [totalIssuesCount]="getTotalIssuesCount()"
-      [filteredIssuesCount]="getFilteredIssuesCount()"
-      (filtersChanged)="onToolbarFiltersChanged($event)"
-      (searchChanged)="onSearchChange($event)">
-    </app-board-filter-toolbar>
-
-    <!-- Kanban Board - Responsive Layout -->
-    <div class="overflow-x-auto overflow-y-auto bg-gray-50 px-2 sm:px-4 md:px-6 py-3 md:py-4 relative min-h-[500px] max-h-[calc(100vh-400px)]">
-      <!-- Empty State - No Columns -->
-      <div *ngIf="columns().length === 0" class="flex items-center justify-center h-full">
-        <div class="text-center max-w-md">
-          <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
-          </svg>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
-          <p class="text-sm text-gray-600 mb-6">
-            Get started by adding your first column to organize your work
-          </p>
-          <button
-            (click)="onAddColumn()"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Add Your First Column
-          </button>
-        </div>
+  <div *ngIf="board() && !loading()" class="flex flex-col flex-1 overflow-hidden">
+    <!-- Filters Bar - Aligned with header -->
+    <div class="flex-shrink-0">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <app-board-filter-toolbar
+          [availableMembers]="availableMembers()"
+          [availableIssueTypes]="availableIssueTypes()"
+          [availableStatuses]="[]"
+          [totalIssuesCount]="getTotalIssuesCount()"
+          [filteredIssuesCount]="getFilteredIssuesCount()"
+          (filtersChanged)="onToolbarFiltersChanged($event)"
+          (searchChanged)="onSearchChange($event)">
+        </app-board-filter-toolbar>
       </div>
+    </div>
 
-      <!-- Columns - Horizontal on desktop, vertical on mobile -->
-      <div *ngIf="columns().length > 0" class="flex flex-col md:flex-row gap-3 md:gap-4 h-full md:overflow-x-auto">
+    <!-- Board Area - Centered wrapper for horizontal scroll -->
+    <div class="flex-1 overflow-hidden">
+      <div class="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Horizontal Scroll Container -->
+        <div class="h-full overflow-x-auto overflow-y-hidden">
+          <!-- Empty State -->
+          <div *ngIf="columns().length === 0" class="flex items-center justify-center h-full">
+            <div class="text-center max-w-md">
+              <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+              </svg>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
+              <p class="text-sm text-gray-600 mb-6">
+                Get started by adding your first column to organize your work
+              </p>
+              <button
+                (click)="onAddColumn()"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Your First Column
+              </button>
+            </div>
+          </div>
+
+          <!-- Columns Container - Dynamic width based on column count -->
+          <div *ngIf="columns().length > 0" class="flex gap-4 py-4 h-full min-w-full" style="width: fit-content;">
         <app-board-column
           *ngFor="let column of columns(); trackBy: trackByColumnId"
           [column]="column"
           [issues]="getIssuesForColumn(column)"
           [connectedDropLists]="connectedDropLists()"
+          [projectId]="projectId()"
           (issueDropped)="onIssueDropped($event)"
           (createIssueClicked)="onCreateIssueClicked($event)"
-          (issueClicked)="onIssueClicked($event)">
+          (issueClicked)="onIssueClicked($event)"
+          (assigneeChanged)="onAssigneeChangedInColumn($event)">
         </app-board-column>
 
-        <!-- Add Column Button - Responsive -->
-        <div class="bg-gray-200 rounded-lg p-3 w-full md:min-w-[280px] md:max-w-[280px] lg:min-w-[300px] lg:max-w-[300px] flex items-center justify-center md:flex-shrink-0">
-          <button
-            (click)="onAddColumn()"
-            class="w-full px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-300 rounded transition-colors flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Add Column
-          </button>
+            <!-- Add Column Button -->
+            <div class="bg-gray-200 rounded-lg p-3 min-w-[280px] max-w-[280px] lg:min-w-[300px] lg:max-w-[300px] flex items-center justify-center flex-shrink-0 h-full">
+              <button
+                (click)="onAddColumn()"
+                class="w-full px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-300 rounded transition-colors flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Column
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -92,21 +104,21 @@
 
   <!-- Create Column Dialog Overlay -->
   <div
-    *ngIf="showCreateColumnDialog() && board()?.project?.id"
+    *ngIf="showCreateColumnDialog() && projectId()"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <app-create-column-dialog
       [boardId]="boardId"
-      [projectId]="board()!.project.id"
+      [projectId]="projectId()"
       (columnCreated)="onColumnCreated($event)"
       (canceled)="onColumnDialogCanceled()">
     </app-create-column-dialog>
   </div>
 
   <!-- Create Issue Dialog -->
-  @if (showCreateIssueDialog() && board()?.project?.id) {
+  @if (showCreateIssueDialog() && projectId()) {
     <app-create-issue-dialog
       [boardId]="boardId"
-      [projectId]="board()!.project.id"
+      [projectId]="projectId()"
       [defaultStatusId]="createIssueColumnId() || undefined"
       (issueCreated)="onIssueCreatedFromDialog($event)"
       (canceled)="onIssueDialogCanceled()">
@@ -114,10 +126,10 @@
   }
 
   <!-- Issue Detail Modal -->
-  @if (showIssueDetailModal() && selectedIssueId() && board()?.project?.id) {
+  @if (showIssueDetailModal() && selectedIssueId() && projectId()) {
     <app-issue-detail-modal
       [issueId]="selectedIssueId()!"
-      [projectId]="board()!.project.id"
+      [projectId]="projectId()"
       (closed)="onIssueDetailClosed()"
       (issueUpdated)="onIssueUpdatedFromModal($event)"
       (issueDeleted)="onIssueDeletedFromModal($event)">

@@ -15,10 +15,12 @@ export class BoardColumnComponent {
   @Input() issues: Issue[] = [];
   @Input() loading: boolean = false;
   @Input() connectedDropLists: string[] = [];
+  @Input() projectId!: string;
   
   @Output() issueDropped = new EventEmitter<{ issueId: string; targetColumnId: string; targetStatusId: string }>();
   @Output() createIssueClicked = new EventEmitter<string>();
   @Output() issueClicked = new EventEmitter<Issue>();
+  @Output() assigneeChanged = new EventEmitter<{ issueId: string; assigneeId: string | null }>();
 
   drop(event: CdkDragDrop<Issue[]>): void {
     console.log('[COLUMN DROP] === DROP EVENT EN COLUMNA ===');
@@ -65,6 +67,10 @@ export class BoardColumnComponent {
 
   onIssueClick(issue: Issue): void {
     this.issueClicked.emit(issue);
+  }
+
+  onAssigneeChanged(event: { issueId: string; assigneeId: string | null }): void {
+    this.assigneeChanged.emit(event);
   }
 
   getWipStatus(): 'normal' | 'warning' | 'exceeded' {

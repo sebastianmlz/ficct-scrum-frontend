@@ -54,8 +54,28 @@ export class MlPredictEffortComponent {
         this.prediction.set(result);
       }
     } catch (error: any) {
-      console.error('Error predicting effort:', error);
-      const errorMsg = error?.error?.error || error?.error?.message || error?.message || 'Failed to predict effort';
+      console.error('[ML Predict Effort] Error:', error);
+      
+      // Handle different error types
+      if (error.message === 'Session expired') {
+        // Auth interceptor already handled this
+        return;
+      }
+      
+      let errorMsg = 'Failed to predict effort';
+      
+      if (error.status === 0) {
+        errorMsg = 'Connection lost. Please check your internet and try again.';
+      } else if (error.status === 400) {
+        errorMsg = error?.error?.error || 'Please provide valid issue details.';
+      } else if (error.status === 404) {
+        errorMsg = 'Project not found. Please refresh and try again.';
+      } else if (error.status === 500) {
+        errorMsg = 'Prediction service temporarily unavailable. Please try again later.';
+      } else {
+        errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
+      }
+      
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);

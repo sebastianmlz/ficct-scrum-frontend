@@ -1,11 +1,16 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { NotificationService } from '../services/notification.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   private authService = inject(AuthService);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Skip auth header for login, register, and password reset endpoints
@@ -29,7 +34,33 @@ export class AuthInterceptor implements HttpInterceptor {
       console.log('AuthInterceptor: No token available for request:', req.url);
     }
 
-    return next.handle(req);
+    // Handle the request and catch authentication errors
+    return next.handle(req).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // Handle 401 Unauthorized or 403 Forbidden
+        if (error.status === 401 || error.status === 403) {
+          console.error('[Auth Interceptor] Authentication error:', error.status);
+          
+          // Clear all auth data
+          localStorage.removeItem('access');
+          localStorage.removeItem('refresh');
+          localStorage.removeItem('user');
+          localStorage.removeItem('user_role');
+          
+          // Show user-friendly message
+          this.notificationService.error('Session expired. Please log in again.');
+          
+          // Redirect to login page
+          this.router.navigate(['/login']);
+          
+          // Return error to prevent further processing
+          return throwError(() => new Error('Session expired'));
+        }
+        
+        // For other errors, pass them through
+        return throwError(() => error);
+      })
+    );
   }
 
   private shouldSkipAuth(url: string): boolean {

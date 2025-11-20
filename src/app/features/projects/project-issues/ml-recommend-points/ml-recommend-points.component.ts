@@ -54,8 +54,28 @@ export class MlRecommendPointsComponent {
         this.recommendation.set(result);
       }
     } catch (error: any) {
-      console.error('Error recommending points:', error);
-      const errorMsg = error?.error?.error || error?.error?.message || error?.message || 'Failed to recommend story points';
+      console.error('[ML Recommend Points] Error:', error);
+      
+      // Handle different error types
+      if (error.message === 'Session expired') {
+        // Auth interceptor already handled this
+        return;
+      }
+      
+      let errorMsg = 'Failed to recommend story points';
+      
+      if (error.status === 0) {
+        errorMsg = 'Connection lost. Please check your internet and try again.';
+      } else if (error.status === 400) {
+        errorMsg = error?.error?.error || 'Please provide valid issue details.';
+      } else if (error.status === 404) {
+        errorMsg = 'Project not found. Please refresh and try again.';
+      } else if (error.status === 500) {
+        errorMsg = 'Prediction service temporarily unavailable. Please try again later.';
+      } else {
+        errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
+      }
+      
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);
@@ -64,6 +84,18 @@ export class MlRecommendPointsComponent {
 
   getStars(points: number): number[] {
     return Array(Math.min(points, 13)).fill(0);
+  }
+
+  getDistributionKeys(): string[] {
+    const rec = this.recommendation();
+    if (!rec || !rec.probability_distribution) {
+      return [];
+    }
+    // Sort by story points value (Fibonacci sequence)
+    return Object.keys(rec.probability_distribution)
+      .map(k => parseInt(k))
+      .sort((a, b) => a - b)
+      .map(k => k.toString());
   }
 
   applyRecommendation(): void {

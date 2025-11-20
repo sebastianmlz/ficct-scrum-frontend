@@ -39,6 +39,24 @@ The application uses a feature-based modular architecture with standalone compon
 - **Admin**: System administration including logs, error tracking, and Pinecone synchronization.
 - **Auth**: Authentication flow with login, registration, password reset, and token management.
 
+### Machine Learning Features
+
+The frontend integrates AI-powered predictions and recommendations to enhance project management workflows. Six ML features provide intelligent insights across issue management, sprint planning, and project health monitoring.
+
+**Available ML Capabilities:**
+- **Effort Prediction**: Estimates hours required for issues based on title, description, and historical data with confidence scoring and prediction ranges.
+- **Story Points Recommendation**: Suggests Fibonacci story points with probability distributions showing likelihood for each value.
+- **Assignment Suggestions**: Ranks team members for issue assignment based on skills, workload, performance, and availability with detailed scoring breakdowns.
+- **Sprint Risk Detection**: Monitors active sprints for velocity issues, unassigned work, capacity problems, and stalled issues with auto-refresh and mitigation suggestions.
+- **Project Summary**: Displays real-time project health metrics including completion percentage, velocity trends, and risk scores with interactive visualizations.
+- **Sprint Duration Estimation**: Predicts actual completion time for planned sprints based on team capacity and workload analysis.
+
+**Technical Stack**: ML Service with client-side caching (5-15 min TTL), comprehensive error handling with session expiration detection, and TailwindCSS-based UI components.
+
+**Usage**: ML predictions appear inline during issue creation, sprint planning, and board operations. Models activate automatically when backend ML endpoints are available. All predictions include confidence scores, AI reasoning, and fallback to manual input if ML unavailable.
+
+For detailed documentation including API endpoints, caching strategy, integration guide, and testing protocols, see **ML_FEATURES_IMPLEMENTATION.md** in the repository root.
+
 ### Routing
 
 All routes use lazy loading via `loadComponent` and `loadChildren` for code splitting and performance optimization. Route guards control access:

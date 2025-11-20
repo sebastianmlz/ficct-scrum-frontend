@@ -87,19 +87,19 @@
           }
 
           <!-- Similar Issues -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-              </svg>
-              <h3 class="text-sm font-semibold text-blue-900">Similar Issues Found</h3>
+          @if (prediction()!.similar_issues && prediction()!.similar_issues!.length > 0) {
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+                <h3 class="text-sm font-semibold text-blue-900">Similar Issues Found</h3>
+              </div>
+              <p class="text-sm text-blue-800">
+                Based on {{ prediction()!.similar_issues!.length }} similar issues in your project.
+              </p>
             </div>
-            <p class="text-sm text-blue-800">
-              {{ prediction()!.similar_issues.length > 0 ?
-                'Based on ' + prediction()!.similar_issues.length + ' similar issues in your project.' :
-                'No similar issues found for this type.' }}
-            </p>
-          </div>
+          }
         </div>
       }
     </div>

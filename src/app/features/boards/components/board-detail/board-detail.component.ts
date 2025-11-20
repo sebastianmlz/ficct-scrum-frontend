@@ -899,6 +899,54 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     this.onIssueDetailClosed();
   }
 
+  onAssigneeChangedInColumn(event: { issueId: string; assigneeId: string | null }): void {
+    console.log('[BOARD-DETAIL] Assignee changed via quick popover:', event);
+    
+    // Find the full user object from availableMembers
+    let fullAssignee = null;
+    if (event.assigneeId) {
+      const member = this.availableMembers().find(m => m.user?.user_uuid === event.assigneeId);
+      if (member?.user) {
+        fullAssignee = {
+          user_uuid: member.user.user_uuid,
+          id: member.user.id,
+          full_name: member.user.full_name,
+          email: member.user.email,
+          avatar: member.user.avatar
+        };
+        console.log('[BOARD-DETAIL] Found full user object:', fullAssignee);
+      } else {
+        console.warn('[BOARD-DETAIL] Could not find member in availableMembers, using minimal object');
+        fullAssignee = { user_uuid: event.assigneeId } as any;
+      }
+    }
+    
+    // Actualizar el issue en el estado local con el nuevo assignee
+    this.issuesByColumn.update(issuesMap => {
+      const newMap = new Map(issuesMap);
+      
+      for (const [statusId, issues] of newMap.entries()) {
+        const index = issues.findIndex(i => i.id === event.issueId);
+        if (index !== -1) {
+          // Crear una copia del issue con el assignee actualizado
+          const updatedIssue = {
+            ...issues[index],
+            assignee: fullAssignee
+          };
+          
+          const updatedIssues = [...issues];
+          updatedIssues[index] = updatedIssue;
+          newMap.set(statusId, updatedIssues);
+          
+          console.log('[BOARD-DETAIL] Issue assignee updated in state with full data:', updatedIssue.assignee);
+          break;
+        }
+      }
+      
+      return newMap;
+    });
+  }
+
   trackByColumnId(index: number, column: BoardColumn): string {
     return column.id;
   }
