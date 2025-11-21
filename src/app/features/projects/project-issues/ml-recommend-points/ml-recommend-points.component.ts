@@ -1,6 +1,8 @@
-import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MlService, RecommendStoryPointsResponse} from '../../../../core/services/ml.service';
+import {MlService, RecommendStoryPointsResponse}
+  from '../../../../core/services/ml.service';
 
 @Component({
   selector: 'app-ml-recommend-points',
@@ -13,7 +15,7 @@ export class MlRecommendPointsComponent implements OnInit {
   @Input() description?: string;
   @Input() issueType!: string;
   @Input() projectId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
   @Output() pointsRecommended = new EventEmitter<number>();
 
   private mlService = inject(MlService);
@@ -25,7 +27,8 @@ export class MlRecommendPointsComponent implements OnInit {
   ngOnInit(): void {
     // Validar que tenemos los datos necesarios
     if (!this.title || !this.projectId || !this.issueType) {
-      this.error.set('Missing required information: title, issue type, and project ID are required');
+      this.error.set('Missing required information: title, issue type, ' +
+        'and project ID are required');
       return;
     }
     this.recommendPoints();
@@ -71,9 +74,11 @@ export class MlRecommendPointsComponent implements OnInit {
       } else if (error.status === 404) {
         errorMsg = 'Project not found. Please refresh and try again.';
       } else if (error.status === 500) {
-        errorMsg = 'Prediction service temporarily unavailable. Please try again later.';
+        errorMsg = 'Prediction service temporarily unavailable. ' +
+        'Please try again later.';
       } else {
-        errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
+        errorMsg = error?.error?.error || error?.error?.message ||
+        error?.message || errorMsg;
       }
 
       this.error.set(errorMsg);
@@ -107,6 +112,6 @@ export class MlRecommendPointsComponent implements OnInit {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

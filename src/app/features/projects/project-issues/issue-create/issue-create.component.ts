@@ -1,21 +1,29 @@
-import {Component, EventEmitter, Input, Output, inject, signal, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, Output, inject, signal, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {IssueService} from '../../../../core/services/issue.service';
 import {IssueType, IssueRequest} from '../../../../core/models/interfaces';
 import {PaginatedIssueTypeList} from '../../../../core/models/api-interfaces';
-import {MlPredictEffortComponent} from '../ml-predict-effort/ml-predict-effort.component';
-import {MlRecommendPointsComponent} from '../ml-recommend-points/ml-recommend-points.component';
+import {MlPredictEffortComponent}
+  from '../ml-predict-effort/ml-predict-effort.component';
+import {MlRecommendPointsComponent}
+  from '../ml-recommend-points/ml-recommend-points.component';
 
 @Component({
   selector: 'app-issue-create',
-  imports: [CommonModule, ReactiveFormsModule, MlPredictEffortComponent, MlRecommendPointsComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MlPredictEffortComponent,
+    MlRecommendPointsComponent],
   templateUrl: './issue-create.component.html',
   styleUrl: './issue-create.component.css',
 })
 export class IssueCreateComponent implements OnInit {
   @Input() projectId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
   @Output() issueCreated = new EventEmitter<void>();
 
   private issueService = inject(IssueService);
@@ -49,18 +57,22 @@ export class IssueCreateComponent implements OnInit {
 
   async loadIssueTypes(): Promise<void> {
     try {
-      console.log('[ISSUE CREATE] Loading issue types for project:', this.projectId);
+      console.log('[ISSUE CREATE] Loading issue types for project:',
+          this.projectId);
 
       // ✅ CRITICAL FIX: Filter issue types by project
-      const types = await this.issueService.getIssueTypes(this.projectId).toPromise();
+      const types = await this.issueService.getIssueTypes(this.projectId)
+          .toPromise();
 
       if (types) {
-        console.log('[ISSUE CREATE] ✅ Issue types loaded:', types.results.length);
+        console.log('[ISSUE CREATE] ✅ Issue types loaded:',
+            types.results.length);
         this.issuesTypes.set(types);
         this.issueTypes.set(types.results || []);
 
         if (types.results.length === 0) {
-          console.warn('[ISSUE CREATE] ⚠️ No issue types found for project:', this.projectId);
+          console.warn('[ISSUE CREATE] ⚠️ No issue types found for project:',
+              this.projectId);
           this.error.set('No issue types available for this project');
         }
       }
@@ -99,7 +111,7 @@ export class IssueCreateComponent implements OnInit {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 
   // ML Feature Methods

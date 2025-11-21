@@ -11,7 +11,7 @@
 <!-- Sprint Cards -->
 <div *ngIf="sprints()?.length" class="sprint-list">
   <div *ngFor="let sprint of sprints()" class="sprint-card">
-    
+
     <!-- Card Header -->
     <div class="sprint-header">
       <div class="sprint-header-left">
@@ -20,13 +20,13 @@
         </span>
         <h3 class="sprint-name">{{ sprint.name }}</h3>
       </div>
-      <button 
-        class="action-menu-button" 
+      <button
+        class="action-menu-button"
         (click)="toggleActionsMenu(sprint.id)"
         aria-label="Sprint actions menu"
         title="More actions">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
         </svg>
       </button>
@@ -35,7 +35,7 @@
     <!-- Sprint Dates -->
     <div class="sprint-dates">
       <svg class="date-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
       <span>{{ formatDateRange(sprint.start_date, sprint.end_date) }}</span>
@@ -46,7 +46,7 @@
     <div class="sprint-metrics">
       <div class="metric">
         <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
         <div class="metric-content">
@@ -56,7 +56,7 @@
       </div>
       <div class="metric">
         <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
         </svg>
         <div class="metric-content">
@@ -66,7 +66,7 @@
       </div>
       <div class="metric">
         <svg class="metric-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div class="metric-content">
@@ -114,7 +114,7 @@
 
     <!-- Sprint Actions -->
     <div class="sprint-actions">
-      <button 
+      <button
         (click)="navigateToIssues(sprint)"
         class="view-all-link">
         View All Issues
@@ -122,9 +122,9 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </button>
-      
+
       <!-- Start Sprint Button (Planning status only) -->
-      <button 
+      <button
         *ngIf="sprint.status === 'planning'"
         class="btn-start-sprint"
         [disabled]="!canStartSprint(sprint)"
@@ -132,9 +132,9 @@
         [title]="getStartSprintTooltip(sprint)"
         (click)="startSprint(sprint.id)">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         Start Sprint
@@ -149,7 +149,7 @@
       <!-- Completed Sprint Indicator -->
       <div *ngIf="sprint.status === 'completed'" class="completed-indicator">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span>Completed</span>
@@ -160,55 +160,55 @@
     <div *ngIf="showActionsMenu() === sprint.id" class="actions-dropdown">
       <button class="dropdown-item" (click)="showDetailSprintModal(sprint.id)">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
         View Details
       </button>
       <button class="dropdown-item" (click)="showEditSprintModal(sprint.id)">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
         </svg>
         Edit Sprint
       </button>
-      
+
       <!-- AI ML Features -->
       <div class="dropdown-divider"></div>
       <button class="dropdown-item ai-item" (click)="openEstimateSprintModal(sprint.id)">
         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span class="text-green-700 font-medium">AI Estimate Duration</span>
       </button>
       <button class="dropdown-item ai-item" (click)="openSprintRiskModal(sprint.id)">
         <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <span class="text-orange-700 font-medium">AI Risk Assessment</span>
       </button>
       <div class="dropdown-divider"></div>
-      
-      <button 
+
+      <button
         *ngIf="sprint.status === 'active'"
-        class="dropdown-item" 
+        class="dropdown-item"
         (click)="completeSprint(sprint.id)">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         Complete Sprint
       </button>
-      <button 
+      <button
         *ngIf="sprint.status === 'planning'"
-        class="dropdown-item danger" 
+        class="dropdown-item danger"
         (click)="deleteSprint(sprint.id)">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
         Delete Sprint
@@ -219,11 +219,11 @@
 </div>
 
 <!-- Sprint Detail Modal -->
-<app-sprint-detail *ngIf="openModalDetail()" [sprintId]="currentSprintId()!" (close)="openModalDetail.set(false)">
+<app-sprint-detail *ngIf="openModalDetail()" [sprintId]="currentSprintId()!" (closeE)="openModalDetail.set(false)">
 </app-sprint-detail>
 
 <!-- Sprint Edit Modal -->
-<app-sprint-edit *ngIf="openModalEdit()" [sprintId]="currentSprintId()!" (close)="openModalEdit.set(false)">
+<app-sprint-edit *ngIf="openModalEdit()" [sprintId]="currentSprintId()!" (closeE)="openModalEdit.set(false)">
 </app-sprint-edit>
 
 <!-- Add Issues to Sprint Dialog (JIRA architecture) -->
@@ -239,11 +239,11 @@
 <app-ml-estimate-sprint
   *ngIf="showEstimateSprint() && currentSprintId()"
   [sprintId]="currentSprintId()!"
-  (close)="closeEstimateSprintModal()">
+  (closeE)="closeEstimateSprintModal()">
 </app-ml-estimate-sprint>
 
 <app-ml-sprint-risk
   *ngIf="showSprintRisk() && currentSprintId()"
   [sprintId]="currentSprintId()!"
-  (close)="closeSprintRiskModal()">
+  (closeE)="closeSprintRiskModal()">
 </app-ml-sprint-risk>

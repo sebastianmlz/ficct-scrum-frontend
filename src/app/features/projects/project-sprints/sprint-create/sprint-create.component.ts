@@ -3,7 +3,8 @@ import {CommonModule} from '@angular/common';
 import {Router} from '@angular/router';
 import {SprintRequest} from '../../../../core/models/interfaces';
 import {SprintsService} from '../../../../core/services/sprints.service';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 
 @Component({
   standalone: true,
@@ -14,7 +15,7 @@ import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/
 })
 export class SprintCreateComponent {
   @Input() projectId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
   @Output() sprintCreated = new EventEmitter<any>();
 
   loading = false;
@@ -35,7 +36,7 @@ export class SprintCreateComponent {
   }
 
   onClose() {
-    this.close.emit();
+    this.closeE.emit();
   }
 
 
@@ -52,7 +53,8 @@ export class SprintCreateComponent {
     };
     console.log('Creating sprint:', sprint);
     try {
-      const createdSprint = await this.sprintRequestService.createSprints(sprint).toPromise();
+      const createdSprint =
+      await this.sprintRequestService.createSprints(sprint).toPromise();
       this.sprintCreated.emit(createdSprint);
       this.onClose();
     } catch (error: any) {

@@ -1,4 +1,4 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
+import {Component, Input, Output, EventEmitter, inject} from '@angular/core';
 import {IssueService} from '../../../../core/services/issue.service';
 import {CommonModule} from '@angular/common';
 @Component({
@@ -13,13 +13,13 @@ import {CommonModule} from '@angular/common';
 export class IssueAssignComponent {
   @Input() issueId!: string;
   @Output() assigned = new EventEmitter<void>();
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
 
   loading = false;
   error: string | null = null;
   success = false;
 
-  constructor(private issueService: IssueService) {}
+  private issueService = inject(IssueService);
 
   assign() {
     if (!this.issueId) return;
@@ -30,9 +30,10 @@ export class IssueAssignComponent {
         this.success = true;
         this.loading = false;
         this.assigned.emit();
-        setTimeout(() => this.close.emit(), 1000);
+        setTimeout(() => this.closeE.emit(), 1000);
       },
-      error: (err) => {
+      error: (err: any) => {
+        console.log(err);
         this.error = 'Error assigning issue';
         this.loading = false;
       },
@@ -40,6 +41,6 @@ export class IssueAssignComponent {
   }
 
   onClose() {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

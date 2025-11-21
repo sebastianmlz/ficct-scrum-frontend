@@ -1,6 +1,7 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, Validators, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators, ReactiveFormsModule}
+  from '@angular/forms';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {WorkspacesService} from '../../../core/services/workspaces.service';
 import {Workspace, WorkspaceRequest} from '../../../core/models/interfaces';
@@ -27,16 +28,16 @@ export class WorkspaceEditComponent implements OnInit {
   workspaceTypes = Object.values(WorkspaceTypeEnum);
   visibilityOptions = Object.values(VisibilityEnum);
 
-  constructor(
-    private fb: FormBuilder,
-    private workspacesService: WorkspacesService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private notificationService: NotificationService,
-  ) {
+  private fb = inject(FormBuilder);
+  private workspacesService = inject(WorkspacesService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
+  constructor() {
     this.workspaceForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(255)]],
-      slug: ['', [Validators.required, Validators.pattern(/^[-a-zA-Z0-9_]+$/), Validators.maxLength(100)]],
+      slug: ['', [Validators.required, Validators.pattern(/^[-a-zA-Z0-9_]+$/),
+        Validators.maxLength(100)]],
       description: [''],
       workspace_type: ['', Validators.required],
       visibility: ['public', Validators.required],
@@ -147,9 +148,11 @@ export class WorkspaceEditComponent implements OnInit {
       formData.append('workspace_type', formValue.workspace_type);
       formData.append('visibility', formValue.visibility);
       formData.append('is_active', formValue.is_active ? 'true' : 'false');
-      formData.append('cover_image', this.selectedFile()!, this.selectedFile()!.name);
+      formData.append('cover_image', this.selectedFile()!,
+      this.selectedFile()!.name);
 
-      this.workspacesService.updateWorkspace(this.workspaceId(), formData).subscribe({
+      this.workspacesService.updateWorkspace(this.workspaceId(),
+          formData).subscribe({
         next: () => {
           this.notificationService.success('Workspace updated successfully');
           this.router.navigate(['/workspaces', this.workspaceId()]);
@@ -169,16 +172,18 @@ export class WorkspaceEditComponent implements OnInit {
         is_active: formValue.is_active,
       };
 
-      this.workspacesService.updateWorkspace(this.workspaceId(), updateData).subscribe({
-        next: () => {
-          this.notificationService.success('Workspace updated successfully');
-          this.router.navigate(['/workspaces', this.workspaceId()]);
-        },
-        error: (err: Error) => {
-          this.error.set(err.message || 'Failed to update workspace');
-          this.submitting.set(false);
-        },
-      });
+      this.workspacesService.updateWorkspace(this.workspaceId(), updateData)
+          .subscribe({
+            next: () => {
+              this.notificationService
+                  .success('Workspace updated successfully');
+              this.router.navigate(['/workspaces', this.workspaceId()]);
+            },
+            error: (err: Error) => {
+              this.error.set(err.message || 'Failed to update workspace');
+              this.submitting.set(false);
+            },
+          });
     }
   }
 
@@ -215,7 +220,9 @@ export class WorkspaceEditComponent implements OnInit {
 
     if (control.hasError('required')) return `${field} is required`;
     if (control.hasError('maxLength')) return `${field} is too long`;
-    if (control.hasError('pattern')) return `${field} contains invalid characters`;
+    if (control.hasError('pattern')) {
+      return `${field} contains invalid characters`;
+    }
 
     return '';
   }

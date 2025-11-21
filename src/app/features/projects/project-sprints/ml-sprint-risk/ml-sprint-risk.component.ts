@@ -1,4 +1,5 @@
-import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MlService, SprintRisk} from '../../../../core/services/ml.service';
 
@@ -10,7 +11,7 @@ import {MlService, SprintRisk} from '../../../../core/services/ml.service';
 })
 export class MlSprintRiskComponent implements OnInit {
   @Input() sprintId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
 
   private mlService = inject(MlService);
 
@@ -31,9 +32,11 @@ export class MlSprintRiskComponent implements OnInit {
     this.error.set(null);
 
     try {
-      console.log('[ML Frontend] Requesting sprint risk assessment for:', this.sprintId);
+      console.log('[ML Frontend] Requesting sprint risk assessment for:',
+          this.sprintId);
 
-      const result = await this.mlService.getSprintRisk(this.sprintId).toPromise();
+      const result = await this.mlService
+          .getSprintRisk(this.sprintId).toPromise();
 
       console.log('[ML Frontend] Sprint risk assessment received:', result);
 
@@ -47,7 +50,9 @@ export class MlSprintRiskComponent implements OnInit {
       console.error('[ML Frontend] Error loading sprint risks:', error);
 
       // Mejorar manejo de errores según respuestas del backend
-      const errorMsg = error?.error?.error || error?.error?.detail || error?.error?.message || error?.message || 'Failed to load sprint risk assessment';
+      const errorMsg = error?.error?.error || error?.error?.detail ||
+      error?.error?.message || error?.message ||
+      'Failed to load sprint risk assessment';
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);
@@ -70,6 +75,6 @@ export class MlSprintRiskComponent implements OnInit {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

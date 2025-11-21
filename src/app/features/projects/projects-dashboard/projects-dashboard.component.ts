@@ -1,4 +1,5 @@
-import {Component, inject, OnInit, signal, AfterViewInit, AfterViewChecked, ViewChild, ElementRef} from '@angular/core';
+import {Component, inject, OnInit, signal, AfterViewInit, AfterViewChecked,
+  ViewChild, ElementRef} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
 import {DashboardService} from '../../../core/services/dashboard.service';
@@ -17,7 +18,8 @@ import Chart from 'chart.js/auto';
   templateUrl: './projects-dashboard.component.html',
   styleUrl: './projects-dashboard.component.css',
 })
-export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterViewChecked {
+export class ProjectsDashboardComponent
+implements OnInit, AfterViewInit, AfterViewChecked {
   private route = inject(ActivatedRoute);
   private dashboardService = inject(DashboardService);
   private sprintsService = inject(SprintsService);
@@ -42,7 +44,8 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
   loadingVelocityChart = signal(false);
   velocityNumSprints = signal<number>(5);
 
-  @ViewChild('velocityChartCanvas', {static: false}) velocityChartCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('velocityChartCanvas', {static: false})
+    velocityChartCanvas!: ElementRef<HTMLCanvasElement>;
   velocityChartInstance: Chart | null = null;
   private chartRendered = false;
 
@@ -51,7 +54,8 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
   loadingCumulativeFlow = signal(false);
   cumulativeFlowDays = signal<number>(30);
 
-  @ViewChild('cumulativeFlowCanvas', {static: false}) cumulativeFlowCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('cumulativeFlowCanvas', {static: false})
+    cumulativeFlowCanvas!: ElementRef<HTMLCanvasElement>;
   cumulativeFlowInstance: Chart | null = null;
   private cfdChartRendered = false;
 
@@ -75,11 +79,13 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
   }
 
   ngAfterViewChecked(): void {
-    if (this.velocityChart() && this.velocityChartCanvas && !this.chartRendered) {
+    if (this.velocityChart() && this.velocityChartCanvas &&
+    !this.chartRendered) {
       this.renderVelocityChart();
       this.chartRendered = true;
     }
-    if (this.cumulativeFlow() && this.cumulativeFlowCanvas && !this.cfdChartRendered) {
+    if (this.cumulativeFlow() && this.cumulativeFlowCanvas &&
+    !this.cfdChartRendered) {
       this.renderCumulativeFlow();
       this.cfdChartRendered = true;
     }
@@ -98,7 +104,8 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
         this.sprints.set(response.results);
         // Seleccionar el primer sprint activo o el más reciente
         if (response.results.length > 0) {
-          const activeSprint = response.results.find((s) => s.status === 'active') || response.results[0];
+          const activeSprint = response.results
+              .find((s) => s.status === 'active') || response.results[0];
           this.selectedSprintId.set(activeSprint.id);
         }
       },
@@ -110,16 +117,17 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
 
   loadTeamMetrics(): void {
     this.loadingTeamMetrics.set(true);
-    this.dashboardService.getTeamMetrics(this.projectId(), this.teamMetricsPeriod()).subscribe({
-      next: (metrics) => {
-        this.teamMetrics.set(metrics);
-        this.loadingTeamMetrics.set(false);
-      },
-      error: (error) => {
-        console.error('[DASHBOARD] Error loading team metrics:', error);
-        this.loadingTeamMetrics.set(false);
-      },
-    });
+    this.dashboardService
+        .getTeamMetrics(this.projectId(), this.teamMetricsPeriod()).subscribe({
+          next: (metrics) => {
+            this.teamMetrics.set(metrics);
+            this.loadingTeamMetrics.set(false);
+          },
+          error: (error) => {
+            console.error('[DASHBOARD] Error loading team metrics:', error);
+            this.loadingTeamMetrics.set(false);
+          },
+        });
   }
 
   onTeamMetricsPeriodChange(period: number): void {
@@ -166,17 +174,19 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
 
   loadVelocityChart(): void {
     this.loadingVelocityChart.set(true);
-    this.dashboardService.getVelocityChart(this.projectId(), this.velocityNumSprints()).subscribe({
-      next: (chart) => {
-        this.velocityChart.set(chart);
-        this.loadingVelocityChart.set(false);
-        this.chartRendered = false;
-      },
-      error: (error) => {
-        console.error('[DASHBOARD] Error loading velocity chart:', error);
-        this.loadingVelocityChart.set(false);
-      },
-    });
+    this.dashboardService
+        .getVelocityChart(this.projectId(), this.velocityNumSprints())
+        .subscribe({
+          next: (chart) => {
+            this.velocityChart.set(chart);
+            this.loadingVelocityChart.set(false);
+            this.chartRendered = false;
+          },
+          error: (error) => {
+            console.error('[DASHBOARD] Error loading velocity chart:', error);
+            this.loadingVelocityChart.set(false);
+          },
+        });
   }
 
   renderVelocityChart(): void {
@@ -207,9 +217,12 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       console.log('[DASHBOARD] Rendering velocity chart with data:', chartData);
 
       // Si no hay labels, mostrar un mensaje genérico
-      const labels = chartData.labels.length > 0 ? chartData.labels : ['No sprints'];
-      const velocities = chartData.velocities.length > 0 ? chartData.velocities : [0];
-      const plannedPoints = chartData.planned_points.length > 0 ? chartData.planned_points : [0];
+      const labels =
+      chartData.labels.length > 0 ? chartData.labels : ['No sprints'];
+      const velocities =
+      chartData.velocities.length > 0 ? chartData.velocities : [0];
+      const plannedPoints =
+      chartData.planned_points.length > 0 ? chartData.planned_points : [0];
 
       this.velocityChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -259,17 +272,19 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
 
   loadCumulativeFlow(): void {
     this.loadingCumulativeFlow.set(true);
-    this.dashboardService.getCumulativeFlow(this.projectId(), this.cumulativeFlowDays()).subscribe({
-      next: (flow) => {
-        this.cumulativeFlow.set(flow);
-        this.loadingCumulativeFlow.set(false);
-        this.cfdChartRendered = false;
-      },
-      error: (error) => {
-        console.error('[DASHBOARD] Error loading cumulative flow:', error);
-        this.loadingCumulativeFlow.set(false);
-      },
-    });
+    this.dashboardService
+        .getCumulativeFlow(this.projectId(), this.cumulativeFlowDays())
+        .subscribe({
+          next: (flow) => {
+            this.cumulativeFlow.set(flow);
+            this.loadingCumulativeFlow.set(false);
+            this.cfdChartRendered = false;
+          },
+          error: (error) => {
+            console.error('[DASHBOARD] Error loading cumulative flow:', error);
+            this.loadingCumulativeFlow.set(false);
+          },
+        });
   }
 
   onCumulativeFlowDaysChange(days: number): void {
@@ -305,15 +320,18 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
       // Preparar datasets para cada estado
       const colors = {
         'To Do': {bg: 'rgba(239, 68, 68, 0.5)', border: 'rgba(239, 68, 68, 1)'},
-        'In Progress': {bg: 'rgba(59, 130, 246, 0.5)', border: 'rgba(59, 130, 246, 1)'},
+        'In Progress':
+        {bg: 'rgba(59, 130, 246, 0.5)', border: 'rgba(59, 130, 246, 1)'},
         'Done': {bg: 'rgba(34, 197, 94, 0.5)', border: 'rgba(34, 197, 94, 1)'},
       };
 
       const datasets = Object.keys(flowData.status_counts).map((status) => ({
         label: status,
         data: flowData.status_counts[status],
-        backgroundColor: colors[status as keyof typeof colors]?.bg || 'rgba(156, 163, 175, 0.1)',
-        borderColor: colors[status as keyof typeof colors]?.border || 'rgba(156, 163, 175, 1)',
+        backgroundColor: colors[status as keyof typeof colors]?.bg ||
+        'rgba(156, 163, 175, 0.1)',
+        borderColor: colors[status as keyof typeof colors]?.border ||
+        'rgba(156, 163, 175, 1)',
         borderWidth: 2,
         fill: false, // ✅ No fill - show lines only, not area
         tension: 0.4, // ✅ Smooth curves
@@ -395,7 +413,8 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
           window.open(response.download_url, '_blank');
         }
         this.loading.set(false);
-        alert(`Export completed successfully! ${response.rows_exported} rows exported.`);
+        alert(`Export completed successfully! ${response.rows_exported}` +
+          ` rows exported.`);
       },
       error: (error) => {
         console.error('[DASHBOARD] Error exporting data:', error);
@@ -424,7 +443,8 @@ export class ProjectsDashboardComponent implements OnInit, AfterViewInit, AfterV
           window.open(response.download_url, '_blank');
         }
         this.loading.set(false);
-        alert(`Activity log exported successfully! ${response.rows_exported} rows exported.`);
+        alert(`Activity log exported successfully! ${response.rows_exported}` +
+          ` rows exported.`);
       },
       error: (error) => {
         console.error('[DASHBOARD] Error exporting activity log:', error);

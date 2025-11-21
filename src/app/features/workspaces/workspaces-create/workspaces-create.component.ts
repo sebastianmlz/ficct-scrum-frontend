@@ -1,5 +1,6 @@
-import {Component} from '@angular/core';
-import {FormBuilder, FormGroup, Validators, ReactiveFormsModule} from '@angular/forms';
+import {Component, inject} from '@angular/core';
+import {FormBuilder, FormGroup, Validators, ReactiveFormsModule}
+  from '@angular/forms';
 import {WorkspaceService} from '../../../core/services/workspace.service';
 import {ActivatedRoute} from '@angular/router';
 import {CommonModule} from '@angular/common';
@@ -10,7 +11,13 @@ import {ButtonModule} from 'primeng/button';
 @Component({
   selector: 'app-workspaces-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, InputTextModule, TextareaModule, ButtonModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule,
+  ],
   templateUrl: './workspaces-create.component.html',
   styleUrl: './workspaces-create.component.css',
 })
@@ -21,11 +28,10 @@ export class WorkspacesCreateComponent {
   success = '';
   selectedFile: File | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private workspaceService: WorkspaceService,
-    private route: ActivatedRoute,
-  ) {
+  private fb = inject(FormBuilder);
+  private workspaceService = inject(WorkspaceService);
+  private route = inject(ActivatedRoute);
+  constructor() {
     this.form = this.fb.group({
       name: ['', Validators.required],
       slug: ['', [Validators.required, Validators.pattern('^[a-z0-9-]+$')]],
@@ -68,7 +74,8 @@ export class WorkspacesCreateComponent {
     this.form.patchValue({slug});
 
     // Obtener el UUID de la organización desde la query param
-    const organization = this.route.snapshot.queryParamMap.get('organization') || '';
+    const organization = this.route.snapshot.queryParamMap
+        .get('organization') || '';
 
     // Si hay archivo, usar FormData (multipart/form-data), sino JSON
     if (this.selectedFile && this.selectedFile.size > 0) {
@@ -78,7 +85,8 @@ export class WorkspacesCreateComponent {
       formData.append('description', this.form.value.description || '');
       formData.append('workspace_type', this.form.value.workspace_type);
       formData.append('visibility', this.form.value.visibility);
-      formData.append('is_active', this.form.value.is_active ? 'true' : 'false');
+      formData.append('is_active',
+        this.form.value.is_active ? 'true' : 'false');
       formData.append('organization', organization);
       formData.append('cover_image', this.selectedFile, this.selectedFile.name);
 

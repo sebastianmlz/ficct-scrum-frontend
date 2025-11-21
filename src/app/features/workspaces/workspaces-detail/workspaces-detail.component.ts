@@ -1,7 +1,8 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {WorkspaceService, Workspace} from '../../../core/services/workspace.service';
+import {WorkspaceService, Workspace}
+  from '../../../core/services/workspace.service';
 
 @Component({
   selector: 'app-workspaces-detail',
@@ -17,11 +18,9 @@ export class WorkspacesDetailComponent implements OnInit {
   workspaceId = signal('');
   objectKeys = Object.keys;
 
-  constructor(
-    private workspaceService: WorkspaceService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) {}
+  private workspaceService = inject(WorkspaceService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
@@ -46,7 +45,8 @@ export class WorkspacesDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Error loading workspace: ' + (err.error?.message || err.message));
+        this.error.set('Error loading workspace: ' +
+          (err.error?.message || err.message));
         this.loading.set(false);
       },
     });
@@ -77,7 +77,8 @@ export class WorkspacesDetailComponent implements OnInit {
   goBack() {
     const orgId = this.workspace()?.organization?.id;
     if (orgId) {
-      this.router.navigate(['/workspaces'], {queryParams: {organization: orgId}});
+      this.router.navigate(['/workspaces'],
+          {queryParams: {organization: orgId}});
     } else {
       this.router.navigate(['/workspaces']);
     }
@@ -88,7 +89,8 @@ export class WorkspacesDetailComponent implements OnInit {
   }
 
   viewProjects() {
-    this.router.navigate(['/projects'], {queryParams: {workspace: this.workspaceId()}});
+    this.router.navigate(['/projects'],
+        {queryParams: {workspace: this.workspaceId()}});
   }
 
   viewMembers() {

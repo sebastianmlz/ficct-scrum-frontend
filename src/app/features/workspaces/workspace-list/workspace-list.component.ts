@@ -1,9 +1,10 @@
-import {Component, OnInit, signal, computed} from '@angular/core';
+import {Component, OnInit, signal, computed, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Router, RouterModule, ActivatedRoute} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {WorkspacesService} from '../../../core/services/workspaces.service';
-import {Workspace, PaginatedWorkspaceList, ApiQueryParams} from '../../../core/models/interfaces';
+import {Workspace, PaginatedWorkspaceList, ApiQueryParams}
+  from '../../../core/models/interfaces';
 import {WorkspaceTypeEnum, VisibilityEnum} from '../../../core/models/enums';
 
 @Component({
@@ -37,19 +38,18 @@ export class WorkspaceListComponent implements OnInit {
   hasWorkspaces = computed(() => this.workspaces().length > 0);
   showPagination = computed(() => this.totalRecords() > this.pageSize);
 
-  constructor(
-    private workspacesService: WorkspacesService,
-    private router: Router,
-    private route: ActivatedRoute,
-  ) {}
+  private workspacesService = inject(WorkspacesService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     console.log('[WORKSPACE-LIST] ngOnInit() called');
     this.route.queryParams.subscribe((params) => {
       console.log('[WORKSPACE-LIST] Query params received:', params);
       this.organizationId.set(params['organization'] || '');
-      console.log('[WORKSPACE-LIST] Organization ID set to:', this.organizationId());
-      this.loadWorkspaces(); // ALWAYS load, like Organizations/Projects components
+      console.log('[WORKSPACE-LIST] Organization ID set to:',
+          this.organizationId());
+      this.loadWorkspaces(); // ALWAYS load, like Organizations/Projects comps.
     });
   }
 
@@ -79,14 +79,17 @@ export class WorkspaceListComponent implements OnInit {
       next: (response: PaginatedWorkspaceList) => {
         console.log('[WORKSPACE-LIST] Response received:', response);
         console.log('[WORKSPACE-LIST] Count:', response.count);
-        console.log('[WORKSPACE-LIST] Results length:', response.results?.length || 0);
+        console.log('[WORKSPACE-LIST] Results length:',
+            response.results?.length || 0);
 
         this.workspaces.set(response.results || []);
         this.totalRecords.set(response.count);
         this.loading.set(false);
 
-        if (response.results.length > 0 && response.results[0].organization_details) {
-          this.organizationName.set(response.results[0].organization_details.name);
+        if (response.results.length > 0 &&
+          response.results[0].organization_details) {
+          this.organizationName
+              .set(response.results[0].organization_details.name);
         }
       },
       error: (err: Error) => {

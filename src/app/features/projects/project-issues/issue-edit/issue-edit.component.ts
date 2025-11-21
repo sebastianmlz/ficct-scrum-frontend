@@ -1,8 +1,11 @@
-import {Component, EventEmitter, Input, Output, inject, signal, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, Output, inject, signal, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {IssueService} from '../../../../core/services/issue.service';
-import {IssueType, Issue, IssueRequest} from '../../../../core/models/interfaces';
+import {IssueType, Issue, IssueRequest}
+  from '../../../../core/models/interfaces';
 import {PaginatedIssueTypeList} from '../../../../core/models/api-interfaces';
 
 @Component({
@@ -13,7 +16,7 @@ import {PaginatedIssueTypeList} from '../../../../core/models/api-interfaces';
 })
 export class IssueEditComponent implements OnInit {
   @Input() issueId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
   @Output() issueUpdated = new EventEmitter<void>();
 
   private issueService = inject(IssueService);
@@ -40,7 +43,7 @@ export class IssueEditComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load issue first to get projectId, then load issue types filtered by project
+    // Load issue first to get projectId, load issue types filtered by project
     this.loadIssue();
   }
 
@@ -49,7 +52,8 @@ export class IssueEditComponent implements OnInit {
       console.log('[ISSUE EDIT] Loading issue types for project:', projectId);
 
       // ✅ CRITICAL FIX: Filter issue types by project
-      const types = await this.issueService.getIssueTypes(projectId).toPromise();
+      const types = await this.issueService.getIssueTypes(projectId)
+          .toPromise();
 
       if (types) {
         console.log('[ISSUE EDIT] ✅ Issue types loaded:', types.results.length);
@@ -57,7 +61,8 @@ export class IssueEditComponent implements OnInit {
         this.issueTypes.set(types.results || []);
 
         if (types.results.length === 0) {
-          console.warn('[ISSUE EDIT] ⚠️ No issue types found for project:', projectId);
+          console.warn('[ISSUE EDIT] ⚠️ No issue types found for project:',
+              projectId);
           this.error.set('No issue types available for this project');
         }
       }
@@ -71,7 +76,8 @@ export class IssueEditComponent implements OnInit {
     this.loading.set(true);
     try {
       console.log('[ISSUE EDIT] Loading issue:', this.issueId);
-      const issueData = await this.issueService.getIssue(this.issueId).toPromise();
+      const issueData = await this.issueService.getIssue(this.issueId)
+          .toPromise();
 
       if (issueData) {
         console.log('[ISSUE EDIT] ✅ Issue loaded:', issueData);
@@ -134,6 +140,6 @@ export class IssueEditComponent implements OnInit {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

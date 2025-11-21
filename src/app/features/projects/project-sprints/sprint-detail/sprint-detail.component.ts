@@ -1,10 +1,12 @@
-import {Component, EventEmitter, inject, Input, Output, signal, OnInit} from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output, signal, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Sprint, SprintBurdown} from '../../../../core/models/interfaces';
 import {SprintsService} from '../../../../core/services/sprints.service';
 import {firstValueFrom} from 'rxjs';
 import {ChartModule} from 'primeng/chart';
-import {AiSprintSummaryComponent} from '../ai-sprint-summary/ai-sprint-summary.component';
+import {AiSprintSummaryComponent}
+  from '../ai-sprint-summary/ai-sprint-summary.component';
 
 @Component({
   selector: 'app-sprint-detail',
@@ -16,7 +18,7 @@ import {AiSprintSummaryComponent} from '../ai-sprint-summary/ai-sprint-summary.c
 
 export class SprintDetailComponent implements OnInit {
   @Input() sprintId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
 
   loading = signal(true);
   error = signal<string | null>(null);
@@ -35,8 +37,10 @@ export class SprintDetailComponent implements OnInit {
       tooltip: {enabled: true},
     },
     scales: {
-      x: {title: {display: true, text: 'Date', color: '#374151'}, ticks: {color: '#6b7280'}},
-      y: {title: {display: true, text: 'Points', color: '#374151'}, ticks: {color: '#6b7280'}, beginAtZero: true},
+      x: {title: {display: true, text: 'Date', color: '#374151'},
+        ticks: {color: '#6b7280'}},
+      y: {title: {display: true, text: 'Points', color: '#374151'},
+        ticks: {color: '#6b7280'}, beginAtZero: true},
     },
   };
 
@@ -54,11 +58,13 @@ export class SprintDetailComponent implements OnInit {
         this.error.set('No sprint selected');
         return;
       }
-      const sprintData = await firstValueFrom(this.sprintDetailService.getSprint(this.sprintId));
+      const sprintData =
+      await firstValueFrom(this.sprintDetailService.getSprint(this.sprintId));
       if (sprintData) {
         this.sprintInfo.set(sprintData);
       }
     } catch (error) {
+      console.log(error);
       this.error.set('Failed to load sprint details');
     } finally {
       this.loading.set(false);
@@ -72,18 +78,22 @@ export class SprintDetailComponent implements OnInit {
         this.error.set('No sprint selected');
         return;
       }
-      const burndownData: SprintBurdown = await firstValueFrom(this.sprintDetailService.getSprintBurdown(this.sprintId));
+      const burndownData: SprintBurdown =
+        await firstValueFrom(this.sprintDetailService
+            .getSprintBurdown(this.sprintId));
       if (burndownData) {
         this.sprintBurdown.set(burndownData);
 
         // Ideal line
         const labels = burndownData.ideal_line.map((d) => d.date);
-        const idealPoints = burndownData.ideal_line.map((d) => d.remaining_points);
+        const idealPoints =
+        burndownData.ideal_line.map((d) => d.remaining_points);
 
         // Actual line (si existe)
         let actualPoints: number[] = [];
         if (burndownData.actual_line) {
-          actualPoints = burndownData.actual_line.map((d) => d.remaining_points);
+          actualPoints = burndownData.actual_line
+              .map((d) => d.remaining_points);
         }
 
         this.burndownChartData = {
@@ -119,6 +129,6 @@ export class SprintDetailComponent implements OnInit {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

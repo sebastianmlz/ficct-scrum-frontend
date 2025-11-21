@@ -1,10 +1,11 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {WorkspacesService} from '../../../core/services/workspaces.service';
 import {OrganizationService} from '../../../core/services/organization.service';
-import {WorkspaceMember, Workspace, OrganizationMember, WorkspaceMemberRequest} from '../../../core/models/interfaces';
+import {WorkspaceMember, Workspace, OrganizationMember, WorkspaceMemberRequest}
+  from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-workspaces-members',
@@ -32,7 +33,7 @@ export class WorkspacesMembersComponent implements OnInit {
   showDeleteConfirm = signal(false);
   memberToDelete = signal<WorkspaceMember | null>(null);
 
-  // Buscar usuarios para agregar al workspace (filtrar miembros de la organización)
+  // Buscar usuarios para agregar al workspace
   searchUsers() {
     // Filtrar miembros que NO están en el workspace
     const currentMemberIds = this.members().map((m) => m.user.id);
@@ -111,12 +112,10 @@ export class WorkspacesMembersComponent implements OnInit {
   searchTerm = '';
   selectedRole = '';
 
-  constructor(
-    private workspacesService: WorkspacesService,
-    private organizationService: OrganizationService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) { }
+  private workspacesService = inject(WorkspacesService);
+  private organizationService = inject(OrganizationService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
@@ -132,7 +131,8 @@ export class WorkspacesMembersComponent implements OnInit {
     this.workspacesService.getWorkspace(this.workspaceId()).subscribe({
       next: (workspace: Workspace) => {
         this.workspaceName.set(workspace.name);
-        if (workspace.organization_details && workspace.organization_details.id) {
+        if (workspace.organization_details &&
+          workspace.organization_details.id) {
           this.loadOrganizationMembers(workspace.organization_details.id);
         }
       },
@@ -146,12 +146,14 @@ export class WorkspacesMembersComponent implements OnInit {
     this.loadingOrgMembers.set(true);
     this.organizationService.getOrganizationMembers(organizationId).subscribe({
       next: (response: any) => {
-        const membersArray = Array.isArray(response) ? response : Array.isArray(response.results) ? response.results : [];
+        const membersArray = Array.isArray(response) ? response :
+        Array.isArray(response.results) ? response.results : [];
         this.organizationMembers.set(membersArray);
         this.loadingOrgMembers.set(false);
       },
       error: (err: Error) => {
-        console.error('[WorkspaceMembers] Error loading organization members:', err);
+        console.error('[WorkspaceMembers] Error loading organization members:',
+            err);
         this.loadingOrgMembers.set(false);
       },
     });
@@ -166,20 +168,21 @@ export class WorkspacesMembersComponent implements OnInit {
       search: this.searchTerm || undefined,
     };
 
-    this.workspacesService.getWorkspaceMembers(this.workspaceId(), params).subscribe({
-      next: (response) => {
-        this.members.set(response.results || []);
-        this.totalRecords.set(response.count);
-        this.loading.set(false);
-        this.searchUsers();
-      },
-      error: (err: Error) => {
-        console.error('[WorkspaceMembers] Error loading members:', err);
-        this.members.set([]);
-        this.error.set(err.message || 'Failed to load members');
-        this.loading.set(false);
-      },
-    });
+    this.workspacesService.getWorkspaceMembers(this.workspaceId(), params)
+        .subscribe({
+          next: (response) => {
+            this.members.set(response.results || []);
+            this.totalRecords.set(response.count);
+            this.loading.set(false);
+            this.searchUsers();
+          },
+          error: (err: Error) => {
+            console.error('[WorkspaceMembers] Error loading members:', err);
+            this.members.set([]);
+            this.error.set(err.message || 'Failed to load members');
+            this.loading.set(false);
+          },
+        });
   }
 
   onPageChange(event: any) {
@@ -195,7 +198,8 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   nextPage() {
-    if (this.currentPage() < Math.ceil(this.totalRecords() / this.rowsPerPage)) {
+    if (this.currentPage() < Math
+        .ceil(this.totalRecords() / this.rowsPerPage)) {
       this.currentPage.set(this.currentPage() + 1);
       this.loadMembers();
     }
@@ -240,19 +244,21 @@ export class WorkspacesMembersComponent implements OnInit {
   }
 
   onRoleChange(member: WorkspaceMember, newRole: string) {
-    this.workspacesService.updateWorkspaceMemberRole(member.id, newRole).subscribe({
-      next: (updatedMember) => {
-        const updatedMembers = this.members().map((m) =>
-          m.id === member.id ? updatedMember : m,
-        );
-        this.members.set(updatedMembers);
-      },
-      error: (err: Error) => {
-        console.error('[WorkspaceMembers] Error updating member role:', err);
-        this.error.set(err.message || 'Failed to update member role');
-        this.loadMembers();
-      },
-    });
+    this.workspacesService.updateWorkspaceMemberRole(member.id, newRole)
+        .subscribe({
+          next: (updatedMember) => {
+            const updatedMembers = this.members().map((m) =>
+              m.id === member.id ? updatedMember : m,
+            );
+            this.members.set(updatedMembers);
+          },
+          error: (err: Error) => {
+            console.error('[WorkspaceMembers] Error updating member role:',
+                err);
+            this.error.set(err.message || 'Failed to update member role');
+            this.loadMembers();
+          },
+        });
   }
 
   removeMember(member: WorkspaceMember) {

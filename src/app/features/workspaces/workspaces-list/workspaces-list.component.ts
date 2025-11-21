@@ -1,7 +1,8 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {WorkspaceService, Workspace, WorkspaceListResponse} from '../../../core/services/workspace.service';
+import {WorkspaceService, Workspace, WorkspaceListResponse}
+  from '../../../core/services/workspace.service';
 import {ButtonModule} from 'primeng/button';
 import {InputTextModule} from 'primeng/inputtext';
 import {CardModule} from 'primeng/card';
@@ -42,11 +43,9 @@ export class WorkspacesListComponent implements OnInit {
   typeFilter = '';
   sortBy = 'created_at';
 
-  constructor(
-    private workspaceService: WorkspaceService,
-    private route: ActivatedRoute,
-    private router: Router,
-  ) { }
+  workspaceService = inject(WorkspaceService);
+  route = inject(ActivatedRoute);
+  router = inject(Router);
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -85,17 +84,24 @@ export class WorkspacesListComponent implements OnInit {
         }));
         // Filtro local por tipo
         if (this.typeFilter) {
-          normalizedWorkspaces = normalizedWorkspaces.filter((ws) => ws.workspace_type === this.typeFilter);
+          normalizedWorkspaces = normalizedWorkspaces
+              .filter((ws) => ws.workspace_type === this.typeFilter);
         }
         // Orden local
         if (this.sortBy === 'created_at') {
-          normalizedWorkspaces = normalizedWorkspaces.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          normalizedWorkspaces = normalizedWorkspaces
+              .sort((a, b) => new Date(b.created_at)
+                  .getTime() - new Date(a.created_at).getTime());
         } else if (this.sortBy === '-created_at') {
-          normalizedWorkspaces = normalizedWorkspaces.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+          normalizedWorkspaces = normalizedWorkspaces
+              .sort((a, b) => new Date(a.created_at)
+                  .getTime() - new Date(b.created_at).getTime());
         } else if (this.sortBy === 'name') {
-          normalizedWorkspaces = normalizedWorkspaces.sort((a, b) => a.name.localeCompare(b.name));
+          normalizedWorkspaces = normalizedWorkspaces
+              .sort((a, b) => a.name.localeCompare(b.name));
         } else if (this.sortBy === '-name') {
-          normalizedWorkspaces = normalizedWorkspaces.sort((a, b) => b.name.localeCompare(a.name));
+          normalizedWorkspaces = normalizedWorkspaces
+              .sort((a, b) => b.name.localeCompare(a.name));
         }
         this.workspaces.set(normalizedWorkspaces);
         this.totalRecords.set(normalizedWorkspaces.length);
@@ -106,7 +112,8 @@ export class WorkspacesListComponent implements OnInit {
         }
       },
       error: (err) => {
-        this.error.set('Error loading workspaces: ' + (err.error?.message || err.message));
+        this.error.set('Error loading workspaces: ' +
+          (err.error?.message || err.message));
         this.loading.set(false);
       },
     });

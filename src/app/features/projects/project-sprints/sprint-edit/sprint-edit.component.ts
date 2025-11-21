@@ -1,8 +1,10 @@
-import {Component, inject, Input, Output, EventEmitter, OnInit} from '@angular/core';
+import {Component, inject, Input, Output, EventEmitter, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SprintsService} from '../../../../core/services/sprints.service';
 import {Sprint, SprintRequest} from '../../../../core/models/interfaces';
-import {FormGroup, FormBuilder, Validators, ReactiveFormsModule} from '@angular/forms';
+import {FormGroup, FormBuilder, Validators, ReactiveFormsModule}
+  from '@angular/forms';
 
 @Component({
   standalone: true,
@@ -13,7 +15,7 @@ import {FormGroup, FormBuilder, Validators, ReactiveFormsModule} from '@angular/
 })
 export class SprintEditComponent implements OnInit {
   @Input() sprintId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
 
   sprintEditService = inject(SprintsService);
   fb = inject(FormBuilder);
@@ -36,20 +38,24 @@ export class SprintEditComponent implements OnInit {
   async loadSprint(): Promise<void> {
     this.loading = true;
     try {
-      const sprintData = await this.sprintEditService.getSprint(this.sprintId).toPromise();
+      const sprintData =
+      await this.sprintEditService.getSprint(this.sprintId).toPromise();
       if (sprintData) {
         this.sprint = sprintData;
         this.form.patchValue({
           name: sprintData.name ?? '',
           goal: sprintData.goal ?? '',
-          start_date: sprintData.start_date ? sprintData.start_date.toString().slice(0, 10) : '',
-          end_date: sprintData.end_date ? sprintData.end_date.toString().slice(0, 10) : '',
+          start_date: sprintData.start_date ?
+          sprintData.start_date.toString().slice(0, 10) : '',
+          end_date: sprintData.end_date ?
+          sprintData.end_date.toString().slice(0, 10) : '',
         });
       } else {
         this.sprint = null;
         this.error = 'No se encontró el sprint.';
       }
     } catch (error) {
+      console.log(error);
       this.error = 'error al cargar los datos';
     }
     this.loading = false;
@@ -65,15 +71,17 @@ export class SprintEditComponent implements OnInit {
       end_date: this.form.value.end_date,
     };
     try {
-      await this.sprintEditService.editSprint(this.sprintId, sprintReq as SprintRequest).toPromise();
-      this.close.emit();
+      await this.sprintEditService
+          .editSprint(this.sprintId, sprintReq as SprintRequest).toPromise();
+      this.closeE.emit();
     } catch (error) {
+      console.log(error);
       this.error = 'Error al editar sprint';
     }
     this.loading = false;
   }
 
   handleClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

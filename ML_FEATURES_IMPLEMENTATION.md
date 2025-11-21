@@ -385,7 +385,7 @@ export class YourComponent {
   [description]="form.get('description')?.value"
   [issueType]="form.get('issue_type')?.value"
   [projectId]="projectId"
-  (close)="showPredictEffort.set(false)"
+  (closeE)="showPredictEffort.set(false)"
   (predictionApplied)="applyPrediction($event)">
 </app-ml-predict-effort>
 ```

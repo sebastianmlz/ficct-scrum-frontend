@@ -1,6 +1,8 @@
-import {Component, Input, Output, EventEmitter, signal, inject, OnInit} from '@angular/core';
+import {Component, Input, Output, EventEmitter, signal, inject, OnInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MlService, SuggestAssignmentResponse, AssignmentSuggestion} from '../../../../core/services/ml.service';
+import {MlService, AssignmentSuggestion}
+  from '../../../../core/services/ml.service';
 import {IssueService} from '../../../../core/services/issue.service';
 
 @Component({
@@ -12,7 +14,7 @@ import {IssueService} from '../../../../core/services/issue.service';
 export class MlSuggestAssignmentComponent implements OnInit {
   @Input() issueId!: string;
   @Input() projectId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
   @Output() assigned = new EventEmitter<void>();
 
   private mlService = inject(MlService);
@@ -27,7 +29,8 @@ export class MlSuggestAssignmentComponent implements OnInit {
   ngOnInit(): void {
     // Validar que tenemos los datos necesarios
     if (!this.issueId || !this.projectId) {
-      this.error.set('Missing required information: issue ID and project ID are required');
+      this.error.set(
+          'Missing required information: issue ID and project ID are required');
       return;
     }
     this.getSuggestion();
@@ -57,7 +60,9 @@ export class MlSuggestAssignmentComponent implements OnInit {
         this.selectedSuggestion.set(result.suggestions[0]);
       } else {
         // Si no hay suggestions o la respuesta está vacía
-        this.error.set('No team members available for assignment suggestion. The AI could not find suitable candidates for this task.');
+        this.error.set(
+            'No team members available for assignment suggestion. ' +
+          'The AI could not find suitable candidates for this task.');
       }
     } catch (error: any) {
       console.error('[ML Suggest Assignment] Error:', error);
@@ -77,9 +82,11 @@ export class MlSuggestAssignmentComponent implements OnInit {
       } else if (error.status === 404) {
         errorMsg = 'Issue or project not found. Please refresh and try again.';
       } else if (error.status === 500) {
-        errorMsg = 'Assignment suggestion service temporarily unavailable. Please try again later.';
+        errorMsg = 'Assignment suggestion service temporarily ' +
+        'unavailable. Please try again later.';
       } else {
-        errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
+        errorMsg = error?.error?.error || error?.error?.message ||
+        error?.message || errorMsg;
       }
 
       this.error.set(errorMsg);
@@ -130,6 +137,6 @@ export class MlSuggestAssignmentComponent implements OnInit {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

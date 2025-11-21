@@ -1,9 +1,11 @@
-import {Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output, signal}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {IssueService} from '../../../../core/services/issue.service';
 import {SprintsService} from '../../../../core/services/sprints.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {Issue, Sprint} from '../../../../core/models/interfaces';
 
 @Component({
@@ -47,7 +49,8 @@ export class AddIssuesToSprintDialogComponent implements OnInit {
 
       if (result?.results) {
         // Filter only issues without sprint (backlog)
-        const backlog = result.results.filter((issue) => !issue.sprint || issue.sprint === null);
+        const backlog = result.results
+            .filter((issue) => !issue.sprint || issue.sprint === null);
         console.log('[ADD ISSUES] Found', backlog.length, 'backlog issues');
         this.backlogIssues.set(backlog);
         this.filteredIssues.set(backlog);
@@ -91,19 +94,25 @@ export class AddIssuesToSprintDialogComponent implements OnInit {
 
     this.adding.set(true);
     try {
-      console.log('[ADD ISSUES] Adding', this.selectedIssueIds().length, 'issues to sprint', this.sprint.id);
+      console.log('[ADD ISSUES] Adding', this.selectedIssueIds().length,
+          'issues to sprint', this.sprint.id);
 
       // Use the bulk add method from SprintsService
-      await this.sprintsService.addIssuesToSprint(this.sprint.id, this.selectedIssueIds()).toPromise();
+      await this.sprintsService
+          .addIssuesToSprint(this.sprint.id, this.selectedIssueIds())
+          .toPromise();
 
       this.notificationService.success(
-          `Successfully added ${this.selectedIssueIds().length} issue${this.selectedIssueIds().length !== 1 ? 's' : ''} to ${this.sprint.name}`,
+          `Successfully added ${this.selectedIssueIds().length} issue${this
+              .selectedIssueIds()
+              .length !== 1 ? 's' : ''} to ${this.sprint.name}`,
       );
 
       this.issuesAdded.emit();
     } catch (error: any) {
       console.error('[ADD ISSUES] Error:', error);
-      this.notificationService.error(error.error?.message || 'Failed to add issues to sprint');
+      this.notificationService
+          .error(error.error?.message || 'Failed to add issues to sprint');
     } finally {
       this.adding.set(false);
     }

@@ -1,19 +1,23 @@
 import {Component, inject, Input, signal, OnInit} from '@angular/core';
 import {SprintsService} from '../../../../core/services/sprints.service';
 import {IssueService} from '../../../../core/services/issue.service';
-import {NotificationService} from '../../../../core/services/notification.service';
-import {Sprint, PaginationParams, Project, Issue} from '../../../../core/models/interfaces';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
+import {Sprint, PaginationParams, Project}
+  from '../../../../core/models/interfaces';
 import {PaginatedSprintList} from '../../../../core/models/api-interfaces';
 import {ProjectStatusEnum} from '../../../../core/models/enums';
 import {CommonModule} from '@angular/common';
 import {SprintDetailComponent} from '../sprint-detail/sprint-detail.component';
 import {SprintEditComponent} from '../sprint-edit/sprint-edit.component';
-import {AddIssuesToSprintDialogComponent} from '../add-issues-to-sprint-dialog/add-issues-to-sprint-dialog.component';
-import {MlEstimateSprintComponent} from '../ml-estimate-sprint/ml-estimate-sprint.component';
-import {MlSprintRiskComponent} from '../ml-sprint-risk/ml-sprint-risk.component';
+import {AddIssuesToSprintDialogComponent}
+  from '../add-issues-to-sprint-dialog/add-issues-to-sprint-dialog.component';
+import {MlEstimateSprintComponent}
+  from '../ml-estimate-sprint/ml-estimate-sprint.component';
+import {MlSprintRiskComponent}
+  from '../ml-sprint-risk/ml-sprint-risk.component';
 import {Router} from '@angular/router';
 import {TableModule} from 'primeng/table';
-import {forkJoin} from 'rxjs';
 @Component({
   selector: 'app-sprint-list',
   imports: [
@@ -29,9 +33,11 @@ import {forkJoin} from 'rxjs';
   styleUrl: './sprint-list.component.css',
 })
 export class SprintListComponent implements OnInit {
-  async removeIssueFromSprint(sprintId: string, issueId: string): Promise<void> {
+  async removeIssueFromSprint(sprintId: string, issueId: string):
+  Promise<void> {
     try {
-      await this.sprintService.removeIssueFromSprint(sprintId, issueId).toPromise();
+      await this.sprintService
+          .removeIssueFromSprint(sprintId, issueId).toPromise();
       this.notificationService.success('Issue removed from sprint');
       await this.loadSprints();
     } catch (error) {
@@ -76,24 +82,31 @@ export class SprintListComponent implements OnInit {
     this.error.set(null);
     try {
       console.log('[SPRINT LIST] Loading sprints for project:', this.projectId);
-      const result = await this.sprintService.getSprints(this.projectId, params).toPromise();
+      const result = await this.sprintService
+          .getSprints(this.projectId, params).toPromise();
       if (result) {
         console.log('[SPRINT LIST] API Response:', result);
         console.log('[SPRINT LIST] Sprints count:', result.results.length);
 
-        const filtered = result.results.filter((sprint) => sprint.project.id === this.projectId);
+        const filtered = result.results
+            .filter((sprint) => sprint.project.id === this.projectId);
 
-        // Load issues for each sprint (JIRA architecture: issues belong to sprints)
+        // Load issues for each sprint (JIRA architecture: issues in sprints)
         const sprintsWithIssues = await Promise.all(
             filtered.map(async (sprint) => {
               try {
-                console.log(`[SPRINT LIST] Loading issues for sprint: ${sprint.name}`);
-                const issuesResult = await this.issueService.getIssues({sprint: sprint.id}).toPromise();
+                console.log(
+                    `[SPRINT LIST] Loading issues for sprint: ${sprint.name}`);
+                const issuesResult = await this.issueService
+                    .getIssues({sprint: sprint.id}).toPromise();
                 const issues = issuesResult?.results || [];
-                console.log(`[SPRINT LIST] Sprint "${sprint.name}" has ${issues.length} issues (issue_count=${sprint.issue_count})`);
+                console.log(`[SPRINT LIST] Sprint "${sprint.name}" has ` +
+                  `${issues.length} issues (issue_count=` +
+                  `${sprint.issue_count})`);
                 return {...sprint, issues};
               } catch (error) {
-                console.error(`[SPRINT LIST] Error loading issues for sprint ${sprint.id}:`, error);
+                console.error(`[SPRINT LIST] Error loading issues for sprint ` +
+                  `${sprint.id}:`, error);
                 return {...sprint, issues: []};
               }
             }),
@@ -102,11 +115,12 @@ export class SprintListComponent implements OnInit {
         this.sprints.set(sprintsWithIssues);
         this.paginationData.set(result);
 
-        console.log('[SPRINT LIST] All sprints loaded with issues:', sprintsWithIssues.map((s) => ({
-          name: s.name,
-          issue_count: s.issue_count,
-          loaded_issues: s.issues?.length || 0,
-        })));
+        console.log('[SPRINT LIST] All sprints loaded with issues:',
+            sprintsWithIssues.map((s) => ({
+              name: s.name,
+              issue_count: s.issue_count,
+              loaded_issues: s.issues?.length || 0,
+            })));
       }
     } catch (error) {
       this.error.set('Error loading sprints');
@@ -128,7 +142,8 @@ export class SprintListComponent implements OnInit {
     if (sprint.status === ProjectStatusEnum.ACTIVE) {
       this.notificationService.warning(
           'Cannot Delete Active Sprint',
-          `Sprint "${sprint.name}" is currently active. Please close it before deleting.`,
+          `Sprint "${sprint.name}" is currently active. ` +
+          `Please close it before deleting.`,
           6000,
       );
       return;
@@ -137,7 +152,8 @@ export class SprintListComponent implements OnInit {
     // Confirmación de eliminación
     const confirmed = confirm(
         `Are you sure you want to delete "${sprint.name}"?\n\n` +
-      `This action cannot be undone. All sprint data will be permanently removed.`,
+      `This action cannot be undone. All sprint data will be ` +
+      `permanently removed.`,
     );
 
     if (!confirmed) {
@@ -147,10 +163,12 @@ export class SprintListComponent implements OnInit {
     this.loading.set(true);
     try {
       await this.sprintService.deleteSprint(sprintId).toPromise();
-      this.notificationService.success(`Sprint "${sprint.name}" deleted successfully`);
+      this.notificationService.success(`Sprint "${sprint.name}" ` +
+      `deleted successfully`);
       await this.loadSprints();
     } catch (error: any) {
-      const errorMessage = error.error?.message || 'Error al eliminar el sprint';
+      const errorMessage = error.error?.message ||
+      'Error al eliminar el sprint';
       this.error.set(errorMessage);
       this.notificationService.error(errorMessage);
       console.error(error);
@@ -206,11 +224,13 @@ export class SprintListComponent implements OnInit {
     }
 
     // Validar que no haya otro sprint activo
-    const activeSprint = this.sprints().find((s) => s.status === ProjectStatusEnum.ACTIVE);
+    const activeSprint = this.sprints()
+        .find((s) => s.status === ProjectStatusEnum.ACTIVE);
     if (activeSprint && activeSprint.id !== sprintId) {
       this.notificationService.warning(
           'Sprint Already Active',
-          `Sprint "${activeSprint.name}" is already active. Close it before starting a new one.`,
+          `Sprint "${activeSprint.name}" is already active.` +
+          ` Close it before starting a new one.`,
           6000,
       );
       return;
@@ -219,7 +239,8 @@ export class SprintListComponent implements OnInit {
     this.loading.set(true);
     try {
       await this.sprintService.starSprint(sprintId).toPromise();
-      this.notificationService.success(`Sprint "${sprint.name}" started successfully!`);
+      this.notificationService
+          .success(`Sprint "${sprint.name}" started successfully!`);
       await this.loadSprints(); // Recargar para actualizar estados
     } catch (error: any) {
       const errorMessage = error.error?.message || 'Error al iniciar el sprint';
@@ -234,7 +255,8 @@ export class SprintListComponent implements OnInit {
   private showSprintEmptyWarning(sprint: Sprint): void {
     this.notificationService.warning(
         'Sprint Cannot Start',
-        `Sprint "${sprint.name}" has no issues. Please add at least one issue before starting the sprint.`,
+        `Sprint "${sprint.name}" has no issues. Please add at least one` +
+        ` issue before starting the sprint.`,
         6000,
     );
   }
@@ -268,7 +290,8 @@ export class SprintListComponent implements OnInit {
     this.loading.set(true);
     try {
       await this.sprintService.completeSprint(sprintId).toPromise();
-      this.notificationService.success(`Sprint "${sprint.name}" completed successfully!`);
+      this.notificationService.success(
+          `Sprint "${sprint.name}" completed successfully!`);
       await this.loadSprints();
     } catch (error: any) {
       const errorMessage = error.error?.message || 'Error completing sprint';

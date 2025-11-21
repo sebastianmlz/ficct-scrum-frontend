@@ -1,4 +1,5 @@
-import {Component, Input, signal, inject, OnInit, OnDestroy} from '@angular/core';
+import {Component, Input, signal, inject, OnInit, OnDestroy}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MlService, SprintRisk} from '../../../../core/services/ml.service';
 import {interval, Subscription} from 'rxjs';
@@ -35,7 +36,8 @@ export class SprintRiskDetectionComponent implements OnInit, OnDestroy {
 
     // Set up auto-refresh if enabled
     if (this.autoRefresh) {
-      this.refreshSubscription = interval(this.REFRESH_INTERVAL).subscribe(() => {
+      this.refreshSubscription =
+      interval(this.REFRESH_INTERVAL).subscribe(() => {
         this.loadRisks();
       });
     }
@@ -55,7 +57,8 @@ export class SprintRiskDetectionComponent implements OnInit, OnDestroy {
     try {
       console.log('[Sprint Risk] Loading risks for sprint:', this.sprintId);
 
-      const result = await this.mlService.getSprintRisk(this.sprintId).toPromise();
+      const result = await this.mlService
+          .getSprintRisk(this.sprintId).toPromise();
 
       if (result) {
         this.risks.set(result.risks || []);
@@ -78,7 +81,8 @@ export class SprintRiskDetectionComponent implements OnInit, OnDestroy {
       } else if (error.status === 500) {
         errorMsg = 'Risk detection temporarily unavailable.';
       } else {
-        errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
+        errorMsg = error?.error?.error || error?.error?.message ||
+        error?.message || errorMsg;
       }
 
       this.error.set(errorMsg);

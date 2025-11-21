@@ -169,34 +169,34 @@
   <!-- Modales -->
   <!-- Modal Asignar Issue (fuera de la tabla, centrado en la pantalla) -->
   <app-issue-assign *ngIf="showAssignModal() && selectedIssueId()" [issueId]="selectedIssueId()!"
-    (close)="closeAssignModal()" (assigned)="onIssueAssigned()">
+    (closeE)="closeAssignModal()" (assigned)="onIssueAssigned()">
   </app-issue-assign>
-  <app-issue-create *ngIf="showCreateModal()" [projectId]="projectId" (close)="closeCreateModal()"
+  <app-issue-create *ngIf="showCreateModal()" [projectId]="projectId" (closeE)="closeCreateModal()"
     (issueCreated)="onIssueCreated()">
   </app-issue-create>
 
-  <app-issue-detail-modal *ngIf="showDetailModal() && selectedIssueId()" 
+  <app-issue-detail-modal *ngIf="showDetailModal() && selectedIssueId()"
     [issueId]="selectedIssueId()!"
     [projectId]="projectId"
     (closed)="closeDetailModal()">
   </app-issue-detail-modal>
 
-  <app-issue-edit *ngIf="showEditModal() && selectedIssueId()" [issueId]="selectedIssueId()!" (close)="closeEditModal()"
+  <app-issue-edit *ngIf="showEditModal() && selectedIssueId()" [issueId]="selectedIssueId()!" (closeE)="closeEditModal()"
     (issueUpdated)="onIssueUpdated()">
   </app-issue-edit>
 
-  <app-ml-suggest-assignment 
+  <app-ml-suggest-assignment
     *ngIf="showSuggestAssignment() && selectedIssueId()"
     [issueId]="selectedIssueId()!"
     [projectId]="projectId"
-    (close)="closeSuggestAssignmentModal()"
+    (closeE)="closeSuggestAssignmentModal()"
     (assigned)="closeSuggestAssignmentModal()">
   </app-ml-suggest-assignment>
 
   <app-ai-search-issues
     *ngIf="showAiSearch()"
     [projectId]="projectId"
-    (close)="closeAiSearch()">
+    (closeE)="closeAiSearch()">
   </app-ai-search-issues>
 
   <!-- Paginación si es necesario -->

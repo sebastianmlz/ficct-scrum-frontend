@@ -1,4 +1,5 @@
-import {Component, Input, Output, EventEmitter, signal, inject} from '@angular/core';
+import {Component, Input, Output, EventEmitter, signal, inject}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
@@ -13,7 +14,7 @@ import {AiService, SearchResult} from '../../../../../core/services/ai.service';
 })
 export class AiSearchIssuesComponent {
   @Input() projectId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
   @Output() issueSelected = new EventEmitter<string>();
 
   private aiService = inject(AiService);
@@ -54,13 +55,16 @@ export class AiSearchIssuesComponent {
       }).toPromise();
 
       if (response) {
-        console.log('[AI SEARCH] ✅ Search successful, results:', response.results.length);
-        console.log('[AI SEARCH] Sample metadata:', response.results[0]?.metadata);
+        console.log('[AI SEARCH] ✅ Search successful, results:',
+            response.results.length);
+        console.log('[AI SEARCH] Sample metadata:',
+            response.results[0]?.metadata);
         this.results.set(response.results);
       }
     } catch (err: any) {
       console.error('[AI SEARCH] ❌ Search error:', err);
-      this.error.set(err.error?.error || 'Failed to search issues. Please try again.');
+      this.error.set(err.error?.error ||
+        'Failed to search issues. Please try again.');
     } finally {
       this.loading.set(false);
     }
@@ -79,7 +83,7 @@ export class AiSearchIssuesComponent {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 
   onKeyPress(event: KeyboardEvent): void {

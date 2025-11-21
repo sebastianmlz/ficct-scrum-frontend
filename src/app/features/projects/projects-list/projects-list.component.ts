@@ -3,7 +3,8 @@ import {CommonModule} from '@angular/common';
 import {RouterLink, ActivatedRoute} from '@angular/router';
 import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
 import {ProjectService} from '../../../core/services/project.service';
-import {Project, PaginatedProjectList, PaginationParams} from '../../../core/models/interfaces';
+import {Project, PaginatedProjectList, PaginationParams}
+  from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-projects-list',
@@ -51,7 +52,8 @@ export class ProjectsListComponent implements OnInit {
     };
 
     try {
-      const response = await this.projectService.getProjects(filterParams).toPromise();
+      const response = await this.projectService.getProjects(filterParams)
+          .toPromise();
       if (response) {
         const normalizeProjects = response.results.map((project) => ({
           ...project,

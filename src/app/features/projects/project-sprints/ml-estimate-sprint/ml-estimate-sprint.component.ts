@@ -1,7 +1,9 @@
-import {Component, Input, Output, EventEmitter, signal, inject} from '@angular/core';
+import {Component, Input, Output, EventEmitter, signal, inject}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {MlService, EstimateSprintDurationResponse} from '../../../../core/services/ml.service';
+import {MlService, EstimateSprintDurationResponse}
+  from '../../../../core/services/ml.service';
 
 @Component({
   selector: 'app-ml-estimate-sprint',
@@ -11,7 +13,7 @@ import {MlService, EstimateSprintDurationResponse} from '../../../../core/servic
 })
 export class MlEstimateSprintComponent {
   @Input() sprintId!: string;
-  @Output() close = new EventEmitter<void>();
+  @Output() closeE = new EventEmitter<void>();
 
   private mlService = inject(MlService);
 
@@ -36,7 +38,8 @@ export class MlEstimateSprintComponent {
         sprint_id: this.sprintId,
       };
 
-      if (this.scopeChangePercentage !== null && this.scopeChangePercentage > 0) {
+      if (this.scopeChangePercentage !== null &&
+        this.scopeChangePercentage > 0) {
         request.scope_change_percentage = this.scopeChangePercentage;
       }
 
@@ -44,9 +47,11 @@ export class MlEstimateSprintComponent {
         request.team_capacity_hours = this.teamCapacityHours;
       }
 
-      console.log('[ML Frontend] Requesting sprint duration estimate with:', request);
+      console.log('[ML Frontend] Requesting sprint duration estimate with:',
+          request);
 
-      const result = await this.mlService.estimateSprintDuration(request).toPromise();
+      const result = await this.mlService.estimateSprintDuration(request)
+          .toPromise();
 
       console.log('[ML Frontend] Sprint duration estimate received:', result);
 
@@ -59,7 +64,9 @@ export class MlEstimateSprintComponent {
       console.error('[ML Frontend] Error estimating sprint duration:', error);
 
       // Mejorar manejo de errores según respuestas del backend
-      const errorMsg = error?.error?.error || error?.error?.detail || error?.error?.message || error?.message || 'Failed to estimate sprint duration';
+      const errorMsg = error?.error?.error || error?.error?.detail ||
+      error?.error?.message || error?.message ||
+      'Failed to estimate sprint duration';
       this.error.set(errorMsg);
     } finally {
       this.loading.set(false);
@@ -82,6 +89,6 @@ export class MlEstimateSprintComponent {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeE.emit();
   }
 }

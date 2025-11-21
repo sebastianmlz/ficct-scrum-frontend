@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {WorkspacesService} from '../../../core/services/workspaces.service';
@@ -19,12 +19,10 @@ export class WorkspaceDetailComponent implements OnInit {
   showDeleteConfirm = signal(false);
   deleting = signal(false);
 
-  constructor(
-    private workspacesService: WorkspacesService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private notificationService: NotificationService,
-  ) {}
+  private workspacesService = inject(WorkspacesService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private notificationService = inject(NotificationService);
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
@@ -54,7 +52,8 @@ export class WorkspaceDetailComponent implements OnInit {
   goBack(): void {
     const orgId = this.workspace()?.organization_details?.id;
     if (orgId) {
-      this.router.navigate(['/workspaces'], {queryParams: {organization: orgId}});
+      this.router.navigate(['/workspaces'],
+          {queryParams: {organization: orgId}});
     } else {
       this.router.navigate(['/organizations']);
     }
@@ -65,7 +64,8 @@ export class WorkspaceDetailComponent implements OnInit {
   }
 
   viewProjects(): void {
-    this.router.navigate(['/projects'], {queryParams: {workspace: this.workspaceId()}});
+    this.router.navigate(['/projects'],
+        {queryParams: {workspace: this.workspaceId()}});
   }
 
   viewMembers(): void {
@@ -89,7 +89,8 @@ export class WorkspaceDetailComponent implements OnInit {
         this.goBack();
       },
       error: (err: Error) => {
-        this.notificationService.error(err.message || 'Failed to delete workspace');
+        this.notificationService
+            .error(err.message || 'Failed to delete workspace');
         this.deleting.set(false);
         this.showDeleteConfirm.set(false);
       },
