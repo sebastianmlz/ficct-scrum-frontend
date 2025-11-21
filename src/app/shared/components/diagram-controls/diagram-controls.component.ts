@@ -5,9 +5,7 @@ import {CommonModule} from '@angular/common';
   selector: 'app-diagram-controls',
   standalone: true,
   imports: [CommonModule],
-  template: `
-
-  `,
+  templateUrl: 'diagram-controls.component.html',
   styles: [`
     .diagram-controls-wrapper {
       position: absolute;

@@ -11,9 +11,7 @@ import {GitHubOAuthRepository} from '../../../../core/models/interfaces';
   selector: 'app-repository-selection-modal',
   standalone: true,
   imports: [CommonModule],
-  template: `
-
-  `,
+  templateUrl: 'repository-selection-modal.component.html',
   styles: [`
     .modal-overlay {
       position: fixed;
