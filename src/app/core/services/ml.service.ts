@@ -71,7 +71,7 @@ export interface RecommendStoryPointsResponse {
 
 export interface AssignmentSuggestion {
   user_id: string;
-  username: string;
+  user_name: string;
   user_email: string;
   total_score: number; // 0.0-1.0
   skill_score: number; // 0.0-1.0

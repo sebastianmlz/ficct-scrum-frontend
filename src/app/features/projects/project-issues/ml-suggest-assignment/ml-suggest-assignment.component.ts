@@ -118,7 +118,7 @@ export class MlSuggestAssignmentComponent implements OnInit {
     }
   }
 
-  getInitials(username: string): string {
+  getInitials(username = 'AA'): string {
     const parts = username.split(' ');
     if (parts.length >= 2) {
       return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase();

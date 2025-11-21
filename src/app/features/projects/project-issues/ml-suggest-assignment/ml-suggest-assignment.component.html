@@ -29,29 +29,29 @@
       } @else if (suggestions().length > 0) {
         <div class="space-y-4">
           <p class="text-sm text-gray-600 mb-4">Top {{ suggestions().length }} recommended team members:</p>
-          
+
           @for (suggestion of suggestions(); track suggestion.user_id) {
-            <div 
+            <div
               class="border-2 rounded-lg p-4 cursor-pointer transition-all"
               [class.border-indigo-500]="selectedSuggestion()?.user_id === suggestion.user_id"
               [class.bg-indigo-50]="selectedSuggestion()?.user_id === suggestion.user_id"
               [class.border-gray-200]="selectedSuggestion()?.user_id !== suggestion.user_id"
               [class.hover:border-indigo-300]="selectedSuggestion()?.user_id !== suggestion.user_id"
               (click)="selectSuggestion(suggestion)">
-              
+
               <div class="flex items-start gap-4">
                 <!-- Avatar -->
                 <div class="flex-shrink-0">
                   <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white text-lg font-bold">
-                    {{ getInitials(suggestion.username) }}
+                    {{ getInitials(suggestion.user_name) }}
                   </div>
                 </div>
-                
+
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center justify-between mb-1">
                     <h3 class="text-base font-bold text-gray-900 truncate">
-                      {{ suggestion.username }}
+                      {{ suggestion.user_name }}
                     </h3>
                     <div class="flex items-center gap-1">
                       <span class="text-2xl font-bold" [ngClass]="getScoreColor(suggestion.total_score)">
@@ -60,9 +60,9 @@
                       <span class="text-xs text-gray-500">match</span>
                     </div>
                   </div>
-                  
+
                   <p class="text-sm text-gray-600 truncate mb-2">{{ suggestion.user_email }}</p>
-                  
+
                   <!-- Score Breakdown -->
                   <div class="grid grid-cols-2 gap-2 text-xs mb-2">
                     <div class="flex items-center gap-1">
@@ -90,7 +90,7 @@
                       </span>
                     </div>
                   </div>
-                  
+
                   <!-- Reasoning -->
                   @if (suggestion.reasoning && suggestion.reasoning.length > 0) {
                     <div class="mt-2 pt-2 border-t border-gray-200">
@@ -103,7 +103,7 @@
                     </div>
                   }
                 </div>
-                
+
                 <!-- Selection Indicator -->
                 @if (selectedSuggestion()?.user_id === suggestion.user_id) {
                   <div class="flex-shrink-0">
@@ -127,7 +127,7 @@
           (click)="assignToSuggested()"
           [disabled]="assigning()"
           class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition-colors disabled:opacity-50">
-          {{ assigning() ? 'Assigning...' : 'Assign to ' + selectedSuggestion()!.username }}
+          {{ assigning() ? 'Assigning...' : 'Assign to ' + selectedSuggestion()!.user_name }}
         </button>
       }
       <button
