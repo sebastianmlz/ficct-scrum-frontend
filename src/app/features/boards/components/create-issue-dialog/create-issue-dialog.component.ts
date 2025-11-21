@@ -1,8 +1,11 @@
-import {Component, inject, OnInit, signal, Input, Output, EventEmitter} from '@angular/core';
+import {Component, inject, OnInit, signal, Input, Output, EventEmitter}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {IssueService} from '../../../../core/services/issue.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {Issue, IssueType} from '../../../../core/models/interfaces';
 
 @Component({
@@ -152,23 +155,31 @@ export class CreateIssueDialogComponent implements OnInit {
   }
 
   loadIssueTypes(): void {
-    console.log('[CREATE ISSUE] Loading issue types for project:', this.projectId);
+    console.log(
+        '[CREATE ISSUE] Loading issue types for project:', this.projectId);
 
     // ✅ CRITICAL FIX: Filter issue types by project
     this.issueService.getIssueTypes(this.projectId).subscribe({
       next: (response) => {
-        console.log('[CREATE ISSUE] ✅ Issue types loaded (filtered by project):', response.results);
-        console.log('[CREATE ISSUE] Number of issue types:', response.results.length);
+        console.log(
+            '[CREATE ISSUE] ✅ Issue types loaded (filtered by project):',
+            response.results);
+        console.log(
+            '[CREATE ISSUE] Number of issue types:', response.results.length);
 
         this.issueTypes.set(response.results);
 
         // Pre-select first issue type if available
-        if (response.results.length > 0 && !this.issueForm.get('issue_type')?.value) {
+        if (response.results.length > 0 &&
+          !this.issueForm.get('issue_type')?.value) {
           this.issueForm.patchValue({issue_type: response.results[0].id});
-          console.log('[CREATE ISSUE] Pre-selected issue type:', response.results[0].name);
+          console.log('[CREATE ISSUE] Pre-selected issue type:',
+              response.results[0].name);
         } else if (response.results.length === 0) {
-          console.error('[CREATE ISSUE] ❌ No issue types found for project:', this.projectId);
-          this.notificationService.error('No issue types available for this project');
+          console.error('[CREATE ISSUE] ❌ No issue types found for project:',
+              this.projectId);
+          this.notificationService.error(
+              'No issue types available for this project');
         }
       },
       error: (error) => {
@@ -188,7 +199,8 @@ export class CreateIssueDialogComponent implements OnInit {
       Object.keys(this.issueForm.controls).forEach((key) => {
         const control = this.issueForm.get(key);
         if (control?.invalid) {
-          console.error(`[CREATE ISSUE] Field '${key}' is invalid:`, control.errors);
+          console.error(`[CREATE ISSUE] Field '${key}' is invalid:`,
+              control.errors);
         }
         control?.markAsTouched();
       });
@@ -222,7 +234,8 @@ export class CreateIssueDialogComponent implements OnInit {
       console.error('[CREATE ISSUE] Error status:', error.status);
       console.error('[CREATE ISSUE] Error body:', error.error);
 
-      const errorMessage = error.error?.detail || error.error?.message || error.message || 'Failed to create issue';
+      const errorMessage = error.error?.detail || error.error?.message ||
+      error.message || 'Failed to create issue';
       this.notificationService.error(errorMessage);
     } finally {
       this.loading.set(false);

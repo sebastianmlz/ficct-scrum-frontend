@@ -2,11 +2,16 @@ import {Component, inject, OnInit, OnDestroy, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
-import {GitHubIntegrationStateService} from '../../../../core/services/github-integration-state.service';
-import {NotificationService} from '../../../../core/services/notification.service';
-import {GitHubCommit, PaginatedGitHubCommitList} from '../../../../core/models/interfaces';
-import {GitHubConnectPromptComponent} from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
+import {GitHubIntegrationService}
+  from '../../../../core/services/github-integration.service';
+import {GitHubIntegrationStateService}
+  from '../../../../core/services/github-integration-state.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
+import {GitHubCommit, PaginatedGitHubCommitList}
+  from '../../../../core/models/interfaces';
+import {GitHubConnectPromptComponent}
+  from '@components/github-connect-prompt/github-connect-prompt.component';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -177,12 +182,13 @@ export class CommitsListComponent implements OnInit, OnDestroy {
               // Backend returns commits directly in response (up to 50)
               if (syncResponse.commits && syncResponse.commits.length > 0) {
                 this.commits.set(syncResponse.commits);
-                this.totalCommits.set(syncResponse.total_commits); // Total in database
-                this.syncCount.set(syncResponse.synced_count); // New commits synced
+                this.totalCommits.set(syncResponse.total_commits);
+                this.syncCount.set(syncResponse.synced_count);
                 this.lastSyncAt.set(syncResponse.last_sync_at); // Timestamp
 
                 this.notificationService.success(
-                    `Successfully synced ${syncResponse.synced_count} new commits`,
+                    `Successfully synced ${
+                      syncResponse.synced_count} new commits`,
                 );
               } else {
                 this.notificationService.info('No new commits to sync');
@@ -205,7 +211,8 @@ export class CommitsListComponent implements OnInit, OnDestroy {
             },
           });
         } else {
-          this.notificationService.error('No GitHub integration found for this project');
+          this.notificationService.error(
+              'No GitHub integration found for this project');
           this.syncing.set(false);
         }
       },

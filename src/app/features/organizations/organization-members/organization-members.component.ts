@@ -1,17 +1,20 @@
 import {Component, OnInit, inject} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {OrganizationService} from '../../../core/services/organization.service';
-import {OrganizationMember, PaginatedOrganizationMemberList, OrganizationInvitation} from '../../../core/models/interfaces';
+import {OrganizationMember, OrganizationInvitation}
+  from '../../../core/models/interfaces';
 import {CommonModule} from '@angular/common';
 import {TableModule} from 'primeng/table';
 import {ProgressSpinnerModule} from 'primeng/progressspinner';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {AuthStore} from '../../../core/store/auth.store';
 
 @Component({
   selector: 'app-organization-members',
   standalone: true,
-  imports: [CommonModule, TableModule, ProgressSpinnerModule, ReactiveFormsModule],
+  imports: [CommonModule, TableModule, ProgressSpinnerModule,
+    ReactiveFormsModule],
   templateUrl: './organization-members.component.html',
   styleUrl: './organization-members.component.css',
 })
@@ -21,7 +24,8 @@ export class OrganizationMembersComponent implements OnInit {
   authStore = inject(AuthStore);
   resendInvitation(invitationId: string): void {
     this.invitationsLoading = true;
-    this.organizationService.resendInvitation(this.organizationId, invitationId).subscribe({
+    this.organizationService.resendInvitation(this.organizationId,
+        invitationId).subscribe({
       next: () => this.loadInvitations(),
       error: () => this.loadInvitations(),
     });
@@ -29,7 +33,8 @@ export class OrganizationMembersComponent implements OnInit {
 
   cancelInvitation(invitationId: string): void {
     this.invitationsLoading = true;
-    this.organizationService.cancelInvitation(this.organizationId, invitationId).subscribe({
+    this.organizationService.cancelInvitation(this.organizationId,
+        invitationId).subscribe({
       next: () => this.loadInvitations(),
       error: () => this.loadInvitations(),
     });
@@ -151,8 +156,9 @@ export class OrganizationMembersComponent implements OnInit {
       email: this.inviteForm.value.email,
       role: this.inviteForm.value.role,
     };
-    this.organizationService.sendInvitation(this.organizationId, data).subscribe({
-      next: (res) => {
+    this.organizationService.sendInvitation(this.organizationId,
+        data).subscribe({
+      next: () => {
         this.inviteSuccess = 'Invitación enviada correctamente.';
         this.inviteLoading = false;
         this.loadInvitations();
@@ -168,7 +174,8 @@ export class OrganizationMembersComponent implements OnInit {
   loadInvitations(page = 1): void {
     this.invitationsLoading = true;
     this.invitationsError = '';
-    this.organizationService.getInvitations(this.organizationId, {page}).subscribe({
+    this.organizationService.getInvitations(this.organizationId,
+        {page}).subscribe({
       next: (res: any) => {
         if (Array.isArray(res)) {
           this.invitations = res;
@@ -189,7 +196,8 @@ export class OrganizationMembersComponent implements OnInit {
   loadMembers(page = 1): void {
     this.loading = true;
     this.error = '';
-    this.organizationService.getOrganizationMembers(this.organizationId, {page}).subscribe({
+    this.organizationService.getOrganizationMembers(this.organizationId,
+        {page}).subscribe({
       next: (res: any) => {
         if (Array.isArray(res)) {
           this.members = res;
@@ -202,9 +210,11 @@ export class OrganizationMembersComponent implements OnInit {
           this.total = 0;
         }
         // Obtener el rol del usuario actual
-        const currentMember = this.members.find((m) => m.user.email === this.currentUserEmail);
+        const currentMember = this.members.find(
+            (m) => m.user.email === this.currentUserEmail);
         this.currentUserRole = currentMember?.role || '';
-        console.log('🔐 Usuario actual:', this.currentUserEmail, 'Rol:', this.currentUserRole);
+        console.log('🔐 Usuario actual:', this.currentUserEmail,
+            'Rol:', this.currentUserRole);
         this.loading = false;
       },
       error: (err) => {
@@ -215,8 +225,10 @@ export class OrganizationMembersComponent implements OnInit {
   }
 
   get canEditRoles(): boolean {
-    const canEdit = this.currentUserRole === 'admin' || this.currentUserRole === 'owner';
-    console.log('🔍 canEditRoles:', canEdit, 'currentUserRole:', this.currentUserRole);
+    const canEdit = this.currentUserRole === 'admin' ||
+    this.currentUserRole === 'owner';
+    console.log('🔍 canEditRoles:', canEdit, 'currentUserRole:',
+        this.currentUserRole);
     return canEdit;
   }
 }

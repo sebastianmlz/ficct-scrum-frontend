@@ -9,7 +9,6 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
-  // Check both AuthService (for token in localStorage) and AuthStore (for app state)
   const hasToken = authService.isLoggedIn();
   const isAuthenticated = authStore.isAuthenticated();
 
@@ -18,7 +17,8 @@ export const authGuard: CanActivateFn = (route, state) => {
   if (hasToken) {
     // If user has token but AuthStore is not initialized, initialize it
     if (!isAuthenticated) {
-      console.log('AuthGuard: Token exists but AuthStore not initialized, initializing...');
+      console.log('AuthGuard: Token exists but AuthStore not initialized, ' +
+        'initializing...');
       authStore.initializeAuth();
     }
     return true;
@@ -29,14 +29,15 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 };
 
-export const guestGuard: CanActivateFn = (route, state) => {
+export const guestGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   if (!authService.isLoggedIn()) {
     return true;
   } else {
-    console.log('GuestGuard: User already authenticated, redirecting to dashboard');
+    console.log(
+        'GuestGuard: User already authenticated, redirecting to dashboard');
     router.navigate(['/dashboard']);
     return false;
   }

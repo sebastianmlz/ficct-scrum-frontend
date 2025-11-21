@@ -1,9 +1,11 @@
 import {Component, OnInit, inject, signal, input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {NotificationsBackendService, ProjectNotificationSettings} from '../../../core/services/notifications-backend.service';
+import {NotificationsBackendService, ProjectNotificationSettings}
+  from '../../../core/services/notifications-backend.service';
 import {NotificationService} from '../../../core/services/notification.service';
-import {SlackWebhookTestComponent} from '../slack-webhook-test/slack-webhook-test.component';
+import {SlackWebhookTestComponent}
+  from '../slack-webhook-test/slack-webhook-test.component';
 
 @Component({
   selector: 'app-project-notification-settings',
@@ -39,16 +41,19 @@ export class ProjectNotificationSettingsComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.notificationsBackendService.getProjectSettings(this.projectId()).subscribe({
+    this.notificationsBackendService.getProjectSettings(
+        this.projectId()).subscribe({
       next: (settings) => {
         this.settings.set(settings);
         this.loading.set(false);
       },
       error: (err) => {
         console.error('Error loading project notification settings:', err);
-        this.error.set('Failed to load notification settings. Please try again.');
+        this.error.set(
+            'Failed to load notification settings. Please try again.');
         this.loading.set(false);
-        this.notificationService.error('Error', 'Failed to load notification settings');
+        this.notificationService.error(
+            'Error', 'Failed to load notification settings');
       },
     });
   }
@@ -72,13 +77,16 @@ export class ProjectNotificationSettingsComponent implements OnInit {
     this.notificationsBackendService.updateProjectSettings(payload).subscribe({
       next: () => {
         this.saving.set(false);
-        this.notificationService.success('Success', 'Notification settings saved successfully');
+        this.notificationService.success(
+            'Success', 'Notification settings saved successfully');
       },
       error: (err) => {
         console.error('Error saving settings:', err);
-        this.error.set('Failed to save notification settings. Please try again.');
+        this.error.set(
+            'Failed to save notification settings. Please try again.');
         this.saving.set(false);
-        this.notificationService.error('Error', 'Failed to save notification settings');
+        this.notificationService.error(
+            'Error', 'Failed to save notification settings');
       },
     });
   }

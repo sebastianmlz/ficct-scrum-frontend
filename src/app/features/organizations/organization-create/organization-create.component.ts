@@ -1,10 +1,12 @@
 import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {OrganizationService} from '../../../core/services/organization.service';
 import {OrganizationRequest} from '../../../core/models/interfaces';
-import {OrganizationTypeEnum, SubscriptionPlanEnum} from '../../../core/models/enums';
+import {OrganizationTypeEnum, SubscriptionPlanEnum}
+  from '../../../core/models/enums';
 
 @Component({
   selector: 'app-organization-create',
@@ -120,8 +122,10 @@ export class OrganizationCreateComponent {
         name: this.organizationForm.value.name,
         slug: this.organizationForm.value.slug,
         description: this.organizationForm.value.description || undefined,
-        organization_type: this.organizationForm.value.organization_type || undefined,
-        subscription_plan: this.organizationForm.value.subscription_plan || undefined,
+        organization_type: this.organizationForm.value.organization_type ||
+        undefined,
+        subscription_plan: this.organizationForm.value.subscription_plan ||
+        undefined,
         website_url: this.organizationForm.value.website_url || undefined,
         is_active: this.organizationForm.value.is_active,
         logo: this.selectedFile || undefined,
@@ -131,7 +135,8 @@ export class OrganizationCreateComponent {
       console.log('📄 Archivo seleccionado:', this.selectedFile);
       console.log('🔍 Valores del form:', this.organizationForm.value);
 
-      const organization = await this.organizationService.createOrganization(formData).toPromise();
+      const organization = await this.organizationService
+          .createOrganization(formData).toPromise();
       console.log('✅ Organización creada:', organization);
 
       if (organization) {
@@ -146,7 +151,8 @@ export class OrganizationCreateComponent {
         error: error.error,
       });
 
-      this.error = error.error?.message || error.message || 'Failed to create organization';
+      this.error = error.error?.message || error.message ||
+      'Failed to create organization';
     } finally {
       this.loading = false;
     }
@@ -171,7 +177,8 @@ export class OrganizationCreateComponent {
 
       console.log('🧪 Datos de prueba (JSON puro):', testData);
 
-      const organization = await this.organizationService.createOrganization(testData).toPromise();
+      const organization = await this.organizationService
+          .createOrganization(testData).toPromise();
       console.log('✅ Organización de prueba creada:', organization);
 
       if (organization) {
@@ -180,7 +187,8 @@ export class OrganizationCreateComponent {
       }
     } catch (error: any) {
       console.error('❌ Error en prueba:', error);
-      this.error = 'Test POST failed: ' + (error.error?.message || error.message);
+      this.error = 'Test POST failed: ' + (error.error?.message ||
+        error.message);
       alert('❌ Error en prueba: ' + this.error);
     } finally {
       this.loading = false;
@@ -211,16 +219,19 @@ export class OrganizationCreateComponent {
 
       console.log('🧪 Datos de prueba (con archivo):', testData);
 
-      const organization = await this.organizationService.createOrganization(testData).toPromise();
+      const organization = await this.organizationService
+          .createOrganization(testData).toPromise();
       console.log('✅ Organización con imagen creada:', organization);
 
       if (organization) {
-        alert('✅ ¡Prueba con imagen exitosa! Organización creada: ' + organization.name);
+        alert('✅ ¡Prueba con imagen exitosa! Organización creada: ' +
+          organization.name);
         this.router.navigate(['/organizations', organization.id]);
       }
     } catch (error: any) {
       console.error('❌ Error en prueba con archivo:', error);
-      this.error = 'Test with file failed: ' + (error.error?.message || error.message);
+      this.error = 'Test with file failed: ' + (error.error?.message ||
+        error.message);
       alert('❌ Error en prueba con archivo: ' + this.error);
     } finally {
       this.loading = false;

@@ -57,7 +57,8 @@ export class OrganizationsInvitationsComponent implements OnInit {
     this.actionError = '';
     this.organizationService.acceptInvitation(this.token).subscribe({
       next: () => {
-        this.actionMessage = '¡Invitación aceptada! Ya eres miembro de la organización.';
+        this.actionMessage =
+        '¡Invitación aceptada! Ya eres miembro de la organización.';
         this.accepted = true;
         this.actionLoading = false;
       },

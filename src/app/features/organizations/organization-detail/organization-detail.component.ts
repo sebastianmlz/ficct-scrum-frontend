@@ -33,7 +33,8 @@ export class OrganizationDetailComponent implements OnInit {
     this.error.set(null);
 
     try {
-      const org = await this.organizationService.getOrganization(id).toPromise();
+      const org = await this.organizationService.getOrganization(id)
+          .toPromise();
       if (org) {
         this.organization.set(org);
       }

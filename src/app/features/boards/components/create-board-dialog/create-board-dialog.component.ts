@@ -1,9 +1,11 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {Router, ActivatedRoute} from '@angular/router';
 import {BoardService} from '../../../../core/services/board.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-create-board-dialog',
@@ -44,7 +46,8 @@ export class CreateBoardDialogComponent implements OnInit {
       Object.keys(this.boardForm.controls).forEach((key) => {
         const control = this.boardForm.get(key);
         if (control?.invalid) {
-          console.error(`[CREATE BOARD] Field '${key}' is invalid:`, control.errors);
+          console.error(
+              `[CREATE BOARD] Field '${key}' is invalid:`, control.errors);
         }
         control?.markAsTouched();
       });
@@ -66,16 +69,19 @@ export class CreateBoardDialogComponent implements OnInit {
       console.log('[CREATE BOARD] Sending request with data:', boardData);
       console.log('[CREATE BOARD] Project ID:', this.projectId());
 
-      const response = await this.boardService.createBoard(boardData).toPromise();
+      const response =
+      await this.boardService.createBoard(boardData).toPromise();
 
       console.log('[CREATE BOARD] ✅ Response received:', response);
       console.log('[CREATE BOARD] Response has id:', !!response?.id);
       console.log('[CREATE BOARD] Response id value:', response?.id);
 
       if (response && response.id) {
-        console.log('[CREATE BOARD] Success! Navigating to board:', response.id);
+        console.log(
+            '[CREATE BOARD] Success! Navigating to board:', response.id);
         this.notificationService.success('Board created successfully');
-        this.router.navigate(['/projects', this.projectId(), 'boards', response.id]);
+        this.router.navigate(
+            ['/projects', this.projectId(), 'boards', response.id]);
       } else {
         console.error('[CREATE BOARD] ❌ Response missing id:', response);
         throw new Error('Board created but no ID returned');
@@ -89,11 +95,14 @@ export class CreateBoardDialogComponent implements OnInit {
 
       // Si es 201 Created pero entra al catch, es un problema de parsing
       if (error.status === 201) {
-        console.error('[CREATE BOARD] ⚠️ CRITICAL: Got 201 but entered error handler!');
-        console.error('[CREATE BOARD] This suggests interceptor or HttpClient issue');
+        console.error(
+            '[CREATE BOARD] ⚠️ CRITICAL: Got 201 but entered error handler!');
+        console.error(
+            '[CREATE BOARD] This suggests interceptor or HttpClient issue');
       }
 
-      const errorMessage = error.error?.message || error.error?.detail || error.message || 'Failed to create board';
+      const errorMessage = error.error?.message || error.error?.detail ||
+      error.message || 'Failed to create board';
       this.error.set(errorMessage);
       this.notificationService.error(errorMessage);
     } finally {
@@ -108,10 +117,12 @@ export class CreateBoardDialogComponent implements OnInit {
   getFieldError(fieldName: string): string {
     const field = this.boardForm.get(fieldName);
     if (field?.hasError('required') && field.touched) {
-      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+      } is required`;
     }
     if (field?.hasError('maxlength') && field.touched) {
-      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is too long`;
+      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+      } is too long`;
     }
     return '';
   }

@@ -1,10 +1,13 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {OrganizationService} from '../../../core/services/organization.service';
-import {Organization, OrganizationRequest} from '../../../core/models/interfaces';
-import {OrganizationTypeEnum, SubscriptionPlanEnum} from '../../../core/models/enums';
+import {Organization, OrganizationRequest}
+  from '../../../core/models/interfaces';
+import {OrganizationTypeEnum, SubscriptionPlanEnum}
+  from '../../../core/models/enums';
 
 @Component({
   selector: 'app-organization-edit',
@@ -68,7 +71,8 @@ export class OrganizationEditComponent implements OnInit {
     this.loadError.set(null);
 
     try {
-      const organization = await this.organizationService.getOrganization(this.organizationId).toPromise();
+      const organization = await this.organizationService
+          .getOrganization(this.organizationId).toPromise();
       if (organization) {
         this.populateForm(organization);
         this.currentLogoUrl.set(organization.logo_url || null);
@@ -126,14 +130,17 @@ export class OrganizationEditComponent implements OnInit {
         name: this.organizationForm.value.name,
         slug: this.organizationForm.value.slug,
         description: this.organizationForm.value.description || undefined,
-        organization_type: this.organizationForm.value.organization_type || undefined,
-        subscription_plan: this.organizationForm.value.subscription_plan || undefined,
+        organization_type: this.organizationForm.value.organization_type ||
+        undefined,
+        subscription_plan: this.organizationForm.value.subscription_plan ||
+        undefined,
         website_url: this.organizationForm.value.website_url || undefined,
         is_active: this.organizationForm.value.is_active,
         logo: this.selectedFile || undefined,
       };
 
-      const organization = await this.organizationService.updateOrganization(this.organizationId, formData).toPromise();
+      const organization = await this.organizationService
+          .updateOrganization(this.organizationId, formData).toPromise();
       if (organization) {
         this.successMessage.set('Organization updated successfully!');
         this.currentLogoUrl.set(organization.logo_url || null);
@@ -144,7 +151,8 @@ export class OrganizationEditComponent implements OnInit {
         setTimeout(() => this.successMessage.set(null), 3000);
       }
     } catch (error: any) {
-      this.saveError.set(error.error?.message || 'Failed to update organization');
+      this.saveError.set(error.error?.message ||
+        'Failed to update organization');
     } finally {
       this.saving.set(false);
     }

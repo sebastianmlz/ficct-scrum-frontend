@@ -1,5 +1,6 @@
 import {Injectable, inject} from '@angular/core';
-import {HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse} from '@angular/common/http';
+import {HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse}
+  from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {Router} from '@angular/router';
@@ -12,7 +13,8 @@ export class AuthInterceptor implements HttpInterceptor {
   private router = inject(Router);
   private notificationService = inject(NotificationService);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept(req: HttpRequest<any>, next: HttpHandler):
+  Observable<HttpEvent<any>> {
     // Skip auth header for login, register, and password reset endpoints
     const skipAuth = this.shouldSkipAuth(req.url);
 
@@ -39,7 +41,8 @@ export class AuthInterceptor implements HttpInterceptor {
         catchError((error: HttpErrorResponse) => {
         // Handle 401 Unauthorized or 403 Forbidden
           if (error.status === 401 || error.status === 403) {
-            console.error('[Auth Interceptor] Authentication error:', error.status);
+            console.error('[Auth Interceptor] Authentication error:',
+                error.status);
 
             // Clear all auth data
             localStorage.removeItem('access');
@@ -48,7 +51,8 @@ export class AuthInterceptor implements HttpInterceptor {
             localStorage.removeItem('user_role');
 
             // Show user-friendly message
-            this.notificationService.error('Session expired. Please log in again.');
+            this.notificationService.error(
+                'Session expired. Please log in again.');
 
             // Redirect to login page
             this.router.navigate(['/login']);

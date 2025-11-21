@@ -8,12 +8,17 @@ export const notificationsRoutes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./notification-list/notification-list.component').then((m) => m.NotificationListComponent),
+        loadComponent: () =>
+          import('./notification-list/notification-list.component')
+              .then((m) => m.NotificationListComponent),
         title: 'Notifications',
       },
       {
         path: 'preferences',
-        loadComponent: () => import('./notification-preferences/notification-preferences.component').then((m) => m.NotificationPreferencesComponent),
+        loadComponent: () =>
+          import(
+              './notification-preferences/notification-preferences.component')
+              .then((m) => m.NotificationPreferencesComponent),
         title: 'Notification Preferences',
       },
     ],

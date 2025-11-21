@@ -2,12 +2,16 @@
 
 import {Sprint, Issue, IssueType} from './interfaces';
 
-export type OrganizationTypeEnum = 'startup' | 'enterprise' | 'agency' | 'nonprofit' | 'education' | 'government' | 'other';
-export type SubscriptionPlanEnum = 'free' | 'basic' | 'professional' | 'enterprise';
-export type WorkspaceTypeEnum = 'development' | 'design' | 'marketing' | 'sales' | 'support' | 'hr' | 'finance' | 'general';
+export type OrganizationTypeEnum = 'startup' | 'enterprise' | 'agency' |
+'nonprofit' | 'education' | 'government' | 'other';
+export type SubscriptionPlanEnum = 'free' | 'basic' | 'professional' |
+'enterprise';
+export type WorkspaceTypeEnum = 'development' | 'design' | 'marketing' |
+'sales' | 'support' | 'hr' | 'finance' | 'general';
 export type VisibilityEnum = 'public' | 'private' | 'restricted';
 export type MethodologyEnum = 'scrum' | 'kanban' | 'waterfall' | 'hybrid';
-export type Status0acEnum = 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled' | 'archived';
+export type Status0acEnum = 'planning' | 'active' | 'on_hold' | 'completed'
+| 'cancelled' | 'archived';
 export type PriorityEnum = 'low' | 'medium' | 'high' | 'critical';
 
 export interface UserBasic {

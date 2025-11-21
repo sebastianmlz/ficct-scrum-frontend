@@ -223,7 +223,8 @@ export interface ArchitectureDiagramData {
 
 export interface DiagramResponse {
   diagram_type: 'workflow' | 'dependency' | 'roadmap' | 'architecture' | 'uml';
-  data: WorkflowDiagramData | DependencyGraphData | RoadmapData | ArchitectureDiagramData | any;
+  data: WorkflowDiagramData | DependencyGraphData | RoadmapData |
+  ArchitectureDiagramData | any;
   format: 'json' | 'svg';
   cached: boolean;
   generated_at?: string;

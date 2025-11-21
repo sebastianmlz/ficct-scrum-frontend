@@ -1,4 +1,4 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import {Observable, BehaviorSubject} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {WebSocketService} from '../../../core/services/websocket.service';
@@ -22,7 +22,7 @@ export class BoardWebSocketService implements OnDestroy {
 
   public connected$ = this.connectedSubject$.asObservable();
 
-  constructor(private wsService: WebSocketService) {}
+  private wsService = inject(WebSocketService);
 
   /**
    * Conectar al WebSocket del board
@@ -45,10 +45,12 @@ export class BoardWebSocketService implements OnDestroy {
 
     console.log('[BOARD-WS] Connecting to board:', boardId);
     console.log('[BOARD-WS] Environment wsUrl:', environment.wsUrl);
-    console.log('[BOARD-WS] Token received - Length:', token.length, '| First 30 chars:', token.substring(0, 30) + '...');
-    console.log('[BOARD-WS] Token format valid (starts with eyJ):', token.startsWith('eyJ'));
-    console.log('[BOARD-WS] Full WebSocket URL:', wsUrl.replace(token, token.substring(0, 20) + '...[CENSORED]'));
-
+    console.log('[BOARD-WS] Token received - Length:', token.length,
+        '| First 30 chars:', token.substring(0, 30) + '...');
+    console.log('[BOARD-WS] Token format valid (starts with eyJ):',
+        token.startsWith('eyJ'));
+    console.log('[BOARD-WS] Full WebSocket URL:',
+        wsUrl.replace(token, token.substring(0, 20) + '...[CENSORED]'));
     this.wsService.connect(wsUrl);
     this.connectedSubject$.next(true);
   }

@@ -1,10 +1,9 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {AuthStore} from '../../../core/store/auth.store';
-import {User} from '../../../core/models/interfaces';
-import {TimezoneEnum, LanguageEnum} from '../../../core/models/enums';
 
 @Component({
   selector: 'app-profile-edit',
@@ -84,7 +83,8 @@ export class ProfileEditComponent implements OnInit {
       }
     } catch (error: any) {
       console.error('Profile update error:', error);
-      this.error.set(error.error?.message || error.message || 'Failed to update profile');
+      this.error.set(error.error?.message || error.message ||
+        'Failed to update profile');
     } finally {
       this.saving.set(false);
     }

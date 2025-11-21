@@ -3,7 +3,8 @@ import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
 import {OrganizationService} from '../../../core/services/organization.service';
-import {Organization, PaginatedOrganizationList, PaginationParams} from '../../../core/models/interfaces';
+import {Organization, PaginatedOrganizationList, PaginationParams}
+  from '../../../core/models/interfaces';
 
 @Component({
   selector: 'app-organizations-list',
@@ -37,7 +38,8 @@ export class OrganizationsListComponent implements OnInit {
     this.error.set(null);
 
     try {
-      const response = await this.organizationService.getOrganizations(params).toPromise();
+      const response = await this.organizationService.getOrganizations(params)
+          .toPromise();
       if (response) {
         this.organizations.set(response.results);
         this.paginationData.set(response);

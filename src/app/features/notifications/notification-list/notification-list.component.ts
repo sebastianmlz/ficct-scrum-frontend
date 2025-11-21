@@ -1,7 +1,8 @@
 import {Component, OnInit, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
-import {NotificationsBackendService, BackendNotification} from '../../../core/services/notifications-backend.service';
+import {NotificationsBackendService, BackendNotification}
+  from '../../../core/services/notifications-backend.service';
 import {NotificationService} from '../../../core/services/notification.service';
 
 @Component({
@@ -53,10 +54,10 @@ export class NotificationListComponent implements OnInit {
 
     this.notificationsBackendService.getNotifications(params).subscribe({
       next: (response) => {
-        // Validación defensiva: si la respuesta no tiene results como array, mostrar error
         if (!response || !Array.isArray(response.results)) {
           this.notifications.set([]);
-          this.error.set('Unexpected API response. Please contact backend or try again later.');
+          this.error.set('Unexpected API response. Please contact ' +
+            'backend or try again later.');
           this.loading.set(false);
           return;
         }
@@ -89,7 +90,8 @@ export class NotificationListComponent implements OnInit {
       next: (updatedNotification) => {
         // Update local state with the updated notification from backend
         this.notifications.update((notifications) =>
-          notifications.map((n) => n.id === notification.id ? updatedNotification : n),
+          notifications.map((n) => n.id === notification.id ?
+        updatedNotification : n),
         );
         this.notificationService.success('Marked as read');
       },

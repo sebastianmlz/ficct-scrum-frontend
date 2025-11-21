@@ -2,7 +2,8 @@ import {Component, OnInit, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
-import {NotificationsBackendService, NotificationPreferences} from '../../../core/services/notifications-backend.service';
+import {NotificationsBackendService, NotificationPreferences}
+  from '../../../core/services/notifications-backend.service';
 import {NotificationService} from '../../../core/services/notification.service';
 
 @Component({
@@ -61,7 +62,8 @@ export class NotificationPreferencesComponent implements OnInit {
     this.saving.set(true);
     this.error.set(null);
 
-    this.notificationsBackendService.updatePreferences(this.preferences()).subscribe({
+    this.notificationsBackendService.updatePreferences(
+        this.preferences()).subscribe({
       next: (response) => {
         console.log('[PREFERENCES] ✅ Save successful!');
         console.log('[PREFERENCES] Response message:', response.message);
@@ -70,7 +72,8 @@ export class NotificationPreferencesComponent implements OnInit {
         // Extract preferences from wrapper
         this.preferences.set(response.preferences);
         this.saving.set(false);
-        this.notificationService.success('Success', response.message || 'Preferences saved successfully');
+        this.notificationService.success('Success', response.message ||
+          'Preferences saved successfully');
       },
       error: (err) => {
         console.error('[PREFERENCES] ❌ Error saving preferences:', err);

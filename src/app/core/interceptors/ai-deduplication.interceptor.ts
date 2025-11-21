@@ -1,5 +1,5 @@
-import {HttpInterceptorFn, HttpRequest, HttpResponse} from '@angular/common/http';
-import {inject} from '@angular/core';
+import {HttpInterceptorFn, HttpRequest, HttpResponse}
+  from '@angular/common/http';
 import {of, throwError} from 'rxjs';
 import {tap, catchError} from 'rxjs/operators';
 
@@ -54,7 +54,8 @@ function cleanExpiredCache(): void {
   expiredKeys.forEach((key) => requestCache.delete(key));
 
   if (expiredKeys.length > 0) {
-    console.log(`[AI-DEDUP] Cleaned ${expiredKeys.length} expired cache entries`);
+    console.log(
+        `[AI-DEDUP] Cleaned ${expiredKeys.length} expired cache entries`);
   }
 }
 
@@ -74,7 +75,8 @@ export const aiDeduplicationInterceptor: HttpInterceptorFn = (req, next) => {
   if (cached) {
     const age = Date.now() - cached.timestamp;
     if (age < DEDUP_WINDOW) {
-      console.log(`[AI-DEDUP] 🚫 BLOCKED duplicate request (${(age / 1000).toFixed(1)}s ago)`);
+      console.log(`[AI-DEDUP] 🚫 BLOCKED duplicate request (${
+        (age / 1000).toFixed(1)}s ago)`);
       console.log(`[AI-DEDUP] URL: ${req.url}`);
 
       // Return cached response

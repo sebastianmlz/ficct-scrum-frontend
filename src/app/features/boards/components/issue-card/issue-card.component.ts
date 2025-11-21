@@ -1,8 +1,10 @@
 import {Component, Input, Output, EventEmitter, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {Issue} from '../../../../core/models/interfaces';
-import {getPriorityLabel, getPriorityTailwindClasses} from '../../../../shared/utils/priority.utils';
-import {QuickAssigneePopoverComponent} from '../../../../shared/components/quick-assignee-popover/quick-assignee-popover.component';
+import {getPriorityLabel, getPriorityTailwindClasses}
+  from '../../../../shared/utils/priority.utils';
+import {QuickAssigneePopoverComponent}
+  from '@components/quick-assignee-popover/quick-assignee-popover.component';
 
 @Component({
   selector: 'app-issue-card',
@@ -15,7 +17,8 @@ export class IssueCardComponent {
   @Input() projectId!: string;
   @Input() draggable = true;
   @Output() clicked = new EventEmitter<Issue>();
-  @Output() assigneeChanged = new EventEmitter<{ issueId: string, assigneeId: string | null }>();
+  @Output() assigneeChanged = new EventEmitter<{ issueId: string,
+    assigneeId: string | null }>();
 
   showAssigneePopover = signal(false);
   avatarElement: HTMLElement | null = null;

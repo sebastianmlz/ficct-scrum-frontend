@@ -1,6 +1,7 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {AuthStore} from '../../../core/store/auth.store';
 
@@ -53,7 +54,8 @@ export class ProfileSettingsComponent implements OnInit {
     const newPassword = group.get('new_password');
     const confirmPassword = group.get('confirm_password');
 
-    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
+    if (newPassword && confirmPassword &&
+      newPassword.value !== confirmPassword.value) {
       confirmPassword.setErrors({mismatch: true});
       return {mismatch: true};
     }
@@ -101,7 +103,8 @@ export class ProfileSettingsComponent implements OnInit {
       // Clear success message after 3 seconds
       setTimeout(() => this.success.set(null), 3000);
     } catch (error: any) {
-      this.error.set(error.error?.message || 'Failed to save notification preferences');
+      this.error.set(error.error?.message ||
+        'Failed to save notification preferences');
     } finally {
       this.savingNotifications.set(false);
     }
@@ -118,19 +121,22 @@ export class ProfileSettingsComponent implements OnInit {
 
       const newStatus = !this.twoFactorEnabled();
       this.twoFactorEnabled.set(newStatus);
-      this.success.set(`Two-factor authentication ${newStatus ? 'enabled' : 'disabled'}!`);
+      this.success.set(`Two-factor authentication ${
+        newStatus ? 'enabled' : 'disabled'}!`);
 
       // Clear success message after 3 seconds
       setTimeout(() => this.success.set(null), 3000);
     } catch (error: any) {
-      this.error.set(error.error?.message || 'Failed to toggle two-factor authentication');
+      this.error.set(error.error?.message ||
+        'Failed to toggle two-factor authentication');
     } finally {
       this.togglingTwoFactor.set(false);
     }
   }
 
   confirmDeleteAccount(): void {
-    const confirmed = confirm('Are you sure you want to delete your account? This action cannot be undone.');
+    const confirmed = confirm('Are you sure you want to delete your account? ' +
+      'This action cannot be undone.');
     if (confirmed) {
       this.deleteAccount();
     }

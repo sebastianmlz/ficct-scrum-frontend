@@ -1,9 +1,12 @@
-import {Component, inject, OnInit, signal, Input, Output, EventEmitter} from '@angular/core';
+import {Component, inject, OnInit, signal, Input, Output, EventEmitter}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {BoardService} from '../../../../core/services/board.service';
 import {ProjectService} from '../../../../core/services/project.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {WorkflowStatus, BoardColumn} from '../../../../core/models/interfaces';
 
 @Component({
@@ -42,15 +45,18 @@ export class CreateColumnDialogComponent implements OnInit {
   async loadWorkflowStatuses(): Promise<void> {
     try {
       this.loadingStatuses.set(true);
-      // Default workflow statuses (can be extended with project-specific statuses)
+      // Default workflow statuses (can be extended with project-specific status
       const defaultStatuses: WorkflowStatus[] = [
         {id: 'to-do', name: 'To Do', color: '#6B7280'} as WorkflowStatus,
-        {id: 'in-progress', name: 'In Progress', color: '#3B82F6'} as WorkflowStatus,
-        {id: 'in-review', name: 'In Review', color: '#8B5CF6'} as WorkflowStatus,
+        {id: 'in-progress', name: 'In Progress',
+          color: '#3B82F6'} as WorkflowStatus,
+        {id: 'in-review', name: 'In Review',
+          color: '#8B5CF6'} as WorkflowStatus,
         {id: 'done', name: 'Done', color: '#10B981'} as WorkflowStatus,
       ];
       this.workflowStatuses.set(defaultStatuses);
     } catch (error: any) {
+      console.log(error);
       this.notificationService.error('Failed to load workflow statuses');
     } finally {
       this.loadingStatuses.set(false);
@@ -77,7 +83,9 @@ export class CreateColumnDialogComponent implements OnInit {
         max_wip: formValue.max_wip || null,
       };
 
-      const response = await this.boardService.createColumn(this.boardId, columnData).toPromise();
+      const response =
+        await this.boardService.createColumn(this.boardId, columnData)
+            .toPromise();
 
       if (response) {
         this.notificationService.success('Column created successfully');
@@ -100,10 +108,12 @@ export class CreateColumnDialogComponent implements OnInit {
   getFieldError(fieldName: string): string {
     const field = this.columnForm.get(fieldName);
     if (field?.hasError('required') && field.touched) {
-      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1).replace('_', ' ')} is required`;
+      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+          .replace('_', ' ')} is required`;
     }
     if (field?.hasError('maxlength') && field.touched) {
-      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is too long`;
+      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
+      } is too long`;
     }
     return '';
   }

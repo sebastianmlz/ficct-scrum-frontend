@@ -1,8 +1,8 @@
+import {AuthService} from './../../core/services/auth.service';
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthStore} from '../../core/store/auth.store';
-import {AuthService} from '../../core/services/auth.service';
 import {OrganizationService} from '../../core/services/organization.service';
 import {Router} from '@angular/router';
 
@@ -10,8 +10,6 @@ import {WorkspaceService} from '../../core/services/workspace.service';
 import {ProjectService} from '../../core/services/project.service';
 import {ActivityLogService} from '../../core/services/activity-log.service';
 import {Organization, Workspace, Project} from '../../core/models/interfaces';
-import {LoadingSkeletonComponent} from '../../shared/components/loading-skeleton/loading-skeleton.component';
-import {ErrorBoundaryComponent} from '../../shared/components/error-boundary/error-boundary.component';
 
 interface QuickStat {
   label: string;
@@ -53,7 +51,8 @@ export class DashboardComponent implements OnInit {
   private workspaceService = inject(WorkspaceService);
   private projectService = inject(ProjectService);
   private activityLogService = inject(ActivityLogService);
-  constructor(private authService: AuthService, private router: Router) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   // UI State
   showUserMenu = signal(false);
@@ -81,7 +80,6 @@ export class DashboardComponent implements OnInit {
   projects = signal<Project[]>([]);
 
   ngOnInit(): void {
-    // Since authGuard already verified authentication, we can load data immediately
     this.loadDashboardData();
   }
 
@@ -109,7 +107,8 @@ export class DashboardComponent implements OnInit {
 
     try {
       // Load organizations, workspaces, and projects
-      const [orgsResponse, workspacesResponse, projectsResponse] = await Promise.all([
+      const [orgsResponse, workspacesResponse, projectsResponse] =
+      await Promise.all([
         this.organizationService.getOrganizations({page: 1}).toPromise(),
         this.workspaceService.getWorkspaces(undefined, 1).toPromise(),
         this.projectService.getProjects({page: 1}).toPromise(),
@@ -122,26 +121,29 @@ export class DashboardComponent implements OnInit {
       this.projects.set(projectsResponse?.results || []);
 
       // Calculate statistics
-      const totalProjects = projectsResponse?.count || 0;
-      const activeProjects = projectsResponse?.results?.filter((p) => p.status === 'active').length || 0;
+      const activeProjects = projectsResponse?.results?.filter((p) =>
+        p.status === 'active').length || 0;
       const totalWorkspaces = workspacesResponse?.count || 0;
       const totalOrganizations = orgsResponse?.count || 0;
 
-      // Calculate team members - use organization members API for accurate count
+      // Calculate team members - use organization members API for accurate coun
       let totalMembers = 0;
 
       // Get first organization's members if available
       if (orgsResponse?.results && orgsResponse.results.length > 0) {
         const firstOrg = orgsResponse.results[0];
         try {
-          const membersResponse = await this.organizationService.getOrganizationMembers(
+          const membersResponse =
+          await this.organizationService.getOrganizationMembers(
               firstOrg.id,
               {page: 1},
           ).toPromise();
           totalMembers = membersResponse?.count || 0;
           console.log('[DASHBOARD] 👥 Team members from org API:', totalMembers);
         } catch (error) {
-          console.warn('[DASHBOARD] ⚠️ Could not load organization members, defaulting to 0');
+          console.log(error);
+          console.warn('[DASHBOARD] ⚠️ Could not load organization members' +
+            ', defaulting to 0');
           totalMembers = 0;
         }
       }
@@ -152,7 +154,10 @@ export class DashboardComponent implements OnInit {
           value: activeProjects,
           change: 12,
           changeType: 'increase',
-          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>',
+          icon: '<path stroke-linecap="round" stroke-linejoin="round" ' +
+          'stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 ' +
+          '2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0' +
+          ' 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>',
           color: 'blue',
         },
         {
@@ -160,7 +165,10 @@ export class DashboardComponent implements OnInit {
           value: totalMembers,
           change: 8,
           changeType: 'increase',
-          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a2.121 2.121 0 113 3L19.5 12.75 6.375 19.5"></path>',
+          icon: '<path stroke-linecap="round" stroke-linejoin="round" ' +
+          'stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 ' +
+          '0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a2.121 2.121 0 113' +
+          ' 3L19.5 12.75 6.375 19.5"></path>',
           color: 'green',
         },
         {
@@ -168,7 +176,10 @@ export class DashboardComponent implements OnInit {
           value: totalWorkspaces,
           change: 5,
           changeType: 'increase',
-          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>',
+          icon: '<path stroke-linecap="round" stroke-linejoin="round"' +
+          ' stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2' +
+          ' 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2' +
+          ' 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>',
           color: 'yellow',
         },
         {
@@ -176,7 +187,12 @@ export class DashboardComponent implements OnInit {
           value: totalOrganizations,
           change: 2,
           changeType: 'increase',
-          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>',
+          icon: '<path stroke-linecap="round" stroke-linejoin="round"' +
+          ' stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 ' +
+          '20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 ' +
+          '015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 ' +
+          '5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4' +
+          ' 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>',
           color: 'purple',
         },
       ]);
@@ -200,7 +216,8 @@ export class DashboardComponent implements OnInit {
 
       if (response?.results) {
         // Convert API projects to RecentProject format
-        const recentProjects: RecentProject[] = response.results.slice(0, 4).map((project) => ({
+        const recentProjects: RecentProject[] =
+        response.results.slice(0, 4).map((project) => ({
           id: project.id,
           name: project.name,
           description: project.description ?? '',
@@ -236,7 +253,8 @@ export class DashboardComponent implements OnInit {
         // Convert API activity logs to ActivityItem format
         const activities: ActivityItem[] = response.results.map((log) => ({
           id: log.id,
-          user: log.user_detail?.full_name || log.user_name || `User ${log.user}`,
+          user: log.user_detail?.full_name || log.user_name ||
+          `User ${log.user}`,
           action: log.formatted_action || log.action_display,
           target: log.object_repr || log.object_type,
           timestamp: log.time_ago || this.formatDate(log.created_at),
@@ -257,7 +275,8 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  private mapObjectTypeToActivityType(objectType: string): ActivityItem['type'] {
+  private mapObjectTypeToActivityType(objectType: string):
+  ActivityItem['type'] {
     switch (objectType) {
       case 'project':
         return 'project';
@@ -368,10 +387,19 @@ export class DashboardComponent implements OnInit {
 
   getActivityIcon(type: ActivityItem['type']): string {
     const typeIcons = {
-      project: '<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>',
-      task: '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>',
-      comment: '<path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>',
-      member: '<path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>',
+      project: '<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0' +
+      ' 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0' +
+      ' 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1' +
+      ' 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clip-rule="evenodd"></path>',
+      task: '<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8' +
+      ' 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1' +
+      ' 1 0 011.414 0z" clip-rule="evenodd"></path>',
+      comment: '<path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841' +
+      ' 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 ' +
+      '10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 ' +
+      '9h2v2H9V9z" clip-rule="evenodd"></path>',
+      member: '<path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0' +
+      ' 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>',
     };
     return typeIcons[type];
   }
@@ -381,7 +409,8 @@ export class DashboardComponent implements OnInit {
       // Try to logout through AuthStore first (which handles API call)
       await this.authStore.logout();
     } catch (error) {
-      console.error('AuthStore logout failed, falling back to AuthService:', error);
+      console.error('AuthStore logout failed, falling back to AuthService:',
+          error);
       // Fallback to AuthService logout
       this.authService.logout();
     }
