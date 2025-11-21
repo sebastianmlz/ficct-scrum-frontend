@@ -1,11 +1,13 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {Router, RouterLink, ActivatedRoute} from '@angular/router';
 import {ProjectService} from '../../../core/services/project.service';
 import {WorkspaceService} from '../../../core/services/workspace.service';
 import {ProjectRequest, Workspace} from '../../../core/models/interfaces';
-import {ProjectStatusEnum, ProjectPriorityEnum, MethodologyEnum} from '../../../core/models/enums';
+import {ProjectStatusEnum, ProjectPriorityEnum, MethodologyEnum}
+  from '../../../core/models/enums';
 
 @Component({
   selector: 'app-project-create',
@@ -90,9 +92,11 @@ export class ProjectCreateComponent implements OnInit {
   }
 
   async loadWorkspaces(): Promise<void> {
-    const organizationId = this.route.snapshot.queryParamMap.get('organization') || undefined;
+    const organizationId = this.route.snapshot.queryParamMap
+        .get('organization') || undefined;
     try {
-      const response = await this.workspaceService.getWorkspaces(organizationId).toPromise();
+      const response = await this.workspaceService
+          .getWorkspaces(organizationId).toPromise();
       const workspacesRaw = Array.isArray(response) ?
         response :
         response?.results || [];
@@ -109,6 +113,7 @@ export class ProjectCreateComponent implements OnInit {
       this.workspaces.set(workspaces);
       console.log('Workspaces loaded:', workspaces);
     } catch (error: any) {
+      console.log(error);
       this.error.set('Failed to load workspaces');
     }
   }
@@ -160,7 +165,8 @@ export class ProjectCreateComponent implements OnInit {
       };
       console.log('datos enviados al backend:', formData);
 
-      const project = await this.projectService.createProject(formData).toPromise();
+      const project =
+      await this.projectService.createProject(formData).toPromise();
       if (project) {
         this.router.navigate(['/projects', project.id]);
       }

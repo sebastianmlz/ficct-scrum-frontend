@@ -1,6 +1,8 @@
-import {Component, Input, signal, inject, OnInit, OnDestroy} from '@angular/core';
+import {Component, Input, signal, inject, OnInit, OnDestroy}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {MlService, ProjectSummaryResponse} from '../../../../core/services/ml.service';
+import {MlService, ProjectSummaryResponse}
+  from '../../../../core/services/ml.service';
 import {interval, Subscription} from 'rxjs';
 
 @Component({
@@ -34,7 +36,8 @@ export class ProjectMlSummaryComponent implements OnInit, OnDestroy {
 
     // Set up auto-refresh if enabled
     if (this.autoRefresh) {
-      this.refreshSubscription = interval(this.REFRESH_INTERVAL).subscribe(() => {
+      this.refreshSubscription =
+      interval(this.REFRESH_INTERVAL).subscribe(() => {
         this.loadSummary();
       });
     }
@@ -52,9 +55,11 @@ export class ProjectMlSummaryComponent implements OnInit, OnDestroy {
     this.error.set(null);
 
     try {
-      console.log('[Project Summary] Loading summary for project:', this.projectId);
+      console.log('[Project Summary] Loading summary for project:',
+          this.projectId);
 
-      const result = await this.mlService.getProjectSummary(this.projectId).toPromise();
+      const result =
+        await this.mlService.getProjectSummary(this.projectId).toPromise();
 
       if (result) {
         this.summary.set(result);
@@ -77,7 +82,8 @@ export class ProjectMlSummaryComponent implements OnInit, OnDestroy {
       } else if (error.status === 500) {
         errorMsg = 'Summary service temporarily unavailable.';
       } else {
-        errorMsg = error?.error?.error || error?.error?.message || error?.message || errorMsg;
+        errorMsg = error?.error?.error || error?.error?.message ||
+        error?.message || errorMsg;
       }
 
       this.error.set(errorMsg);

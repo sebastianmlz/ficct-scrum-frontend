@@ -1,8 +1,10 @@
 import {Component, Input, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {IssueService} from '../../../../core/services/issue.service';
-import {IssueComment, PaginatedIssueCommentList, UserBasic} from '../../../../core/models/interfaces';
+import {IssueComment, PaginatedIssueCommentList, UserBasic}
+  from '../../../../core/models/interfaces';
 import {AuthService} from '../../../../core/services/auth.service';
 
 @Component({
@@ -71,7 +73,7 @@ export class IssueCommentsComponent implements OnInit {
       next: (response: PaginatedIssueCommentList) => {
         this.comments.set(response.results);
         this.totalComments.set(response.count);
-        this.totalPages.set(Math.ceil(response.count / 10)); // Asumiendo 10 por página
+        this.totalPages.set(Math.ceil(response.count / 10));
         this.currentPage.set(page);
         this.loading.set(false);
       },
@@ -119,19 +121,20 @@ export class IssueCommentsComponent implements OnInit {
     if (this.editForm.valid) {
       const content = this.editForm.value.content.trim();
 
-      this.issueService.updateIssueComment(this.issueId, commentId, content).subscribe({
-        next: (updatedComment) => {
-          this.comments.update((comments) =>
-            comments.map((c) => c.id === commentId ? updatedComment : c),
-          );
-          this.editingCommentId.set(null);
-          this.editForm.reset();
-        },
-        error: (err) => {
-          this.error.set('Error al actualizar el comentario');
-          console.error('Error updating comment:', err);
-        },
-      });
+      this.issueService.updateIssueComment(this.issueId, commentId, content)
+          .subscribe({
+            next: (updatedComment) => {
+              this.comments.update((comments) =>
+                comments.map((c) => c.id === commentId ? updatedComment : c),
+              );
+              this.editingCommentId.set(null);
+              this.editForm.reset();
+            },
+            error: (err) => {
+              this.error.set('Error al actualizar el comentario');
+              console.error('Error updating comment:', err);
+            },
+          });
     }
   }
 
@@ -163,7 +166,8 @@ export class IssueCommentsComponent implements OnInit {
   }
 
   getInitials(firstName: string, lastName: string): string {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`
+        .toUpperCase();
   }
 
   formatDate(dateString: string): string {
@@ -172,9 +176,15 @@ export class IssueCommentsComponent implements OnInit {
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) return 'hace un momento';
-    if (diffInSeconds < 3600) return `hace ${Math.floor(diffInSeconds / 60)} min`;
-    if (diffInSeconds < 86400) return `hace ${Math.floor(diffInSeconds / 3600)} h`;
-    if (diffInSeconds < 604800) return `hace ${Math.floor(diffInSeconds / 86400)} días`;
+    if (diffInSeconds < 3600) {
+      return `hace ${Math.floor(diffInSeconds / 60)} min`;
+    }
+    if (diffInSeconds < 86400) {
+      return `hace ${Math.floor(diffInSeconds / 3600)} h`;
+    }
+    if (diffInSeconds < 604800) {
+      return `hace ${Math.floor(diffInSeconds / 86400)} días`;
+    }
 
     return date.toLocaleDateString('es-ES', {
       year: 'numeric',

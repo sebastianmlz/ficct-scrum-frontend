@@ -1,11 +1,14 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ProjectService} from '../../../core/services/project.service';
 import {WorkspaceService} from '../../../core/services/workspace.service';
-import {Project, ProjectRequest, Workspace} from '../../../core/models/interfaces';
-import {ProjectStatusEnum, ProjectPriorityEnum} from '../../../core/models/enums';
+import {Project, ProjectRequest, Workspace}
+  from '../../../core/models/interfaces';
+import {ProjectStatusEnum, ProjectPriorityEnum}
+  from '../../../core/models/enums';
 
 @Component({
   selector: 'app-project-edit',
@@ -73,19 +76,20 @@ export class ProjectEditComponent implements OnInit {
   loadWorkSpaces(): void {
     this.workspaceService.getWorkspaces().subscribe({
       next: (response) => {
-        // Normaliza cada workspace para que su organization tenga los campos esperados
-        const normalizedWorkspaces = (response.results || []).map((ws: any) => ({
-          ...ws,
-          organization: {
-            id: ws.organization?.id || '',
-            name: ws.organization?.name || '',
-            slug: ws.organization?.slug || '',
-            logo_url: ws.organization?.logo_url || '',
-            organization_type: ws.organization?.organization_type || '',
-            subscription_plan: ws.organization?.subscription_plan || '',
-            is_active: ws.organization?.is_active ?? true,
-          },
-        }));
+        // Normaliza cada workspace
+        const normalizedWorkspaces = (response.results || [])
+            .map((ws: any) => ({
+              ...ws,
+              organization: {
+                id: ws.organization?.id || '',
+                name: ws.organization?.name || '',
+                slug: ws.organization?.slug || '',
+                logo_url: ws.organization?.logo_url || '',
+                organization_type: ws.organization?.organization_type || '',
+                subscription_plan: ws.organization?.subscription_plan || '',
+                is_active: ws.organization?.is_active ?? true,
+              },
+            }));
         this.workspaces.set(normalizedWorkspaces);
       },
       error: () => {
@@ -97,10 +101,13 @@ export class ProjectEditComponent implements OnInit {
   async loadProject(): Promise<void> {
     this.loading.set(true);
     try {
-      const project = await this.projectService.getProject(this.projectId).toPromise();
+      const project = await this.projectService
+          .getProject(this.projectId).toPromise();
       if (project) {
-        const workspaceId = typeof project.workspace === 'string' ? project.workspace : project.workspace?.id;
-        const workspaceObj = this.workspaces().find((ws) => ws.id === workspaceId);
+        const workspaceId = typeof project.workspace === 'string' ?
+        project.workspace : project.workspace?.id;
+        const workspaceObj = this.workspaces()
+            .find((ws) => ws.id === workspaceId);
         this.projectForm.patchValue({
           name: project.name,
           slug: project.slug,
@@ -108,7 +115,8 @@ export class ProjectEditComponent implements OnInit {
           description: project.description,
           status: project.status,
           priority: project.priority,
-          start_date: project.start_date ? project.start_date.split('T')[0] : '',
+          start_date: project.start_date ?
+          project.start_date.split('T')[0] : '',
           due_date: project.due_date ? project.due_date.split('T')[0] : '',
           budget: project.budget,
           estimated_hours: project.estimated_hours,
@@ -190,7 +198,8 @@ export class ProjectEditComponent implements OnInit {
         cover_image: this.selectedFile || undefined,
       };
 
-      const project = await this.projectService.updateProject(this.projectId, formData).toPromise();
+      const project = await this.projectService
+          .updateProject(this.projectId, formData).toPromise();
       if (project) {
         this.successMessage.set('Project updated successfully!');
         this.currentCoverUrl.set(project.cover_image_url || null);

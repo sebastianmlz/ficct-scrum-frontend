@@ -2,7 +2,8 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {ProjectConfigRequest} from '../../../core/models/interfaces';
 import {ProjectsService} from '../../../core/services/projects.service';
 import {CommonModule} from '@angular/common';
-import {FormBuilder, FormGroup, Validators, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators, ReactiveFormsModule}
+  from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 @Component({
@@ -59,9 +60,12 @@ export class ProjectConfigCreateComponent implements OnInit {
       auto_close_sprints: this.configForm.value.auto_close_sprints,
       estimation_type: this.configForm.value.estimation_type,
       story_point_scale: {
-        additionalProp1: this.configForm.value.story_point_scale_additionalProp1,
-        additionalProp2: this.configForm.value.story_point_scale_additionalProp2,
-        additionalProp3: this.configForm.value.story_point_scale_additionalProp3,
+        additionalProp1:
+        this.configForm.value.story_point_scale_additionalProp1,
+        additionalProp2:
+        this.configForm.value.story_point_scale_additionalProp2,
+        additionalProp3:
+        this.configForm.value.story_point_scale_additionalProp3,
       },
       enable_time_tracking: this.configForm.value.enable_time_tracking,
       require_time_logging: this.configForm.value.require_time_logging,
@@ -69,19 +73,22 @@ export class ProjectConfigCreateComponent implements OnInit {
       email_notifications: this.configForm.value.email_notifications,
       slack_notifications: this.configForm.value.slack_notifications,
       slack_webhook_url: this.configForm.value.slack_webhook_url,
-      restrict_issue_visibility: this.configForm.value.restrict_issue_visibility,
-      require_approval_for_changes: this.configForm.value.require_approval_for_changes,
+      restrict_issue_visibility:
+      this.configForm.value.restrict_issue_visibility,
+      require_approval_for_changes:
+      this.configForm.value.require_approval_for_changes,
     };
 
     this.projectsService.createProjectConfig(config).subscribe({
-      next: (response) => {
+      next: () => {
         this.loading.set(false);
         // Redirigir o mostrar confirmación
         this.routerNav.navigate(['/projects', this.projectId]);
       },
       error: (error) => {
         this.loading.set(false);
-        this.error.set(error.error?.message || 'Error creating project configuration');
+        this.error.set(error.error?.message ||
+          'Error creating project configuration');
       },
     });
   }

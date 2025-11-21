@@ -1,13 +1,17 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, Router, RouterLink, RouterOutlet} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink, RouterOutlet}
+  from '@angular/router';
 import {ProjectService} from '../../../core/services/project.service';
 import {Project, ProjectConfig, Sprint} from '../../../core/models/interfaces';
-import {ProjectStatusEnum, ProjectPriorityEnum} from '../../../core/models/enums';
-import {SprintCreateComponent} from '../project-sprints/sprint-create/sprint-create.component';
-import {SprintListComponent} from '../project-sprints/sprint-list/sprint-list.component';
-import {AiService, ProjectReportResponse} from '../../../core/services/ai.service';
-import {ProjectMembersModalComponent} from '../components/project-members-modal/project-members-modal.component';
+import {SprintCreateComponent}
+  from '../project-sprints/sprint-create/sprint-create.component';
+import {SprintListComponent}
+  from '../project-sprints/sprint-list/sprint-list.component';
+import {AiService, ProjectReportResponse}
+  from '../../../core/services/ai.service';
+import {ProjectMembersModalComponent}
+  from '../components/project-members-modal/project-members-modal.component';
 
 interface Tab {
   id: string;
@@ -60,7 +64,8 @@ export class ProjectDetailComponent implements OnInit {
 
   tabs: Tab[] = [
     {id: 'overview', label: 'Overview', icon: 'home'},
-    {id: 'dashboard', label: 'Dashboard', icon: 'dashboard', route: 'dashboard'},
+    {id: 'dashboard', label: 'Dashboard', icon: 'dashboard',
+      route: 'dashboard'},
     {id: 'board', label: 'Board', icon: 'view_column', route: 'boards'},
     {id: 'issues', label: 'Issues', icon: 'list', route: 'issues'},
     {id: 'activity', label: 'Activity', icon: 'history', route: 'activity'},
@@ -71,9 +76,12 @@ export class ProjectDetailComponent implements OnInit {
       icon: 'code',
       subTabs: [
         {id: 'commits', label: 'Commits', route: 'commits', icon: 'commit'},
-        {id: 'prs', label: 'Pull Requests', route: 'pull-requests', icon: 'git_pull_request'},
-        {id: 'metrics', label: 'Code Metrics', route: 'metrics', icon: 'bar_chart'},
-        {id: 'github', label: 'GitHub Settings', route: 'github', icon: 'settings'},
+        {id: 'prs', label: 'Pull Requests', route: 'pull-requests',
+          icon: 'git_pull_request'},
+        {id: 'metrics', label: 'Code Metrics', route: 'metrics',
+          icon: 'bar_chart'},
+        {id: 'github', label: 'GitHub Settings', route: 'github',
+          icon: 'settings'},
       ],
     },
     {
@@ -81,11 +89,15 @@ export class ProjectDetailComponent implements OnInit {
       label: 'Diagrams',
       icon: 'account_tree',
       subTabs: [
-        {id: 'workflow', label: 'Workflow', route: 'diagrams/workflow', icon: 'workflow'},
-        {id: 'dependencies', label: 'Dependencies', route: 'diagrams/dependencies', icon: 'link'},
-        {id: 'roadmap', label: 'Roadmap', route: 'diagrams/roadmap', icon: 'calendar'},
+        {id: 'workflow', label: 'Workflow', route: 'diagrams/workflow',
+          icon: 'workflow'},
+        {id: 'dependencies', label: 'Dependencies',
+          route: 'diagrams/dependencies', icon: 'link'},
+        {id: 'roadmap', label: 'Roadmap', route: 'diagrams/roadmap',
+          icon: 'calendar'},
         {id: 'uml', label: 'UML', route: 'diagrams/uml', icon: 'diagram'},
-        {id: 'architecture', label: 'Architecture', route: 'diagrams/architecture', icon: 'architecture'},
+        {id: 'architecture', label: 'Architecture',
+          route: 'diagrams/architecture', icon: 'architecture'},
       ],
     },
     {id: 'settings', label: 'Settings', icon: 'settings', route: 'config'},
@@ -129,7 +141,8 @@ export class ProjectDetailComponent implements OnInit {
     try {
       const project = await this.projectService.getProject(id).toPromise();
       console.log('[PROJECT-DETAIL] 📦 Project loaded from API:', project);
-      console.log('[PROJECT-DETAIL] 📦 Workspace in project:', project?.workspace);
+      console.log('[PROJECT-DETAIL] 📦 Workspace in project:',
+          project?.workspace);
       console.log('[PROJECT-DETAIL] 📦 Workspace ID:', project?.workspace?.id);
 
       if (project) {
@@ -147,7 +160,8 @@ export class ProjectDetailComponent implements OnInit {
 
   async loadMemberCount(projectId: string): Promise<void> {
     try {
-      const response = await this.projectService.getProjectMembers(projectId, {page: 1}).toPromise();
+      const response = await this.projectService
+          .getProjectMembers(projectId, {page: 1}).toPromise();
       if (response) {
         this.memberCount.set(response.count || 0);
         console.log('[PROJECT-DETAIL] Member count:', response.count);
@@ -159,7 +173,7 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   /**
-   * Get workspace ID from project - handles both string UUID and Workspace object
+   * Get workspace ID from project
    */
   getWorkspaceId(): string | null {
     const workspace = this.project()?.workspace;
@@ -191,12 +205,15 @@ export class ProjectDetailComponent implements OnInit {
 
     const workspaceId = this.getWorkspaceId();
     if (!workspaceId) {
-      console.error('[PROJECT-DETAIL] ❌ Cannot open modal: Workspace ID missing');
-      console.error('[PROJECT-DETAIL] Workspace value:', this.project()?.workspace);
+      console.error(
+          '[PROJECT-DETAIL] ❌ Cannot open modal: Workspace ID missing');
+      console.error(
+          '[PROJECT-DETAIL] Workspace value:', this.project()?.workspace);
       return;
     }
 
-    console.log('[PROJECT-DETAIL] ✅ Opening modal with workspace ID:', workspaceId);
+    console.log(
+        '[PROJECT-DETAIL] ✅ Opening modal with workspace ID:', workspaceId);
     this.showTeamModal.set(true);
   }
 
@@ -222,7 +239,8 @@ export class ProjectDetailComponent implements OnInit {
       if (error.status === 404) {
         this.projectConfig.set(null);
       } else {
-        this.error.set(error.error?.message || 'Failed to load project configuration');
+        this.error.set(error.error?.message ||
+          'Failed to load project configuration');
       }
     } finally {
       this.loading.set(false);
@@ -270,7 +288,8 @@ export class ProjectDetailComponent implements OnInit {
     if (!text) return '';
     return text
         .split('_')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .map((word) => word.charAt(0)
+            .toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
   }
 
@@ -338,7 +357,8 @@ export class ProjectDetailComponent implements OnInit {
     if (forceRefresh) {
       console.log('[PROJECT-DETAIL] 🔄 Force refreshing AI report');
     } else {
-      console.log('[PROJECT-DETAIL] 🤖 Requesting AI report for project:', this.project()!.id);
+      console.log('[PROJECT-DETAIL] 🤖 Requesting AI report for project:',
+        this.project()!.id);
     }
 
     try {
@@ -354,9 +374,12 @@ export class ProjectDetailComponent implements OnInit {
         this.aiReport.set(response);
 
         // Warn if all metrics are zero (no data available)
-        if (response.completion === 0 && response.velocity === 0 && response.risk_score === 0) {
-          console.warn('[PROJECT-DETAIL] ⚠️ All metrics are zero - project may have no completed work');
-          this.aiReportError.set('No metrics available. Ensure project has completed issues and active sprints.');
+        if (response.completion === 0 && response.velocity === 0 &&
+          response.risk_score === 0) {
+          console.warn('[PROJECT-DETAIL] ⚠️ All metrics are zero - ' +
+            'project may have no completed work');
+          this.aiReportError.set('No metrics available. Ensure project has ' +
+            'completed issues and active sprints.');
         }
       }
     } catch (err: any) {
@@ -371,15 +394,19 @@ export class ProjectDetailComponent implements OnInit {
       let errorMessage = 'Failed to generate AI report. Please try again.';
 
       if (err.status === 401 || err.status === 403) {
-        errorMessage = 'You do not have permission to generate reports for this project.';
+        errorMessage = 'You do not have permission to generate reports ' +
+        'for this project.';
       } else if (err.status === 404) {
         errorMessage = 'Project not found or ML service unavailable.';
       } else if (err.status === 408 || err.name === 'TimeoutError') {
-        errorMessage = 'Report generation timed out. The ML model may be busy. Please try again in a moment.';
+        errorMessage = 'Report generation timed out. The ML model ' +
+        'may be busy. Please try again in a moment.';
       } else if (err.status === 500) {
-        errorMessage = err.error?.error || err.error?.detail || 'Server error while generating report. Please try again later.';
+        errorMessage = err.error?.error || err.error?.detail ||
+        'Server error while generating report. Please try again later.';
       } else if (err.status === 0) {
-        errorMessage = 'Network error. Please check your connection and try again.';
+        errorMessage = 'Network error. Please check your connection ' +
+        'and try again.';
       } else if (err.error?.error) {
         errorMessage = err.error.error;
       } else if (err.error?.detail) {

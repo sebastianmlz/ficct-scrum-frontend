@@ -1,12 +1,17 @@
-import {Component, inject, OnInit, OnDestroy, signal, AfterViewInit, ElementRef, ViewChild} from '@angular/core';
+import {Component, inject, OnInit, OnDestroy, signal, ElementRef,
+  ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
-import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
-import {GitHubIntegrationStateService} from '../../../../core/services/github-integration-state.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {GitHubIntegrationService}
+  from '../../../../core/services/github-integration.service';
+import {GitHubIntegrationStateService}
+  from '../../../../core/services/github-integration-state.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {GitHubMetrics} from '../../../../core/models/interfaces';
 import {Chart, registerables} from 'chart.js';
-import {GitHubConnectPromptComponent} from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
+import {GitHubConnectPromptComponent} from
+  '@shared/components/github-connect-prompt/github-connect-prompt.component';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -18,8 +23,10 @@ Chart.register(...registerables);
   templateUrl: './metrics-dashboard.component.html',
   styleUrls: ['./metrics-dashboard.component.scss'],
 })
-export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('commitTrendCanvas') commitTrendCanvas!: ElementRef<HTMLCanvasElement>;
+export class MetricsDashboardComponent
+implements OnInit, OnDestroy {
+  @ViewChild('commitTrendCanvas') commitTrendCanvas!:
+  ElementRef<HTMLCanvasElement>;
   @ViewChild('prStatusCanvas') prStatusCanvas!: ElementRef<HTMLCanvasElement>;
 
   private route = inject(ActivatedRoute);
@@ -47,21 +54,19 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
     });
   }
 
-  ngAfterViewInit(): void {
-    // Charts will be initialized after metrics load
-  }
-
   loadIntegrationAndMetrics(): void {
     this.loading.set(true);
     this.noIntegration.set(false);
 
-    console.log('[METRICS] Using centralized state service for integration check');
+    console.log(
+        '[METRICS] Using centralized state service for integration check');
 
     // Use centralized state service
     this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
         if (integration) {
-          console.log('[METRICS] Integration found via state service:', integration.id);
+          console.log('[METRICS] Integration found via state service:',
+              integration.id);
           this.integrationId.set(integration.id);
           this.loadMetrics(integration.id);
         } else {
@@ -123,12 +128,15 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
       // Backend sends: { "2025-10-04": 5, "2025-10-05": 3, ... }
       commitData = Object.entries(metrics.commit_frequency)
           .map(([date, count]) => ({date, count}))
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          .sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      console.log('[METRICS] Parsed commit_frequency:', commitData.length, 'data points');
+      console.log('[METRICS] Parsed commit_frequency:',
+          commitData.length, 'data points');
     } else if (metrics.commit_activity) {
       // Fallback to legacy format
-      commitData = metrics.commit_activity.map((a) => ({date: a.date, count: a.commits}));
+      commitData = metrics.commit_activity.map((a) =>
+        ({date: a.date, count: a.commits}));
     }
 
     if (commitData.length === 0) {
@@ -197,14 +205,16 @@ export class MetricsDashboardComponent implements OnInit, AfterViewInit, OnDestr
     const totalPRs = metrics.total_pull_requests || 0;
     const openPRs = metrics.open_pull_requests || 0;
     const mergedPRs = metrics.merged_pull_requests || 0;
-    const closedPRs = metrics.closed_pull_requests || (totalPRs - openPRs - mergedPRs);
+    const closedPRs = metrics.closed_pull_requests ||
+    (totalPRs - openPRs - mergedPRs);
 
     if (totalPRs === 0) {
       console.warn('[METRICS] No pull requests data available for chart');
       return;
     }
 
-    console.log('[METRICS] PR status:', {open: openPRs, merged: mergedPRs, closed: closedPRs});
+    console.log('[METRICS] PR status:',
+        {open: openPRs, merged: mergedPRs, closed: closedPRs});
 
     this.prStatusChart = new Chart(ctx, {
       type: 'doughnut',

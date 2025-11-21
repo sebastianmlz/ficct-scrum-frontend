@@ -4,9 +4,12 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {DiagramService} from '../../../../core/services/diagram.service';
-import {NotificationService} from '../../../../core/services/notification.service';
-import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
-import {UMLDiagramData, GitHubIntegration} from '../../../../core/models/interfaces';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
+import {GitHubIntegrationService}
+  from '../../../../core/services/github-integration.service';
+import {UMLDiagramData, GitHubIntegration}
+  from '../../../../core/models/interfaces';
 
 // Interface para los datos REALES del backend
 interface ClassInfo {
@@ -14,7 +17,8 @@ interface ClassInfo {
   file_path?: string;
   module?: string;
   attributes?: { name: string; type?: string; visibility?: string }[];
-  methods?: { name: string; visibility?: string; parameters?: any[]; return_type?: string }[];
+  methods?: { name: string; visibility?: string; parameters?: any[];
+    return_type?: string }[];
   parent_classes?: string[];
 }
 
@@ -22,236 +26,7 @@ interface ClassInfo {
   selector: 'app-uml-diagram',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  template: `
-    <div class="uml-diagram-container min-h-screen bg-gray-50">
-      <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-
-        <!-- HEADER -->
-        <div class="mb-6">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="flex items-center space-x-3">
-              <button type="button" (click)="goBack()" class="p-2 rounded-md text-gray-400 hover:text-gray-500">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-              </button>
-              <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-900">UML Class Diagram</h1>
-                @if (totalClasses() > 0) {
-                  <p class="text-sm text-gray-500 mt-1">{{ totalClasses() }} Classes | {{ totalRelationships() }} Relationships</p>
-                }
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <button (click)="exportDiagram()" [disabled]="loading()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50">
-                📥 Export
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- SEARCH AND FILTERS BAR -->
-        @if (!loading() && allClasses().length > 0) {
-          <div class="bg-white shadow rounded-lg p-4 mb-4">
-            <div class="flex flex-col md:flex-row gap-3">
-              <!-- Search -->
-              <div class="flex-1">
-                <div class="relative">
-                  <input
-                    type="text"
-                    [(ngModel)]="searchQuery"
-                    (input)="applyFilters()"
-                    placeholder="🔍 Search classes..."
-                    class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Module Filter -->
-              <select
-                [(ngModel)]="selectedModule"
-                (change)="applyFilters()"
-                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">📁 All Modules</option>
-                @for (module of uniqueModules(); track module) {
-                  <option [value]="module">{{ module }}</option>
-                }
-              </select>
-
-              <!-- Clear Filters -->
-              @if (searchQuery || selectedModule) {
-                <button
-                  (click)="clearFilters()"
-                  class="px-4 py-2 text-sm text-red-600 hover:bg-red-50 border border-red-300 rounded-lg">
-                  Clear Filters
-                </button>
-              }
-            </div>
-
-            <!-- Results Count -->
-            <div class="mt-3 text-sm text-gray-600">
-              Showing <strong>{{ filteredClasses().length }}</strong> of <strong>{{ totalClasses() }}</strong> classes
-              @if (currentPage() > 1) {
-                <span class="ml-2">• Page {{ currentPage() }} of {{ totalPages() }}</span>
-              }
-            </div>
-          </div>
-        }
-
-        <!-- MAIN CONTENT -->
-        <div class="bg-white shadow rounded-lg p-6">
-          @if (loading()) {
-            <!-- LOADING -->
-            <div class="flex flex-col justify-center items-center py-12">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-              <p class="text-gray-600">Loading classes...</p>
-            </div>
-          } @else if (safeSvgContent()) {
-            <!-- SVG CONTENT -->
-            <div class="mb-4">
-              <p class="text-sm text-gray-600">UML diagram showing class structure and relationships.</p>
-            </div>
-            <div class="w-full mx-auto bg-gray-50 rounded-lg p-4">
-              <div class="diagram-svg-container" [innerHTML]="safeSvgContent()"></div>
-            </div>
-          } @else if (allClasses().length > 0) {
-            <!-- WARNING BANNER SI NO HAY GITHUB INTEGRATION -->
-            @if (!loadingGitHub() && !gitHubIntegration()) {
-              <div class="warning-banner">
-                <div class="warning-content">
-                  <svg class="warning-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
-                  <div class="warning-text">
-                    <p class="warning-title">⚠️ GitHub repository not connected</p>
-                    <p class="warning-description">Repository links will not work. Connect your GitHub repository to access source code files.</p>
-                  </div>
-                  <a [routerLink]="['/projects', projectId(), 'config']" fragment="integrations" class="warning-action">
-                    Connect GitHub →
-                  </a>
-                </div>
-              </div>
-            }
-
-            <!-- GRID DE CARDS CON DATOS REALES -->
-            <div class="classes-grid">
-              @for (cls of paginatedClasses(); track cls.name) {
-                <div class="class-card" [class.selected]="selectedClass()?.name === cls.name" (click)="selectClass(cls)">
-                  <!-- Class Header -->
-                  <div class="class-header">
-                    <h3 class="class-name">{{ cls.name }}</h3>
-                    @if (cls.module) {
-                      <span class="module-badge">{{ cls.module }}</span>
-                    }
-                  </div>
-
-                  <!-- Class Body -->
-                  <div class="class-body">
-                    <!-- Attributes Count -->
-                    <div class="info-row">
-                      <span class="label">Attributes:</span>
-                      <strong>{{ cls.attributes?.length || 0 }}</strong>
-                    </div>
-
-                    <!-- Methods Section -->
-                    <div class="methods-section">
-                      <div class="info-row">
-                        <span class="label">Methods:</span>
-                        <strong>{{ cls.methods?.length || 0 }}</strong>
-                      </div>
-                      @if (cls.methods && cls.methods.length > 0) {
-                        <ul class="methods-list">
-                          @for (method of cls.methods | slice:0:3; track method.name) {
-                            <li [class]="'visibility-' + (method.visibility || 'public')">
-                              {{ getVisibilityIcon(method.visibility) }} {{ method.name }}()
-                              @if (method.visibility === 'private') {
-                                <span class="private-badge">(private)</span>
-                              }
-                            </li>
-                          }
-                          @if (cls.methods && cls.methods.length > 3) {
-                            <li class="more-methods">
-                              +{{ cls.methods.length - 3 }} more methods
-                            </li>
-                          }
-                        </ul>
-                      }
-                    </div>
-
-                    <!-- Parent Classes -->
-                    @if (cls.parent_classes && cls.parent_classes.length > 0) {
-                      <div class="parent-class">
-                        Inherits: <strong>{{ cls.parent_classes.join(', ') }}</strong>
-                      </div>
-                    } @else {
-                      <div class="parent-class text-gray-400 italic">
-                        No parent
-                      </div>
-                    }
-
-                    <!-- Action Buttons -->
-                    <div class="card-actions">
-                      <button
-                        class="btn-small btn-primary"
-                        (click)="viewDetails(cls); $event.stopPropagation()"
-                        [disabled]="loadingGitHub()">
-                        View Details
-                      </button>
-                      @if (cls.file_path) {
-                        <button
-                          class="btn-small btn-secondary"
-                          (click)="goToRepo(cls); $event.stopPropagation()"
-                          [disabled]="!gitHubIntegration() || loadingGitHub()"
-                          [title]="gitHubIntegration() ? 'Open in GitHub' : 'GitHub not connected'">
-                          {{ gitHubIntegration() ? 'Repo →' : 'No Repo' }}
-                        </button>
-                      }
-                    </div>
-                  </div>
-                </div>
-              }
-            </div>
-
-            <!-- PAGINATION -->
-            @if (totalPages() > 1) {
-              <div class="pagination-controls">
-                <button
-                  [disabled]="currentPage() === 1"
-                  (click)="previousPage()"
-                  class="pagination-btn">
-                  ← Previous
-                </button>
-                <span class="page-info">
-                  Page {{ currentPage() }} of {{ totalPages() }}
-                </span>
-                <button
-                  [disabled]="currentPage() === totalPages()"
-                  (click)="nextPage()"
-                  class="pagination-btn">
-                  Next →
-                </button>
-              </div>
-            }
-          } @else {
-            <!-- EMPTY STATE -->
-            <div class="empty-state">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-              <h3 class="mt-2 text-sm font-medium text-gray-900">No classes found</h3>
-              @if (searchQuery || selectedModule) {
-                <button (click)="clearFilters()" class="mt-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  Clear Filters
-                </button>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './uml-diagram.component.html',
   styles: [`
     .animate-spin {
       animation: spin 1s linear infinite;
@@ -575,7 +350,8 @@ export class UMLDiagramComponent implements OnInit {
 
   // Computed signals
   uniqueModules = computed(() => {
-    return [...new Set(this.allClasses().map((c) => c.module).filter((m) => m))].sort();
+    return [...new Set(this.allClasses().map((c) => c.module).filter((m) => m))]
+        .sort();
   });
 
   totalPages = computed(() => {
@@ -603,7 +379,8 @@ export class UMLDiagramComponent implements OnInit {
     if (!this.projectId()) return;
 
     this.loadingGitHub.set(true);
-    console.log('[UML-DIAGRAM] Loading GitHub integration for project:', this.projectId());
+    console.log('[UML-DIAGRAM] Loading GitHub integration for project:',
+        this.projectId());
 
     this.githubService.checkIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
@@ -616,7 +393,8 @@ export class UMLDiagramComponent implements OnInit {
             url: integration.repository_url,
           });
         } else {
-          console.log('[UML-DIAGRAM] ⚠️ No GitHub integration found for project');
+          console.log(
+              '[UML-DIAGRAM] ⚠️ No GitHub integration found for project');
         }
       },
       error: (err) => {
@@ -634,7 +412,8 @@ export class UMLDiagramComponent implements OnInit {
 
     console.log('[UML-DIAGRAM] Loading diagram for project:', this.projectId());
 
-    this.diagramService.generateUMLDiagram(this.projectId(), 'json', {diagram_type: this.diagramType}).subscribe({
+    this.diagramService.generateUMLDiagram(this.projectId(), 'json',
+        {diagram_type: this.diagramType}).subscribe({
       next: (response) => {
         console.log('[UML-DIAGRAM] Response received:', response);
         this.diagramFormat.set(response.format as 'svg' | 'json');
@@ -642,7 +421,8 @@ export class UMLDiagramComponent implements OnInit {
         if (response.format === 'svg') {
           // Backend returned SVG - sanitize and render directly
           if (typeof response.data === 'string') {
-            this.safeSvgContent.set(this.sanitizer.bypassSecurityTrustHtml(response.data));
+            this.safeSvgContent
+                .set(this.sanitizer.bypassSecurityTrustHtml(response.data));
           }
           this.loading.set(false);
         } else if (response.format === 'json') {
@@ -678,11 +458,11 @@ export class UMLDiagramComponent implements OnInit {
 
     console.log('[UML-DIAGRAM] Parsed data:', jsonData);
 
-    // Extraer clases REALES (backend usa "classes", no "classes" con properties/package)
     const classes = jsonData.classes || [];
     this.allClasses.set(classes);
     this.totalClasses.set(jsonData.metadata?.total_classes || classes.length);
-    this.totalRelationships.set(jsonData.metadata?.total_relationships || jsonData.relationships?.length || 0);
+    this.totalRelationships.set(jsonData.metadata?.total_relationships ||
+      jsonData.relationships?.length || 0);
 
     console.log('[UML-DIAGRAM] ✅ Parsed', classes.length, 'classes');
     console.log('[UML-DIAGRAM] First class sample:', classes[0]);
@@ -695,7 +475,8 @@ export class UMLDiagramComponent implements OnInit {
     this.diagramService.exportAsPNG('uml', this.projectId()).subscribe({
       next: (response) => {
         if (typeof response.data === 'string') {
-          this.diagramService.downloadBase64Image(response.data, 'uml-diagram.png');
+          this.diagramService
+              .downloadBase64Image(response.data, 'uml-diagram.png');
           this.notificationService.success('Diagram exported');
         }
       },
@@ -727,7 +508,8 @@ export class UMLDiagramComponent implements OnInit {
 
     this.filteredClasses.set(filtered);
     this.currentPage.set(1); // Reset to first page
-    console.log('[UML-DIAGRAM] Filters applied:', filtered.length, 'classes match');
+    console.log('[UML-DIAGRAM] Filters applied:',
+        filtered.length, 'classes match');
   }
 
   clearFilters(): void {
@@ -777,7 +559,8 @@ export class UMLDiagramComponent implements OnInit {
     }
 
     if (!cls.file_path) {
-      console.warn('[UML-DIAGRAM] ⚠️ No file path available for class:', cls.name);
+      console.warn('[UML-DIAGRAM] ⚠️ No file path available for class:',
+          cls.name);
       return;
     }
 
@@ -818,7 +601,8 @@ export class UMLDiagramComponent implements OnInit {
 
   getVisibilityTitle(visibility?: string): string {
     if (!visibility) return 'Public visibility';
-    return `${visibility.charAt(0).toUpperCase() + visibility.slice(1)} visibility`;
+    return `${visibility.charAt(0).toUpperCase() + visibility.slice(1)
+    } visibility`;
   }
 
   getParametersString(parameters: any[]): string {

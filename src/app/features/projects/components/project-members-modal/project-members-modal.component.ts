@@ -1,6 +1,8 @@
-import {Component, Input, Output, EventEmitter, OnInit, signal, inject} from '@angular/core';
+import {Component, Input, Output, EventEmitter, OnInit, signal, inject}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {ProjectService} from '../../../../core/services/project.service';
 import {WorkspaceService} from '../../../../core/services/workspace.service';
 import {
@@ -44,9 +46,12 @@ export class ProjectMembersModalComponent implements OnInit {
 
   // Role options
   roles = [
-    {value: ProjectMemberRoleEnum.ADMIN, label: 'Admin', description: 'Can manage project and members'},
-    {value: ProjectMemberRoleEnum.MEMBER, label: 'Member', description: 'Can view and edit project content'},
-    {value: ProjectMemberRoleEnum.VIEWER, label: 'Viewer', description: 'Can only view project content'},
+    {value: ProjectMemberRoleEnum.ADMIN, label: 'Admin',
+      description: 'Can manage project and members'},
+    {value: ProjectMemberRoleEnum.MEMBER, label: 'Member',
+      description: 'Can view and edit project content'},
+    {value: ProjectMemberRoleEnum.VIEWER, label: 'Viewer',
+      description: 'Can only view project content'},
   ];
 
   constructor() {
@@ -88,14 +93,16 @@ export class ProjectMembersModalComponent implements OnInit {
         this.workspaceMembers.set((response.results || []) as any);
       },
       error: (err) => {
-        console.error('[PROJECT MEMBERS] Error loading workspace members:', err);
+        console.error('[PROJECT MEMBERS] Error loading workspace members:',
+            err);
       },
     });
   }
 
   // Get available workspace members (not already in project)
   get availableWorkspaceMembers(): WorkspaceMember[] {
-    const projectMemberIds = this.members().map((m) => m.user.user_uuid || m.user.id.toString());
+    const projectMemberIds = this.members().map((m) =>
+      m.user.user_uuid || m.user.id.toString());
     return this.workspaceMembers().filter((wm) =>
       !projectMemberIds.includes(wm.user.user_uuid || wm.user.id.toString()),
     );
@@ -169,7 +176,8 @@ export class ProjectMembersModalComponent implements OnInit {
 
     const newRole = this.editRoleForm.value.role;
 
-    this.projectService.updateProjectMember(this.projectId, member.id, {role: newRole}).subscribe({
+    this.projectService.updateProjectMember(this.projectId, member.id,
+        {role: newRole}).subscribe({
       next: () => {
         this.editRoleLoading.set(false);
         this.closeEditRoleModal();
@@ -188,12 +196,14 @@ export class ProjectMembersModalComponent implements OnInit {
       return;
     }
 
-    this.projectService.removeProjectMember(this.projectId, member.id).subscribe({
+    this.projectService.removeProjectMember(this.projectId,
+        member.id).subscribe({
       next: () => {
         this.loadMembers();
       },
       error: (err) => {
-        alert('Failed to remove member: ' + (err.error?.message || 'Unknown error'));
+        alert('Failed to remove member: ' + (err.error?.message ||
+          'Unknown error'));
         console.error('[PROJECT MEMBERS] Error removing member:', err);
       },
     });

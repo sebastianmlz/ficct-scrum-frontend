@@ -2,11 +2,15 @@ import {Component, inject, OnInit, OnDestroy, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {GitHubIntegrationService} from '../../../../core/services/github-integration.service';
-import {GitHubIntegrationStateService} from '../../../../core/services/github-integration-state.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {GitHubIntegrationService}
+  from '../../../../core/services/github-integration.service';
+import {GitHubIntegrationStateService}
+  from '../../../../core/services/github-integration-state.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {GitHubPullRequest} from '../../../../core/models/interfaces';
-import {GitHubConnectPromptComponent} from '../../../../shared/components/github-connect-prompt/github-connect-prompt.component';
+import {GitHubConnectPromptComponent} from
+  '@shared/components/github-connect-prompt/github-connect-prompt.component';
 import {Subscription} from 'rxjs';
 
 @Component({
@@ -57,11 +61,13 @@ export class PullRequestsListComponent implements OnInit, OnDestroy {
     this.integrationState.getIntegrationStatus(this.projectId()).subscribe({
       next: (integration) => {
         if (integration) {
-          console.log('[PULL REQUESTS] Integration found via state service:', integration.id);
+          console.log('[PULL REQUESTS] Integration found via state service:',
+              integration.id);
           this.integrationId.set(integration.id);
           this.loadPullRequests(integration.id);
         } else {
-          console.log('[PULL REQUESTS] No GitHub integration (from state service)');
+          console.log(
+              '[PULL REQUESTS] No GitHub integration (from state service)');
           this.noIntegration.set(true);
           this.loading.set(false);
         }
@@ -114,7 +120,8 @@ export class PullRequestsListComponent implements OnInit, OnDestroy {
 
     // Filter by author
     if (this.selectedAuthor()) {
-      filtered = filtered.filter((pr) => pr.author.login === this.selectedAuthor());
+      filtered = filtered.filter((pr) =>
+        pr.author.login === this.selectedAuthor());
     }
 
     this.filteredPRs.set(filtered);

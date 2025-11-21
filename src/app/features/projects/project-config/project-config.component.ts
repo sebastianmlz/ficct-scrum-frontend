@@ -1,15 +1,18 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup}
+  from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ProjectService} from '../../../core/services/project.service';
-import {Project, ProjectConfigRequest} from '../../../core/models/interfaces';
-import {GitHubIntegrationComponent} from '../components/github-integration/github-integration.component';
+import {Project} from '../../../core/models/interfaces';
+import {GitHubIntegrationComponent}
+  from '../components/github-integration/github-integration.component';
 
 @Component({
   selector: 'app-project-config',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, GitHubIntegrationComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink,
+    GitHubIntegrationComponent],
   templateUrl: './project-config.component.html',
 })
 
@@ -57,7 +60,8 @@ export class ProjectConfigComponent implements OnInit {
     this.loadError.set(null);
 
     try {
-      const project = await this.projectService.getProject(this.projectId).toPromise();
+      const project =
+      await this.projectService.getProject(this.projectId).toPromise();
       if (project) {
         this.project.set(project);
         // In a real app, you would load the project configuration from the API
@@ -98,14 +102,16 @@ export class ProjectConfigComponent implements OnInit {
       // Clear success message after 3 seconds
       setTimeout(() => this.successMessage.set(null), 3000);
     } catch (error: any) {
-      this.saveError.set(error.error?.message || 'Failed to save project settings');
+      this.saveError.set(error.error?.message ||
+        'Failed to save project settings');
     } finally {
       this.saving.set(false);
     }
   }
 
   async archiveProject(): Promise<void> {
-    if (!confirm('Are you sure you want to archive this project? It will be hidden from the main project list.')) {
+    if (!confirm('Are you sure you want to archive this project? It ' +
+      'will be hidden from the main project list.')) {
       return;
     }
 
@@ -122,7 +128,8 @@ export class ProjectConfigComponent implements OnInit {
   confirmDeleteProject(): void {
     const projectName = this.project()?.name || 'this project';
     const confirmation = prompt(
-        `This action cannot be undone. Type "${projectName}" to confirm deletion:`,
+        `This action cannot be undone. Type "${projectName
+        }" to confirm deletion:`,
     );
 
     if (confirmation === projectName) {

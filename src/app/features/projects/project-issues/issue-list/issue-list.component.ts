@@ -6,11 +6,14 @@ import {IssueService} from '../../../../core/services/issue.service';
 import {PaginationParams, Issue} from '../../../../core/models/interfaces';
 import {PaginatedIssueList} from '../../../../core/models/api-interfaces';
 import {IssueCreateComponent} from '../issue-create/issue-create.component';
-import {IssueDetailModalComponent} from '../../../../shared/components/issue-detail-modal/issue-detail-modal.component';
+import {IssueDetailModalComponent}
+  from '@shared/components/issue-detail-modal/issue-detail-modal.component';
 import {IssueEditComponent} from '../issue-edit/issue-edit.component';
 import {IssueAssignComponent} from '../issue-assign/issue-assign.component';
-import {MlSuggestAssignmentComponent} from '../ml-suggest-assignment/ml-suggest-assignment.component';
-import {AiSearchIssuesComponent} from '../ai/ai-search-issues/ai-search-issues.component';
+import {MlSuggestAssignmentComponent}
+  from '../ml-suggest-assignment/ml-suggest-assignment.component';
+import {AiSearchIssuesComponent}
+  from '../ai/ai-search-issues/ai-search-issues.component';
 import {Subject} from 'rxjs';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 
@@ -68,7 +71,7 @@ export class IssueListComponent implements OnInit {
     status_name: [''], // Changed from 'status' to 'status_name'
     priority: [''],
     assignee_email: [''], // Changed from 'assignee' to 'assignee_email'
-    issue_type_category: [''], // Changed from 'issue_type' to 'issue_type_category'
+    issue_type_category: [''], // Changed to 'issue_type_category'
     sprint: [''],
     ordering: ['-created_at'],
   });
@@ -239,7 +242,8 @@ export class IssueListComponent implements OnInit {
     this.savedFilters.set(filters);
 
     // Save to localStorage
-    localStorage.setItem(`saved-filters-${this.projectId}`, JSON.stringify(filters));
+    localStorage
+        .setItem(`saved-filters-${this.projectId}`, JSON.stringify(filters));
   }
 
   loadSavedFilters(): void {
@@ -257,7 +261,8 @@ export class IssueListComponent implements OnInit {
   deleteSavedFilter(filterId: string): void {
     const filters = this.savedFilters().filter((f) => f.id !== filterId);
     this.savedFilters.set(filters);
-    localStorage.setItem(`saved-filters-${this.projectId}`, JSON.stringify(filters));
+    localStorage
+        .setItem(`saved-filters-${this.projectId}`, JSON.stringify(filters));
   }
 
   // UC-067: Advanced search (JQL basic)
@@ -318,7 +323,8 @@ export class IssueListComponent implements OnInit {
 
   async updateIssuePriority(issueId: string, priority: string): Promise<void> {
     try {
-      await this.issueService.updateIssuePriority(issueId, priority).toPromise();
+      await this.issueService
+          .updateIssuePriority(issueId, priority).toPromise();
       this.closePriorityMenu(issueId);
       this.loadIssues({project: this.projectId});
     } catch (error) {
@@ -327,9 +333,11 @@ export class IssueListComponent implements OnInit {
     }
   }
 
-  async updateIssueStatus(issueId: string, status: string | null ): Promise<void> {
+  async updateIssueStatus(issueId: string, status: string | null )
+  : Promise<void> {
     try {
-      await this.issueService.updateIssueTransition(issueId, status).toPromise();
+      await this.issueService.updateIssueTransition(issueId, status)
+          .toPromise();
       this.loadIssues({project: this.projectId});
     } catch (error) {
       console.log('datos mandando', issueId, 'Status_UUID', status);

@@ -1,4 +1,5 @@
-import {Component, inject, OnInit, OnDestroy, signal, computed, AfterViewInit} from '@angular/core';
+import {Component, inject, OnInit, OnDestroy, signal, computed, AfterViewInit}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Subject} from 'rxjs';
@@ -6,10 +7,12 @@ import {takeUntil, debounceTime} from 'rxjs/operators';
 import {BoardService} from '../../../../core/services/board.service';
 import {BoardWebSocketService} from '../../services/board-websocket.service';
 import {AuthService} from '../../../../core/services/auth.service';
-import {NotificationService} from '../../../../core/services/notification.service';
+import {NotificationService}
+  from '../../../../core/services/notification.service';
 import {SprintsService} from '../../../../core/services/sprints.service';
 import {IssueService} from '../../../../core/services/issue.service';
-import {getAllPriorities, getPriorityLabel} from '../../../../shared/utils/priority.utils';
+import {getAllPriorities, getPriorityLabel}
+  from '../../../../shared/utils/priority.utils';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../../../environments/environment';
 import {
@@ -19,16 +22,23 @@ import {
   UserJoinedData,
   Sprint,
 } from '../../../../core/models/interfaces';
-import {BoardColumnComponent} from '../board-column/board-column.component';
-import {BoardFilterToolbarComponent, BoardFilters as ToolbarFilters} from '../board-filter-toolbar/board-filter-toolbar.component';
-import {CreateColumnDialogComponent} from '../create-column-dialog/create-column-dialog.component';
-import {CreateIssueDialogComponent} from '../create-issue-dialog/create-issue-dialog.component';
-import {IssueDetailModalComponent} from '../../../../shared/components/issue-detail-modal/issue-detail-modal.component';
+import {BoardColumnComponent}
+  from '../board-column/board-column.component';
+import {BoardFilterToolbarComponent, BoardFilters as ToolbarFilters}
+  from '../board-filter-toolbar/board-filter-toolbar.component';
+import {CreateColumnDialogComponent}
+  from '../create-column-dialog/create-column-dialog.component';
+import {CreateIssueDialogComponent}
+  from '../create-issue-dialog/create-issue-dialog.component';
+import {IssueDetailModalComponent}
+  from '@shared/components/issue-detail-modal/issue-detail-modal.component';
 
 @Component({
   selector: 'app-board-detail',
   standalone: true,
-  imports: [CommonModule, BoardColumnComponent, BoardFilterToolbarComponent, CreateColumnDialogComponent, CreateIssueDialogComponent, IssueDetailModalComponent],
+  imports: [CommonModule, BoardColumnComponent, BoardFilterToolbarComponent,
+    CreateColumnDialogComponent, CreateIssueDialogComponent,
+    IssueDetailModalComponent],
   providers: [BoardWebSocketService],
   templateUrl: './board-detail.component.html',
 })
@@ -122,14 +132,16 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
     try {
       // Cargar board con columnas
-      const boardData = await this.boardService.getBoardById(this.boardId).toPromise();
+      const boardData =
+      await this.boardService.getBoardById(this.boardId).toPromise();
 
       if (boardData) {
         this.board.set(boardData);
         this.projectId.set(boardData.project.id);
 
         // Ordenar columnas por order
-        const sortedColumns = (boardData.columns || []).sort((a, b) => a.order - b.order);
+        const sortedColumns =
+        (boardData.columns || []).sort((a, b) => a.order - b.order);
         this.columns.set(sortedColumns);
 
         // Load sprints ONLY for Scrum boards (JIRA architecture)
@@ -137,7 +149,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[BOARD-DETAIL] Scrum board detected - Loading sprints');
           await this.loadSprints();
         } else {
-          console.log('[BOARD-DETAIL] Kanban board detected - Skipping sprint loading');
+          console.log(
+              '[BOARD-DETAIL] Kanban board detected - Skipping sprint loading');
         }
 
         // Cargar issues del board
@@ -153,7 +166,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   async loadSprints(): Promise<void> {
     try {
       console.log('[BOARD] Loading sprints for project:', this.projectId());
-      const result = await this.sprintsService.getSprints(this.projectId()).toPromise();
+      const result =
+      await this.sprintsService.getSprints(this.projectId()).toPromise();
 
       if (result?.results) {
         this.sprints.set(result.results);
@@ -168,7 +182,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[BOARD] Defaulting to active sprint:', active.name);
         }
 
-        console.log('[BOARD] Loaded', result.results.length, 'sprints. Active:', active?.name || 'none');
+        console.log('[BOARD] Loaded', result.results.length,
+            'sprints. Active:', active?.name || 'none');
       }
     } catch (error) {
       console.error('[BOARD] Error loading sprints:', error);
@@ -186,9 +201,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       // Kanban boards should show ALL issues regardless of sprint
       if (this.board()?.board_type === 'scrum' && this.selectedSprintId()) {
         params.sprint = this.selectedSprintId();
-        console.log('[BOARD-DETAIL] Scrum board - Loading issues for sprint:', this.selectedSprintId());
+        console.log('[BOARD-DETAIL] Scrum board - Loading issues for sprint:',
+            this.selectedSprintId());
       } else {
-        console.log('[BOARD-DETAIL] Kanban board or no sprint selected - Loading ALL issues (no sprint filter)');
+        console.log('[BOARD-DETAIL] Kanban board or no sprint selected - ' +
+          'Loading ALL issues (no sprint filter)');
       }
 
       const result = await this.issueService.getIssues(params).toPromise();
@@ -233,7 +250,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('[BOARD-DETAIL] Organized issues by column:', issuesMap);
     this.columns().forEach((column) => {
       const count = issuesMap.get(column.workflow_status.id)?.length || 0;
-      console.log(`[BOARD-DETAIL] Column "${column.name}" (${column.workflow_status.id}): ${count} issues`);
+      console.log(`[BOARD-DETAIL] Column "${column.name}" (${
+        column.workflow_status.id}): ${count} issues`);
     });
 
     this.issuesByColumn.set(issuesMap);
@@ -241,7 +259,9 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private connectWebSocket(): void {
     const token = this.authService.getToken();
-    console.log('[BOARD-DETAIL] Obtained token from authService:', token ? `${token.substring(0, 30)}... (length: ${token.length})` : 'NULL/UNDEFINED');
+    console.log('[BOARD-DETAIL] Obtained token from authService:', token ?
+      `${token.substring(0, 30)}... (length: ${token.length
+      })` : 'NULL/UNDEFINED');
 
     if (token) {
       console.log('[BOARD-DETAIL] Token is valid, connecting to WebSocket...');
@@ -253,10 +273,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             this.wsConnected.set(connected);
           });
     } else {
-      console.error('[BOARD-DETAIL] ❌ CRITICAL: Token is NULL/UNDEFINED - Cannot connect to WebSocket!');
-      console.error('[BOARD-DETAIL] User might not be logged in or token is not stored correctly');
-      console.error('[BOARD-DETAIL] Check localStorage.getItem("access") in DevTools console');
-      this.notificationService.error('Authentication required. Please login again.');
+      console.error('[BOARD-DETAIL] ❌ CRITICAL: Token is NULL/UNDEFINED ' +
+        '- Cannot connect to WebSocket!');
+      console.error('[BOARD-DETAIL] User might not be logged in or token ' +
+        'is not stored correctly');
+      console.error('[BOARD-DETAIL] Check localStorage.getItem("access") ' +
+        'in DevTools console');
+      this.notificationService.error('Authentication required. Please login' +
+        ' again.');
     }
   }
 
@@ -276,7 +300,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.boardWsService.onUserLeft()
         .pipe(takeUntil(this.destroy$))
         .subscribe((data) => {
-          this.activeUsers.update((users) => users.filter((u) => u.user_id !== data.user_id));
+          this.activeUsers.update((users) =>
+            users.filter((u) => u.user_id !== data.user_id));
           this.notificationService.info(`${data.user_name} left the board`);
         });
 
@@ -291,11 +316,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           if (data.user.id !== this.currentUserId) {
           // JIRA architecture: Check if issue belongs to current sprint filter
             if (this.issueMatchesSprintFilter(data.issue)) {
-              console.log('[BOARD-DETAIL] Processing issue moved (from other user)');
+              console.log(
+                  '[BOARD-DETAIL] Processing issue moved (from other user)');
               this.handleIssueMovedEvent(data);
-              this.notificationService.info(`${data.user.name} moved issue ${data.issue.title}`);
+              this.notificationService.info(
+                  `${data.user.name} moved issue ${data.issue.title}`);
             } else {
-              console.log('[BOARD-DETAIL] Issue not in current sprint filter, ignoring');
+              console.log('[BOARD-DETAIL] Issue not in current ' +
+                'sprint filter, ignoring');
             }
           } else {
             console.log('[BOARD-DETAIL] Ignoring own event');
@@ -310,11 +338,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
           if (data.user.id !== this.currentUserId) {
             if (this.issueMatchesSprintFilter(data.issue)) {
-              console.log('[BOARD-DETAIL] Processing issue created (from other user)');
+              console.log(
+                  '[BOARD-DETAIL] Processing issue created (from other user)');
               this.handleIssueCreatedEvent(data);
-              this.notificationService.info(`${data.user.name} created issue ${data.issue.title}`);
+              this.notificationService.info(`${data.user.name
+              } created issue ${data.issue.title}`);
             } else {
-              console.log('[BOARD-DETAIL] Issue not in current sprint filter, ignoring');
+              console.log('[BOARD-DETAIL] Issue not in current' +
+                ' sprint filter, ignoring');
             }
           } else {
             console.log('[BOARD-DETAIL] Ignoring own event');
@@ -330,11 +361,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           if (data.user.id !== this.currentUserId) {
           // Check if issue still matches filter after update
             if (this.issueMatchesSprintFilter(data.issue)) {
-              console.log('[BOARD-DETAIL] Processing issue updated (from other user)');
+              console.log(
+                  '[BOARD-DETAIL] Processing issue updated (from other user)');
               this.handleIssueUpdatedEvent(data);
             } else {
-              console.log('[BOARD-DETAIL] Issue moved out of sprint filter, removing from view');
-              this.handleIssueDeletedEvent({...data, issue_key: data.issue.key});
+              console.log('[BOARD-DETAIL] Issue moved out of sprint' +
+                ' filter, removing from view');
+              this.handleIssueDeletedEvent(
+                  {...data, issue_key: data.issue.key});
             }
           } else {
             console.log('[BOARD-DETAIL] Ignoring own event');
@@ -348,9 +382,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[BOARD-DETAIL] Issue deleted event:', data);
 
           if (data.user.id !== this.currentUserId) {
-            console.log('[BOARD-DETAIL] Processing issue deleted (from other user)');
+            console.log(
+                '[BOARD-DETAIL] Processing issue deleted (from other user)');
             this.handleIssueDeletedEvent(data);
-            this.notificationService.info(`${data.user.name} deleted issue ${data.issue_key}`);
+            this.notificationService.info(`${data.user.name
+            } deleted issue ${data.issue_key}`);
           } else {
             console.log('[BOARD-DETAIL] Ignoring own event');
           }
@@ -363,9 +399,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[BOARD-DETAIL] Column created event:', data);
 
           if (data.user.id !== this.currentUserId) {
-            console.log('[BOARD-DETAIL] Processing column created (from other user)');
+            console.log(
+                '[BOARD-DETAIL] Processing column created (from other user)');
             this.handleColumnCreatedEvent(data);
-            this.notificationService.info(`${data.user.name} created column ${data.column.name}`);
+            this.notificationService.info(`${data.user.name
+            } created column ${data.column.name}`);
           } else {
             console.log('[BOARD-DETAIL] Ignoring own event');
           }
@@ -378,7 +416,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[BOARD-DETAIL] Column updated event:', data);
 
           if (data.user.id !== this.currentUserId) {
-            console.log('[BOARD-DETAIL] Processing column updated (from other user)');
+            console.log(
+                '[BOARD-DETAIL] Processing column updated (from other user)');
             this.handleColumnUpdatedEvent(data);
           } else {
             console.log('[BOARD-DETAIL] Ignoring own event');
@@ -392,7 +431,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           console.log('[BOARD-DETAIL] Column deleted event:', data);
 
           if (data.user.id !== this.currentUserId) {
-            console.log('[BOARD-DETAIL] Processing column deleted (from other user)');
+            console.log(
+                '[BOARD-DETAIL] Processing column deleted (from other user)');
             this.handleColumnDeletedEvent(data);
             this.notificationService.info(`Column deleted`);
           } else {
@@ -404,7 +444,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   // Event handlers
   private handleIssueMovedEvent(data: any): void {
     console.log('[WS] Handling issue moved:', data);
-    console.log('[WS] From status:', data.from_status, 'To status:', data.to_status);
+    console.log('[WS] From status:', data.from_status,
+        'To status:', data.to_status);
 
     // ✅ Actualizar signal inmutablemente
     this.issuesByColumn.update((currentMap) => {
@@ -417,7 +458,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Remover de columna anterior
       const fromIssues = newMap.get(data.from_status) || [];
-      const updatedFromIssues = fromIssues.filter((i) => i.id !== data.issue.id);
+      const updatedFromIssues = fromIssues.filter((i) =>
+        i.id !== data.issue.id);
       newMap.set(data.from_status, updatedFromIssues);
 
       // Agregar a nueva columna
@@ -471,6 +513,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Buscar y actualizar el issue en todas las columnas
       for (const [statusId, issues] of newMap.entries()) {
+        console.log(statusId);
         const index = issues.findIndex((i) => i.id === data.issue.id);
         if (index !== -1) {
           // Reemplazar issue en array copiado
@@ -533,7 +576,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getIssuesForColumn(column: BoardColumn): Issue[] {
-    const allIssues = this.issuesByColumn().get(column.workflow_status.id) || [];
+    const allIssues = this.issuesByColumn()
+        .get(column.workflow_status.id) || [];
     return this.applyFilters(allIssues);
   }
 
@@ -553,30 +597,34 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Assignee filter
       if (currentFilters.assignees.length > 0) {
-        const issueAssigneeId = issue.assignee?.user_uuid || (issue.assignee?.id ? String(issue.assignee.id) : null);
+        const issueAssigneeId = issue.assignee?.user_uuid ||
+        (issue.assignee?.id ? String(issue.assignee.id) : null);
         const matchesAssignee =
-          (issueAssigneeId && currentFilters.assignees.includes(issueAssigneeId)) ||
+          (issueAssigneeId && currentFilters.assignees
+              .includes(issueAssigneeId)) ||
           (currentFilters.assignees.includes('unassigned') && !issue.assignee);
         if (!matchesAssignee) return false;
       }
 
       // Priority filter
       if (currentFilters.priorities.length > 0) {
-        if (!issue.priority || !currentFilters.priorities.includes(issue.priority)) {
+        if (!issue.priority ||
+            !currentFilters.priorities.includes(issue.priority)) {
           return false;
         }
       }
 
       // Issue type filter
       if (currentFilters.issueTypes.length > 0) {
-        if (!issue.issue_type?.id || !currentFilters.issueTypes.includes(issue.issue_type.id)) {
+        if (!issue.issue_type?.id || !currentFilters.issueTypes
+            .includes(issue.issue_type.id)) {
           return false;
         }
       }
 
-      // Status filter (redundant in column view but useful for cross-column filtering)
       if (currentFilters.statuses.length > 0) {
-        if (!issue.status?.id || !currentFilters.statuses.includes(issue.status.id)) {
+        if (!issue.status?.id ||
+          !currentFilters.statuses.includes(issue.status.id)) {
           return false;
         }
       }
@@ -626,7 +674,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   // User actions
-  async onIssueDropped(event: { issueId: string; targetColumnId: string; targetStatusId: string; previousStatusId?: string }): Promise<void> {
+  async onIssueDropped(event: { issueId: string; targetColumnId: string;
+    targetStatusId: string; previousStatusId?: string }): Promise<void> {
     console.log('[DROP] === INICIO DROP ===');
     console.log('[DROP] Event:', event);
     console.log('[DROP] Issue ID:', event.issueId);
@@ -667,7 +716,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         return currentMap; // No cambiar nada
       }
 
-      // 4. Actualizar status del issue (mantener estructura completa del status)
       const updatedIssue: Issue = {
         ...movedIssue,
         status: {
@@ -686,7 +734,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       newMap.set(event.targetStatusId, targetIssues);
 
       console.log('[DROP] ✅ Issue movido en signal inmutable');
-      console.log('[DROP]    From:', sourceStatusId, 'To:', event.targetStatusId);
+      console.log('[DROP]    From:', sourceStatusId,
+          'To:', event.targetStatusId);
       console.log('[DROP]    Issue:', updatedIssue.id, updatedIssue.title);
 
       // 6. Retornar NUEVO Map - signal detecta cambio!
@@ -697,9 +746,10 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
       console.log('[DROP] Llamando API para persistir cambio...');
 
-      const response = await this.boardService.moveIssue(this.boardId, event.issueId, {
-        column_id: event.targetColumnId,
-      }).toPromise();
+      const response = await this.boardService
+          .moveIssue(this.boardId, event.issueId, {
+            column_id: event.targetColumnId,
+          }).toPromise();
 
       console.log('[DROP] ✅ API Success:', response);
       console.log('[DROP] Issue persistido correctamente en backend');
@@ -711,8 +761,10 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // NO ROLLBACK: El cambio ya se guardó en el backend
       // El error es solo un problema de serialización en la respuesta
-      console.log('[DROP] ⚠️ Error en respuesta del API, pero el cambio puede haberse guardado');
-      console.log('[DROP] Recargando issues desde backend para obtener estado actualizado...');
+      console.log('[DROP] ⚠️ Error en respuesta del API, pero ' +
+        'el cambio puede haberse guardado');
+      console.log('[DROP] Recargando issues desde backend para ' +
+        'obtener estado actualizado...');
 
       // Recargar issues desde el backend para obtener el estado real
       await this.loadIssues();
@@ -724,7 +776,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onCreateIssueClicked(columnId: string): void {
-    console.log('[BOARD-DETAIL] Opening create issue dialog for column:', columnId);
+    console.log('[BOARD-DETAIL] Opening create issue dialog for column:',
+        columnId);
     this.createIssueColumnId.set(columnId);
     this.showCreateIssueDialog.set(true);
   }
@@ -739,11 +792,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showCreateIssueDialog.set(false);
     this.createIssueColumnId.set(null);
 
-    // Si el backend no devuelve el status, necesitamos recargar el board completo
-    // para obtener la issue con todos sus datos actualizados (incluyendo el status asignado por el backend)
     if (!issue.status?.id) {
-      console.warn('[BOARD-DETAIL] ⚠️ Backend did not return status for created issue');
-      console.log('[BOARD-DETAIL] Reloading issues to get complete data from backend...');
+      console.warn('[BOARD-DETAIL] ⚠️ Backend did not return ' +
+        'status for created issue');
+      console.log('[BOARD-DETAIL] Reloading issues to get ' +
+        'complete data from backend...');
       await this.loadIssues();
       this.notificationService.success('Issue created successfully');
       return;
@@ -752,15 +805,17 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     // Si tenemos el status, agregamos la issue al estado local
     const statusId = issue.status.id;
     console.log('[BOARD-DETAIL] Adding issue to column with status:', statusId);
-    console.log('[BOARD-DETAIL] Available columns:', this.columns().map((c) => ({
-      name: c.name,
-      workflow_status_id: c.workflow_status.id,
-    })));
+    console.log('[BOARD-DETAIL] Available columns:',
+        this.columns().map((c) => ({
+          name: c.name,
+          workflow_status_id: c.workflow_status.id,
+        })));
 
     this.issuesByColumn.update((issuesMap) => {
       const newMap = new Map(issuesMap);
       const columnIssues = newMap.get(statusId) || [];
-      console.log('[BOARD-DETAIL] Current issues in column:', columnIssues.length);
+      console.log(
+          '[BOARD-DETAIL] Current issues in column:', columnIssues.length);
       columnIssues.push(issue);
       console.log('[BOARD-DETAIL] Issues after adding:', columnIssues.length);
       newMap.set(statusId, columnIssues);
@@ -800,12 +855,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('[BOARD] Es issue válido?:', !!issue);
     console.log('[BOARD] Issue ID:', issue?.id);
     console.log('[BOARD] Issue assignee:', issue?.assignee);
-    console.log('[BOARD] Issue assignee completo:', JSON.stringify(issue?.assignee));
+    console.log('[BOARD] Issue assignee completo:',
+        JSON.stringify(issue?.assignee));
     console.log('[BOARD] Issue status:', issue?.status);
     console.log('[BOARD] Issue status ID:', issue?.status?.id);
 
     // Log estado ANTES de actualizar
-    console.log('[BOARD] Estado ANTES de actualizar - Total issues:', Array.from(this.issuesByColumn().values()).flat().length);
+    console.log('[BOARD] Estado ANTES de actualizar - Total issues:',
+        Array.from(this.issuesByColumn().values()).flat().length);
     const issueBeforeUpdate = Array.from(this.issuesByColumn().values())
         .flat()
         .find((i) => i.id === issue.id);
@@ -816,25 +873,26 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     const statusId = issue.status?.id;
     if (statusId) {
       let issueFound = false;
-      let oldStatusId = '';
 
       this.issuesByColumn.update((issuesMap) => {
         const newMap = new Map(issuesMap);
 
-        console.log('[BOARD-DETAIL] Current state columns:', Array.from(newMap.keys()));
+        console.log('[BOARD-DETAIL] Current state columns:',
+            Array.from(newMap.keys()));
 
         // Buscar y actualizar el issue en todas las columnas
         for (const [colStatusId, issues] of newMap.entries()) {
           const index = issues.findIndex((i) => i.id === issue.id);
           if (index !== -1) {
             issueFound = true;
-            oldStatusId = colStatusId;
-            console.log('[BOARD-DETAIL] Found issue at column:', colStatusId, 'index:', index);
+            console.log('[BOARD-DETAIL] Found issue at column:',
+                colStatusId, 'index:', index);
             console.log('[BOARD-DETAIL] Old issue data:', issues[index]);
 
             // Si el status cambió, mover a nueva columna
             if (colStatusId !== statusId) {
-              console.log('[BOARD-DETAIL] Status changed from', colStatusId, 'to', statusId);
+              console.log('[BOARD-DETAIL] Status changed from',
+                  colStatusId, 'to', statusId);
               // Remover de columna actual
               issues.splice(index, 1);
               newMap.set(colStatusId, [...issues]);
@@ -845,7 +903,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
               newMap.set(statusId, [...targetIssues]);
             } else {
               console.log('[BOARD-DETAIL] Same status, updating in place');
-              // Mismo status, solo actualizar con spread para forzar change detection
               const updatedIssues = [...issues];
               updatedIssues[index] = {...issue}; // Clone issue también
               newMap.set(colStatusId, updatedIssues);
@@ -864,13 +921,15 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       });
 
       // Log estado DESPUÉS de actualizar
-      console.log('[BOARD] Estado DESPUÉS de actualizar - Total issues:', Array.from(this.issuesByColumn().values()).flat().length);
+      console.log('[BOARD] Estado DESPUÉS de actualizar - Total issues:',
+          Array.from(this.issuesByColumn().values()).flat().length);
       const issueAfterUpdate = Array.from(this.issuesByColumn().values())
           .flat()
           .find((i) => i.id === issue.id);
       console.log('[BOARD] Issue DESPUÉS en estado:', issueAfterUpdate);
       console.log('[BOARD] Assignee DESPUÉS:', issueAfterUpdate?.assignee);
-      console.log('[BOARD] Assignee DESPUÉS full_name:', issueAfterUpdate?.assignee?.full_name);
+      console.log('[BOARD] Assignee DESPUÉS full_name:',
+          issueAfterUpdate?.assignee?.full_name);
       console.log('[BOARD] === FIN UPDATE BOARD ===');
     } else {
       console.error('[BOARD] ❌ Issue has no status ID!');
@@ -898,13 +957,15 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onIssueDetailClosed();
   }
 
-  onAssigneeChangedInColumn(event: { issueId: string; assigneeId: string | null }): void {
+  onAssigneeChangedInColumn(event: { issueId: string; assigneeId: string |
+    null }): void {
     console.log('[BOARD-DETAIL] Assignee changed via quick popover:', event);
 
     // Find the full user object from availableMembers
     let fullAssignee = null;
     if (event.assigneeId) {
-      const member = this.availableMembers().find((m) => m.user?.user_uuid === event.assigneeId);
+      const member = this.availableMembers().find(
+          (m) => m.user?.user_uuid === event.assigneeId);
       if (member?.user) {
         fullAssignee = {
           user_uuid: member.user.user_uuid,
@@ -915,7 +976,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         };
         console.log('[BOARD-DETAIL] Found full user object:', fullAssignee);
       } else {
-        console.warn('[BOARD-DETAIL] Could not find member in availableMembers, using minimal object');
+        console.warn('[BOARD-DETAIL] Could not find member in ' +
+          'availableMembers, using minimal object');
         fullAssignee = {user_uuid: event.assigneeId} as any;
       }
     }
@@ -937,7 +999,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
           updatedIssues[index] = updatedIssue;
           newMap.set(statusId, updatedIssues);
 
-          console.log('[BOARD-DETAIL] Issue assignee updated in state with full data:', updatedIssue.assignee);
+          console.log('[BOARD-DETAIL] Issue assignee updated in state' +
+            ' with full data:', updatedIssue.assignee);
           break;
         }
       }
@@ -974,7 +1037,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   private searchSubject = new Subject<string>();
 
   openSettings(): void {
-    // Navegar a configuración del proyecto (boards es parte de project settings)
     if (this.board()) {
       this.router.navigate(['/projects', this.board()!.project.id, 'config']);
     }
@@ -1039,26 +1101,31 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       ).toPromise();
 
       if (project?.workspace) {
-        console.log('[FILTERS] Loading workspace members for workspace:', project.workspace);
+        console.log('[FILTERS] Loading workspace members for workspace:',
+            project.workspace);
         // Load workspace members
         const membersResponse = await this.http.get<any>(
-            `${environment.apiUrl}/api/v1/workspaces/members/?workspace=${project.workspace}`,
+            `${environment.apiUrl}/api/v1/workspaces/members/?workspace=${
+              project.workspace}`,
         ).toPromise();
 
         if (membersResponse?.results) {
           this.availableMembers.set(membersResponse.results);
-          console.log('[FILTERS] ✅ Workspace members loaded:', membersResponse.results.length);
+          console.log('[FILTERS] ✅ Workspace members loaded:',
+              membersResponse.results.length);
         }
       }
 
       // Load issue types
       const typesResponse = await this.http.get<any>(
-          `${environment.apiUrl}/api/v1/projects/issue-types/?project=${projectId}`,
+          `${environment.apiUrl}/api/v1/projects/issue-types/?project=${
+            projectId}`,
       ).toPromise();
 
       if (typesResponse?.results) {
         this.availableIssueTypes.set(typesResponse.results);
-        console.log('[FILTERS] ✅ Issue types loaded:', typesResponse.results.length);
+        console.log('[FILTERS] ✅ Issue types loaded:',
+            typesResponse.results.length);
       }
 
       console.log('[FILTERS] ✅ Filter options loaded successfully');
@@ -1072,6 +1139,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onColumnCreated(column: BoardColumn): void {
+    console.log(column);
     this.showCreateColumnDialog.set(false);
     // Recargar board para obtener columnas actualizadas
     this.loadBoard();

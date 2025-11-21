@@ -1,4 +1,5 @@
-import {Component, Input, Output, EventEmitter, inject, OnChanges} from '@angular/core';
+import {Component, Input, Output, EventEmitter, inject, OnChanges}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {IssueLinkDetail} from '../../../../../core/models/interfaces';
 import {IssueService} from '../../../../../core/services/issue.service';
@@ -33,7 +34,8 @@ export class IssueLinkDetailComponent implements OnChanges {
     this.error = null;
 
     try {
-      const result = await this.issueService.getIssueLinkDetail(this.issueId, this.linkId).toPromise();
+      const result = await this.issueService
+          .getIssueLinkDetail(this.issueId, this.linkId).toPromise();
       this.linkDetail = result || null;
     } catch (error) {
       this.error = 'Error al cargar los detalles del enlace';

@@ -1,6 +1,7 @@
 import {Component, Input, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {AiService, IssueSummaryResponse} from '../../../../../core/services/ai.service';
+import {AiService, IssueSummaryResponse}
+  from '../../../../../core/services/ai.service';
 
 @Component({
   selector: 'app-ai-issue-summary',
@@ -37,7 +38,9 @@ export class AiIssueSummaryComponent implements OnInit {
     this.manualLoadRequired.set(false);
 
     try {
-      const response = await this.aiService.getIssueSummary(this.issueId, forceRefresh).toPromise();
+      const response =
+        await this.aiService.getIssueSummary(this.issueId, forceRefresh)
+            .toPromise();
 
       if (response) {
         this.summary.set(response);

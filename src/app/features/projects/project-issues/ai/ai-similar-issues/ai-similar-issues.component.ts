@@ -35,16 +35,19 @@ export class AiSimilarIssuesComponent implements OnInit {
       return;
     }
 
-    console.log(`[AI-SIMILAR] User requested similar issues for ${this.issueId}`);
+    console.log(`[AI-SIMILAR] User requested similar issues` +
+      ` for ${this.issueId}`);
     this.loading.set(true);
     this.error.set(null);
     this.manualLoadRequired.set(false);
 
     try {
-      const response = await this.aiService.findSimilar(this.issueId, this.limit).toPromise();
+      const response = await this.aiService
+          .findSimilar(this.issueId, this.limit).toPromise();
       if (response && Array.isArray(response.similar_issues)) {
         this.similarIssues.set(response.similar_issues);
-        console.log(`[AI-SIMILAR] Found ${response.similar_issues.length} similar issues`);
+        console.log(`[AI-SIMILAR] Found ${response.similar_issues.length}` +
+          ` similar issues`);
       } else {
         this.similarIssues.set([]);
       }

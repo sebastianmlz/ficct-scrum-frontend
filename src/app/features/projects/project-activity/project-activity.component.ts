@@ -1,7 +1,8 @@
 import {Component, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {ActivityLogService, ActivityLog} from '../../../core/services/activity-log.service';
+import {ActivityLogService, ActivityLog}
+  from '../../../core/services/activity-log.service';
 import {ProjectService} from '../../../core/services/project.service';
 
 @Component({
@@ -47,7 +48,8 @@ export class ProjectActivityComponent implements OnInit {
 
   async loadProjectKey(): Promise<void> {
     try {
-      const project = await this.projectService.getProject(this.projectId).toPromise();
+      const project =
+      await this.projectService.getProject(this.projectId).toPromise();
       if (project?.key) {
         this.projectKey = project.key;
       }
@@ -88,7 +90,8 @@ export class ProjectActivityComponent implements OnInit {
         params.object_type = this.selectedObjectType();
       }
 
-      const response = await this.activityLogService.getActivityLogs(params).toPromise();
+      const response =
+      await this.activityLogService.getActivityLogs(params).toPromise();
 
       // Log API response for debugging
       console.log('[ACTIVITY FEED] API Response:', {
@@ -100,22 +103,28 @@ export class ProjectActivityComponent implements OnInit {
 
       // Log first activity to verify structure
       if (response?.results && response.results.length > 0) {
-        console.log('[ACTIVITY FEED] Sample activity:', response.results[0]);
-        console.log('[ACTIVITY FEED] 🔗 object_url:', response.results[0].object_url);
-        console.log('[ACTIVITY FEED] 🔗 object_type:', response.results[0].object_type);
-        console.log('[ACTIVITY FEED] 🔗 object_id:', response.results[0].object_id);
+        console.log(
+            '[ACTIVITY FEED] Sample activity:', response.results[0]);
+        console.log(
+            '[ACTIVITY FEED] 🔗 object_url:', response.results[0].object_url);
+        console.log(
+            '[ACTIVITY FEED] 🔗 object_type:', response.results[0].object_type);
+        console.log(
+            '[ACTIVITY FEED] 🔗 object_id:', response.results[0].object_id);
       }
 
       // Log all object URLs for navigation debugging
       response?.results?.forEach((activity, index) => {
         if (activity.object_url) {
-          console.log(`[ACTIVITY FEED] Activity ${index}: ${activity.action_type} ${activity.object_type} → URL: ${activity.object_url}`);
+          console.log(`[ACTIVITY FEED] Activity ${index}: ${activity.action_type
+          } ${activity.object_type} → URL: ${activity.object_url}`);
         }
       });
 
       if (isLoadingMore) {
         // Append to existing activities
-        this.activities.set([...this.activities(), ...(response?.results || [])]);
+        this.activities.set(
+            [...this.activities(), ...(response?.results || [])]);
       } else {
         // Replace activities
         this.activities.set(response?.results || []);
@@ -140,12 +149,14 @@ export class ProjectActivityComponent implements OnInit {
   }
 
   filterByActionType(actionType: string): void {
-    this.selectedActionType.set(actionType === this.selectedActionType() ? '' : actionType);
+    this.selectedActionType
+        .set(actionType === this.selectedActionType() ? '' : actionType);
     this.loadActivities();
   }
 
   filterByObjectType(objectType: string): void {
-    this.selectedObjectType.set(objectType === this.selectedObjectType() ? '' : objectType);
+    this.selectedObjectType
+        .set(objectType === this.selectedObjectType() ? '' : objectType);
     this.loadActivities();
   }
 
@@ -158,15 +169,24 @@ export class ProjectActivityComponent implements OnInit {
   getActionIcon(actionType: string): string {
     const icons: Record<string, string> = {
       'created': 'M12 4v16m8-8H4',
-      'updated': 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21H3v-3.5L16.732 3.732z',
-      'deleted': 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
+      'updated': 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 ' +
+      '113.536 3.536L6.5 21H3v-3.5L16.732 3.732z',
+      'deleted': 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 ' +
+      '01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 ' +
+      '1v3M4 7h16',
       'transitioned': 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4',
-      'commented': 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
-      'assigned': 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-      'attached': 'M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13',
-      'linked': 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',
+      'commented': 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 ' +
+      '8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 ' +
+      '12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+      'assigned': 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 ' +
+      '0 00-7-7z',
+      'attached': 'M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4' +
+      ' 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13',
+      'linked': 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.1' +
+      '02-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1',
     };
-    return icons[actionType] || 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+    return icons[actionType] ||
+    'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
   }
 
   getActionColor(actionType: string): string {

@@ -1,7 +1,8 @@
 import {Component, signal, inject, OnDestroy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {AiService, AIQueryResponse, AISource} from '../../../../../core/services/ai.service';
+import {AiService, AIQueryResponse, AISource}
+  from '../../../../../core/services/ai.service';
 import {RouterModule} from '@angular/router';
 import {interval, Subject, takeUntil} from 'rxjs';
 
@@ -48,7 +49,8 @@ export class AiQueryTestComponent implements OnDestroy {
     if (!query || this.loading()) return;
 
     console.log('[AI QUERY TEST] User submitted query:', query);
-    console.log('[AI QUERY TEST] Note: O4-mini may take 10-45 seconds due to reasoning tokens');
+    console.log('[AI QUERY TEST] Note: O4-mini may take 10-45 ' +
+      'seconds due to reasoning tokens');
 
     this.loading.set(true);
     this.error.set(null);
@@ -64,7 +66,8 @@ export class AiQueryTestComponent implements OnDestroy {
       next: (response: AIQueryResponse) => {
         console.log('[AI QUERY TEST] ✅ Query successful!');
         console.log('[AI QUERY TEST] Answer:', response.answer);
-        console.log('[AI QUERY TEST] Sources count:', response.sources?.length || 0);
+        console.log('[AI QUERY TEST] Sources count:',
+            response.sources?.length || 0);
         console.log('[AI QUERY TEST] Sources:', response.sources);
 
         this.answer.set(response.answer);
@@ -81,14 +84,20 @@ export class AiQueryTestComponent implements OnDestroy {
 
         // Handle timeout errors specially (O4-mini can take long)
         if (err.name === 'TimeoutError' || err.status === 408) {
-          errorMessage = err.message || 'Query took longer than expected. The AI model may be processing complex reasoning. Try a simpler question or try again later.';
-          console.warn('[AI QUERY TEST] ⏱️ Timeout occurred - this is normal for very complex queries');
+          errorMessage = err.message ||
+          'Query took longer than expected. The AI model may be processing ' +
+          'complex reasoning. Try a simpler question or try again later.';
+          console.warn('[AI QUERY TEST] ⏱️ Timeout occurred - this is ' +
+            'normal for very complex queries');
         } else if (err.status === 500) {
-          errorMessage = 'AI service temporarily unavailable. Please try again later.';
+          errorMessage = 'AI service temporarily unavailable. ' +
+          'Please try again later.';
         } else if (err.status === 400) {
           // Model mismatch or unsupported parameter
-          if (err.error?.error?.includes('parameter') || err.error?.error?.includes('model')) {
-            errorMessage = 'This query is not supported by the current AI model configuration.';
+          if (err.error?.error?.includes('parameter') ||
+          err.error?.error?.includes('model')) {
+            errorMessage = 'This query is not supported by the current ' +
+            'AI model configuration.';
           } else {
             errorMessage = err.error?.error || 'Invalid query format.';
           }
@@ -111,9 +120,12 @@ export class AiQueryTestComponent implements OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           if (this.loading()) {
-            this.currentMessageIndex = (this.currentMessageIndex + 1) % this.loadingMessages.length;
-            this.loadingMessage.set(this.loadingMessages[this.currentMessageIndex]);
-            console.log('[AI QUERY TEST] 🔄 Loading message updated:', this.loadingMessages[this.currentMessageIndex]);
+            this.currentMessageIndex =
+            (this.currentMessageIndex + 1) % this.loadingMessages.length;
+            this.loadingMessage
+                .set(this.loadingMessages[this.currentMessageIndex]);
+            console.log('[AI QUERY TEST] 🔄 Loading message updated:',
+                this.loadingMessages[this.currentMessageIndex]);
           }
         });
   }

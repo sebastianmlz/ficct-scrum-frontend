@@ -1,15 +1,19 @@
 import {Component, Input, OnInit, signal, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {IssueService} from '../../../../core/services/issue.service';
-import {IssueLink, IssueLinkRequest, PaginatedIssueLinkList, Issue, PaginatedIssueList} from '../../../../core/models/interfaces';
+import {IssueLink, IssueLinkRequest, PaginatedIssueLinkList, Issue,
+  PaginatedIssueList} from '../../../../core/models/interfaces';
 import {IssueLinkTypeEnum} from '../../../../core/models/enums';
-import {IssueLinkDetailComponent} from './issue-link-detail/issue-link-detail.component';
+import {IssueLinkDetailComponent}
+  from './issue-link-detail/issue-link-detail.component';
 
 @Component({
   selector: 'app-issue-links',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IssueLinkDetailComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule,
+    IssueLinkDetailComponent],
   templateUrl: './issue-links.component.html',
   styleUrl: './issue-links.component.css',
 })
@@ -41,13 +45,20 @@ export class IssueLinksComponent implements OnInit {
 
   // Available link types
   LINK_TYPES = [
-    {value: IssueLinkTypeEnum.BLOCKS, label: 'Bloquea', description: 'Esta issue bloquea a otra issue'},
-    {value: IssueLinkTypeEnum.BLOCKED_BY, label: 'Bloqueado por', description: 'Esta issue está bloqueada por otra issue'},
-    {value: IssueLinkTypeEnum.RELATES_TO, label: 'Se relaciona con', description: 'Esta issue se relaciona con otra issue'},
-    {value: IssueLinkTypeEnum.DUPLICATES, label: 'Duplica', description: 'Esta issue duplica a otra issue'},
-    {value: IssueLinkTypeEnum.DUPLICATED_BY, label: 'Duplicado por', description: 'Esta issue es duplicada por otra issue'},
-    {value: IssueLinkTypeEnum.DEPENDS_ON, label: 'Depende de', description: 'Esta issue depende de otra issue'},
-    {value: IssueLinkTypeEnum.DEPENDENCY_OF, label: 'Es dependencia de', description: 'Esta issue es dependencia de otra issue'},
+    {value: IssueLinkTypeEnum.BLOCKS, label: 'Bloquea',
+      description: 'Esta issue bloquea a otra issue'},
+    {value: IssueLinkTypeEnum.BLOCKED_BY, label: 'Bloqueado por',
+      description: 'Esta issue está bloqueada por otra issue'},
+    {value: IssueLinkTypeEnum.RELATES_TO, label: 'Se relaciona con',
+      description: 'Esta issue se relaciona con otra issue'},
+    {value: IssueLinkTypeEnum.DUPLICATES, label: 'Duplica',
+      description: 'Esta issue duplica a otra issue'},
+    {value: IssueLinkTypeEnum.DUPLICATED_BY, label: 'Duplicado por',
+      description: 'Esta issue es duplicada por otra issue'},
+    {value: IssueLinkTypeEnum.DEPENDS_ON, label: 'Depende de',
+      description: 'Esta issue depende de otra issue'},
+    {value: IssueLinkTypeEnum.DEPENDENCY_OF, label: 'Es dependencia de',
+      description: 'Esta issue es dependencia de otra issue'},
   ];
 
   // Form
@@ -82,7 +93,8 @@ export class IssueLinksComponent implements OnInit {
     }).subscribe({
       next: (response: PaginatedIssueList) => {
         // Filtrar la issue actual para que no aparezca en la lista
-        const issuesFiltered = response.results.filter((issue) => issue.id !== this.issueId);
+        const issuesFiltered = response.results
+            .filter((issue) => issue.id !== this.issueId);
         this.projectIssues.set(issuesFiltered);
         this.filteredIssues.set(issuesFiltered);
         this.loadingIssues.set(false);
@@ -174,7 +186,8 @@ export class IssueLinksComponent implements OnInit {
     const selectedId = this.linkForm.get('target_issue_id')?.value;
     if (!selectedId) return '';
 
-    const selectedIssue = this.projectIssues().find((issue) => issue.id === selectedId);
+    const selectedIssue = this.projectIssues()
+        .find((issue) => issue.id === selectedId);
     return selectedIssue ? selectedIssue.title : '';
   }
 
@@ -248,7 +261,8 @@ export class IssueLinksComponent implements OnInit {
 
   getRelatedIssue(link: IssueLink): Issue {
     // Si la issue actual es la source, retornamos la target, y viceversa
-    return link.source_issue.id === this.issueId ? link.target_issue : link.source_issue;
+    return link.source_issue.id === this.issueId ?
+    link.target_issue : link.source_issue;
   }
 
   getRelationDirection(link: IssueLink): 'outward' | 'inward' {
