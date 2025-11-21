@@ -306,7 +306,14 @@ export class GitHubIntegrationService {
   parseSmartCommitActions(message: string)
   : {action: string; issueRef: string}[] {
     const actions: {action: string; issueRef: string}[] = [];
-    const pattern = /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+(#\d+|[A-Z]+-\d+)/gi;
+    const pattern = new RegExp(
+        '(' +
+        'close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved' +
+        ')' +
+        '\\s+' +
+        '(#\\d+|[A-Z]+-\\d+)',
+        'gi',
+    );
 
     let match;
     while ((match = pattern.exec(message)) !== null) {
