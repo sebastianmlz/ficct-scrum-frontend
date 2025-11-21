@@ -20,6 +20,7 @@ export class OrganizationCreateComponent {
   private organizationService = inject(OrganizationService);
 
   loading = false;
+  debug = false;
   error: string | null = null;
   selectedFile: File | null = null;
   previewUrl: string | null = null;
