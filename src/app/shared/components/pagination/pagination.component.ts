@@ -14,7 +14,7 @@ export interface PaginationData {
   selector: 'app-pagination',
   standalone: true,
   imports: [CommonModule],
-  template: 'pagination.component.html',
+  templateUrl: 'pagination.component.html',
 })
 export class PaginationComponent {
   @Input() currentPage = 1;

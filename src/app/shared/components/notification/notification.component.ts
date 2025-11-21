@@ -7,7 +7,7 @@ import {NotificationService, Notification}
   selector: 'app-notification',
   standalone: true,
   imports: [CommonModule],
-  template: 'notification.component.html',
+  templateUrl: 'notification.component.html',
 })
 export class NotificationComponent {
   notificationService = inject(NotificationService);

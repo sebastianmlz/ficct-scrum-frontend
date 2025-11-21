@@ -10,7 +10,7 @@ export interface FileUploadEvent {
   selector: 'app-file-upload',
   standalone: true,
   imports: [CommonModule],
-  template: 'file-upload.component.html',
+  templateUrl: 'file-upload.component.html',
 })
 export class FileUploadComponent {
   @Input() accept = 'image/*';

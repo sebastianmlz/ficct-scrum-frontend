@@ -7,7 +7,7 @@ import {FileUploadEvent}
   selector: 'app-logo-upload',
   standalone: true,
   imports: [CommonModule],
-  template: 'logo-upload.component.html',
+  templateUrl: 'logo-upload.component.html',
 })
 export class LogoUploadComponent {
   @Input() currentLogoUrl?: string;

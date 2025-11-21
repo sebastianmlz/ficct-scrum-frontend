@@ -5,7 +5,7 @@ import {CommonModule} from '@angular/common';
   selector: 'app-loading-skeleton',
   standalone: true,
   imports: [CommonModule],
-  template: 'loading-skeleton.component.html',
+  templateUrl: 'loading-skeleton.component.html',
   styleUrl: 'loading-skeleton.component.css',
 })
 export class LoadingSkeletonComponent {

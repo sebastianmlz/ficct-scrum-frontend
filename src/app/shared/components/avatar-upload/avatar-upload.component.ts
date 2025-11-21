@@ -7,7 +7,7 @@ import {FileUploadEvent}
   selector: 'app-avatar-upload',
   standalone: true,
   imports: [CommonModule],
-  template: 'avatar-upload.component.html',
+  templateUrl: 'avatar-upload.component.html',
 })
 export class AvatarUploadComponent {
   @Input() currentAvatarUrl?: string;

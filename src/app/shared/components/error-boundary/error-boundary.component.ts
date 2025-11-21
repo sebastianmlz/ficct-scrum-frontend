@@ -5,7 +5,7 @@ import {CommonModule} from '@angular/common';
   selector: 'app-error-boundary',
   standalone: true,
   imports: [CommonModule],
-  template: 'error-boundary.component.html',
+  templateUrl: 'error-boundary.component.html',
   styleUrl: 'error-boundary.component.css',
 })
 export class ErrorBoundaryComponent {
