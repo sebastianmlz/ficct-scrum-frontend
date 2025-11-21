@@ -77,7 +77,7 @@ export interface SearchResult {
   issue_id: string; // Direct issue_id for easier access
   title: string;
   key?: string; // Issue key (e.g., PROJ-123)
-  score: number; // Similarity score (0-1)
+  similarity_score: number; // Similarity score (0-1)
   metadata: IssueMetadata; // Complete sanitized metadata
 }
 

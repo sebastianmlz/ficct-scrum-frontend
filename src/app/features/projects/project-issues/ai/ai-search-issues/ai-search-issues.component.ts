@@ -106,6 +106,7 @@ export class AiSearchIssuesComponent {
   }
 
   getScorePercentage(score: number): number {
+    console.log('Calculating score percentage for score:', score);
     return Math.round(score * 100);
   }
 
