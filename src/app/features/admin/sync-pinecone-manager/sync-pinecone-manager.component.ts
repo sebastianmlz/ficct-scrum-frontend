@@ -1,6 +1,7 @@
 import {Component, signal, inject, OnDestroy} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {AiService, SyncAllResponse, SyncError} from '../../../core/services/ai.service';
+import {AiService, SyncAllResponse, SyncError}
+  from '../../../core/services/ai.service';
 import {interval, Subject, takeUntil} from 'rxjs';
 
 @Component({
@@ -88,25 +89,34 @@ export class SyncPineconeManagerComponent implements OnDestroy {
         if (result.status === 'success' && result.success_rate === 100) {
           console.log('[SYNC MANAGER] 🎉 Perfect sync! 100% success rate');
         } else if (result.status === 'partial' || result.success_rate < 100) {
-          console.warn('[SYNC MANAGER] ⚠️ Partial sync:', result.success_rate + '%');
-          console.warn('[SYNC MANAGER] Failed:', result.failed, 'Errors:', result.total_errors);
+          console.warn(
+              '[SYNC MANAGER] ⚠️ Partial sync:', result.success_rate + '%');
+          console.warn(
+              '[SYNC MANAGER] Failed:', result.failed, 'Errors:',
+              result.total_errors);
         }
       }
     } catch (err: any) {
       const elapsed = this.elapsedSeconds();
-      console.error('[SYNC MANAGER] ❌ Sync failed after', elapsed, 'seconds:', err);
+      console.error('[SYNC MANAGER] ❌ Sync failed after',
+          elapsed, 'seconds:', err);
 
       let errorMessage = 'Failed to sync Pinecone. Please try again.';
 
       if (err.name === 'TimeoutError' || err.status === 408) {
-        errorMessage = 'Sync operation took longer than 10 minutes. Check backend logs for status.';
-        console.error('[SYNC MANAGER] ⏱️ TIMEOUT - Operation exceeded 600 seconds');
+        errorMessage = 'Sync operation took longer than 10 minutes. ' +
+        'Check backend logs for status.';
+        console.error(
+            '[SYNC MANAGER] ⏱️ TIMEOUT - Operation exceeded 600 seconds');
       } else if (err.status === 401 || err.status === 403) {
-        errorMessage = 'You do not have permission to sync Pinecone. Admin access required.';
+        errorMessage = 'You do not have permission to sync Pinecone.' +
+        ' Admin access required.';
       } else if (err.status === 500) {
-        errorMessage = 'Backend error occurred. Please check server logs and try again later.';
+        errorMessage = 'Backend error occurred. Please check server ' +
+        'logs and try again later.';
       } else if (err.status === 0) {
-        errorMessage = 'Network connection lost. Please check your connection and try again.';
+        errorMessage = 'Network connection lost. Please check your ' +
+        'connection and try again.';
       } else if (err.error?.detail) {
         errorMessage = err.error.detail;
       }
@@ -138,9 +148,12 @@ export class SyncPineconeManagerComponent implements OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           if (this.syncing()) {
-            this.currentMessageIndex = (this.currentMessageIndex + 1) % this.loadingMessages.length;
-            this.loadingMessage.set(this.loadingMessages[this.currentMessageIndex]);
-            console.log('[SYNC MANAGER] 🔄 Loading message updated:', this.loadingMessages[this.currentMessageIndex]);
+            this.currentMessageIndex =
+            (this.currentMessageIndex + 1) % this.loadingMessages.length;
+            this.loadingMessage.set(
+                this.loadingMessages[this.currentMessageIndex]);
+            console.log('[SYNC MANAGER] 🔄 Loading message updated:',
+                this.loadingMessages[this.currentMessageIndex]);
           }
         });
   }
@@ -152,7 +165,8 @@ export class SyncPineconeManagerComponent implements OnDestroy {
     const seconds = this.elapsedSeconds();
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString()
+        .padStart(2, '0')}`;
   }
 
   /**

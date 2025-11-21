@@ -1,6 +1,7 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AuthStore} from '../../../core/store/auth.store';
 import {PasswordResetConfirmRequest} from '../../../core/models/interfaces';
@@ -53,7 +54,8 @@ export class ResetPasswordComponent {
     const password = form.get('new_password');
     const confirmPassword = form.get('new_password_confirm');
 
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
+    if (password && confirmPassword &&
+      password.value !== confirmPassword.value) {
       return {passwordMismatch: true};
     }
     return null;
@@ -66,11 +68,11 @@ export class ResetPasswordComponent {
     }
 
     // Evitar duplicidad de token en el payload
-    const {new_password, new_password_confirm} = this.resetPasswordForm.value;
+    const {newPassword, newPasswordConfirm} = this.resetPasswordForm.value;
     const request: PasswordResetConfirmRequest = {
       token: this.token!,
-      new_password,
-      new_password_confirm,
+      new_password: newPassword,
+      new_password_confirm: newPasswordConfirm,
     };
 
     console.log('[ResetPassword] Payload enviado:', request);
@@ -82,7 +84,9 @@ export class ResetPasswordComponent {
       // Log completo del error
       console.error('[ResetPassword] Password reset failed:', error);
       // Detectar error de token inválido
-      if (error?.error?.token && Array.isArray(error.error.token) && error.error.token.includes('Invalid token')) {
+      if (error?.error?.token &&
+        Array.isArray(error.error.token) &&
+        error.error.token.includes('Invalid token')) {
         this.invalidToken = true;
       }
     }

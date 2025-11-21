@@ -147,7 +147,7 @@ export class OrganizationService {
       return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, jsonData, {
         headers: {'Content-Type': 'application/json'},
       }).pipe(
-        catchError(this.handleError),
+          catchError(this.handleError),
       );
     }
 
@@ -181,7 +181,7 @@ export class OrganizationService {
       formData.append('is_active', organizationData.is_active.toString());
     }
     return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, formData).pipe(
-      catchError(this.handleError),
+        catchError(this.handleError),
     );
   }
 

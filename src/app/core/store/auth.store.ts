@@ -37,7 +37,8 @@ export class AuthStore {
   });
 
   // Computed signals
-  isLoggedIn = computed(() => this.state().isAuthenticated && !!this.state().accessToken);
+  isLoggedIn = computed(() => this.state().isAuthenticated &&
+  !!this.state().accessToken);
   currentUser = computed(() => this.state().user);
   isLoading = computed(() => this.state().loading);
   accessToken = computed(() => this.state().accessToken);
@@ -54,7 +55,8 @@ export class AuthStore {
   }
 
   // Public method to sync login state from external login
-  public syncLoginState(user: User, accessToken: string, refreshToken: string): void {
+  public syncLoginState(user: User, accessToken: string,
+      refreshToken: string): void {
     this.updateState({
       user,
       isAuthenticated: true,
@@ -68,7 +70,8 @@ export class AuthStore {
     this.updateState({loading: true, error: null});
 
     try {
-      const response: LoginResponse = await firstValueFrom(this.authService.login(credentials));
+      const response: LoginResponse =
+        await firstValueFrom(this.authService.login(credentials));
 
       // Store tokens immediately in localStorage and state
       localStorage.setItem('access', response.access);
@@ -105,7 +108,8 @@ export class AuthStore {
     this.updateState({loading: true, error: null});
 
     try {
-      const user: User = await firstValueFrom(this.authService.register(userData));
+      const user: User =
+        await firstValueFrom(this.authService.register(userData));
 
       this.updateState({
         user,
@@ -158,7 +162,8 @@ export class AuthStore {
     this.updateState({loading: true, error: null});
 
     try {
-      const user: User = await firstValueFrom(this.authService.getCurrentUserFromAPI());
+      const user: User =
+        await firstValueFrom(this.authService.getCurrentUserFromAPI());
 
       this.updateState({
         user,
@@ -183,7 +188,8 @@ export class AuthStore {
     }
   }
 
-  async requestPasswordReset(request: PasswordResetRequestRequest): Promise<void> {
+  async requestPasswordReset(request: PasswordResetRequestRequest)
+  : Promise<void> {
     this.updateState({loading: true, error: null});
 
     try {
@@ -198,7 +204,8 @@ export class AuthStore {
     }
   }
 
-  async confirmPasswordReset(request: PasswordResetConfirmRequest): Promise<void> {
+  async confirmPasswordReset(request: PasswordResetConfirmRequest)
+  : Promise<void> {
     this.updateState({loading: true, error: null});
 
     try {
@@ -219,7 +226,8 @@ export class AuthStore {
     this.updateState({loading: true});
 
     try {
-      const profile: UserProfile = await firstValueFrom(this.authService.getProfile());
+      const profile: UserProfile =
+        await firstValueFrom(this.authService.getProfile());
       this.updateState({loading: false});
       return profile;
     } catch (error: any) {
@@ -237,7 +245,8 @@ export class AuthStore {
     this.updateState({loading: true});
 
     try {
-      const profile: UserProfile = await firstValueFrom(this.authService.uploadAvatar(avatarFile));
+      const profile: UserProfile =
+        await firstValueFrom(this.authService.uploadAvatar(avatarFile));
 
       // Update user profile in store
       const currentUser = this.state().user;
@@ -282,7 +291,8 @@ export class AuthStore {
     if (!this.state().isAuthenticated) return null;
     this.updateState({loading: true, error: null});
     try {
-      const updatedUser: User = await firstValueFrom(this.authService.updateProfile(userId, profileData));
+      const updatedUser: User =
+      await firstValueFrom(this.authService.updateProfile(userId, profileData));
       localStorage.setItem('user', JSON.stringify(updatedUser));
       this.updateState({
         user: updatedUser,
@@ -345,7 +355,7 @@ export class AuthStore {
       try {
         await this.getCurrentUser();
       } catch (error) {
-        console.error('Token verification failed during initialization:', error);
+       console.error('Token verification failed during initialization:', error);
         // Don't logout immediately, let the user continue with cached data
       }
       */
@@ -403,11 +413,13 @@ export class AuthStore {
 
     // Token is expired, try to refresh
     try {
-      const response = await firstValueFrom(this.authService.refreshToken(refreshToken));
+      const response =
+      await firstValueFrom(this.authService.refreshToken(refreshToken));
       this.updateTokens(response.access, response.refresh);
       return response.access;
     } catch (error) {
       // Refresh failed, logout
+      console.log(error);
       await this.logout();
       return null;
     }

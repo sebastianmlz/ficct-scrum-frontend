@@ -1,6 +1,7 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {AuthStore} from '../../../core/store/auth.store';
 import {UserRegistrationRequest} from '../../../core/models/interfaces';
@@ -57,7 +58,8 @@ export class RegisterComponent {
     const password = form.get('password');
     const confirmPassword = form.get('password_confirm');
 
-    if (password && confirmPassword && password.value !== confirmPassword.value) {
+    if (password && confirmPassword &&
+      password.value !== confirmPassword.value) {
       return {passwordMismatch: true};
     }
     return null;

@@ -1,4 +1,5 @@
-import {Component, Input, Output, EventEmitter, inject, OnChanges} from '@angular/core';
+import {Component, Input, Output, EventEmitter, inject, OnChanges}
+  from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
 import {BoardService} from '../../../../core/services/board.service';
@@ -47,7 +48,8 @@ export class BoardEditComponent implements OnChanges {
       board_type: this.editForm.value.board_type,
     };
     try {
-      const result = await this.boardService.updateBoard(this.board.id, updated).toPromise();
+      const result =
+      await this.boardService.updateBoard(this.board.id, updated).toPromise();
       this.boardUpdated.emit(result);
       this.closed.emit();
     } catch (error: any) {

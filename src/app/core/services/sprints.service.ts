@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
@@ -13,9 +13,10 @@ import {PaginationParams} from '../models/interfaces';
 export class SprintsService {
   private baseUrl = `${environment.apiUrl}/api/v1/projects/sprints`;
 
-  constructor(private http: HttpClient) { }
+  private http = inject(HttpClient);
 
-  getSprints(projectId: string, params?: PaginationParams): Observable<PaginatedSprintList> {
+  getSprints(projectId: string, params?: PaginationParams)
+  : Observable<PaginatedSprintList> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     let query = `?project=${projectId}`;
@@ -25,7 +26,8 @@ export class SprintsService {
       if (params.search) query += `&search=${params.search}`;
       if (params.status) query += `&status=${params.status}`;
     }
-    return this.http.get<PaginatedSprintList>(`${this.baseUrl}/${query}`, {headers});
+    return this.http.get<PaginatedSprintList>(`${
+      this.baseUrl}/${query}`, {headers});
   }
 
   createSprints(sprintData: SprintRequest): Observable<Sprint> {
@@ -43,7 +45,8 @@ export class SprintsService {
   editSprint(sprintId: string, sprintData: SprintRequest): Observable<Sprint> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.patch<Sprint>(`${this.baseUrl}/${sprintId}/`, sprintData, {headers});
+    return this.http.patch<Sprint>(`${
+      this.baseUrl}/${sprintId}/`, sprintData, {headers});
   }
 
   deleteSprint(sprintId: string): Observable<Sprint> {
@@ -55,25 +58,29 @@ export class SprintsService {
   getSprintBurdown(sprintId: string): Observable<any> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any>(`${this.baseUrl}/${sprintId}/burndown/`, {headers});
+    return this.http.get<any>(`${
+      this.baseUrl}/${sprintId}/burndown/`, {headers});
   }
 
   starSprint(sprintId: string): Observable<Sprint> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/start/`, {}, {headers});
+    return this.http.post<Sprint>(`${
+      this.baseUrl}/${sprintId}/start/`, {}, {headers});
   }
 
   getSprintProgress(sprintId: string): Observable<any> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any>(`${this.baseUrl}/${sprintId}/progress/`, {headers});
+    return this.http.get<any>(`${
+      this.baseUrl}/${sprintId}/progress/`, {headers});
   }
 
   completeSprint(sprintId: string): Observable<Sprint> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<Sprint>(`${this.baseUrl}/${sprintId}/complete/`, {}, {headers});
+    return this.http.post<Sprint>(`${
+      this.baseUrl}/${sprintId}/complete/`, {}, {headers});
   }
 
   /**
@@ -83,7 +90,8 @@ export class SprintsService {
   addIssueToSprint(sprintId: string, issueId: string): Observable<any> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post(`${this.baseUrl}/${sprintId}/issues/`, {issue_id: issueId}, {headers});
+    return this.http.post(`${
+      this.baseUrl}/${sprintId}/issues/`, {issue_id: issueId}, {headers});
   }
 
   /**
@@ -93,7 +101,8 @@ export class SprintsService {
   removeIssueFromSprint(sprintId: string, issueId: string): Observable<any> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete(`${this.baseUrl}/${sprintId}/issues/${issueId}/`, {headers});
+    return this.http.delete(`${
+      this.baseUrl}/${sprintId}/issues/${issueId}/`, {headers});
   }
 
   /**

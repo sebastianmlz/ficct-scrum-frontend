@@ -1,7 +1,9 @@
-import {Component, Input, Output, EventEmitter, signal, computed, OnInit, inject, OnDestroy} from '@angular/core';
+import {Component, Input, Output, EventEmitter, signal, computed, OnInit,
+  OnDestroy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {getAllPriorities, getPriorityLabel, getPriorityBgColor, getPriorityTextColor, PriorityConfig} from '../../../../shared/utils/priority.utils';
+import {getAllPriorities, getPriorityLabel, getPriorityBgColor,
+  getPriorityTextColor} from '../../../../shared/utils/priority.utils';
 
 export interface BoardFilters {
   search: string;
@@ -74,7 +76,8 @@ export class BoardFilterToolbarComponent implements OnInit, OnDestroy {
 
   activeFiltersCount = computed(() => {
     const f = this.filters();
-    return f.priorities.length + f.assignees.length + f.issueTypes.length + f.statuses.length;
+    return f.priorities.length + f.assignees.length +
+    f.issueTypes.length + f.statuses.length;
   });
 
   // Filtered options
@@ -111,7 +114,8 @@ export class BoardFilterToolbarComponent implements OnInit, OnDestroy {
 
     // Assignee badges
     f.assignees.forEach((id) => {
-      const member = this.availableMembers.find((m) => m.user?.id === id || m.user?.user_uuid === id);
+      const member = this.availableMembers.find((m) =>
+        m.user?.id === id || m.user?.user_uuid === id);
       if (member) {
         badges.push({
           type: 'assignee',
@@ -245,10 +249,12 @@ export class BoardFilterToolbarComponent implements OnInit, OnDestroy {
         case 'search':
           return {...f, search: ''};
         case 'priority':
-          return {...f, priorities: value ? f.priorities.filter((p) => getPriorityLabel(p) !== value) : []};
+          return {...f, priorities: value ? f.priorities.filter((p) =>
+            getPriorityLabel(p) !== value) : []};
         case 'assignee':
           return {...f, assignees: value ? f.assignees.filter((a) => {
-            const member = this.availableMembers.find((m) => m.user?.id === a || m.user?.user_uuid === a);
+            const member = this.availableMembers.find((m) =>
+              m.user?.id === a || m.user?.user_uuid === a);
             return member?.user?.full_name !== value;
           }) : []};
         case 'type':

@@ -1,6 +1,7 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {ReactiveFormsModule, FormBuilder, FormGroup, Validators}
+  from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {AuthStore} from '../../../core/store/auth.store';
 import {PasswordResetRequestRequest} from '../../../core/models/interfaces';

@@ -2,8 +2,8 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ReactiveFormsModule, FormBuilder, FormGroup} from '@angular/forms';
 import {RouterLink} from '@angular/router';
-import {SystemLog, PaginatedSystemLogList, SystemLogQueryParams} from '../../../core/models/interfaces';
-import {LevelEnum} from '../../../core/models/enums';
+import {SystemLog, PaginatedSystemLogList, SystemLogQueryParams}
+  from '../../../core/models/interfaces';
 import {LoggingService} from '../../../core/services/logging.service';
 
 @Component({
@@ -141,21 +141,26 @@ export class LogsComponent implements OnInit {
     if (log.user_agent) {
       return log.user_agent;
     }
-    if (log.metadata && typeof log.metadata === 'object' && 'user_agent' in log.metadata) {
+    if (log.metadata && typeof log.metadata === 'object' &&
+      'user_agent' in log.metadata) {
       return (log.metadata as any).user_agent;
     }
     return '';
   }
 
   hasUserAgent(log: SystemLog): boolean {
-    return !!(log.user_agent || (log.metadata && typeof log.metadata === 'object' && 'user_agent' in log.metadata));
+    return !!(log.user_agent || (log.metadata &&
+      typeof log.metadata === 'object' && 'user_agent' in log.metadata));
   }
 
   hasRequestData(log: SystemLog): boolean {
-    return !!(log.request_data && typeof log.request_data === 'object' && Object.keys(log.request_data).length > 0);
+    return !!(log.request_data &&
+      typeof log.request_data === 'object' &&
+      Object.keys(log.request_data).length > 0);
   }
 
   hasMetadata(log: SystemLog): boolean {
-    return !!(log.metadata && typeof log.metadata === 'object' && Object.keys(log.metadata).length > 0);
+    return !!(log.metadata && typeof log.metadata === 'object' &&
+      Object.keys(log.metadata).length > 0);
   }
 }

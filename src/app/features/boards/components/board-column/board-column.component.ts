@@ -17,17 +17,21 @@ export class BoardColumnComponent {
   @Input() connectedDropLists: string[] = [];
   @Input() projectId!: string;
 
-  @Output() issueDropped = new EventEmitter<{ issueId: string; targetColumnId: string; targetStatusId: string }>();
+  @Output() issueDropped = new EventEmitter<{ issueId: string;
+    targetColumnId: string; targetStatusId: string }>();
   @Output() createIssueClicked = new EventEmitter<string>();
   @Output() issueClicked = new EventEmitter<Issue>();
-  @Output() assigneeChanged = new EventEmitter<{ issueId: string; assigneeId: string | null }>();
+  @Output() assigneeChanged = new EventEmitter<{ issueId: string;
+    assigneeId: string | null }>();
 
   drop(event: CdkDragDrop<Issue[]>): void {
     console.log('[COLUMN DROP] === DROP EVENT EN COLUMNA ===');
     console.log('[COLUMN DROP] Column:', this.column.workflow_status.name);
-    console.log('[COLUMN DROP] Previous container:', event.previousContainer.id);
+    console.log('[COLUMN DROP] Previous container:',
+        event.previousContainer.id);
     console.log('[COLUMN DROP] Current container:', event.container.id);
-    console.log('[COLUMN DROP] Same container?:', event.previousContainer === event.container);
+    console.log('[COLUMN DROP] Same container?:',
+        event.previousContainer === event.container);
     console.log('[COLUMN DROP] Previous index:', event.previousIndex);
     console.log('[COLUMN DROP] Current index:', event.currentIndex);
 
@@ -39,9 +43,12 @@ export class BoardColumnComponent {
     } else {
       // Movimiento entre columnas
       const issue = event.previousContainer.data[event.previousIndex];
-      console.log('[COLUMN DROP] Moviendo issue entre columnas:', issue.id, issue.title);
-      console.log('[COLUMN DROP] From:', event.previousContainer.id, 'To:', event.container.id);
-      console.log('[COLUMN DROP] Target column workflow_status:', this.column.workflow_status);
+      console.log('[COLUMN DROP] Moviendo issue entre columnas:',
+          issue.id, issue.title);
+      console.log('[COLUMN DROP] From:', event.previousContainer.id, 'To:',
+          event.container.id);
+      console.log('[COLUMN DROP] Target column workflow_status:',
+          this.column.workflow_status);
 
       // ✅ SOLO EMITIR EVENTO - NO modificar arrays directamente
       // El board-detail se encargará de actualizar el signal inmutablemente
@@ -52,7 +59,8 @@ export class BoardColumnComponent {
         previousStatusId: event.previousContainer.id,
       };
       console.log('[COLUMN DROP] Emitiendo issueDropped event:', dropEvent);
-      console.log('[COLUMN DROP] Board-detail actualizará el signal inmutablemente');
+      console.log(
+          '[COLUMN DROP] Board-detail actualizará el signal inmutablemente');
       this.issueDropped.emit(dropEvent);
 
       // ❌ NO USAR transferArrayItem - causa que signal no detecte cambios
@@ -69,7 +77,8 @@ export class BoardColumnComponent {
     this.issueClicked.emit(issue);
   }
 
-  onAssigneeChanged(event: { issueId: string; assigneeId: string | null }): void {
+  onAssigneeChanged(event: { issueId: string;
+    assigneeId: string | null }): void {
     this.assigneeChanged.emit(event);
   }
 

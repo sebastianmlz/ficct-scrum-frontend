@@ -52,7 +52,8 @@ export class LoginComponent {
     this.loading = true;
     this.error = '';
 
-    this.authService.login({email: this.email, password: this.password}).subscribe({
+    this.authService.login({email: this.email,
+      password: this.password}).subscribe({
       next: (response) => {
         // Store tokens and user info in localStorage
         localStorage.setItem('access', response.access);
@@ -67,7 +68,8 @@ export class LoginComponent {
         }
 
         // Sync AuthStore state with the login response
-        this.authStore.syncLoginState(response.user, response.access, response.refresh);
+        this.authStore
+            .syncLoginState(response.user, response.access, response.refresh);
 
         // Redirect based on user role
         if (response.user.is_superuser) {

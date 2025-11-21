@@ -23,7 +23,8 @@ export class WorkspacesService {
   // ==================== WORKSPACE CRUD ====================
 
   getWorkspaces(params?: ApiQueryParams): Observable<PaginatedWorkspaceList> {
-    console.log('[WORKSPACE-SERVICE] 🔵 getWorkspaces() called with params:', params);
+    console.log('[WORKSPACE-SERVICE] 🔵 getWorkspaces() called with params:',
+        params);
 
     let httpParams = new HttpParams();
     if (params) {
@@ -39,7 +40,8 @@ export class WorkspacesService {
     console.log('[WORKSPACE-SERVICE] 🌐 HTTP GET URL:', url);
     console.log('[WORKSPACE-SERVICE] 📋 HTTP Params:', httpParams.toString());
 
-    return this.http.get<PaginatedWorkspaceList>(url, {params: httpParams}).pipe(
+    return this.http.get<PaginatedWorkspaceList>(url,
+        {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
@@ -52,13 +54,15 @@ export class WorkspacesService {
     );
   }
 
-  createWorkspace(workspace: WorkspaceRequest | FormData): Observable<Workspace> {
+  createWorkspace(workspace: WorkspaceRequest | FormData)
+  : Observable<Workspace> {
     return this.http.post<Workspace>(`${this.baseUrl}/`, workspace).pipe(
         catchError(this.handleError),
     );
   }
 
-  updateWorkspace(id: string, workspace: Partial<WorkspaceRequest> | FormData): Observable<Workspace> {
+  updateWorkspace(id: string, workspace: Partial<WorkspaceRequest> | FormData)
+  : Observable<Workspace> {
     return this.http.patch<Workspace>(`${this.baseUrl}/${id}/`, workspace).pipe(
         catchError(this.handleError),
     );
@@ -74,14 +78,16 @@ export class WorkspacesService {
     const formData = new FormData();
     formData.append('cover_image', file);
 
-    return this.http.post<Workspace>(`${this.baseUrl}/${id}/upload-cover/`, formData).pipe(
+    return this.http.post<Workspace>(`${this.baseUrl}/${id}/upload-cover/`,
+        formData).pipe(
         catchError(this.handleError),
     );
   }
 
   // ==================== WORKSPACE MEMBERS ====================
 
-  getWorkspaceMembers(workspaceId: string, params?: ApiQueryParams): Observable<PaginatedWorkspaceMemberList> {
+  getWorkspaceMembers(workspaceId: string, params?: ApiQueryParams)
+  : Observable<PaginatedWorkspaceMemberList> {
     let httpParams = new HttpParams();
 
     if (workspaceId) {
@@ -97,26 +103,31 @@ export class WorkspacesService {
       });
     }
 
-    return this.http.get<PaginatedWorkspaceMemberList>(`${this.baseUrl}/members/`, {params: httpParams}).pipe(
+    return this.http.get<PaginatedWorkspaceMemberList>(`${
+      this.baseUrl}/members/`, {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
   getWorkspaceMember(memberId: string): Observable<WorkspaceMember> {
-    return this.http.get<WorkspaceMember>(`${this.baseUrl}/members/${memberId}/`).pipe(
+    return this.http.get<WorkspaceMember>(`${
+      this.baseUrl}/members/${memberId}/`).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
-  addWorkspaceMember(data: WorkspaceMemberRequest): Observable<WorkspaceMember> {
-    return this.http.post<WorkspaceMember>(`${this.baseUrl}/members/`, data).pipe(
+  addWorkspaceMember(data: WorkspaceMemberRequest)
+  : Observable<WorkspaceMember> {
+    return this.http.post<WorkspaceMember>(`${
+      this.baseUrl}/members/`, data).pipe(
         catchError(this.handleError),
     );
   }
 
-  updateWorkspaceMemberRole(memberId: string, role: string): Observable<WorkspaceMember> {
+  updateWorkspaceMemberRole(memberId: string, role: string)
+  : Observable<WorkspaceMember> {
     return this.http.patch<WorkspaceMember>(
         `${this.baseUrl}/members/${memberId}/update-role/`,
         {role},

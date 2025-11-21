@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject, timer, EMPTY, Subscription} from 'rxjs';
+import {Subject, timer, EMPTY, Subscription} from 'rxjs';
 import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
 import {retryWhen, tap, delayWhen, catchError} from 'rxjs/operators';
 
@@ -57,7 +57,8 @@ export class WebSocketService {
                       console.error('[WS] Max reconnection attempts reached');
                       return EMPTY;
                     }
-                    const delay = Math.min(30000, 1000 * Math.pow(2, this.reconnectAttempts));
+                    const delay = Math.min(30000, 1000 * Math
+                        .pow(2, this.reconnectAttempts));
                     console.log(`[WS] Reconnecting in ${delay}ms...`);
                     return timer(delay);
                   }),

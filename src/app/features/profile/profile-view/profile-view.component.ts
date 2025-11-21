@@ -45,6 +45,7 @@ export class ProfileViewComponent implements OnInit {
   }
 
   getInitials(fullName: string): string {
-    return fullName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+    return fullName.split(' ').map((n) => n[0]).join('')
+        .toUpperCase().slice(0, 2);
   }
 }

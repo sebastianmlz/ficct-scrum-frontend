@@ -1,5 +1,6 @@
 import {Injectable, inject} from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpParams}
+  from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
 import {catchError, retry} from 'rxjs/operators';
 import {
@@ -28,7 +29,8 @@ export class ProjectsService {
       });
     }
 
-    return this.http.get<PaginatedProjectList>(`${this.baseUrl}/projects/`, {params: httpParams}).pipe(
+    return this.http.get<PaginatedProjectList>(`${
+      this.baseUrl}/projects/`, {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
@@ -48,7 +50,8 @@ export class ProjectsService {
   }
 
   updateProject(id: string, project: Partial<Project>): Observable<Project> {
-    return this.http.patch<Project>(`${this.baseUrl}/projects/${id}/`, project).pipe(
+    return this.http.patch<Project>(`${
+      this.baseUrl}/projects/${id}/`, project).pipe(
         catchError(this.handleError),
     );
   }
@@ -84,17 +87,20 @@ export class ProjectsService {
           errorMessage = 'Server error. Please try again later.';
           break;
         default:
-          errorMessage = `Error ${error.status}: ${error.error?.message || error.message}`;
+          errorMessage = `Error ${
+            error.status}: ${error.error?.message || error.message}`;
       }
     }
 
     return throwError(() => new Error(errorMessage));
   }
 
-  createProjectConfig(config: ProjectConfigRequest): Observable<ProjectConfigRequest> {
+  createProjectConfig(config: ProjectConfigRequest)
+  : Observable<ProjectConfigRequest> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<ProjectConfigRequest>(`${this.baseUrl}/configs/`, config, {headers}).pipe(
+    return this.http.post<ProjectConfigRequest>(`${
+      this.baseUrl}/configs/`, config, {headers}).pipe(
         catchError(this.handleError),
     );
   }
@@ -102,13 +108,16 @@ export class ProjectsService {
   getProjectConfig(): Observable<ProjectConfigRequest> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<ProjectConfigRequest>(`${this.baseUrl}/projects/configs/`, {headers}).pipe(
+    return this.http.get<ProjectConfigRequest>(`${
+      this.baseUrl}/projects/configs/`, {headers}).pipe(
         catchError(this.handleError),
     );
   }
 
-  editProjectConfig(id: string, config: Partial<ProjectConfigRequest>): Observable<ProjectConfigRequest> {
-    return this.http.patch<ProjectConfigRequest>(`${this.baseUrl}/projects/configs/${id}/`, config).pipe(
+  editProjectConfig(id: string, config: Partial<ProjectConfigRequest>)
+  : Observable<ProjectConfigRequest> {
+    return this.http.patch<ProjectConfigRequest>(`${
+      this.baseUrl}/projects/configs/${id}/`, config).pipe(
         catchError(this.handleError),
     );
   }
