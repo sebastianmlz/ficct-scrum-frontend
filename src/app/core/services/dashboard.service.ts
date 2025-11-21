@@ -21,7 +21,8 @@ export class DashboardService {
    */
   getSprintReport(sprintId: string): Observable<SprintReport> {
     const params = new HttpParams().set('sprint', sprintId);
-    return this.http.get<SprintReport>(`${this.baseUrl}/sprint-report/`, {params});
+    return this.http.get<SprintReport>(`${
+      this.baseUrl}/sprint-report/`, {params});
   }
 
   /**
@@ -29,12 +30,14 @@ export class DashboardService {
    * @param projectId UUID del proyecto
    * @param period Periodo en días (opcional)
    */
-  getTeamMetrics(projectId: string, period?: number): Observable<TeamMetricsResponse> {
+  getTeamMetrics(projectId: string, period?: number)
+  : Observable<TeamMetricsResponse> {
     let params = new HttpParams().set('project', projectId);
     if (period) {
       params = params.set('period', period.toString());
     }
-    return this.http.get<TeamMetricsResponse>(`${this.baseUrl}/team-metrics/`, {params});
+    return this.http.get<TeamMetricsResponse>(`${
+      this.baseUrl}/team-metrics/`, {params});
   }
 
   /**
@@ -42,12 +45,14 @@ export class DashboardService {
    * @param projectId UUID del proyecto
    * @param numSprints Número de sprints a incluir (opcional)
    */
-  getVelocityChart(projectId: string, numSprints?: number): Observable<VelocityChartResponse> {
+  getVelocityChart(projectId: string, numSprints?: number)
+  : Observable<VelocityChartResponse> {
     let params = new HttpParams().set('project', projectId);
     if (numSprints) {
       params = params.set('num_sprints', numSprints.toString());
     }
-    return this.http.get<VelocityChartResponse>(`${this.baseUrl}/velocity/`, {params});
+    return this.http.get<VelocityChartResponse>(`${
+      this.baseUrl}/velocity/`, {params});
   }
 
   /**
@@ -55,12 +60,14 @@ export class DashboardService {
    * @param projectId UUID del proyecto
    * @param days Número de días a incluir (opcional)
    */
-  getCumulativeFlow(projectId: string, days?: number): Observable<CumulativeFlowResponse> {
+  getCumulativeFlow(projectId: string, days?: number)
+  : Observable<CumulativeFlowResponse> {
     let params = new HttpParams().set('project', projectId);
     if (days) {
       params = params.set('days', days.toString());
     }
-    return this.http.get<CumulativeFlowResponse>(`${this.baseUrl}/cumulative-flow/`, {params});
+    return this.http.get<CumulativeFlowResponse>(`${
+      this.baseUrl}/cumulative-flow/`, {params});
   }
 
   /**
@@ -68,6 +75,7 @@ export class DashboardService {
    * @param exportData Datos de la exportación
    */
   exportData(exportData: ExportRequest): Observable<ExportResponse> {
-    return this.http.post<ExportResponse>(`${this.baseUrl}/export/`, exportData);
+    return this.http.post<ExportResponse>(`${
+      this.baseUrl}/export/`, exportData);
   }
 }

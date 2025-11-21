@@ -1,14 +1,17 @@
 import {Injectable, inject} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Observable, throwError, TimeoutError, of, Subject} from 'rxjs';
-import {timeout, catchError, map, throttleTime, switchMap} from 'rxjs/operators';
+import {timeout, catchError, map} from 'rxjs/operators';
 import {environment} from '../../../environments/environment';
 import {AiCacheService} from './ai-cache.service';
 
 // Timeout constants for different model types
-const TRADITIONAL_MODEL_TIMEOUT = 10000; // 10 seconds for gpt-4o, gpt-4-turbo
-const O_SERIES_MODEL_TIMEOUT = 45000; // 45 seconds for o4-mini, o1-preview (reasoning takes longer)
-const SYNC_ALL_TIMEOUT = 600000; // 10 minutes for full Pinecone sync-all operation
+// const TRADITIONAL_MODEL_TIMEOUT = 10000;
+// 10 seconds for gpt-4o, gpt-4-turbo
+const O_SERIES_MODEL_TIMEOUT = 45000;
+// 45 seconds for o4-mini, o1-preview (reasoning takes longer)
+const SYNC_ALL_TIMEOUT = 600000;
+// 10 minutes for full Pinecone sync-all operation
 
 // Interfaces para las respuestas de los endpoints AI
 export interface AIChatRequest {
@@ -184,7 +187,8 @@ export class AiService {
   readonly QUERY_TIMEOUT_MS = O_SERIES_MODEL_TIMEOUT;
 
   // Throttle subjects for rate limiting
-  private similarIssuesSubject = new Subject<{issueId: string, limit: number, sameProjectOnly: boolean}>();
+  private similarIssuesSubject = new Subject<{issueId: string, limit: number,
+    sameProjectOnly: boolean}>();
   private issueSummarySubject = new Subject<string>();
   private sprintSummarySubject = new Subject<string>();
 
@@ -223,18 +227,22 @@ export class AiService {
    * IMPORTANT: O-series models (o4-mini, o1-preview) use reasoning tokens
    * which take 10-30+ seconds to process. Timeout set to 45s.
    */
-  query(queryText: string, customTimeout?: number): Observable<AIQueryResponse> {
+  query(queryText: string, customTimeout?: number)
+  : Observable<AIQueryResponse> {
     const timeoutMs = customTimeout || O_SERIES_MODEL_TIMEOUT;
     const request: AIQueryRequest = {query: queryText};
 
-    return this.http.post<AIQueryResponse>(`${this.apiUrl}/query/`, request).pipe(
+    return this.http.post<AIQueryResponse>(`${
+      this.apiUrl}/query/`, request).pipe(
         timeout(timeoutMs),
         catchError((error) => {
           if (error instanceof TimeoutError || error.name === 'TimeoutError') {
             return throwError(() => ({
               name: 'TimeoutError',
               status: 408,
-              message: `Query took longer than ${timeoutMs / 1000} seconds. The AI model may be processing complex reasoning. Please try again or simplify your query.`,
+              message: `Query took longer than ${
+                timeoutMs / 1000} seconds. The AI model may be processing ` +
+                `complex reasoning. Please try again or simplify your query.`,
               error: {type: 'timeout', detail: 'Request timeout'},
             }));
           }
@@ -248,8 +256,10 @@ export class AiService {
    * POST /api/v1/ai/search-issues/
    * CACHED: Results cached for 1 hour
    */
-  searchIssues(request: SemanticSearchRequest): Observable<SemanticSearchResponse> {
-    const cacheKey = `search_${request.query}_${request.project_id || 'all'}_${request.top_k || 10}`;
+  searchIssues(request: SemanticSearchRequest)
+  : Observable<SemanticSearchResponse> {
+    const cacheKey = `search_${
+      request.query}_${request.project_id || 'all'}_${request.top_k || 10}`;
 
     // Check cache first
     const cached = this.cache.get<SemanticSearchResponse>(cacheKey);
@@ -259,7 +269,8 @@ export class AiService {
     }
 
     console.log(`[AI-SERVICE] 🌐 Searching issues: "${request.query}"`);
-    return this.http.post<SemanticSearchResponse>(`${this.apiUrl}/search-issues/`, request).pipe(
+    return this.http.post<SemanticSearchResponse>(`${
+      this.apiUrl}/search-issues/`, request).pipe(
         timeout(O_SERIES_MODEL_TIMEOUT),
         map((response) => {
         // Store in cache for 1 hour
@@ -276,18 +287,21 @@ export class AiService {
    * THROTTLED: Max 1 request per minute per issue
    * CACHED: Results cached for 1 hour
    */
-  findSimilar(issueId: string, limit = 5, sameProjectOnly = true): Observable<FindSimilarResponse> {
+  findSimilar(issueId: string, limit = 5, sameProjectOnly = true)
+  : Observable<FindSimilarResponse> {
     const cacheKey = `similar_${issueId}_${limit}_${sameProjectOnly}`;
 
     // Check cache first
     const cached = this.cache.get<FindSimilarResponse>(cacheKey);
     if (cached) {
-      console.log(`[AI-SERVICE] 🚀 Returning cached similar issues for ${issueId}`);
+      console.log(`[AI-SERVICE] 🚀 Returning cached similar issues for ${
+        issueId}`);
       return of(cached);
     }
 
     console.log(`[AI-SERVICE] 🌐 Fetching similar issues for ${issueId}`);
-    return this.http.get<FindSimilarResponse>(`${this.apiUrl}/${issueId}/similar-issues/`, {
+    return this.http.get<FindSimilarResponse>(`${
+      this.apiUrl}/${issueId}/similar-issues/`, {
       params: {
         top_k: limit.toString(),
         same_project_only: sameProjectOnly.toString(),
@@ -307,7 +321,8 @@ export class AiService {
    * THROTTLED: Max 1 request per minute per issue
    * CACHED: Invalidate when issue changes
    */
-  getIssueSummary(issueId: string, forceRefresh = false): Observable<IssueSummaryResponse> {
+  getIssueSummary(issueId: string, forceRefresh = false)
+  : Observable<IssueSummaryResponse> {
     const cacheKey = `summary_${issueId}`;
 
     // Check cache first (unless force refresh)
@@ -320,7 +335,8 @@ export class AiService {
     }
 
     console.log(`[AI-SERVICE] 🌐 Generating summary for ${issueId}`);
-    return this.http.post<IssueSummaryResponse>(`${this.apiUrl}/${issueId}/summarize-issue/`, {}).pipe(
+    return this.http.post<IssueSummaryResponse>(`${
+      this.apiUrl}/${issueId}/summarize-issue/`, {}).pipe(
         map((response) => {
         // Store in cache (no TTL - invalidate manually)
           this.cache.set(cacheKey, response, this.cache.TTL_NEVER);
@@ -341,7 +357,8 @@ export class AiService {
    * POST /api/v1/ai/suggest-solutions/
    */
   suggestSolutions(): Observable<{error: string}> {
-    return this.http.post<{error: string}>(`${this.apiUrl}/suggest-solutions/`, {});
+    return this.http.post<{error: string}>(`${
+      this.apiUrl}/suggest-solutions/`, {});
   }
 
   /**
@@ -349,20 +366,23 @@ export class AiService {
    * THROTTLED: Max 1 request per minute per sprint
    * CACHED: Results cached with no expiration (invalidate manually)
    */
-  getSprintSummary(sprintId: string, forceRefresh = false): Observable<SprintSummaryResponse> {
+  getSprintSummary(sprintId: string, forceRefresh = false)
+  : Observable<SprintSummaryResponse> {
     const cacheKey = `sprint_summary_${sprintId}`;
 
     // Check cache first (unless force refresh)
     if (!forceRefresh) {
       const cached = this.cache.get<SprintSummaryResponse>(cacheKey);
       if (cached) {
-        console.log(`[AI-SERVICE] 🚀 Returning cached sprint summary for ${sprintId}`);
+        console.log(`[AI-SERVICE] 🚀 Returning cached sprint summary for ${
+          sprintId}`);
         return of(cached);
       }
     }
 
     console.log(`[AI-SERVICE] 🌐 Generating sprint summary for ${sprintId}`);
-    return this.http.post<SprintSummaryResponse>(`${this.apiUrl}/${sprintId}/summarize-sprint/`, {}).pipe(
+    return this.http.post<SprintSummaryResponse>(`${
+      this.apiUrl}/${sprintId}/summarize-sprint/`, {}).pipe(
         map((response) => {
         // Store in cache (no TTL - invalidate manually)
           this.cache.set(cacheKey, response, this.cache.TTL_NEVER);
@@ -382,14 +402,16 @@ export class AiService {
    * Generate Project Report - AI-powered project metrics summary
    * NEW ENDPOINT: POST /api/v1/ml/{project_id}/project-summary/
    *
-   * Response: {completion, velocity, risk_score, project_id, generated_at, metrics_breakdown}
+   * Response: {completion, velocity, risk_score, project_id,
+   * generated_at, metrics_breakdown}
    * - completion: Percentage (0-100), NOT decimal (37.5 means 37.5%)
    * - velocity: Sprint velocity metric
    * - risk_score: Risk percentage (0-100)
    *
    * CACHING STRATEGY:
    * - TTL: 15 minutes (good balance between freshness and API cost reduction)
-   * - Invalidation: Manual via invalidateProjectCache() when issues/sprints change
+   * - Invalidation: Manual via invalidateProjectCache()
+   * when issues/sprints change
    * - Force Refresh: Bypass cache with forceRefresh=true
    *
    * TIMEOUT: 45 seconds (ML model may need reasoning time)
@@ -397,7 +419,8 @@ export class AiService {
    * @param request - Project report request with project_id
    * @param forceRefresh - If true, bypass cache and fetch fresh data
    */
-  generateProjectReport(request: ProjectReportRequest, forceRefresh = false): Observable<ProjectReportResponse> {
+  generateProjectReport(request: ProjectReportRequest, forceRefresh = false)
+  : Observable<ProjectReportResponse> {
     const cacheKey = `project_summary_${request.project_id}`;
     const mlUrl = `${environment.apiUrl}/api/v1/ml`;
 
@@ -406,7 +429,8 @@ export class AiService {
       const cached = this.cache.get<ProjectReportResponse>(cacheKey);
       if (cached) {
         const age = Date.now() - (new Date(cached.generated_at).getTime());
-        console.log(`[AI-SERVICE] 🚀 Returning cached project summary (age: ${Math.floor(age / 1000)}s)`);
+        console.log(`[AI-SERVICE] 🚀 Returning cached project summary (age: ${
+          Math.floor(age / 1000)}s)`);
         return of(cached);
       }
     } else {
@@ -415,7 +439,8 @@ export class AiService {
 
     console.log('[AI-SERVICE] 🤖 Generating project report');
     console.log('[AI-SERVICE] Project ID:', request.project_id);
-    console.log('[AI-SERVICE] Endpoint:', `${mlUrl}/${request.project_id}/project-summary/`);
+    console.log('[AI-SERVICE] Endpoint:', `${mlUrl}/${
+      request.project_id}/project-summary/`);
 
     return this.http.post<ProjectReportResponse>(
         `${mlUrl}/${request.project_id}/project-summary/`,
@@ -464,8 +489,10 @@ export class AiService {
   /**
    * Index Issue for Search - Manually index issue for semantic search
    */
-  indexIssue(issueId: string, forceReindex = false): Observable<{success: boolean; message: string}> {
-    return this.http.post<{success: boolean; message: string}>(`${this.apiUrl}/index-issue/`, {
+  indexIssue(issueId: string, forceReindex = false)
+  : Observable<{success: boolean; message: string}> {
+    return this.http.post<{success: boolean; message: string}>(`${
+      this.apiUrl}/index-issue/`, {
       issue_id: issueId,
       force_reindex: forceReindex,
     });
@@ -476,10 +503,12 @@ export class AiService {
    * POST /api/v1/ai/{project_id}/index-project/
    * Takes 5-15 seconds depending on project size
    */
-  indexProject(projectId: string, batchSize?: number): Observable<IndexProjectResponse> {
+  indexProject(projectId: string, batchSize?: number)
+  : Observable<IndexProjectResponse> {
     const payload = batchSize ? {batch_size: batchSize} : {};
 
-    return this.http.post<IndexProjectResponse>(`${this.apiUrl}/${projectId}/index-project/`, payload).pipe(
+    return this.http.post<IndexProjectResponse>(`${
+      this.apiUrl}/${projectId}/index-project/`, payload).pipe(
         timeout(O_SERIES_MODEL_TIMEOUT),
         catchError((error) => throwError(() => error)),
     );
@@ -494,7 +523,8 @@ export class AiService {
    */
   invalidateProjectCache(projectId: string): void {
     this.cache.invalidate(`project_summary_${projectId}`);
-    console.log(`[AI-SERVICE] 🗑️ Invalidated project summary cache for: ${projectId}`);
+    console.log(`[AI-SERVICE] 🗑️ Invalidated project summary cache for: ${
+      projectId}`);
   }
 
   /**
@@ -502,7 +532,8 @@ export class AiService {
    */
   invalidateIndexCache(projectId: string): void {
     this.cache.invalidate(`index_status_${projectId}`);
-    console.log(`[AI-SERVICE] 🗑️ Invalidated index status cache for: ${projectId}`);
+    console.log(`[AI-SERVICE] 🗑️ Invalidated index status cache for: ${
+      projectId}`);
   }
 
   /**
@@ -513,10 +544,12 @@ export class AiService {
    * WARNING: This operation takes 5-10 MINUTES
    * Timeout set to 10 minutes (600 seconds)
    *
-   * @param clearExisting - Whether to clear Pinecone before re-indexing (default: true)
+   * @param clearExisting
+   * - Whether to clear Pinecone before re-indexing (default: true)
    * @param batchSize - Optional batch size for indexing
    */
-  syncAllPinecone(clearExisting = true, batchSize?: number): Observable<SyncAllResponse> {
+  syncAllPinecone(clearExisting = true, batchSize?: number)
+  : Observable<SyncAllResponse> {
     const request: SyncAllRequest = {
       clear_existing: clearExisting,
     };
@@ -525,14 +558,17 @@ export class AiService {
       request.batch_size = batchSize;
     }
 
-    return this.http.post<SyncAllResponse>(`${this.apiUrl}/sync-all/`, request).pipe(
+    return this.http.post<SyncAllResponse>(`${
+      this.apiUrl}/sync-all/`, request).pipe(
         timeout(SYNC_ALL_TIMEOUT),
         catchError((error) => {
           if (error instanceof TimeoutError || error.name === 'TimeoutError') {
             return throwError(() => ({
               name: 'TimeoutError',
               status: 408,
-              message: `Sync operation took longer than ${SYNC_ALL_TIMEOUT / 1000} seconds. Check backend logs for status.`,
+              message: `Sync operation took longer than ${
+                SYNC_ALL_TIMEOUT / 1000
+              } seconds. Check backend logs for status.`,
               error: {type: 'timeout', detail: 'Sync timeout'},
             }));
           }

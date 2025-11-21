@@ -456,14 +456,15 @@ export interface PaginatedResponse<T> {
 }
 
 // Paginated Lists
-export interface PaginatedOrganizationList extends PaginatedResponse<Organization> { }
-export interface PaginatedWorkspaceList extends PaginatedResponse<Workspace> { }
-export interface PaginatedProjectList extends PaginatedResponse<Project> { }
-export interface PaginatedOrganizationMemberList extends PaginatedResponse<OrganizationMember> { }
-export interface PaginatedWorkspaceMemberList extends PaginatedResponse<WorkspaceMember> { }
-export interface PaginatedProjectMemberList extends PaginatedResponse<ProjectMember> { }
-export interface PaginatedSystemLogList extends PaginatedResponse<SystemLog> { }
-export interface PaginatedErrorLogList extends PaginatedResponse<ErrorLog> { }
+export type PaginatedOrganizationList = PaginatedResponse<Organization>
+export type PaginatedWorkspaceList = PaginatedResponse<Workspace>
+export type PaginatedProjectList = PaginatedResponse<Project>
+export type PaginatedOrganizationMemberList =
+PaginatedResponse<OrganizationMember>
+export type PaginatedWorkspaceMemberList = PaginatedResponse<WorkspaceMember>
+export type PaginatedProjectMemberList = PaginatedResponse<ProjectMember>
+export type PaginatedSystemLogList = PaginatedResponse<SystemLog>
+export type PaginatedErrorLogList = PaginatedResponse<ErrorLog>
 
 // --- Organization Invitation System ---
 export interface OrganizationInvitation {
@@ -492,7 +493,8 @@ export interface OrganizationInvitationResponse {
   invitation: OrganizationInvitation;
 }
 
-export interface PaginatedOrganizationInvitationList extends PaginatedResponse<OrganizationInvitation> { }
+export type PaginatedOrganizationInvitationList =
+PaginatedResponse<OrganizationInvitation>;
 // Alias for legacy ApiQueryParams used in some services
 export type ApiQueryParams = PaginationParams;
 
@@ -811,9 +813,9 @@ export interface ColumnDeletedData {
   };
 }
 
-export interface PaginatedBoardList extends PaginatedResponse<Board> { }
-export interface PaginatedIssueList extends PaginatedResponse<Issue> { }
-export interface PaginatedIssueTypeList extends PaginatedResponse<IssueType> { }
+export type PaginatedBoardList = PaginatedResponse<Board>
+export type PaginatedIssueList = PaginatedResponse<Issue>
+export type PaginatedIssueTypeList = PaginatedResponse<IssueType>
 
 // Issue Links Interfaces
 export interface IssueLink {
@@ -870,7 +872,7 @@ export interface IssueLinkRequest {
   link_type: IssueLinkTypeEnum;
 }
 
-export interface PaginatedIssueLinkList extends PaginatedResponse<IssueLink> { }
+export type PaginatedIssueLinkList = PaginatedResponse<IssueLink>
 
 // ===========================
 // GITHUB INTEGRATION INTERFACES (Sprint 3)
@@ -936,7 +938,7 @@ export interface GitHubCommit {
   commit_date: string; // ISO 8601 timestamp
   branch: string; // Branch name (e.g., "main")
   url: string; // GitHub commit URL
-  issue_keys_mentioned: string[]; // Auto-detected issue keys (e.g., ["PROJ-123"])
+  issue_keys_mentioned: string[]; // Auto-detected issue keys (ex. ["PROJ-123"])
   synced_at: string; // When this commit was synced
   // Legacy/optional fields
   committed_at?: string;
@@ -1071,8 +1073,9 @@ export interface SyncCommitsResponse {
   smart_actions_performed?: SmartCommitAction[];
 }
 
-export interface PaginatedGitHubCommitList extends PaginatedResponse<GitHubCommit> { }
-export interface PaginatedGitHubIntegrationList extends PaginatedResponse<GitHubIntegration> { }
+export type PaginatedGitHubCommitList = PaginatedResponse<GitHubCommit>
+export type PaginatedGitHubIntegrationList =
+PaginatedResponse<GitHubIntegration>
 
 // OAuth Flow Interfaces
 export interface GitHubOAuthRepository {
@@ -1102,7 +1105,8 @@ export interface GitHubOAuthCompleteRequest {
 // DIAGRAM GENERATION INTERFACES (Sprint 3)
 // ===========================
 
-export type DiagramType = 'workflow' | 'dependency' | 'roadmap' | 'uml' | 'architecture' | 'burndown' | 'velocity';
+export type DiagramType = 'workflow' | 'dependency' | 'roadmap' |
+'uml' | 'architecture' | 'burndown' | 'velocity';
 export type DiagramFormat = 'svg' | 'png' | 'pdf' | 'json';
 
 export interface DiagramRequestRequest {
@@ -1302,7 +1306,8 @@ export interface UMLParameter {
 export interface UMLRelationship {
   from: string;
   to: string;
-  type: 'inheritance' | 'composition' | 'aggregation' | 'association' | 'dependency';
+  type: 'inheritance' | 'composition' | 'aggregation' |
+  'association' | 'dependency';
   label?: string;
 }
 
@@ -1327,7 +1332,8 @@ export interface ArchitectureLayer {
 
 export interface ArchitectureComponent {
   name: string;
-  type: 'viewset' | 'serializer' | 'service' | 'model' | 'middleware' | 'manager' | 'admin' | 'form' | 'filter';
+  type: 'viewset' | 'serializer' | 'service' | 'model' | 'middleware' |
+  'manager' | 'admin' | 'form' | 'filter';
   app: string;
   description?: string;
 }
@@ -1361,7 +1367,7 @@ export interface IssueCommentRequest {
   content: string;
 }
 
-export interface PaginatedIssueCommentList extends PaginatedResponse<IssueComment> { }
+export type PaginatedIssueCommentList = PaginatedResponse<IssueComment>
 
 // Union type for all diagram data
 export type DiagramData =
@@ -1400,9 +1406,7 @@ export interface SprintReport {
 }
 
 // Team Metrics Interfaces
-export interface TeamMetricsUser {
-  // Define fields if needed, for now it's an empty array in the example
-}
+export type TeamMetricsUser = object
 
 export interface TeamMetricsAggregates {
   total_issues: number;

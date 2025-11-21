@@ -113,7 +113,8 @@ export class ActivityLogService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/api/v1/reporting/activity`;
 
-  getActivityLogs(params?: ActivityLogParams): Observable<PaginatedActivityLogList> {
+  getActivityLogs(params?: ActivityLogParams)
+  : Observable<PaginatedActivityLogList> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
@@ -122,7 +123,9 @@ export class ActivityLogService {
       // Scope filters
       if (params.organization) query += `&organization=${params.organization}`;
       if (params.workspace) query += `&workspace=${params.workspace}`;
-      if (params.workspace_key) query += `&workspace_key=${params.workspace_key}`;
+      if (params.workspace_key) {
+        query += `&workspace_key=${params.workspace_key}`;
+      }
       if (params.project) query += `&project=${params.project}`;
       if (params.project_key) query += `&project_key=${params.project_key}`;
 
@@ -135,8 +138,12 @@ export class ActivityLogService {
       if (params.user_email) query += `&user_email=${params.user_email}`;
 
       // Date filters
-      if (params.created_after) query += `&created_after=${params.created_after}`;
-      if (params.created_before) query += `&created_before=${params.created_before}`;
+      if (params.created_after) {
+        query += `&created_after=${params.created_after}`;
+      }
+      if (params.created_before) {
+        query += `&created_before=${params.created_before}`;
+      }
 
       // Pagination
       if (params.page) query += `&page=${params.page}`;
@@ -145,6 +152,7 @@ export class ActivityLogService {
       if (params.ordering) query += `&ordering=${params.ordering}`;
     }
 
-    return this.http.get<PaginatedActivityLogList>(`${this.baseUrl}?${query}`, {headers});
+    return this.http.get<PaginatedActivityLogList>(`${
+      this.baseUrl}?${query}`, {headers});
   }
 }

@@ -16,7 +16,8 @@ export class OrganizationsService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api/v1/orgs`;
 
-  getOrganizations(params?: ApiQueryParams): Observable<PaginatedOrganizationList> {
+  getOrganizations(params?: ApiQueryParams)
+  : Observable<PaginatedOrganizationList> {
     let httpParams = new HttpParams();
     if (params) {
       Object.keys(params).forEach((key) => {
@@ -27,27 +28,33 @@ export class OrganizationsService {
       });
     }
 
-    return this.http.get<PaginatedOrganizationList>(`${this.baseUrl}/organizations/`, {params: httpParams}).pipe(
+    return this.http.get<PaginatedOrganizationList>(`${
+      this.baseUrl}/organizations/`, {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
   getOrganization(id: string): Observable<Organization> {
-    return this.http.get<Organization>(`${this.baseUrl}/organizations/${id}/`).pipe(
+    return this.http.get<Organization>(`${
+      this.baseUrl}/organizations/${id}/`).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
-  createOrganization(organization: Partial<Organization>): Observable<Organization> {
-    return this.http.post<Organization>(`${this.baseUrl}/organizations/`, organization).pipe(
+  createOrganization(organization: Partial<Organization>)
+  : Observable<Organization> {
+    return this.http.post<Organization>(`${
+      this.baseUrl}/organizations/`, organization).pipe(
         catchError(this.handleError),
     );
   }
 
-  updateOrganization(id: string, organization: Partial<Organization>): Observable<Organization> {
-    return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, organization).pipe(
+  updateOrganization(id: string, organization: Partial<Organization>)
+  : Observable<Organization> {
+    return this.http.patch<Organization>(`${
+      this.baseUrl}/organizations/${id}/`, organization).pipe(
         catchError(this.handleError),
     );
   }
@@ -85,7 +92,8 @@ export class OrganizationsService {
           errorMessage = 'Server error. Please try again later.';
           break;
         default:
-          errorMessage = `Error ${error.status}: ${error.error?.message || error.message}`;
+          errorMessage = `Error ${
+            error.status}: ${error.error?.message || error.message}`;
       }
     }
 

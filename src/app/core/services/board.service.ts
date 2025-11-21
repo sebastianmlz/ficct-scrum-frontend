@@ -26,7 +26,8 @@ export class BoardService {
   private readonly baseUrl = `${environment.apiUrl}/api/v1/projects`;
 
   // Board CRUD operations
-  getBoards(params?: PaginationParams & { project?: string; board_type?: string }): Observable<Board[]> {
+  getBoards(params?: PaginationParams & { project?: string;
+    board_type?: string }): Observable<Board[]> {
     let httpParams = new HttpParams();
 
     if (params?.project) {
@@ -42,7 +43,8 @@ export class BoardService {
       httpParams = httpParams.set('search', params.search);
     }
 
-    return this.http.get<PaginatedBoardList>(`${this.baseUrl}/boards/`, {params: httpParams})
+    return this.http.get<PaginatedBoardList>(`${
+      this.baseUrl}/boards/`, {params: httpParams})
         .pipe(
             map((response) => response.results),
         );
@@ -56,8 +58,10 @@ export class BoardService {
     return this.http.post<Board>(`${this.baseUrl}/boards/`, boardData);
   }
 
-  updateBoard(boardId: string, boardData: UpdateBoardRequest): Observable<Board> {
-    return this.http.patch<Board>(`${this.baseUrl}/boards/${boardId}/`, boardData);
+  updateBoard(boardId: string, boardData: UpdateBoardRequest)
+  : Observable<Board> {
+    return this.http.patch<Board>(`${
+      this.baseUrl}/boards/${boardId}/`, boardData);
   }
 
   deleteBoard(boardId: string): Observable<void> {
@@ -66,28 +70,38 @@ export class BoardService {
 
   // Column operations
   getColumns(boardId: string): Observable<BoardColumn[]> {
-    return this.http.get<BoardColumn[]>(`${this.baseUrl}/boards/${boardId}/columns/`);
+    return this.http.get<BoardColumn[]>(`${
+      this.baseUrl}/boards/${boardId}/columns/`);
   }
 
-  createColumn(boardId: string, columnData: CreateColumnRequest): Observable<BoardColumn> {
-    return this.http.post<BoardColumn>(`${this.baseUrl}/boards/${boardId}/columns/`, columnData);
+  createColumn(boardId: string, columnData: CreateColumnRequest)
+  : Observable<BoardColumn> {
+    return this.http.post<BoardColumn>(`${
+      this.baseUrl}/boards/${boardId}/columns/`, columnData);
   }
 
-  updateColumn(boardId: string, columnId: string, columnData: UpdateColumnRequest): Observable<BoardColumn> {
-    return this.http.patch<BoardColumn>(`${this.baseUrl}/boards/${boardId}/columns/${columnId}/`, columnData);
+  updateColumn(boardId: string, columnId: string,
+      columnData: UpdateColumnRequest): Observable<BoardColumn> {
+    return this.http.patch<BoardColumn>(`${
+      this.baseUrl}/boards/${boardId}/columns/${columnId}/`, columnData);
   }
 
   deleteColumn(boardId: string, columnId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/boards/${boardId}/columns/${columnId}/`);
+    return this.http.delete<void>(`${
+      this.baseUrl}/boards/${boardId}/columns/${columnId}/`);
   }
 
   // Issue operations in board context
-  createIssue(boardId: string, issueData: CreateIssueQuickRequest): Observable<Issue> {
-    return this.http.post<Issue>(`${this.baseUrl}/boards/${boardId}/issues/`, issueData);
+  createIssue(boardId: string, issueData: CreateIssueQuickRequest)
+  : Observable<Issue> {
+    return this.http.post<Issue>(`${
+      this.baseUrl}/boards/${boardId}/issues/`, issueData);
   }
 
-  moveIssue(boardId: string, issueId: string, moveData: MoveIssueRequest): Observable<Issue> {
-    return this.http.patch<Issue>(`${this.baseUrl}/boards/${boardId}/issues/${issueId}/move/`, moveData);
+  moveIssue(boardId: string, issueId: string, moveData: MoveIssueRequest)
+  : Observable<Issue> {
+    return this.http.patch<Issue>(`${
+      this.baseUrl}/boards/${boardId}/issues/${issueId}/move/`, moveData);
   }
 
   getIssuesByBoard(boardId: string, filters?: {
@@ -111,7 +125,8 @@ export class BoardService {
       httpParams = httpParams.set('search', filters.search);
     }
 
-    return this.http.get<PaginatedIssueList>(`${this.baseUrl}/issues/`, {params: httpParams})
+    return this.http.get<PaginatedIssueList>(`${
+      this.baseUrl}/issues/`, {params: httpParams})
         .pipe(
             map((response) => response.results),
         );

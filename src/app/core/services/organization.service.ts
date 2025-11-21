@@ -6,7 +6,6 @@ import {
   Organization,
   OrganizationRequest,
   OrganizationMember,
-  OrganizationMemberRequest,
   PatchedOrganizationMemberRequest,
   PaginatedOrganizationList,
   PaginatedOrganizationMemberList,
@@ -25,7 +24,8 @@ export class OrganizationService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api/v1/orgs`;
 
-  getOrganizations(params?: PaginationParams): Observable<PaginatedOrganizationList> {
+  getOrganizations(params?: PaginationParams)
+  : Observable<PaginatedOrganizationList> {
     let httpParams = new HttpParams();
 
     if (params?.page) {
@@ -38,20 +38,23 @@ export class OrganizationService {
       httpParams = httpParams.set('ordering', params.ordering);
     }
 
-    return this.http.get<PaginatedOrganizationList>(`${this.baseUrl}/organizations/`, {params: httpParams}).pipe(
+    return this.http.get<PaginatedOrganizationList>(`${
+      this.baseUrl}/organizations/`, {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
   getOrganization(id: string): Observable<Organization> {
-    return this.http.get<Organization>(`${this.baseUrl}/organizations/${id}/`).pipe(
+    return this.http.get<Organization>(`${
+      this.baseUrl}/organizations/${id}/`).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
-  createOrganization(organizationData: OrganizationRequest): Observable<Organization> {
+  createOrganization(organizationData: OrganizationRequest)
+  : Observable<Organization> {
     console.log('🔧 OrganizationService - Datos recibidos:', organizationData);
 
     // Si NO hay logo, enviar como JSON normal
@@ -68,7 +71,8 @@ export class OrganizationService {
 
       console.log('📤 Enviando como JSON (sin logo):', jsonData);
 
-      return this.http.post<Organization>(`${this.baseUrl}/organizations/`, jsonData, {
+      return this.http.post<Organization>(`${
+        this.baseUrl}/organizations/`, jsonData, {
         headers: {'Content-Type': 'application/json'},
       }).pipe(
           catchError(this.handleError),
@@ -99,14 +103,19 @@ export class OrganizationService {
 
     // Agregar logo al final y con validación
     if (organizationData.logo && organizationData.logo instanceof File) {
-      console.log('📸 Agregando logo - Nombre:', organizationData.logo.name, 'Tamaño:', organizationData.logo.size, 'Tipo:', organizationData.logo.type);
+      console.log('📸 Agregando logo - Nombre:',
+          organizationData.logo.name, 'Tamaño:', organizationData.logo.size,
+          'Tipo:', organizationData.logo.type);
 
       // Validar que el archivo sea una imagen
       if (organizationData.logo.type.startsWith('image/')) {
-        formData.append('logo', organizationData.logo, organizationData.logo.name);
+        formData.append('logo', organizationData.logo,
+            organizationData.logo.name);
       } else {
-        console.error('❌ El archivo no es una imagen válida:', organizationData.logo.type);
-        return throwError(() => new Error('El archivo debe ser una imagen válida'));
+        console.error('❌ El archivo no es una imagen válida:',
+            organizationData.logo.type);
+        return throwError(() => new Error(
+            'El archivo debe ser una imagen válida'));
       }
     }
 
@@ -114,7 +123,8 @@ export class OrganizationService {
     console.log('📋 FormData contents:');
     for (const pair of formData.entries()) {
       if (pair[1] instanceof File) {
-        console.log(`${pair[0]}:`, `[File: ${pair[1].name}, ${pair[1].size} bytes, ${pair[1].type}]`);
+        console.log(`${pair[0]}:`, `[File: ${pair[1].name}, ${
+          pair[1].size} bytes, ${pair[1].type}]`);
       } else {
         console.log(`${pair[0]}:`, pair[1]);
       }
@@ -123,13 +133,15 @@ export class OrganizationService {
     const url = `${this.baseUrl}/organizations/`;
     console.log('🌐 POST URL (con FormData):', url);
 
-    // Enviar FormData SIN headers explícitos (dejar que el navegador los configure)
+    // Enviar FormData SIN headers explícitos
+    // (dejar que el navegador los configure)
     return this.http.post<Organization>(url, formData).pipe(
         catchError(this.handleError),
     );
   }
 
-  updateOrganization(id: string, organizationData: Partial<OrganizationRequest>): Observable<Organization> {
+  updateOrganization(id: string, organizationData: Partial<OrganizationRequest>)
+  : Observable<Organization> {
     // Si NO hay logo, enviar como JSON normal
     if (!organizationData.logo) {
       const jsonData: any = {
@@ -144,7 +156,8 @@ export class OrganizationService {
       if (organizationData.organization_settings) {
         jsonData.organization_settings = organizationData.organization_settings;
       }
-      return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, jsonData, {
+      return this.http.patch<Organization>(`${
+        this.baseUrl}/organizations/${id}/`, jsonData, {
         headers: {'Content-Type': 'application/json'},
       }).pipe(
           catchError(this.handleError),
@@ -175,12 +188,14 @@ export class OrganizationService {
       formData.append('subscription_plan', organizationData.subscription_plan);
     }
     if (organizationData.organization_settings) {
-      formData.append('organization_settings', JSON.stringify(organizationData.organization_settings));
+      formData.append('organization_settings',
+          JSON.stringify(organizationData.organization_settings));
     }
     if (organizationData.is_active !== undefined) {
       formData.append('is_active', organizationData.is_active.toString());
     }
-    return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, formData).pipe(
+    return this.http.patch<Organization>(`${
+      this.baseUrl}/organizations/${id}/`, formData).pipe(
         catchError(this.handleError),
     );
   }
@@ -192,7 +207,8 @@ export class OrganizationService {
   }
 
   // Organization Members
-  getOrganizationMembers(organizationId: string, params?: PaginationParams): Observable<PaginatedOrganizationMemberList> {
+  getOrganizationMembers(organizationId: string, params?: PaginationParams)
+  : Observable<PaginatedOrganizationMemberList> {
     let httpParams = new HttpParams();
 
     if (params?.page) {
@@ -208,36 +224,48 @@ export class OrganizationService {
       httpParams = httpParams.set('role', params.role);
     }
 
-    return this.http.get<PaginatedOrganizationMemberList>(`${this.baseUrl}/organizations/${organizationId}/members/`, {params: httpParams}).pipe(
+    return this.http.get<PaginatedOrganizationMemberList>(`${
+      this.baseUrl}/organizations/${organizationId}/members/`,
+    {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
-  addOrganizationMember(_organizationId: string, memberData: any): Observable<OrganizationMember> {
-    // El backend espera POST a /api/v1/orgs/members/ con email, role, status, is_active
+  addOrganizationMember(_organizationId: string, memberData: any)
+  : Observable<OrganizationMember> {
+    // El backend espera POST a /api/v1/orgs/members/
+    // con email, role, status, is_active
     const url = `${this.baseUrl}/members/`;
     return this.http.post<OrganizationMember>(url, memberData).pipe(
         catchError(this.handleError),
     );
   }
 
-  updateOrganizationMemberRole(organizationId: string, memberId: string, roleData: PatchedOrganizationMemberRequest): Observable<OrganizationMember> {
-    return this.http.patch<OrganizationMember>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`, roleData).pipe(
+  updateOrganizationMemberRole(organizationId: string, memberId: string,
+      roleData: PatchedOrganizationMemberRequest)
+    : Observable<OrganizationMember> {
+    return this.http.patch<OrganizationMember>(`${
+      this.baseUrl}/organizations/${organizationId}/members/${memberId}/`,
+    roleData).pipe(
         catchError(this.handleError),
     );
   }
 
-  removeOrganizationMember(organizationId: string, memberId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/organizations/${organizationId}/members/${memberId}/`).pipe(
+  removeOrganizationMember(organizationId: string, memberId: string)
+  : Observable<void> {
+    return this.http.delete<void>(`${
+      this.baseUrl}/organizations/${organizationId}/members/${memberId}/`).pipe(
         catchError(this.handleError),
     );
   }
 
   /**
-   * Actualiza el rol de un miembro usando el endpoint PATCH /api/v1/orgs/members/{id}/update-role/
+   * Actualiza el rol de un miembro usando el endpoint
+   * PATCH /api/v1/orgs/members/{id}/update-role/
    */
-  updateOrganizationMemberRoleById(memberId: string, roleData: { role: string }): Observable<OrganizationMember> {
+  updateOrganizationMemberRoleById(memberId: string, roleData: { role: string })
+  : Observable<OrganizationMember> {
     const url = `${this.baseUrl}/members/${memberId}/update-role/`;
     return this.http.patch<OrganizationMember>(url, roleData).pipe(
         catchError(this.handleError),
@@ -245,7 +273,9 @@ export class OrganizationService {
   }
 
   // --- Organization Invitations ---
-  sendInvitation(organizationId: string, invitationData: OrganizationInvitationRequest): Observable<OrganizationInvitationResponse> {
+  sendInvitation(organizationId: string,
+      invitationData: OrganizationInvitationRequest)
+    : Observable<OrganizationInvitationResponse> {
     // POST /api/v1/orgs/invitations/
     const url = `${this.baseUrl}/invitations/`;
     const body = {
@@ -259,24 +289,33 @@ export class OrganizationService {
     );
   }
 
-  getInvitations(organizationId: string, params?: PaginationParams): Observable<PaginatedOrganizationInvitationList> {
+  getInvitations(organizationId: string, params?: PaginationParams)
+  : Observable<PaginatedOrganizationInvitationList> {
     // GET /api/v1/orgs/invitations/?organization={id}
     let httpParams = new HttpParams();
     httpParams = httpParams.set('organization', organizationId);
-    if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.ordering) httpParams = httpParams.set('ordering', params.ordering);
+    if (params?.page) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.ordering) {
+      httpParams = httpParams.set('ordering', params.ordering);
+    }
     if (params?.status) httpParams = httpParams.set('status', params.status);
     const url = `${this.baseUrl}/invitations/`;
     console.log('🔍 getInvitations URL:', url);
     console.log('🔍 getInvitations params:', httpParams.toString());
-    return this.http.get<PaginatedOrganizationInvitationList>(url, {params: httpParams}).pipe(
+    return this.http.get<PaginatedOrganizationInvitationList>(url,
+        {params: httpParams}).pipe(
         retry(1),
         catchError(this.handleError),
     );
   }
 
-  cancelInvitation(organizationId: string, invitationId: string): Observable<void> {
+  cancelInvitation(organizationId: string, invitationId: string)
+  : Observable<void> {
     // DELETE /api/v1/orgs/invitations/{invitation_id}/
     const url = `${this.baseUrl}/invitations/${invitationId}/`;
     console.log('🗑️ Cancelando invitación:', url);
@@ -285,7 +324,8 @@ export class OrganizationService {
     );
   }
 
-  resendInvitation(organizationId: string, invitationId: string): Observable<OrganizationInvitationResponse> {
+  resendInvitation(organizationId: string, invitationId: string)
+  : Observable<OrganizationInvitationResponse> {
     // POST /api/v1/orgs/invitations/{invitation_id}/resend/
     const url = `${this.baseUrl}/invitations/${invitationId}/resend/`;
     console.log('📧 Reenviando invitación:', url);
@@ -336,12 +376,13 @@ export class OrganizationService {
       errorMessage = `Error: ${error.error.message}`;
     } else {
       // Server-side error
+      const validationErrors = error.error?.errors || error.error;
       switch (error.status) {
         case 400:
-          const validationErrors = error.error?.errors || error.error;
           if (typeof validationErrors === 'object') {
             const errorMessages = Object.entries(validationErrors)
-                .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                .map(([field, messages]) => `${field}: ${
+                  Array.isArray(messages) ? messages.join(', ') : messages}`)
                 .join('; ');
             errorMessage = `Validation errors: ${errorMessages}`;
           } else {
@@ -361,7 +402,8 @@ export class OrganizationService {
           errorMessage = 'Server error. Please try again later.';
           break;
         default:
-          errorMessage = `Error ${error.status}: ${error.error?.message || error.message}`;
+          errorMessage = `Error ${error.status}: ${
+            error.error?.message || error.message}`;
       }
     }
 

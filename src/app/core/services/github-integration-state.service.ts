@@ -37,8 +37,10 @@ export class GitHubIntegrationStateService {
    * Get integration status for a project
    * Uses cache if available and not expired, otherwise fetches from API
    */
-  getIntegrationStatus(projectId: string): Observable<GitHubIntegration | null> {
-    console.log('[INTEGRATION STATE] Getting integration for project:', projectId);
+  getIntegrationStatus(projectId: string)
+  : Observable<GitHubIntegration | null> {
+    console.log('[INTEGRATION STATE] Getting integration for project:',
+        projectId);
 
     // Get or create cache entry for this project
     if (!this.cache.has(projectId)) {
@@ -57,7 +59,8 @@ export class GitHubIntegrationStateService {
     const isExpired = (now - cached.timestamp) > this.CACHE_TTL;
 
     if (cached.integration !== null && !isExpired && !cached.loading) {
-      console.log('[INTEGRATION STATE] Returning cached integration (age:', Math.round((now - cached.timestamp) / 1000), 'seconds)');
+      console.log('[INTEGRATION STATE] Returning cached integration (age:',
+          Math.round((now - cached.timestamp) / 1000), 'seconds)');
       return of(cached.integration);
     }
 
@@ -76,8 +79,10 @@ export class GitHubIntegrationStateService {
   /**
    * Force refresh integration status, bypassing cache
    */
-  refreshIntegrationStatus(projectId: string): Observable<GitHubIntegration | null> {
-    console.log('[INTEGRATION STATE] Force refreshing integration for project:', projectId);
+  refreshIntegrationStatus(projectId: string)
+  : Observable<GitHubIntegration | null> {
+    console.log('[INTEGRATION STATE] Force refreshing integration for project:',
+        projectId);
     return this.fetchIntegrationStatus(projectId);
   }
 
@@ -119,7 +124,7 @@ export class GitHubIntegrationStateService {
       }
     } else {
       console.log('[INTEGRATION STATE] Clearing all cache');
-      this.cache.forEach((cached$, key) => {
+      this.cache.forEach((cached$) => {
         cached$.next({
           integration: null,
           timestamp: 0,
@@ -132,8 +137,10 @@ export class GitHubIntegrationStateService {
   /**
    * Internal method to fetch integration from API and update cache
    */
-  private fetchIntegrationStatus(projectId: string): Observable<GitHubIntegration | null> {
-    const cached$ = this.cache.get(projectId) || new BehaviorSubject<CachedIntegration>({
+  private fetchIntegrationStatus(projectId: string)
+  : Observable<GitHubIntegration | null> {
+    const cached$ = this.cache.get(projectId) ||
+    new BehaviorSubject<CachedIntegration>({
       integration: null,
       timestamp: 0,
       loading: false,
@@ -154,13 +161,16 @@ export class GitHubIntegrationStateService {
         retry({
           count: 3,
           delay: (error, retryCount) => {
-            console.warn(`[INTEGRATION STATE] Retry attempt ${retryCount} after error:`, error);
+            console.warn(`[INTEGRATION STATE] Retry attempt ${
+              retryCount} after error:`, error);
             return of(null).pipe(delay(1000 * Math.pow(2, retryCount - 1)));
           },
         }),
         map((response) => {
-          const integration = response.results && response.results.length > 0 ? response.results[0] : null;
-          console.log('[INTEGRATION STATE] Integration fetched:', integration ? 'found' : 'not found');
+          const integration = response.results && response.results.length > 0 ?
+          response.results[0] : null;
+          console.log('[INTEGRATION STATE] Integration fetched:',
+            integration ? 'found' : 'not found');
 
           // Update cache
           cached$.next({
@@ -172,7 +182,8 @@ export class GitHubIntegrationStateService {
           return integration;
         }),
         catchError((error) => {
-          console.error('[INTEGRATION STATE] Error fetching integration:', error);
+          console.error('[INTEGRATION STATE] Error fetching integration:',
+              error);
 
           // Handle specific error codes
           if (error.status === 404 || error.status === 403) {
@@ -228,7 +239,8 @@ export class GitHubIntegrationStateService {
    * Manually update cache (useful after creating/deleting integration)
    */
   updateCache(projectId: string, integration: GitHubIntegration | null): void {
-    console.log('[INTEGRATION STATE] Manually updating cache for project:', projectId);
+    console.log('[INTEGRATION STATE] Manually updating cache for project:',
+        projectId);
 
     if (!this.cache.has(projectId)) {
       this.cache.set(projectId, new BehaviorSubject<CachedIntegration>({

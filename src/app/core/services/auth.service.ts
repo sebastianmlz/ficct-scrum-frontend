@@ -1,15 +1,13 @@
-import {Injectable, inject} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
-import {catchError, retry, tap} from 'rxjs/operators';
+import {catchError, retry} from 'rxjs/operators';
 import {Router} from '@angular/router';
 
 import {
   User,
   UserBasic,
-  UserLoginRequest,
   UserRegistrationRequest,
-  LoginResponse,
   LogoutRequestRequest,
   LogoutResponse,
   PasswordResetRequestRequest,
@@ -25,7 +23,8 @@ import {environment} from '../../../environments/environment';
 })
 export class AuthService {
   private readonly baseUrl = `${environment.apiUrl}/api/v1/auth`;
-  constructor(private http: HttpClient, private router: Router) { }
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
 
   login(credentials: { email: string, password: string }): Observable<any> {
@@ -76,7 +75,8 @@ export class AuthService {
       email: user.email,
       first_name: user.first_name,
       last_name: user.last_name,
-      full_name: user.full_name || `${user.first_name} ${user.last_name}`.trim(),
+      full_name: user.full_name || `${
+        user.first_name} ${user.last_name}`.trim(),
       avatar_url: user.avatar_url,
     };
   }
@@ -84,7 +84,8 @@ export class AuthService {
 
   register(userData: UserRegistrationRequest): Observable<User> {
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    return this.http.post<User>(`${this.baseUrl}/register/`, userData, {headers});
+    return this.http.post<User>(`${
+      this.baseUrl}/register/`, userData, {headers});
   }
 
   logoutt(request: LogoutRequestRequest): Observable<LogoutResponse> {
@@ -106,12 +107,16 @@ export class AuthService {
     return localStorage.getItem('access_token');
   }
 
-  requestPasswordReset(request: PasswordResetRequestRequest): Observable<PasswordResetRequestResponse> {
-    return this.http.post<PasswordResetRequestResponse>(`${this.baseUrl}/password-reset-request/`, request);
+  requestPasswordReset(request: PasswordResetRequestRequest)
+  : Observable<PasswordResetRequestResponse> {
+    return this.http.post<PasswordResetRequestResponse>(`${
+      this.baseUrl}/password-reset-request/`, request);
   }
 
-  confirmPasswordReset(request: PasswordResetConfirmRequest): Observable<PasswordResetConfirmResponse> {
-    return this.http.post<PasswordResetConfirmResponse>(`${this.baseUrl}/password-reset-confirm/`, request);
+  confirmPasswordReset(request: PasswordResetConfirmRequest)
+  : Observable<PasswordResetConfirmResponse> {
+    return this.http.post<PasswordResetConfirmResponse>(`${
+      this.baseUrl}/password-reset-confirm/`, request);
   }
 
   getProfile(): Observable<UserProfile> {
@@ -120,7 +125,8 @@ export class AuthService {
 
   updateProfile(userId: number, profileData: any): Observable<User> {
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    return this.http.patch<User>(`${this.baseUrl}/users/${userId}/`, profileData, {headers}).pipe(
+    return this.http.patch<User>(`${
+      this.baseUrl}/users/${userId}/`, profileData, {headers}).pipe(
         retry(1),
         catchError((error: HttpErrorResponse) => {
           console.error('updateProfile failed:', error);
@@ -133,11 +139,14 @@ export class AuthService {
     const formData = new FormData();
     formData.append('avatar', avatarFile);
 
-    return this.http.post<UserProfile>(`${this.baseUrl}/profiles/upload-avatar/`, formData);
+    return this.http.post<UserProfile>(`${
+      this.baseUrl}/profiles/upload-avatar/`, formData);
   }
 
-  refreshToken(refreshToken: string): Observable<{ access: string; refresh?: string }> {
-    return this.http.post<{ access: string; refresh?: string }>(`${this.baseUrl}/token/refresh/`, {
+  refreshToken(refreshToken: string)
+  : Observable<{ access: string; refresh?: string }> {
+    return this.http.post<{ access: string; refresh?: string }>(`${
+      this.baseUrl}/token/refresh/`, {
       refresh: refreshToken,
     });
   }

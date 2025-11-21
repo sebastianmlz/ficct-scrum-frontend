@@ -1,16 +1,11 @@
 import {Injectable, inject} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {
   DiagramRequestRequest,
   DiagramResponse,
   DiagramType,
   DiagramFormat,
-  WorkflowDiagramData,
-  DependencyDiagramData,
-  RoadmapDiagramData,
-  UMLDiagramData,
-  ArchitectureDiagramData,
 } from '../models/interfaces';
 import {environment} from '../../../environments/environment';
 
@@ -34,10 +29,13 @@ export class DiagramService {
       project: request.project,
       format: request.format,
       parameters: request.parameters,
-      parametersCount: request.parameters ? Object.keys(request.parameters).length : 0,
+      parametersCount: request.parameters ?
+      Object.keys(request.parameters).length : 0,
     });
-    console.log('[DIAGRAM SERVICE] 🔍 Full request object:', JSON.stringify(request, null, 2));
-    return this.http.post<DiagramResponse>(`${this.baseUrl}/generate/`, request);
+    console.log('[DIAGRAM SERVICE] 🔍 Full request object:',
+        JSON.stringify(request, null, 2));
+    return this.http.post<DiagramResponse>(`${
+      this.baseUrl}/generate/`, request);
   }
 
   /**
@@ -211,7 +209,8 @@ export class DiagramService {
   /**
    * Export diagram as PNG
    */
-  exportAsPNG(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
+  exportAsPNG(diagramType: DiagramType, projectId: string, options?: any)
+  : Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
       project: projectId,
@@ -223,7 +222,8 @@ export class DiagramService {
   /**
    * Export diagram as PDF
    */
-  exportAsPDF(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
+  exportAsPDF(diagramType: DiagramType, projectId: string, options?: any)
+  : Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
       project: projectId,
@@ -235,7 +235,8 @@ export class DiagramService {
   /**
    * Export diagram as SVG
    */
-  exportAsSVG(diagramType: DiagramType, projectId: string, options?: any): Observable<DiagramResponse> {
+  exportAsSVG(diagramType: DiagramType, projectId: string, options?: any)
+  : Observable<DiagramResponse> {
     return this.generateDiagram({
       diagram_type: diagramType,
       project: projectId,
@@ -251,12 +252,14 @@ export class DiagramService {
   /**
    * Generate filename with timestamp for diagram export
    */
-  generateFilename(diagramType: DiagramType, format: DiagramFormat, projectName?: string): string {
+  generateFilename(diagramType: DiagramType, format: DiagramFormat,
+      projectName?: string): string {
     const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
     const sanitizedProjectName = projectName ?
       this.sanitizeFilename(projectName) + '-' :
       '';
-    return `${sanitizedProjectName}${diagramType}-diagram-${timestamp}.${format}`;
+    return `${sanitizedProjectName}${
+      diagramType}-diagram-${timestamp}.${format}`;
   }
 
   /**
@@ -360,7 +363,8 @@ export class DiagramService {
           observer.next({
             success: false,
             filename,
-            error: error.error?.message || error.message || 'Failed to generate diagram',
+            error: error.error?.message || error.message ||
+              'Failed to generate diagram',
           });
           observer.complete();
         },

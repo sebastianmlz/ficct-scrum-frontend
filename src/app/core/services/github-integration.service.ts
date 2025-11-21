@@ -1,5 +1,5 @@
 import {Injectable, inject} from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {map, catchError} from 'rxjs/operators';
 import {
@@ -35,7 +35,8 @@ export class GitHubIntegrationService {
   /**
    * List all GitHub integrations
    */
-  getIntegrations(params?: PaginationParams): Observable<PaginatedGitHubIntegrationList> {
+  getIntegrations(params?: PaginationParams)
+  : Observable<PaginatedGitHubIntegrationList> {
     let httpParams = new HttpParams();
 
     if (params?.page) {
@@ -51,7 +52,8 @@ export class GitHubIntegrationService {
       httpParams = httpParams.set('project', params.project);
     }
 
-    return this.http.get<PaginatedGitHubIntegrationList>(`${this.baseUrl}/github/`, {params: httpParams});
+    return this.http.get<PaginatedGitHubIntegrationList>(`${
+      this.baseUrl}/github/`, {params: httpParams});
   }
 
   /**
@@ -59,7 +61,8 @@ export class GitHubIntegrationService {
    * Returns null if integration not found (404)
    */
   getIntegration(id: string): Observable<GitHubIntegrationDetail | null> {
-    return this.http.get<GitHubIntegrationDetail>(`${this.baseUrl}/github/${id}/`).pipe(
+    return this.http.get<GitHubIntegrationDetail>(`${
+      this.baseUrl}/github/${id}/`).pipe(
         catchError((error) => {
           if (error.status === 404) {
             console.info('[GITHUB] Integration not found:', id);
@@ -74,15 +77,18 @@ export class GitHubIntegrationService {
   /**
    * Connect GitHub repository to project
    */
-  connectRepository(data: GitHubIntegrationRequest): Observable<GitHubIntegration> {
+  connectRepository(data: GitHubIntegrationRequest)
+  : Observable<GitHubIntegration> {
     return this.http.post<GitHubIntegration>(`${this.baseUrl}/github/`, data);
   }
 
   /**
    * Update GitHub integration settings
    */
-  updateIntegration(id: string, data: PatchedGitHubIntegrationRequest): Observable<GitHubIntegration> {
-    return this.http.patch<GitHubIntegration>(`${this.baseUrl}/github/${id}/`, data);
+  updateIntegration(id: string, data: PatchedGitHubIntegrationRequest)
+  : Observable<GitHubIntegration> {
+    return this.http.patch<GitHubIntegration>(`${
+      this.baseUrl}/github/${id}/`, data);
   }
 
   /**
@@ -100,7 +106,8 @@ export class GitHubIntegrationService {
    * Initiate GitHub OAuth flow
    * Returns authorization URL to redirect user to GitHub
    */
-  initiateOAuth(projectId: string): Observable<{ authorization_url: string; state: string }> {
+  initiateOAuth(projectId: string)
+  : Observable<{ authorization_url: string; state: string }> {
     return this.http.post<{ authorization_url: string; state: string }>(
         `${this.baseUrl}/github/oauth/initiate/`,
         {project: projectId},
@@ -111,7 +118,8 @@ export class GitHubIntegrationService {
    * Check if project has GitHub integration
    * Returns integration details if exists, null if not
    */
-  checkIntegrationStatus(projectId: string): Observable<GitHubIntegration | null> {
+  checkIntegrationStatus(projectId: string)
+  : Observable<GitHubIntegration | null> {
     return this.getIntegrations({project: projectId}).pipe(
         map((response) => {
           if (response.results && response.results.length > 0) {
@@ -126,7 +134,8 @@ export class GitHubIntegrationService {
    * Get available repositories for OAuth user
    * Called after OAuth callback with temp token
    */
-  getAvailableRepositories(projectId: string, tempToken: string): Observable<GitHubOAuthRepositoriesResponse> {
+  getAvailableRepositories(projectId: string, tempToken: string)
+  : Observable<GitHubOAuthRepositoriesResponse> {
     return this.http.get<GitHubOAuthRepositoriesResponse>(
         `${this.baseUrl}/github/oauth/repositories/`,
         {params: {project: projectId, temp_token: tempToken}},
@@ -137,11 +146,14 @@ export class GitHubIntegrationService {
    * Complete GitHub integration with selected repository
    * Final step in OAuth flow
    */
-  completeIntegration(data: GitHubOAuthCompleteRequest): Observable<{status: string; message: string; integration_id: string; repository: string}> {
-    return this.http.post<{status: string; message: string; integration_id: string; repository: string}>(
-        `${this.baseUrl}/github/oauth/complete/`,
-        data,
-    );
+  completeIntegration(data: GitHubOAuthCompleteRequest)
+  : Observable<{status: string; message: string;
+    integration_id: string; repository: string}> {
+    return this.http.post<{status: string; message: string;
+      integration_id: string; repository: string}>(
+          `${this.baseUrl}/github/oauth/complete/`,
+          data,
+      );
   }
 
   // ===========================
@@ -151,7 +163,8 @@ export class GitHubIntegrationService {
   /**
    * List commits for a GitHub integration
    */
-  getCommits(integrationId: string, params?: { since?: string; limit?: number }): Observable<GitHubCommit[]> {
+  getCommits(integrationId: string, params?: { since?: string; limit?: number })
+  : Observable<GitHubCommit[]> {
     let httpParams = new HttpParams();
 
     if (params?.since) {
@@ -161,12 +174,13 @@ export class GitHubIntegrationService {
       httpParams = httpParams.set('limit', params.limit.toString());
     }
 
-    return this.http.get<GitHubCommit[]>(`${this.baseUrl}/github/${integrationId}/commits/`, {params: httpParams});
+    return this.http.get<GitHubCommit[]>(`${
+      this.baseUrl}/github/${integrationId}/commits/`, {params: httpParams});
   }
 
   /**
    * List all commits (paginated)
-   * IMPORTANT: Should be filtered by project to show only project-specific commits
+   * IMPORTANT: Should be filtered by project
    */
   getAllCommits(params?: any): Observable<PaginatedGitHubCommitList> {
     let httpParams = new HttpParams();
@@ -190,35 +204,41 @@ export class GitHubIntegrationService {
       httpParams = httpParams.set('ordering', params.ordering);
     }
 
-    return this.http.get<PaginatedGitHubCommitList>(`${this.baseUrl}/commits/`, {params: httpParams});
+    return this.http.get<PaginatedGitHubCommitList>(`${
+      this.baseUrl}/commits/`, {params: httpParams});
   }
 
   /**
    * Get single commit details
    */
   getCommit(commitId: string): Observable<GitHubCommitDetail> {
-    return this.http.get<GitHubCommitDetail>(`${this.baseUrl}/commits/${commitId}/`);
+    return this.http.get<GitHubCommitDetail>(`${
+      this.baseUrl}/commits/${commitId}/`);
   }
 
   /**
    * Manually sync commits from GitHub
    */
   syncCommits(integrationId: string): Observable<SyncCommitsResponse> {
-    return this.http.post<SyncCommitsResponse>(`${this.baseUrl}/github/${integrationId}/sync_commits/`, {});
+    return this.http.post<SyncCommitsResponse>(`${
+      this.baseUrl}/github/${integrationId}/sync_commits/`, {});
   }
 
   /**
    * Link commit to an issue
    */
-  linkCommitToIssue(commitId: string, data: CommitIssueLinkRequest): Observable<GitHubCommitDetail> {
-    return this.http.post<GitHubCommitDetail>(`${this.baseUrl}/commits/${commitId}/link_issue/`, data);
+  linkCommitToIssue(commitId: string, data: CommitIssueLinkRequest)
+  : Observable<GitHubCommitDetail> {
+    return this.http.post<GitHubCommitDetail>(`${
+      this.baseUrl}/commits/${commitId}/link_issue/`, data);
   }
 
   /**
    * Unlink commit from an issue
    */
   unlinkCommitFromIssue(commitId: string, issueId: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/commits/${commitId}/unlink_issue/`, {issue_id: issueId});
+    return this.http.post<void>(`${
+      this.baseUrl}/commits/${commitId}/unlink_issue/`, {issue_id: issueId});
   }
 
   // ===========================
@@ -229,7 +249,8 @@ export class GitHubIntegrationService {
    * Get pull requests for integration
    */
   getPullRequests(integrationId: string): Observable<GitHubPullRequest[]> {
-    return this.http.get<GitHubPullRequest[]>(`${this.baseUrl}/github/${integrationId}/pull_requests/`);
+    return this.http.get<GitHubPullRequest[]>(`${
+      this.baseUrl}/github/${integrationId}/pull_requests/`);
   }
 
   // ===========================
@@ -241,10 +262,12 @@ export class GitHubIntegrationService {
    * Returns null if integration not found (404)
    */
   getMetrics(integrationId: string): Observable<GitHubMetrics | null> {
-    return this.http.get<GitHubMetrics>(`${this.baseUrl}/github/${integrationId}/metrics/`).pipe(
+    return this.http.get<GitHubMetrics>(`${
+      this.baseUrl}/github/${integrationId}/metrics/`).pipe(
         catchError((error) => {
           if (error.status === 404) {
-            console.info('[GITHUB] Metrics not found for integration:', integrationId);
+            console.info('[GITHUB] Metrics not found for integration:',
+                integrationId);
             return of(null);
           }
           console.error('[GITHUB] Error loading metrics:', error);
@@ -271,7 +294,8 @@ export class GitHubIntegrationService {
    * Check if commit message contains smart commit keywords
    */
   hasSmartCommitKeyword(message: string): boolean {
-    const keywords = ['close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved'];
+    const keywords = ['close', 'closes', 'closed', 'fix', 'fixes',
+      'fixed', 'resolve', 'resolves', 'resolved'];
     const messageLower = message.toLowerCase();
     return keywords.some((keyword) => messageLower.includes(keyword));
   }
@@ -279,7 +303,8 @@ export class GitHubIntegrationService {
   /**
    * Extract smart commit actions from message
    */
-  parseSmartCommitActions(message: string): {action: string; issueRef: string}[] {
+  parseSmartCommitActions(message: string)
+  : {action: string; issueRef: string}[] {
     const actions: {action: string; issueRef: string}[] = [];
     const pattern = /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+(#\d+|[A-Z]+-\d+)/gi;
 

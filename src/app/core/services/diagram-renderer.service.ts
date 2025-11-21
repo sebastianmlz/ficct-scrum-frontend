@@ -9,7 +9,6 @@ import {
   DependencyEdge,
   RoadmapData,
   Sprint,
-  Milestone,
 } from '../models/diagram.interfaces';
 
 @Injectable({
@@ -18,11 +17,9 @@ import {
 export class DiagramRendererService {
   private currentZoomTransform: any = null;
 
-  constructor() {}
-
-  // ============================================================================
+  // ===========================================================================
   // WORKFLOW DIAGRAM RENDERER
-  // ============================================================================
+  // ===========================================================================
 
   renderWorkflowDiagram(containerId: string, data: WorkflowDiagramData): void {
     console.log('[DIAGRAM RENDERER] Rendering workflow diagram');
@@ -57,7 +54,7 @@ export class DiagramRendererService {
     this.renderWorkflowNodes(g, data.nodes);
 
     if (data.legend) {
-      this.renderLegend(g, data.legend, width, height);
+      this.renderLegend(g, data.legend, width);
     }
   }
 
@@ -68,7 +65,8 @@ export class DiagramRendererService {
         .enter()
         .append('g')
         .attr('class', 'node')
-        .attr('transform', (d: WorkflowNode) => `translate(${d.position.x}, ${d.position.y})`);
+        .attr('transform', (d: WorkflowNode) =>
+          `translate(${d.position.x}, ${d.position.y})`);
 
     nodeGroups
         .append('rect')
@@ -99,7 +97,8 @@ export class DiagramRendererService {
         .text((d: WorkflowNode) => `${d.issue_count} issues`);
   }
 
-  private renderWorkflowEdges(g: any, nodes: WorkflowNode[], edges: WorkflowEdge[]): void {
+  private renderWorkflowEdges(g: any, nodes: WorkflowNode[],
+      edges: WorkflowEdge[]): void {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
     g.selectAll('path.edge')
@@ -114,7 +113,8 @@ export class DiagramRendererService {
         .attr('marker-end', 'url(#arrowhead)');
   }
 
-  private calculateEdgePath(edge: WorkflowEdge, nodeMap: Map<string, WorkflowNode>): string {
+  private calculateEdgePath(edge: WorkflowEdge,
+      nodeMap: Map<string, WorkflowNode>): string {
     const source = nodeMap.get(edge.source);
     const target = nodeMap.get(edge.target);
     if (!source || !target) return '';
@@ -130,9 +130,9 @@ export class DiagramRendererService {
     return `M ${sx},${sy} Q ${midX},${midY} ${tx},${ty}`;
   }
 
-  // ============================================================================
+  // ===========================================================================
   // DEPENDENCY GRAPH RENDERER
-  // ============================================================================
+  // ===========================================================================
 
   renderDependencyGraph(containerId: string, data: DependencyGraphData): void {
     console.log('[DIAGRAM RENDERER] Rendering dependency graph');
@@ -162,7 +162,8 @@ export class DiagramRendererService {
 
     const simulation = d3
         .forceSimulation<IssueNode>(data.nodes)
-        .force('link', d3.forceLink<IssueNode, DependencyEdge>(data.edges).id((d) => d.id).distance(200))
+        .force('link', d3.forceLink<IssueNode, DependencyEdge>(data.edges)
+            .id((d) => d.id).distance(200))
         .force('charge', d3.forceManyBody().strength(-500))
         .force('center', d3.forceCenter(width / 2, height / 2))
         .force('collide', d3.forceCollide(100));
@@ -219,9 +220,9 @@ export class DiagramRendererService {
     });
   }
 
-  // ============================================================================
+  // ===========================================================================
   // ROADMAP TIMELINE RENDERER
-  // ============================================================================
+  // ===========================================================================
 
   renderRoadmapTimeline(containerId: string, data: RoadmapData): void {
     console.log('[DIAGRAM RENDERER] Rendering roadmap timeline');
@@ -241,7 +242,8 @@ export class DiagramRendererService {
     const g = svg.append('g');
 
     const parseDate = d3.timeParse('%Y-%m-%d');
-    const dates = data.sprints.flatMap((s) => [parseDate(s.start_date)!, parseDate(s.end_date)!]);
+    const dates = data.sprints.flatMap((s) => [parseDate(s.start_date)!,
+      parseDate(s.end_date)!]);
     const xScale = d3
         .scaleTime()
         .domain([d3.min(dates)!, d3.max(dates)!])
@@ -260,12 +262,14 @@ export class DiagramRendererService {
         .data(data.sprints)
         .enter()
         .append('g')
-        .attr('transform', (d: Sprint, i: number) => `translate(0, ${margin.top + 50 + i * (barHeight + spacing)})`);
+        .attr('transform', (d: Sprint, i: number) => `translate(0, ${
+          margin.top + 50 + i * (barHeight + spacing)})`);
 
     sprintGroups
         .append('rect')
         .attr('x', (d: Sprint) => xScale(parseDate(d.start_date)!))
-        .attr('width', (d: Sprint) => xScale(parseDate(d.end_date)!) - xScale(parseDate(d.start_date)!))
+        .attr('width', (d: Sprint) => xScale(parseDate(d.end_date)!) -
+        xScale(parseDate(d.start_date)!))
         .attr('height', barHeight)
         .attr('fill', (d: Sprint) => d.color)
         .attr('rx', 4);
@@ -279,22 +283,25 @@ export class DiagramRendererService {
         .text((d: Sprint) => d.name);
   }
 
-  // ============================================================================
+  // ===========================================================================
   // EXPORT METHODS
-  // ============================================================================
+  // ===========================================================================
 
   exportToSVG(containerId: string, filename: string): void {
-    const svg = d3.select(`#${containerId}`).select('svg').node() as SVGSVGElement;
+    const svg = d3.select(`#${containerId}`)
+        .select('svg').node() as SVGSVGElement;
     if (!svg) return;
 
     const serializer = new XMLSerializer();
-    const svgString = `<?xml version="1.0"?>\n${serializer.serializeToString(svg)}`;
+    const svgString = `<?xml version="1.0"?>\n${
+      serializer.serializeToString(svg)}`;
     const blob = new Blob([svgString], {type: 'image/svg+xml'});
     this.downloadBlob(blob, filename);
   }
 
   exportToPNG(containerId: string, filename: string, scale = 2): void {
-    const svg = d3.select(`#${containerId}`).select('svg').node() as SVGSVGElement;
+    const svg = d3.select(`#${containerId}`)
+        .select('svg').node() as SVGSVGElement;
     if (!svg) return;
 
     const rect = svg.getBoundingClientRect();
@@ -305,7 +312,8 @@ export class DiagramRendererService {
     const ctx = canvas.getContext('2d')!;
     const img = new Image();
     const serializer = new XMLSerializer();
-    const svgBlob = new Blob([serializer.serializeToString(svg)], {type: 'image/svg+xml'});
+    const svgBlob = new Blob([serializer.serializeToString(svg)],
+        {type: 'image/svg+xml'});
     const url = URL.createObjectURL(svgBlob);
 
     img.onload = () => {
@@ -318,9 +326,9 @@ export class DiagramRendererService {
     img.src = url;
   }
 
-  // ============================================================================
+  // ===========================================================================
   // HELPER METHODS
-  // ============================================================================
+  // ===========================================================================
 
   private addArrowMarkers(defs: any): void {
     defs
@@ -336,8 +344,10 @@ export class DiagramRendererService {
         .attr('fill', '#42526E');
   }
 
-  private renderLegend(g: any, legend: any, width: number, height: number): void {
-    const legendGroup = g.append('g').attr('transform', `translate(${width - 200}, 50)`);
+  private renderLegend(g: any, legend: any, width: number)
+  : void {
+    const legendGroup = g.append('g').attr('transform', `translate(${
+      width - 200}, 50)`);
 
     legendGroup
         .append('text')
@@ -345,8 +355,10 @@ export class DiagramRendererService {
         .text(legend.title || 'Legend');
 
     legend.items.forEach((item: any, i: number) => {
-      const itemG = legendGroup.append('g').attr('transform', `translate(0, ${20 + i * 25})`);
-      itemG.append('rect').attr('width', 20).attr('height', 20).attr('fill', item.color);
+      const itemG = legendGroup.append('g').attr('transform', `translate(0, ${
+        20 + i * 25})`);
+      itemG.append('rect').attr('width', 20).attr('height', 20).attr('fill',
+          item.color);
       itemG.append('text').attr('x', 25).attr('y', 15).text(item.label);
     });
   }
@@ -387,6 +399,7 @@ export class DiagramRendererService {
 
   resetZoom(containerId: string): void {
     const svg = d3.select(`#${containerId}`).select('svg');
-    svg.transition().duration(750).call(d3.zoom().transform as any, d3.zoomIdentity);
+    svg.transition().duration(750).call(d3.zoom().transform as any,
+        d3.zoomIdentity);
   }
 }

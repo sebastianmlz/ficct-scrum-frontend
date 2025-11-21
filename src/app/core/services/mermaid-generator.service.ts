@@ -40,7 +40,8 @@ export class MermaidGeneratorService {
       for (const attr of cls.attributes) {
         const visibility = attr.required ? '+' : '-';
         const pkMarker = attr.primary_key ? ' PK' : '';
-        definition += `        ${visibility}${attr.name} ${attr.type}${pkMarker}\n`;
+        definition += `        ${
+          visibility}${attr.name} ${attr.type}${pkMarker}\n`;
       }
     }
 

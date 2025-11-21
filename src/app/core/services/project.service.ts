@@ -38,7 +38,8 @@ export class ProjectService {
       httpParams = httpParams.set('workspace', params.workspace);
     }
 
-    return this.http.get<PaginatedProjectList>(`${this.baseUrl}/projects/`, {params: httpParams});
+    return this.http.get<PaginatedProjectList>(`${
+      this.baseUrl}/projects/`, {params: httpParams});
   }
 
   getProject(id: string): Observable<Project> {
@@ -82,7 +83,8 @@ export class ProjectService {
         formData.append('end_date', projectData.end_date);
       }
       if (projectData.estimated_hours !== undefined) {
-        formData.append('estimated_hours', projectData.estimated_hours.toString());
+        formData.append('estimated_hours',
+            projectData.estimated_hours.toString());
       }
       if (projectData.budget !== undefined) {
         formData.append('budget', projectData.budget.toString());
@@ -94,7 +96,8 @@ export class ProjectService {
         formData.append('attachments', projectData.attachments);
       }
       if (projectData.project_settings) {
-        formData.append('project_settings', JSON.stringify(projectData.project_settings));
+        formData.append('project_settings',
+            JSON.stringify(projectData.project_settings));
       }
       if (projectData.is_active !== undefined) {
         formData.append('is_active', projectData.is_active.toString());
@@ -102,10 +105,12 @@ export class ProjectService {
       return this.http.post<Project>(`${this.baseUrl}/projects/`, formData);
     }
 
-    return this.http.post<Project>(`${this.baseUrl}/projects/`, projectData, {headers});
+    return this.http.post<Project>(`${
+      this.baseUrl}/projects/`, projectData, {headers});
   }
 
-  updateProject(id: string, projectData: Partial<ProjectRequest>): Observable<Project> {
+  updateProject(id: string, projectData: Partial<ProjectRequest>)
+  : Observable<Project> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     /* const formData = new FormData();
@@ -144,7 +149,7 @@ export class ProjectService {
       formData.append('end_date', projectData.end_date);
     }
     if (projectData.estimated_hours !== undefined) {
-      formData.append('estimated_hours', projectData.estimated_hours.toString());
+     formData.append('estimated_hours', projectData.estimated_hours.toString());
     }
     if (projectData.budget !== undefined) {
       formData.append('budget', projectData.budget.toString());
@@ -156,13 +161,15 @@ export class ProjectService {
       formData.append('attachments', projectData.attachments);
     }
     if (projectData.project_settings) {
-      formData.append('project_settings', JSON.stringify(projectData.project_settings));
+      formData.append('project_settings',
+      JSON.stringify(projectData.project_settings));
     }
     if (projectData.is_active !== undefined) {
       formData.append('is_active', projectData.is_active.toString());
     }*/
 
-    return this.http.patch<Project>(`${this.baseUrl}/projects/${id}/`, projectData, {headers});
+    return this.http.patch<Project>(`${
+      this.baseUrl}/projects/${id}/`, projectData, {headers});
   }
 
   deleteProject(id: string): Observable<void> {
@@ -171,15 +178,19 @@ export class ProjectService {
 
   // Project Configuration
   getProjectConfig(projectId: string): Observable<ProjectConfig> {
-    return this.http.get<ProjectConfig>(`${this.baseUrl}/configs/${projectId}/`);
+    return this.http.get<ProjectConfig>(`${
+      this.baseUrl}/configs/${projectId}/`);
   }
 
-  updateProjectConfig(projectId: string, configData: ProjectConfigRequest): Observable<ProjectConfig> {
-    return this.http.put<ProjectConfig>(`${this.baseUrl}/configs/${projectId}/`, configData);
+  updateProjectConfig(projectId: string, configData: ProjectConfigRequest)
+  : Observable<ProjectConfig> {
+    return this.http.put<ProjectConfig>(`${
+      this.baseUrl}/configs/${projectId}/`, configData);
   }
 
   // Project Members Management
-  getProjectMembers(projectId: string, params?: PaginationParams): Observable<PaginatedProjectMemberList> {
+  getProjectMembers(projectId: string, params?: PaginationParams)
+  : Observable<PaginatedProjectMemberList> {
     let httpParams = new HttpParams();
 
     if (params?.page) {
@@ -201,14 +212,16 @@ export class ProjectService {
     );
   }
 
-  addProjectMember(projectId: string, memberData: ProjectMemberRequest): Observable<ProjectMember> {
+  addProjectMember(projectId: string, memberData: ProjectMemberRequest)
+  : Observable<ProjectMember> {
     return this.http.post<ProjectMember>(
         `${this.baseUrl}/projects/${projectId}/members/`,
         memberData,
     );
   }
 
-  updateProjectMember(projectId: string, memberId: string, memberData: PatchedProjectMemberRequest): Observable<ProjectMember> {
+  updateProjectMember(projectId: string, memberId: string,
+      memberData: PatchedProjectMemberRequest): Observable<ProjectMember> {
     return this.http.patch<ProjectMember>(
         `${this.baseUrl}/projects/${projectId}/members/${memberId}/`,
         memberData,
@@ -216,6 +229,7 @@ export class ProjectService {
   }
 
   removeProjectMember(projectId: string, memberId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/projects/${projectId}/members/${memberId}/`);
+    return this.http.delete<void>(`${
+      this.baseUrl}/projects/${projectId}/members/${memberId}/`);
   }
 }

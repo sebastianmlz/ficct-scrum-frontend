@@ -80,7 +80,8 @@ export class NotificationsBackendService {
       httpParams = httpParams.set('is_read', params.is_read.toString());
     }
     if (params?.notification_type) {
-      httpParams = httpParams.set('notification_type', params.notification_type);
+      httpParams = httpParams.set('notification_type',
+          params.notification_type);
     }
     if (params?.page) {
       httpParams = httpParams.set('page', params.page.toString());
@@ -101,7 +102,8 @@ export class NotificationsBackendService {
       httpParams = httpParams.set('created_before', params.created_before);
     }
 
-    return this.http.get<NotificationListResponse>(`${this.apiUrl}/notifications/`, {params: httpParams});
+    return this.http.get<NotificationListResponse>(`${
+      this.apiUrl}/notifications/`, {params: httpParams});
   }
 
   /**
@@ -148,7 +150,8 @@ export class NotificationsBackendService {
    * Delete all read notifications
    * DELETE /api/v1/notifications/delete-read/
    */
-  deleteReadNotifications(): Observable<{ message: string; deleted_count: number }> {
+  deleteReadNotifications(): Observable<{ message: string;
+    deleted_count: number }> {
     return this.http.delete<{ message: string; deleted_count: number }>(
         `${this.apiUrl}/delete-read/`,
     );
@@ -159,15 +162,17 @@ export class NotificationsBackendService {
    * GET /api/v1/notifications/preferences/
    */
   getPreferences(): Observable<NotificationPreferences> {
-    return this.http.get<NotificationPreferences>(`${this.apiUrl}/preferences/`);
+    return this.http.get<NotificationPreferences>(`${
+      this.apiUrl}/preferences/`);
   }
 
   /**
    * Update user's notification preferences
    * PATCH /api/v1/notifications/preferences/
-   * Backend now returns: {message: string, preferences: NotificationPreferences}
+   * Backend now returns:{message: string, preferences: NotificationPreferences}
    */
-  updatePreferences(preferences: Partial<NotificationPreferences>): Observable<NotificationPreferencesResponse> {
+  updatePreferences(preferences: Partial<NotificationPreferences>)
+  : Observable<NotificationPreferencesResponse> {
     console.log('[NOTIFICATION SERVICE] Updating preferences with PATCH');
     console.log('[NOTIFICATION SERVICE] Payload:', JSON.stringify(preferences));
 
@@ -181,7 +186,8 @@ export class NotificationsBackendService {
    * Test Slack webhook
    * POST /api/v1/notifications/test-slack/
    */
-  testSlackWebhook(webhookUrl: string, message?: string): Observable<{ success: boolean; message: string }> {
+  testSlackWebhook(webhookUrl: string, message?: string)
+  : Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
         `${this.apiUrl}/test-slack/`,
         {webhook_url: webhookUrl, message},
@@ -192,7 +198,8 @@ export class NotificationsBackendService {
    * Get project notification settings
    * GET /api/v1/notifications/project-settings/?project={uuid}
    */
-  getProjectSettings(projectId: string): Observable<ProjectNotificationSettings> {
+  getProjectSettings(projectId: string)
+  : Observable<ProjectNotificationSettings> {
     const params = new HttpParams().set('project', projectId);
     return this.http.get<ProjectNotificationSettings>(
         `${this.apiUrl}/project-settings/`,
@@ -204,7 +211,8 @@ export class NotificationsBackendService {
    * Update project notification settings
    * PATCH /api/v1/notifications/project-settings/
    */
-  updateProjectSettings(settings: Partial<ProjectNotificationSettings>): Observable<{ success: boolean; message: string }> {
+  updateProjectSettings(settings: Partial<ProjectNotificationSettings>)
+  : Observable<{ success: boolean; message: string }> {
     return this.http.patch<{ success: boolean; message: string }>(
         `${this.apiUrl}/project-settings/`,
         settings,

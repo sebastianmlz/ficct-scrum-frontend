@@ -65,7 +65,8 @@ export class NotificationService {
       id: this.generateId(),
     };
 
-    this.notifications.update((notifications) => [...notifications, newNotification]);
+    this.notifications.update((notifications) =>
+      [...notifications, newNotification]);
 
     // Auto-remove non-persistent notifications
     if (!notification.persistent && notification.duration) {
@@ -91,7 +92,8 @@ export class NotificationService {
   }
 
   apiError(action: string, error?: any): void {
-    const message = error?.error?.message || error?.message || 'An unexpected error occurred';
+    const message = error?.error?.message || error?.message ||
+    'An unexpected error occurred';
     this.error('Error', `Failed to ${action.toLowerCase()}: ${message}`, true);
   }
 
@@ -100,7 +102,8 @@ export class NotificationService {
   }
 
   networkError(): void {
-    this.error('Network Error', 'Please check your internet connection and try again', true);
+    this.error('Network Error',
+        'Please check your internet connection and try again', true);
   }
 
   unauthorized(): void {
@@ -108,6 +111,7 @@ export class NotificationService {
   }
 
   forbidden(): void {
-    this.error('Access Denied', 'You do not have permission to perform this action', true);
+    this.error('Access Denied',
+        'You do not have permission to perform this action', true);
   }
 }

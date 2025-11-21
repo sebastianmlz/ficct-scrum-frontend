@@ -54,14 +54,16 @@ export interface EstimateSprintDurationResponse {
   average_velocity?: number;
   total_story_points?: number;
   risk_factors: string[];
-  method: string; // 'from_sprint_dates' | 'from_estimated_hours' | 'historical_velocity' | 'default'
+  method: string; // 'from_sprint_dates' | 'from_estimated_hours' |
+                  // 'historical_velocity' | 'default'
   error?: string;
 }
 
 export interface RecommendStoryPointsResponse {
   recommended_points: number; // Fibonacci: 1, 2, 3, 5, 8, 13, 21
   confidence: number; // 0.0-1.0
-  probability_distribution?: Record<string, number>; // e.g., {"3": 0.2, "5": 0.5, "8": 0.3}
+  probability_distribution?: Record<string, number>;
+  // e.g., {"3": 0.2, "5": 0.5, "8": 0.3}
   reasoning: string;
   method: string;
   similar_issues_count?: number;
@@ -149,8 +151,10 @@ export class MlService {
    * Predicts effort (hours) required for an issue
    * Caches results for 5 minutes based on request parameters
    */
-  predictEffort(request: PredictEffortRequest): Observable<PredictEffortResponse> {
-    const cacheKey = `effort_${request.project_id}_${request.title}_${request.issue_type}`;
+  predictEffort(request: PredictEffortRequest)
+  : Observable<PredictEffortResponse> {
+    const cacheKey = `effort_${
+      request.project_id}_${request.title}_${request.issue_type}`;
     const cached = this.cache.get<PredictEffortResponse>(cacheKey);
 
     if (cached) {
@@ -166,14 +170,16 @@ export class MlService {
         `${this.baseUrl}/predict-effort/`,
         request,
     ).pipe(
-        tap((response) => this.cache.set(cacheKey, response, this.EFFORT_CACHE_TTL)),
+        tap((response) => this.cache
+            .set(cacheKey, response, this.EFFORT_CACHE_TTL)),
     );
   }
 
   /**
    * Estimates actual sprint completion time
    */
-  estimateSprintDuration(request: EstimateSprintDurationRequest): Observable<EstimateSprintDurationResponse> {
+  estimateSprintDuration(request: EstimateSprintDurationRequest)
+  : Observable<EstimateSprintDurationResponse> {
     console.log('[ML Service] Estimating sprint duration');
     return this.http.post<EstimateSprintDurationResponse>(
         `${this.baseUrl}/estimate-sprint-duration/`,
@@ -185,8 +191,10 @@ export class MlService {
    * Recommends story points for an issue
    * Caches results for 5 minutes based on request parameters
    */
-  recommendStoryPoints(request: RecommendStoryPointsRequest): Observable<RecommendStoryPointsResponse> {
-    const cacheKey = `points_${request.project_id}_${request.title}_${request.issue_type}`;
+  recommendStoryPoints(request: RecommendStoryPointsRequest)
+  : Observable<RecommendStoryPointsResponse> {
+    const cacheKey = `points_${
+      request.project_id}_${request.title}_${request.issue_type}`;
     const cached = this.cache.get<RecommendStoryPointsResponse>(cacheKey);
 
     if (cached) {
@@ -202,7 +210,8 @@ export class MlService {
         `${this.baseUrl}/recommend-story-points/`,
         request,
     ).pipe(
-        tap((response) => this.cache.set(cacheKey, response, this.POINTS_CACHE_TTL)),
+        tap((response) => this.cache.set(cacheKey,
+            response, this.POINTS_CACHE_TTL)),
     );
   }
 
@@ -211,7 +220,8 @@ export class MlService {
    * Returns top N suggestions ranked by score
    * Caches results for 5 minutes
    */
-  suggestAssignment(request: SuggestAssignmentRequest): Observable<SuggestAssignmentResponse> {
+  suggestAssignment(request: SuggestAssignmentRequest)
+  : Observable<SuggestAssignmentResponse> {
     const cacheKey = `assignment_${request.project_id}_${request.issue_id}`;
     const cached = this.cache.get<SuggestAssignmentResponse>(cacheKey);
 
@@ -228,7 +238,8 @@ export class MlService {
         `${this.baseUrl}/suggest-assignment/`,
         request,
     ).pipe(
-        tap((response) => this.cache.set(cacheKey, response, this.ASSIGNMENT_CACHE_TTL)),
+        tap((response) => this.cache.set(cacheKey, response,
+            this.ASSIGNMENT_CACHE_TTL)),
     );
   }
 
@@ -252,7 +263,8 @@ export class MlService {
     return this.http.get<SprintRiskResponse>(
         `${this.baseUrl}/${sprintId}/sprint-risk/`,
     ).pipe(
-        tap((response) => this.cache.set(cacheKey, response, this.RISK_CACHE_TTL)),
+        tap((response) => this.cache.set(cacheKey, response,
+            this.RISK_CACHE_TTL)),
     );
   }
 
@@ -277,7 +289,8 @@ export class MlService {
         `${this.baseUrl}/${projectId}/project-summary/`,
         {},
     ).pipe(
-        tap((response) => this.cache.set(cacheKey, response, this.SUMMARY_CACHE_TTL)),
+        tap((response) => this.cache.set(cacheKey, response,
+            this.SUMMARY_CACHE_TTL)),
     );
   }
 

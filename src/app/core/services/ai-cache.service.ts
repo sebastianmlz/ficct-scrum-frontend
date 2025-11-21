@@ -72,7 +72,8 @@ export class AiCacheService {
       };
 
       localStorage.setItem(cacheKey, JSON.stringify(entry));
-      console.log(`[AI-CACHE] 💾 STORED: ${key} (TTL: ${ttl === 0 ? 'never' : ttl / 1000 + 's'})`);
+      console.log(`[AI-CACHE] 💾 STORED: ${
+        key} (TTL: ${ttl === 0 ? 'never' : ttl / 1000 + 's'})`);
     } catch (error) {
       console.error('[AI-CACHE] Error storing cache:', error);
       // Si falla localStorage (quota exceeded), continuar sin cache
@@ -102,7 +103,8 @@ export class AiCacheService {
       }
     });
 
-    console.log(`[AI-CACHE] 🗑️ INVALIDATED ${count} entries matching: ${pattern}`);
+    console.log(`[AI-CACHE] 🗑️ INVALIDATED ${
+      count} entries matching: ${pattern}`);
   }
 
   /**

@@ -20,7 +20,8 @@ export class LoggingService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/api/v1/logs`;
 
-  getSystemLogs(params?: SystemLogQueryParams): Observable<PaginatedSystemLogList> {
+  getSystemLogs(params?: SystemLogQueryParams)
+  : Observable<PaginatedSystemLogList> {
     let httpParams = new HttpParams();
 
     if (params?.page) {
@@ -45,14 +46,16 @@ export class LoggingService {
       httpParams = httpParams.set('user', params.user.toString());
     }
 
-    return this.http.get<PaginatedSystemLogList>(`${this.baseUrl}/system-logs/`, {params: httpParams});
+    return this.http.get<PaginatedSystemLogList>(`${
+      this.baseUrl}/system-logs/`, {params: httpParams});
   }
 
   getSystemLog(id: string): Observable<SystemLog> {
     return this.http.get<SystemLog>(`${this.baseUrl}/system-logs/${id}/`);
   }
 
-  getErrorLogs(params?: ErrorLogQueryParams): Observable<PaginatedErrorLogList> {
+  getErrorLogs(params?: ErrorLogQueryParams)
+  : Observable<PaginatedErrorLogList> {
     let httpParams = new HttpParams();
 
     if (params?.page) {
@@ -74,14 +77,16 @@ export class LoggingService {
       httpParams = httpParams.set('status', params.status);
     }
 
-    return this.http.get<PaginatedErrorLogList>(`${this.baseUrl}/error-logs/`, {params: httpParams});
+    return this.http.get<PaginatedErrorLogList>(`${
+      this.baseUrl}/error-logs/`, {params: httpParams});
   }
 
   getErrorLog(id: string): Observable<ErrorLog> {
     return this.http.get<ErrorLog>(`${this.baseUrl}/error-logs/${id}/`);
   }
 
-  updateErrorLogStatus(id: string, status: string, notes?: string): Observable<ErrorLog> {
+  updateErrorLogStatus(id: string, status: string, notes?: string)
+  : Observable<ErrorLog> {
     const data: any = {status};
     if (notes) {
       data.notes = notes;
