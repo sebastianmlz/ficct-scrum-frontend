@@ -130,8 +130,29 @@ export class OrganizationService {
   }
 
   updateOrganization(id: string, organizationData: Partial<OrganizationRequest>): Observable<Organization> {
-    const formData = new FormData();
+    // Si NO hay logo, enviar como JSON normal
+    if (!organizationData.logo) {
+      const jsonData: any = {
+        name: organizationData.name,
+        slug: organizationData.slug,
+        description: organizationData.description || '',
+        organization_type: organizationData.organization_type || '',
+        subscription_plan: organizationData.subscription_plan || '',
+        website_url: organizationData.website_url || '',
+        is_active: organizationData.is_active ?? true,
+      };
+      if (organizationData.organization_settings) {
+        jsonData.organization_settings = organizationData.organization_settings;
+      }
+      return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, jsonData, {
+        headers: {'Content-Type': 'application/json'},
+      }).pipe(
+        catchError(this.handleError),
+      );
+    }
 
+    // Si HAY logo, enviar como FormData
+    const formData = new FormData();
     if (organizationData.name) {
       formData.append('name', organizationData.name);
     }
@@ -159,9 +180,8 @@ export class OrganizationService {
     if (organizationData.is_active !== undefined) {
       formData.append('is_active', organizationData.is_active.toString());
     }
-
     return this.http.patch<Organization>(`${this.baseUrl}/organizations/${id}/`, formData).pipe(
-        catchError(this.handleError),
+      catchError(this.handleError),
     );
   }
 
