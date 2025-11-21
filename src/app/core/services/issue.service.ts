@@ -135,12 +135,16 @@ export class IssueService {
    * Asigna o reasigna una issue automáticamente (sin especificar usuario).
    * @param issueId UUID de la issue
    */
-  assignIssue(issueId: string): Observable<any> {
+  assignIssue(issueId: string, assigneeId: number | null): Observable<any> {
     const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     // No se envía body, solo PATCH vacío
+    if (assigneeId === null) {
+      return this.http.patch<any>(`${this.baseUrl}/${
+        issueId}/assign/`, {}, {headers});
+    }
     return this.http.patch<any>(`${this.baseUrl}/${
-      issueId}/assign/`, {}, {headers});
+      issueId}/assign/`, {assignee: assigneeId}, {headers});
   }
 
   updateIssuePriority(issueId: string, priority: string): Observable<Issue> {

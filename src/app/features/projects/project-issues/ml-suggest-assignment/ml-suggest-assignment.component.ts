@@ -107,7 +107,9 @@ export class MlSuggestAssignmentComponent implements OnInit {
 
     try {
       // Usar el endpoint de asignación del IssueService
-      await this.issueService.assignIssue(this.issueId).toPromise();
+      await this.issueService
+          .assignIssue(this.issueId, Number.parseInt(selected.user_id))
+          .toPromise();
       this.assigned.emit();
       this.onClose();
     } catch (error: any) {

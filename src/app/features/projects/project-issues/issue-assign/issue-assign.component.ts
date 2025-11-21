@@ -25,7 +25,7 @@ export class IssueAssignComponent {
     if (!this.issueId) return;
     this.loading = true;
     this.error = null;
-    this.issueService.assignIssue(this.issueId).subscribe({
+    this.issueService.assignIssue(this.issueId, null).subscribe({
       next: () => {
         this.success = true;
         this.loading = false;
