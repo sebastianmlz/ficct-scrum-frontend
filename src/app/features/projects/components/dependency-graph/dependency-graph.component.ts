@@ -401,6 +401,7 @@ export class DependencyGraphComponent implements OnInit, AfterViewInit {
       next: (response) => {
         this.exporting.set(false);
         if (response.success) {
+          console.log(response);
           this.notificationService.success('Export Successful',
               `Diagram exported as ${format.toUpperCase()}`);
         } else {

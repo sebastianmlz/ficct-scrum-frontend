@@ -1,6 +1,7 @@
 import {Injectable, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {
   DiagramRequestRequest,
   DiagramResponse,
@@ -48,7 +49,21 @@ export class DiagramService {
       project: request.project,
       format: request.format,
     });
-    return this.http.post<DiagramResponse>(`${this.baseUrl}/export/`, request);
+    return this.http
+        .post<any>(`${this.baseUrl}/export/`, request, {
+          responseType: 'text' as 'json',
+        })
+        .pipe(
+            map((res) => {
+              if (typeof res === 'string') {
+                return {
+                  format: request.format,
+                  data: res,
+                } as DiagramResponse;
+              }
+              return res as DiagramResponse;
+            }),
+        );
   }
 
   /**
