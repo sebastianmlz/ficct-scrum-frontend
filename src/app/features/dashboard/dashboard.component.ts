@@ -109,9 +109,9 @@ export class DashboardComponent implements OnInit {
       // Load organizations, workspaces, and projects
       const [orgsResponse, workspacesResponse, projectsResponse] =
       await Promise.all([
-        this.organizationService.getOrganizations({page: 1}).toPromise(),
-        this.workspaceService.getWorkspaces(undefined, 1).toPromise(),
-        this.projectService.getProjects({page: 1}).toPromise(),
+        this.organizationService.getOrganizations().toPromise(),
+        this.workspaceService.getWorkspaces(undefined).toPromise(),
+        this.projectService.getProjects().toPromise(),
       ]);
 
       // Update raw data
@@ -127,32 +127,25 @@ export class DashboardComponent implements OnInit {
       const totalOrganizations = orgsResponse?.count || 0;
 
       // Calculate team members - use organization members API for accurate coun
-      let totalMembers = 0;
-
-      // Get first organization's members if available
-      if (orgsResponse?.results && orgsResponse.results.length > 0) {
-        const firstOrg = orgsResponse.results[0];
-        try {
-          const membersResponse =
-          await this.organizationService.getOrganizationMembers(
-              firstOrg.id,
-              {page: 1},
-          ).toPromise();
-          totalMembers = membersResponse?.count || 0;
-          console.log('[DASHBOARD] 👥 Team members from org API:', totalMembers);
-        } catch (error) {
-          console.log(error);
-          console.warn('[DASHBOARD] ⚠️ Could not load organization members' +
-            ', defaulting to 0');
-          totalMembers = 0;
-        }
+      let tmpmembers = 0;
+      let membersChange = 0;
+      let orgsChange = 0;
+      let wkspChange = 0;
+      let prjChange = 0;
+      for (const org of orgsResponse?.results || []) {
+        membersChange += (org as any).team_members_change_pct || 0;
+        orgsChange = (org as any).organizations_change_pct || 0;
+        wkspChange += (org as any).total_workspaces_change_pct || 0;
+        prjChange += (org as any).active_projects_change_pct || 0;
+        tmpmembers += org.member_count || 0;
       }
 
       this.quickStats.set([
         {
           label: 'Active Projects',
           value: activeProjects,
-          change: 12,
+          change: (prjChange/totalOrganizations)
+              .toFixed(0) as unknown as number,
           changeType: 'increase',
           icon: '<path stroke-linecap="round" stroke-linejoin="round" ' +
           'stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 ' +
@@ -162,8 +155,9 @@ export class DashboardComponent implements OnInit {
         },
         {
           label: 'Team Members',
-          value: totalMembers,
-          change: 8,
+          value: tmpmembers,
+          change: (membersChange/totalOrganizations)
+              .toFixed(0) as unknown as number,
           changeType: 'increase',
           icon: '<path stroke-linecap="round" stroke-linejoin="round" ' +
           'stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 ' +
@@ -174,7 +168,8 @@ export class DashboardComponent implements OnInit {
         {
           label: 'Total Workspaces',
           value: totalWorkspaces,
-          change: 5,
+          change: (wkspChange/totalOrganizations)
+              .toFixed(0) as unknown as number,
           changeType: 'increase',
           icon: '<path stroke-linecap="round" stroke-linejoin="round"' +
           ' stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2' +
@@ -185,7 +180,7 @@ export class DashboardComponent implements OnInit {
         {
           label: 'Organizations',
           value: totalOrganizations,
-          change: 2,
+          change: orgsChange,
           changeType: 'increase',
           icon: '<path stroke-linecap="round" stroke-linejoin="round"' +
           ' stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 ' +
