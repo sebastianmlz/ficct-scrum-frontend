@@ -65,6 +65,7 @@
     "@types/http-errors": "^2.0.5",
     "@types/http-proxy": "^1.17.16",
     "@types/jasmine": "~5.1.0",
+    "@types/jest": "^30.0.0",
     "@types/json-schema": "^7.0.15",
     "@types/mime": "^3.0.4",
     "@types/node": "^24.3.3",
