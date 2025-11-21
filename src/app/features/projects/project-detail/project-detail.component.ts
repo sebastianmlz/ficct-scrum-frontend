@@ -315,8 +315,18 @@ export class ProjectDetailComponent implements OnInit {
     if (this.project()) {
       console.log('[NAV] Navigating to sub-tab:', route);
       console.log('[NAV] Current route:', this.route);
-      // Navigate to child route relative to current route
-      this.router.navigate([route], {relativeTo: this.route});
+
+      // Special handling for github route - redirect to config#integrations
+      if (route === 'github') {
+        console.log('[NAV] Redirecting GitHub Settings to config#integrations');
+        this.router.navigate(['/projects', this.project()!.id, 'config'], {
+          fragment: 'integrations',
+        });
+      } else {
+        // Navigate to child route relative to current route
+        this.router.navigate([route], {relativeTo: this.route});
+      }
+
       this.codeDropdownOpen.set(false);
       this.diagramsDropdownOpen.set(false);
     }

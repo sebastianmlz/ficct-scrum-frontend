@@ -72,6 +72,56 @@
         </div>
       </div>
 
+      <!-- Sync Progress Indicator -->
+      @if (syncing()) {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <div class="flex items-start gap-3">
+            <svg class="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-blue-800">
+                Syncing with GitHub...
+              </p>
+              <p class="text-sm text-blue-700 mt-1">
+                Fetching commits and pull requests. This may take 1-2 minutes for large repositories.
+              </p>
+              <div class="mt-2 bg-blue-100 rounded-full h-1 overflow-hidden">
+                <div class="bg-blue-600 h-full animate-pulse" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Sync Help Message -->
+      @if (!syncing() && (!integration()?.last_synced_at || (integration()?.commit_count === 0 && integration()?.pull_request_count === 0))) {
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-medium text-blue-800">
+                @if (!integration()?.last_synced_at) {
+                  Data Not Synced Yet
+                } @else {
+                  No Data Available
+                }
+              </p>
+              <p class="text-sm text-blue-700 mt-1">
+                @if (!integration()?.last_synced_at) {
+                  Click "Sync Now" to fetch commits and pull requests from your GitHub repository.
+                } @else {
+                  Your repository appears to be empty or has no recent activity. Click "Sync Now" to refresh.
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Settings -->
       <div class="settings-section">
         <h4 class="text-sm font-medium text-gray-700 mb-3">Sync Settings</h4>
@@ -85,8 +135,15 @@
             <input 
               type="checkbox" 
               [checked]="integration()?.sync_commits"
-              (change)="onUpdateSettings('sync_commits', $any($event.target).checked)">
-            <span class="toggle-slider"></span>
+              [disabled]="savingSyncCommits() || isAnyToggleSaving()"
+              (click)="onUpdateSettings('sync_commits', !integration()?.sync_commits, $event)">
+            <span class="toggle-slider" [class.opacity-50]="savingSyncCommits()"></span>
+            @if (savingSyncCommits()) {
+              <svg class="animate-spin h-4 w-4 text-blue-600 ml-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
           </label>
         </div>
 
@@ -99,8 +156,15 @@
             <input 
               type="checkbox" 
               [checked]="integration()?.sync_pull_requests"
-              (change)="onUpdateSettings('sync_pull_requests', $any($event.target).checked)">
-            <span class="toggle-slider"></span>
+              [disabled]="savingSyncPullRequests() || isAnyToggleSaving()"
+              (click)="onUpdateSettings('sync_pull_requests', !integration()?.sync_pull_requests, $event)">
+            <span class="toggle-slider" [class.opacity-50]="savingSyncPullRequests()"></span>
+            @if (savingSyncPullRequests()) {
+              <svg class="animate-spin h-4 w-4 text-blue-600 ml-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
           </label>
         </div>
 
@@ -113,8 +177,15 @@
             <input 
               type="checkbox" 
               [checked]="integration()?.auto_link_issues"
-              (change)="onUpdateSettings('auto_link_issues', $any($event.target).checked)">
-            <span class="toggle-slider"></span>
+              [disabled]="savingAutoLinkIssues() || isAnyToggleSaving()"
+              (click)="onUpdateSettings('auto_link_issues', !integration()?.auto_link_issues, $event)">
+            <span class="toggle-slider" [class.opacity-50]="savingAutoLinkIssues()"></span>
+            @if (savingAutoLinkIssues()) {
+              <svg class="animate-spin h-4 w-4 text-blue-600 ml-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
           </label>
         </div>
       </div>

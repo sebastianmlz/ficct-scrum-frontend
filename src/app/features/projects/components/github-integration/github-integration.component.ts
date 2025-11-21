@@ -37,6 +37,11 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
   showDisconnectConfirm = signal(false);
   connectingOAuth = signal(false);
 
+  // Toggle loading states
+  savingSyncCommits = signal(false);
+  savingSyncPullRequests = signal(false);
+  savingAutoLinkIssues = signal(false);
+
   // Forms
   connectForm: FormGroup = this.fb.group({
     repository_url: ['', [Validators.required,
@@ -74,6 +79,8 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
   loadIntegration(): void {
     this.loading.set(true);
 
+    console.log('[GITHUB] Loading integration for project:', this.projectId);
+
     this.githubService.getIntegrations({project: this.projectId}).subscribe({
       next: (response) => {
         if (response.results && response.results.length > 0) {
@@ -84,6 +91,21 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
                 this.integration.set(detail);
                 console.log('[GITHUB] Integration loaded:',
                     detail.repository_full_name);
+                console.log('[GITHUB] Commit count:', detail.commit_count);
+                console.log('[GITHUB] Pull request count:',
+                    detail.pull_request_count);
+                console.log('[GITHUB] Last synced:', detail.last_synced_at);
+
+                // Log if data needs syncing
+                if (!detail.last_synced_at) {
+                  console.warn('[GITHUB] Integration has never been synced. ' +
+                    'Click "Sync Now" to fetch data.');
+                }
+                if (detail.commit_count === 0 &&
+                  detail.pull_request_count === 0) {
+                  console.warn('[GITHUB] No commits or PRs found. ' +
+                    'Repository might be empty or needs syncing.');
+                }
               } else {
                 console.info('[GITHUB] Integration not found (404)');
                 this.integration.set(null);
@@ -222,11 +244,20 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Update integration settings
+   * Update integration settings with proper state management
    */
-  onUpdateSettings(field: string, value: boolean): void {
+  onUpdateSettings(field: string, value: boolean, event: Event): void {
     const currentIntegration = this.integration();
     if (!currentIntegration) return;
+
+    // Prevent default checkbox behavior - we'll update it manually
+    event.preventDefault();
+
+    // Set loading state for specific toggle
+    this.setToggleLoading(field, true);
+
+    console.log(`[GITHUB] Updating ${field} to:`, value);
+    console.log('[GITHUB] Integration ID:', currentIntegration.id);
 
     const updateData: any = {};
     updateData[field] = value;
@@ -234,40 +265,130 @@ export class GitHubIntegrationComponent implements OnInit, OnChanges {
     this.githubService.updateIntegration(currentIntegration.id, updateData)
         .subscribe({
           next: (updated) => {
-            console.log('[GITHUB] Settings updated:', updated);
+            console.log('[GITHUB] Settings updated successfully:', updated);
+            console.log(`[GITHUB] ${field} is now:`, (updated as any)[field]);
+
+            // Update integration state with response from backend
             this.integration.set({...currentIntegration, ...updated});
-            this.notificationService.success('Settings updated');
+            this.notificationService.success('Settings updated successfully');
+
+            this.setToggleLoading(field, false);
           },
           error: (error) => {
             console.error('[GITHUB] Error updating settings:', error);
-            this.notificationService.error('Failed to update settings');
+            console.error('[GITHUB] Error status:', error.status);
+            console.error('[GITHUB] Error body:', error.error);
+
+            // Revert the checkbox state (it stays at old value)
+            this.notificationService.error(
+                error.error?.detail || 'Failed to update settings',
+            );
+
+            this.setToggleLoading(field, false);
           },
         });
   }
 
   /**
-   * Manually sync commits
+   * Set loading state for specific toggle
+   */
+  private setToggleLoading(field: string, loading: boolean): void {
+    switch (field) {
+      case 'sync_commits':
+        this.savingSyncCommits.set(loading);
+        break;
+      case 'sync_pull_requests':
+        this.savingSyncPullRequests.set(loading);
+        break;
+      case 'auto_link_issues':
+        this.savingAutoLinkIssues.set(loading);
+        break;
+    }
+  }
+
+  /**
+   * Check if any toggle is currently saving
+   */
+  isAnyToggleSaving(): boolean {
+    return this.savingSyncCommits() ||
+           this.savingSyncPullRequests() ||
+           this.savingAutoLinkIssues();
+  }
+
+  /**
+   * Manually sync commits from GitHub
+   * This can take 1-2 minutes for large repositories
    */
   onSyncCommits(): void {
     const currentIntegration = this.integration();
-    if (!currentIntegration) return;
+    if (!currentIntegration) {
+      console.error('[GITHUB] Cannot sync: No integration loaded');
+      return;
+    }
+
+    console.log('[GITHUB] Starting manual sync for integration:',
+        currentIntegration.id);
 
     this.syncing.set(true);
 
     this.githubService.syncCommits(currentIntegration.id).subscribe({
       next: (response) => {
-        console.log('[GITHUB] Sync complete:', response);
-        this.notificationService.success(
-            `Synced ${response.commits_synced} commits, linked ` +
-            `${response.issues_linked} issues`,
-        );
+        console.log('[GITHUB] ✅ Sync complete:', response);
+
+        // Handle both legacy and new response formats
+        const commitCount = response.commits_synced ||
+          response.synced_count || 0;
+        const issuesLinked = response.issues_linked || 0;
+
+        console.log('[GITHUB] Commits synced:', commitCount);
+        console.log('[GITHUB] Issues linked:', issuesLinked);
+
+        // Show success message
+        if (issuesLinked > 0) {
+          this.notificationService.success(
+              `Synced ${commitCount} commits and linked ${issuesLinked} issues`,
+          );
+        } else {
+          this.notificationService.success(
+              `Synced ${commitCount} commits from GitHub`,
+          );
+        }
+
         this.syncing.set(false);
-        this.loadIntegration(); // Refresh integration data
+
+        // Refresh integration data to show updated counts
+        console.log('[GITHUB] Refreshing integration data...');
+        this.loadIntegration();
       },
       error: (error) => {
-        console.error('[GITHUB] Error syncing commits:', error);
-        this.notificationService.error('Failed to sync commits');
+        console.error('[GITHUB] ❌ Sync failed:', error);
+        console.error('[GITHUB] Error status:', error.status);
+        console.error('[GITHUB] Error name:', error.name);
+        console.error('[GITHUB] Error message:', error.message);
+
         this.syncing.set(false);
+
+        // Show user-friendly error message based on error type
+        let errorMessage = 'Failed to sync commits';
+
+        if (error.name === 'TimeoutError') {
+          errorMessage = 'Sync is taking longer than expected. ' +
+            'Your repository might be very large. ' +
+            'Try again in a few minutes or contact support.';
+        } else if (error.message) {
+          // Use the enhanced error message from service
+          errorMessage = error.message;
+        } else if (error.error?.detail) {
+          errorMessage = error.error.detail;
+        } else if (error.error?.error) {
+          errorMessage = error.error.error;
+        } else if (error.status === 0) {
+          errorMessage = 'Network error. Please check your internet ' +
+            'connection and try again.';
+        }
+
+        console.error('[GITHUB] Showing error to user:', errorMessage);
+        this.notificationService.error(errorMessage);
       },
     });
   }

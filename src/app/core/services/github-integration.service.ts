@@ -1,7 +1,7 @@
 import {Injectable, inject} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {map, catchError} from 'rxjs/operators';
+import {Observable, of, throwError} from 'rxjs';
+import {map, catchError, timeout} from 'rxjs/operators';
 import {
   GitHubIntegration,
   GitHubIntegrationDetail,
@@ -218,10 +218,73 @@ export class GitHubIntegrationService {
 
   /**
    * Manually sync commits from GitHub
+   * CRITICAL: This operation can take 1-2 minutes for large repositories
+   * Timeout set to 2 minutes (120 seconds)
    */
   syncCommits(integrationId: string): Observable<SyncCommitsResponse> {
+    console.log('[GITHUB SERVICE] Starting sync for integration:',
+        integrationId);
+    console.log('[GITHUB SERVICE] Timeout set to 120 seconds');
+
     return this.http.post<SyncCommitsResponse>(`${
-      this.baseUrl}/github/${integrationId}/sync_commits/`, {});
+      this.baseUrl}/github/${integrationId}/sync_commits/`, {}).pipe(
+        timeout(120000), // 2 minutes timeout
+        map((response) => {
+          console.log('[GITHUB SERVICE] Sync response received:', response);
+          return response;
+        }),
+        catchError((error) => {
+          console.error('[GITHUB SERVICE] Sync failed:', error);
+
+          // Handle specific error types
+          if (error.name === 'TimeoutError') {
+            console.error('[GITHUB SERVICE] Request timed out after 2 minutes');
+            return throwError(() => ({
+              name: 'TimeoutError',
+              message: 'Sync is taking longer than expected. ' +
+                'Your repository might be very large. ' +
+                'The sync may still complete in the background.',
+              status: 0,
+              error: {detail: 'Request timeout'},
+            }));
+          }
+
+          if (error.status === 401 || error.status === 403) {
+            return throwError(() => ({
+              ...error,
+              message: 'GitHub access token is invalid or expired. ' +
+                'Please reconnect your repository.',
+            }));
+          }
+
+          if (error.status === 404) {
+            return throwError(() => ({
+              ...error,
+              message: 'Integration not found or repository not accessible.',
+            }));
+          }
+
+          if (error.status === 429) {
+            return throwError(() => ({
+              ...error,
+              message: 'GitHub API rate limit exceeded. ' +
+                'Please try again in an hour.',
+            }));
+          }
+
+          if (error.status === 500 || error.status === 502 ||
+              error.status === 503) {
+            return throwError(() => ({
+              ...error,
+              message: 'GitHub API or backend server error. ' +
+                'Please try again in a few minutes.',
+            }));
+          }
+
+          // Generic error
+          return throwError(() => error);
+        }),
+    );
   }
 
   /**
